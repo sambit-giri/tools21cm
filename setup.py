@@ -5,7 +5,7 @@ Setup script
 '''
 
 from distutils.core import setup
-setup(name='21cmtools',
+setup(name='py21cmtools',
       version='0.1',
       author='Sambit Giri',
       author_email='sambit.giri@astro.su.se',
