@@ -1,6 +1,6 @@
 import numpy as np
 import c2raytools as c2t
-from scipy.interpolate import interp1d
+from scipy.interpolate import interp1d, interp2d
 from usefuls import *
 import os
 import time, timeit
