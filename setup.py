@@ -5,11 +5,11 @@ Setup script
 '''
 
 from setuptools import setup, find_packages
-setup(name='py21cmtools',
+setup(name='tools21cm',
       version='0.1',
       author='Sambit Giri',
       author_email='sambit.giri@astro.su.se',
-      package_dir = {'py21cmtools' : 'src'},
-      packages=['py21cmtools'],
+      package_dir = {'tools21cm' : 'src'},
+      packages=['tools21cm'],
       include_package_data=True,
 )

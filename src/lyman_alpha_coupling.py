@@ -120,14 +120,27 @@ def Lya_coupling_coeff_useprofile(ncells, boxsize, sourcelist, z=-1, SED=None, l
 		if type(lum)==str: lum = np.loadtxt(lum)   # Energy/time/mass
 		if type(lam)==str: lam = np.loadtxt(lam)   # angstrom
 	sed_func = interp1d(lam, lum, kind='cubic')
-	rr = 10**np.linspace(-2,np.log10(boxsize*1.8),1000)
+	rs = 10**np.linspace(-2,np.log10(boxsize*1.8),1000)
 	#rr  = np.hstack((-rr_,rr_)); rr.sort()
-	zs  = c2t.cdist_to_z(rr+c2t.z_to_cdist(z))
+	zs  = c2t.cdist_to_z(rs+c2t.z_to_cdist(z))
 	lms = lam_lya*(1+z)/(1+zs)
-	zs_HII = zs[lms<=lam_HII].min()
-	rp  = rr/(1.0+zs)
-
-
+	rs_HII = rs[lms<=lam_HII].min()
+	rp  = rs/(1.0+zs)
+	eng = sed_func(lms)*dlam/(4*np.pi*rp**2)
+	xx,yy,zz = np.mgrid[-ncells:ncells,-ncells:ncells,-ncells:ncells]
+	rr2 = (xx**2 + yy**2 + zz**2)*boxsize**2/ncells**2
+	rr  = np.sqrt(rr2); rr[rr==0] = 0.1
+	eng_func = interp1d(rs, eng, kind='cubic')
+	engs     = eng_func(rr)
+	engs[rr>=rs_HII] = 0.
+	masses   = Mgrid_2_Msolar(src[:,3])
+	xc_cube  = np.zeros((ncells, ncells, ncells))
+	for s in xrange(n_src):
+		i,j,k = src[s,:-1]-np.ones(3)
+		mass  = masses[s]
+		eng_  = engs[(ncells-i):(2*ncells-i),(ncells-j):(2*ncells-j),(ncells-k):(2*ncells-k)]
+		xc_cube += eng_*mass/E_lya
+	return xc_cube
 
 	
 	
