@@ -82,8 +82,8 @@ def Lya_coupling_coeff_(ncells, boxsize, sourcelist, z=-1, SED=None, lum=None, l
 	sed_func = interp1d(lam, lum, kind='cubic')
 	rr  = 10**np.linspace(-2,np.log10(boxsize*1.8),1000)
 	zs  = c2t.cdist_to_z(rr+c2t.z_to_cdist(z))
-	zs_HII = zs[lms<=lam_HII].min()
 	lms = lam_lya*(1+z)/(1+zs)
+	zs_HII = zs[lms<=lam_HII].min()
 	rp  = rr/(1.0+zs)
 	eng = sed_func(lms)*dlam/(4*np.pi*rp**2)
 	eng_func = interp1d(zs, eng, kind='cubic')
@@ -112,6 +112,20 @@ def one_source_(xx, yy, zz, z, ncells, boxsize, source_pos, mass, eng_func, zs_H
 	print stop-start
 	return n_a
 
+def Lya_coupling_coeff_useprofile(ncells, boxsize, sourcelist, z=-1, SED=None, lum=None, lam=None):
+	assert SED is not None or (lum is not None and lam is not None)
+	if SED is not None and type(SED) == str: lum, lam = np.loadtxt(SED)
+	elif SED is not None: lum, lam = SED
+	if (lum is not None and lam is not None):
+		if type(lum)==str: lum = np.loadtxt(lum)   # Energy/time/mass
+		if type(lam)==str: lam = np.loadtxt(lam)   # angstrom
+	sed_func = interp1d(lam, lum, kind='cubic')
+	rr = 10**np.linspace(-2,np.log10(boxsize*1.8),1000)
+	#rr  = np.hstack((-rr_,rr_)); rr.sort()
+	zs  = c2t.cdist_to_z(rr+c2t.z_to_cdist(z))
+	lms = lam_lya*(1+z)/(1+zs)
+	zs_HII = zs[lms<=lam_HII].min()
+	rp  = rr/(1.0+zs)
 
 
 

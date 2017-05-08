@@ -19,16 +19,16 @@ def galactic_synch_fg(z, ncells, boxsize, max_baseline=2.):
 	Y  = np.random.normal(size=(ncells, ncells))
 	nu = c2t.z_to_nu(z)
 	nu_s,A150,beta_,a_syn,Da_syn = 150,513,2.34,2.8,0.1
-	c_light, m2Mpc = 3e8, 3.24e-23
-	lam   = c_light/(nu*1e6)/1000.
-	bb    = np.mgrid[1:ncells+1,1:ncells+1]*max_baseline/ncells/lam
-	l_cb  = 2*np.pi*np.sqrt(bb[0,:,:]**2+bb[1,:,:]**2)
+	#c_light, m2Mpc = 3e8, 3.24e-23
+	#lam   = c_light/(nu*1e6)/1000.
+	U_cb  = (np.mgrid[-ncells/2:ncells/2,-ncells/2:ncells/2]+0.5)*c2t.z_to_cdist(z)/boxsize
+	l_cb  = 2*np.pi*np.sqrt(U_cb[0,:,:]**2+U_cb[1,:,:]**2)
 	C_syn = A150*(1000/l_cb)**beta_*(nu/nu_s)**(-2*a_syn-2*Da_syn*np.log(nu/nu_s))
 	solid_angle = boxsize**2/c2t.z_to_cdist(z)**2
 	AA = np.sqrt(solid_angle*C_syn/2)
 	T_four = AA*(X+Y*1j)
-	T_real = np.real(np.fft.ifft2(T_four))
-	return T_real
+	T_real = np.abs(np.fft.ifft2(T_four))   #in Jansky
+	return jansky_2_kelvin(T_real*1e6, z, boxsize=boxsize, ncells=ncells)
 
 def extragalactic_pointsource_fg(z, ncells, boxsize, S_max=100):
 	"""
@@ -51,7 +51,8 @@ def extragalactic_pointsource_fg(z, ncells, boxsize, S_max=100):
 	N  = int(10**3.75*np.trapz(Ss**(-1.6), x=Ss, dx=dS)*solid_angle)
 	x,y = np.random.random_integers(0, high=ncells, size=(2,N))
 	alpha_ps = 0.7+0.1*np.random.random(size=N)
-	nu_s, S_s = 150, S_max
+	S_s  = np.random.choice(Ss, N)
+	nu_s = 150
 	S_nu = S_s*(nu/nu_s)**(-alpha_ps)
 	for p in xrange(S_nu.size): fg[x[p],y[p]] = S_nu[p]
 	return jansky_2_kelvin(fg, z, boxsize=boxsize, ncells=ncells)
