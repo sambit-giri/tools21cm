@@ -97,7 +97,7 @@ def get_uv_daily_observation(ncells, z, filename, total_int_time=4., int_time=10
 		uv_map1   = get_uv_coverage(new_Nbase, z, ncells, boxsize=boxsize)
 		uv_map   += uv_map1
 		if verbose:
-			perc = (i+1)*100/tot_num_obs
+			perc = (i+2)*100/tot_num_obs
 			msg = str(perc) + '%'
 			loading_verbose(msg)
 	uv_map = (uv_map+uv_map0)/tot_num_obs

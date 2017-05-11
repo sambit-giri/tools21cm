@@ -143,11 +143,12 @@ def _get_xc(sources, engs, ncells, mass_axis=3, time_taken=False):
 	masses  = Mgrid_2_Msolar(sources[:,mass_axis])
 	xc_cube = np.zeros((ncells, ncells, ncells))
 	n_src   = sources.shape[0]
+	engs   *= mass/E_lya
 	for s in xrange(n_src):
 		i,j,k = sources[s,:3]-np.ones(3)
 		mass  = masses[s]
 		eng_  = engs[(ncells-i):(2*ncells-i),(ncells-j):(2*ncells-j),(ncells-k):(2*ncells-k)]
-		xc_cube += eng_*mass/E_lya
+		xc_cube += eng_
 	stop  = timeit.default_timer()
 	if time_taken: print (stop-start), "seconds"
 	return xc_cube

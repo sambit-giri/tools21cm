@@ -1,1 +1,1 @@
-include share/data/*
+recursive-include share/data *
