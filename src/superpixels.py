@@ -1,8 +1,6 @@
 import numpy as np
 from scipy.stats import spearmanr
 import c2raytools as c2t
-import matplotlib.pyplot as plt
-import owntools
 from skimage.segmentation import slic, mark_boundaries
 from skimage.filters import threshold_otsu
 
