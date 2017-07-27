@@ -5,5 +5,5 @@ INSTALLATION
 python setup.py install
 
 In order to install it in a separate directory:
-python setup.py install --home=directory
 
+python setup.py install --home=directory
