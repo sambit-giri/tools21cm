@@ -124,12 +124,12 @@ def get_uv_coverage(Nbase, z, ncells, boxsize=None):
 	Nb  = (Nbase*theta_max).astype(int)
 	xx,yy,zz = Nb[:,0], Nb[:,1], Nb[:,2]
 	xx = xx[xx<ncells]
-	yy = yy[xx<ncells]
-	xx = xx[xx>-ncells]
-	yy = yy[xx>-ncells]
-	xx = xx[yy<ncells]
 	yy = yy[yy<ncells]
-	xx = xx[yy>-ncells]
+	xx = xx[xx>-ncells]
+	yy = yy[yy>-ncells]
+	xx = xx[xx<ncells]
+	yy = yy[yy<ncells]
+	xx = xx[xx>-ncells]
 	yy = yy[yy>-ncells]
 	for p in xrange(xx.shape[0]):
 		uv_map[xx[p],yy[p]] += 1
@@ -248,6 +248,3 @@ def kelvin_2_jansky(array, z, boxsize=None, ncells=None):
 	if not ncells: ncells  = array.shape[0]
 	con_sol = kelvin_jansky_conversion(ncells, z, boxsize=boxsize)	
 	return  array*con_sol
-
-
-
