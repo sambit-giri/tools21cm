@@ -1,6 +1,6 @@
 import numpy as np
 from Friends_of_Friends import FoF_search
-import zahnbubble
+#import zahnbubble
 import os
 import datetime, time
 from mfp import mfp2d, mfp3d
@@ -29,7 +29,7 @@ def fof(data, xth=0.5):
 
 	return out_map, size_list
 
-
+"""
 def zahn(data, xth=0.5, boxsize=100, nscales=20, upper_lim=False):
 	"""
 	ZAHN bubble
@@ -121,6 +121,7 @@ def spa(data, xth=0.95, boxsize=100, nscales=30, upper_lim=False):
 	ni_   = ni[rr>=r_min]
 	nn_   = nn[rr>=r_min]
 	return rr_, ni_*ni.sum()/ni_.sum(), nn_*nn.sum()/nn_.sum()
+"""
 
 def mfp(data, xth=0.5, boxsize=100, iterations = 10000000, verbose=True, upper_lim=False):
 	"""
