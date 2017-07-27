@@ -4,8 +4,8 @@ Created on 12 April 2017
 Setup script
 '''
 
-from setuptools import setup, find_packages
-#from distutils.core import setup
+#from setuptools import setup, find_packages
+from distutils.core import setup
 
 
 setup(name='tools21cm',
@@ -14,6 +14,6 @@ setup(name='tools21cm',
       author_email='sambit.giri@astro.su.se',
       package_dir = {'tools21cm' : 'src'},
       packages=['tools21cm'],
-      #package_data={'share':['*'],},
-      include_package_data=True,
+      package_data={'share':['*'],},
+      #include_package_data=True,
 )
