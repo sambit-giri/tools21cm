@@ -13,5 +13,7 @@ setup(name='tools21cm',
       author='Sambit Giri',
       author_email='sambit.giri@astro.su.se',
       package_dir = {'tools21cm' : 'src'},
-      package_data={'data':['*'],},
+      packages=['tools21cm'],
+      #package_data={'share':['*'],},
+      include_package_data=True,
 )
