@@ -3,8 +3,7 @@ from Friends_of_Friends import FoF_search
 #import zahnbubble
 import os
 import datetime, time
-#from mfp import mfp2d, mfp3d
-import mfp_np
+import mfp_np, spa_np
 
 def fof(data, xth=0.5):
 	"""
@@ -122,6 +121,30 @@ def fof(data, xth=0.5):
 #	nn_   = nn[rr>=r_min]
 #	return rr_, ni_*ni.sum()/ni_.sum(), nn_*nn.sum()/nn_.sum()
 
+def spa(data, xth=0.95, boxsize=100, nscales=20, upper_lim=False, binning='log'):
+	"""
+	Spherical-Averege (SPA) bubble
+	
+	Parameter
+	---------
+	input     : 3D array of ionization fraction.
+	xth       : The threshold value (Default: 0.5).
+	boxsize   : The boxsize in cMpc can be given (Default: 100).
+	nscales   : The number of different radii to consider (Default: 20).
+	upper_lim : It decides if the threshold is the upper limit or the lower limit (Default: True).
+
+	Output
+	------
+	The output is a tuple containing three values: r, rdp/dr(ion).
+	"""
+	if (upper_lim): 
+		data = -1.*data
+		xth  = -1.*xth
+	rs, ni = spa_np.spa_np(data, xth=xth, binning=binning, nscales=nscales)
+	rs_ = rs*boxsize/data.shape[0]
+	ni_ = ni/np.sum(ni)
+	return rs_, ni_
+
 
 def mfp(data, xth=0.5, boxsize=100, iterations = 10000000, verbose=True, upper_lim=False):
 	"""
@@ -138,7 +161,7 @@ def mfp(data, xth=0.5, boxsize=100, iterations = 10000000, verbose=True, upper_l
 
 	Output
 	------
-	The output contains a tuple with three values: r, rdP/dr, max(r).
+	The output contains a tuple with three values: r, rdP/dr, most probable r.
 	"""
 	dim = len(data.shape)
 	t1 = datetime.datetime.now()
