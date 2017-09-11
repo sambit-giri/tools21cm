@@ -248,7 +248,7 @@ def plot_fof_sizes(sizes, bins=100, boxsize=None):
 	xx = 10**ht[1]
 	yy = ht[0]*xx[:-1]
 	if boxsize is None: zz = yy/np.sum(yy)
-	elif boxsize == 'auto': zz = yy/conv.LB
+	elif boxsize == 'auto': zz = yy/conv.LB**3
 	else: zz = yy/boxsize**3
 	dummy = zz[zz!=0].min()/10.
 	zz[zz==0] = dummy
