@@ -242,12 +242,14 @@ def get_distribution(array, resolution=1., bins=100, sizes=False):
 
 	return sizes, dist/np.sum(dist), vols
 
-def plot_fof_sizes(sizes, bins=100):
+def plot_fof_sizes(sizes, bins=100, boxsize=None):
 	lg = np.log10(np.array(sizes))
 	ht = np.histogram(lg, bins=bins)
 	xx = 10**ht[1]
 	yy = ht[0]*xx[:-1]
-	zz = yy/np.sum(yy)
+	if boxsize is None: zz = yy/np.sum(yy)
+	elif boxsize == 'auto': zz = yy/conv.LB**3
+	else: zz = yy/boxsize**3
 	dummy = zz[zz!=0].min()/10.
 	zz[zz==0] = dummy
 	zz = np.hstack((zz,dummy))
