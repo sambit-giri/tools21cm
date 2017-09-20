@@ -24,10 +24,10 @@ dt = t2c.calc_dt(xfrac, dens, z)
 smt_dt = t2c.smooth_coeval(dt, z)
 
 ### Generating the binary field from 21-cm signal using KMeans
-bin_xf_sim = owntools.threshold_kmeans_3cluster(dt, upper_lim=True, n_jobs=5)
+bin_xf_sim = t2c.threshold_kmeans_3cluster(dt, upper_lim=True, n_jobs=5)
 bin_nf_sim = 1. - bin_xf_sim		# The neutral binary field at Sim-Res
 
-bin_xf_smt = owntools.threshold_kmeans_3cluster(smt_dt, upper_lim=True, n_jobs=5)
+bin_xf_smt = t2c.threshold_kmeans_3cluster(smt_dt, upper_lim=True, n_jobs=5)
 bin_nf_smt = 1. - bin_xf_smt            # The neutral binary field at Sim-Res
 
 

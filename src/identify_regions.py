@@ -3,6 +3,8 @@ from scipy.signal import argrelextrema
 import c2raytools as c2t
 import matplotlib.pyplot as plt
 import superpixels
+from sklearn.cluster import KMeans
+import numpy as np
 
 def bubbles_from_slic(data, n_segments=5000, bins=50):
 	"""
