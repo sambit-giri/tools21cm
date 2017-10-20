@@ -1,5 +1,6 @@
 import numpy as np
-import c2raytools as c2t 
+import c2raytools as c2t
+import glob
 
 def _load_binary_data(filename, dtype=np.float32): 
 	""" 
@@ -71,10 +72,10 @@ def coeval_21cm_c2ray(xfrac_dir, dens_dir, z, interpolation='linear', mean_subtr
 	xfrac_dir     : Give the path that contains the xfrac-files.
 	dens_dir      : Give the path that contains the density-files.
 	z	      : Redshift.
-	interpolation : This is used when the coveal cube at that redshift is not available.
+	interpolation : This is used when the xfrac cube at that redshift is not available.
 	"""
-	xfrac = coeval_xfrac(xfrac_dir, z, interpolation=interpolation)
-	dens  = coeval_dens(dens_dir, z, interpolation=interpolation)
+	xfrac = coeval_xfrac_c2ray(xfrac_dir, z, interpolation=interpolation)
+	dens  = coeval_dens_c2ray(dens_dir, z)
 	dt    = c2t.calc_dt(xfrac, dens, z=z)
 	if mean_subtract: return dt-dt.mean()
 	else: return dt
