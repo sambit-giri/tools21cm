@@ -108,7 +108,6 @@ def coeval_dens_c2ray(dens_dir, z):
 	"""
 	dens_dir      : Give the path that contains the density-files.
 	z	      : Redshift.
-	interpolation : This is used when the coveal cube at that redshift is not available.
 	"""
 	dens_files  = glob.glob(dens_dir + '/*n_all.dat')
 	dens_zs  = None
