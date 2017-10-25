@@ -1,6 +1,7 @@
 import numpy as np
-import c2raytools as c2t
+#import c2raytools as c2t
 from telescope_functions import jansky_2_kelvin, from_antenna_config
+import cosmology as cm
 
 def galactic_synch_fg(z, ncells, boxsize, max_baseline=2.):
 	"""
@@ -17,14 +18,14 @@ def galactic_synch_fg(z, ncells, boxsize, max_baseline=2.):
 	"""
 	X  = np.random.normal(size=(ncells, ncells))
 	Y  = np.random.normal(size=(ncells, ncells))
-	nu = c2t.z_to_nu(z)
+	nu = cm.z_to_nu(z)
 	nu_s,A150,beta_,a_syn,Da_syn = 150,513,2.34,2.8,0.1
 	#c_light, m2Mpc = 3e8, 3.24e-23
 	#lam   = c_light/(nu*1e6)/1000.
-	U_cb  = (np.mgrid[-ncells/2:ncells/2,-ncells/2:ncells/2]+0.5)*c2t.z_to_cdist(z)/boxsize
+	U_cb  = (np.mgrid[-ncells/2:ncells/2,-ncells/2:ncells/2]+0.5)*cm.z_to_cdist(z)/boxsize
 	l_cb  = 2*np.pi*np.sqrt(U_cb[0,:,:]**2+U_cb[1,:,:]**2)
 	C_syn = A150*(1000/l_cb)**beta_*(nu/nu_s)**(-2*a_syn-2*Da_syn*np.log(nu/nu_s))
-	solid_angle = boxsize**2/c2t.z_to_cdist(z)**2
+	solid_angle = boxsize**2/cm.z_to_cdist(z)**2
 	AA = np.sqrt(solid_angle*C_syn/2)
 	T_four = AA*(X+Y*1j)
 	T_real = np.abs(np.fft.ifft2(T_four))   #in Jansky
@@ -43,11 +44,11 @@ def extragalactic_pointsource_fg(z, ncells, boxsize, S_max=100):
 	------
 	A 2D numpy array of brightness temperature in mK.
 	"""
-	nu = c2t.z_to_nu(z)
+	nu = cm.z_to_nu(z)
 	fg = np.zeros((ncells,ncells))
 	dS = 0.01
 	Ss = np.arange(0.1, S_max, dS)
-	solid_angle = boxsize**2/c2t.z_to_cdist(z)**2
+	solid_angle = boxsize**2/cm.z_to_cdist(z)**2
 	N  = int(10**3.75*np.trapz(Ss**(-1.6), x=Ss, dx=dS)*solid_angle)
 	x,y = np.random.random_integers(0, high=ncells, size=(2,N))
 	alpha_ps = 0.7+0.1*np.random.random(size=N)

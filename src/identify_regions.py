@@ -1,6 +1,5 @@
 from skimage.filters import threshold_otsu
 from scipy.signal import argrelextrema
-import c2raytools as c2t
 import matplotlib.pyplot as plt
 import superpixels
 from sklearn.cluster import KMeans

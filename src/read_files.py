@@ -1,6 +1,9 @@
 import numpy as np
-import c2raytools as c2t
+#import c2raytools as c2t
 import glob
+from xfrac_file import XfracFile
+import helper_functions, density_file, vel_file, lightcone
+import temperature as tm
 
 def _load_binary_data(filename, dtype=np.float32): 
 	""" 
@@ -43,14 +46,14 @@ def read_c2ray_files(filename, file_type='xfrac', density_file=None):
 	Numpy array
 	"""
 	assert file_type in ['xfrac', 'dens', 'vel']
-	if file_type=='xfrac': out = c2t.XfracFile(filename).xi
+	if file_type=='xfrac': out = XfracFile(filename).xi
 	elif file_type=='dens': 
-		dens, dtype = c2t.helper_functions.get_data_and_type(filename)
+		dens, dtype = helper_functions.get_data_and_type(filename)
 		out = dens.astype(np.float64)
 	elif file_type=='vel':
 		assert density_file is not None
-		dfile = c2t.density_file.DensityFile(density_file)
-		vel_file = c2t.vel_file.VelocityFile(filename)
+		dfile = density_file.DensityFile(density_file)
+		vel_file = vel_file.VelocityFile(filename)
 		out = vel_file.get_kms_from_density(dfile)
 	return out
 
@@ -64,7 +67,7 @@ def read_grizzly_files(filename):
 	---------
 	Numpy array
 	"""
-	return c2t.XfracFile(filename).xi
+	return XfracFile(filename).xi
 
 
 def coeval_21cm_c2ray(xfrac_dir, dens_dir, z, interpolation='linear', mean_subtract=False):
@@ -76,7 +79,7 @@ def coeval_21cm_c2ray(xfrac_dir, dens_dir, z, interpolation='linear', mean_subtr
 	"""
 	xfrac = coeval_xfrac_c2ray(xfrac_dir, z, interpolation=interpolation)
 	dens  = coeval_dens_c2ray(dens_dir, z)
-	dt    = c2t.calc_dt(xfrac, dens, z=z)
+	dt    = tm.calc_dt(xfrac, dens, z=z)
 	if mean_subtract: return dt-dt.mean()
 	else: return dt
 
@@ -91,14 +94,14 @@ def coeval_xfrac_c2ray(xfrac_dir, z, interpolation='linear'):
 		raise ValueError('Unknown interpolation type: %s' % interpolation)
 	xfrac_files = glob.glob(xfrac_dir + '/xfrac3d_*.bin')
 	xfrac_zs = None
-	xfrac_zs = c2t.lightcone._get_file_redshifts(xfrac_zs, xfrac_files)
+	xfrac_zs = lightcone._get_file_redshifts(xfrac_zs, xfrac_files)
 	if z in xfrac_zs:
-		xfrac = c2t.XfracFile(xfrac_files[np.argwhere(z==xfrac_zs)]).xi
+		xfrac = XfracFile(xfrac_files[np.argwhere(z==xfrac_zs)]).xi
 	else:
 		z_l = xfrac_zs[xfrac_zs<z].max()
 		z_h = xfrac_zs[xfrac_zs>z].min()
-		xfrac_l = c2t.XfracFile(xfrac_files[xfrac_zs[xfrac_zs<z].argmax()]).xi
-		xfrac_h = c2t.XfracFile(xfrac_files[xfrac_zs[xfrac_zs>z].argmin()]).xi
+		xfrac_l = XfracFile(xfrac_files[xfrac_zs[xfrac_zs<z].argmax()]).xi
+		xfrac_h = XfracFile(xfrac_files[xfrac_zs[xfrac_zs>z].argmin()]).xi
 		xfrac = xfrac_h + (xfrac_l-xfrac_h)*(z-z_h)/(z_l-z_h)
 		print "The xfrac cube has been interpolated using", interpolation, "interpolation."
 		print "CAUTION: This data should be used with care."
@@ -111,14 +114,14 @@ def coeval_dens_c2ray(dens_dir, z):
 	"""
 	dens_files  = glob.glob(dens_dir + '/*n_all.dat')
 	dens_zs  = None
-	dens_zs  = c2t.lightcone._get_file_redshifts(dens_zs, dens_files)
+	dens_zs  = lightcone._get_file_redshifts(dens_zs, dens_files)
 	if z in dens_zs:
-		dens, dtype = c2t.helper_functions.get_data_and_type(dens_files[np.argwhere(z==dens_zs)])
+		dens, dtype = helper_functions.get_data_and_type(dens_files[np.argwhere(z==dens_zs)])
 	else:
 		#z_l = dens_zs[dens_zs<z].max()
 		z_h = dens_zs[dens_zs>z].min()
-		#dens_l,dtype = c2t.helper_functions.get_data_and_type(dens_files[dens_zs[dens_zs<z].argmax()])
-		dens_h, dtype = c2t.helper_functions.get_data_and_type(dens_files[dens_zs[dens_zs>z].argmin()])
+		#dens_l,dtype = helper_functions.get_data_and_type(dens_files[dens_zs[dens_zs<z].argmax()])
+		dens_h, dtype = helper_functions.get_data_and_type(dens_files[dens_zs[dens_zs>z].argmin()])
 		#dens = dens_h + (dens_l-dens_h)*(z-z_h)/(z_l-z_h)
 		dens = dens_h*(z/z_h)**3
 		#print "The density cube has been interpolated using", interpolation, "interpolation."

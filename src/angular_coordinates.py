@@ -1,0 +1,274 @@
+'''
+Created on Sep 17, 2014
+
+@author: Hannes Jensen
+
+Methods to convert data between physical (cMpc) coordinates
+and observational (angular-frequency) coordinates
+'''
+
+import numpy as np
+from lightcone import redshifts_at_equal_comoving_distance
+import cosmology as cm
+import conv
+import helper_functions as hf
+import smoothing
+import const
+from scipy.signal import fftconvolve
+
+
+def physical_lightcone_to_observational(physical_lightcone, input_z_low, output_dnu, output_dtheta, input_box_size_mpc=None):
+    '''
+    Interpolate a lightcone volume from physical (length) units
+    to observational (angle/frequency) units.
+    
+    Parameters:
+        * physical_lightcone (numpy array): the lightcone volume
+        * input_z_low (float): the lowest redshift of the input lightcone
+        * output_dnu (float): the frequency resolution of the output volume in MHz
+        * output_dtheta (float): the angular resolution of the output in arcmin
+        * input_box_size_mpc (float): the size of the input FoV in Mpc.
+            If None (default), this will be set to conv.LB
+            
+    Returns:
+        * The output volume as a numpy array
+        * The output frequencies in MHz as an array of floats
+    '''
+    if input_box_size_mpc == None:
+        input_box_size_mpc = conv.LB
+    
+    #For each output redshift: average the corresponding slices
+    hf.print_msg('Making observational lightcone...')
+    hf.print_msg('Binning in frequency...')
+    lightcone_freq, output_freqs = bin_lightcone_in_frequency(physical_lightcone,\
+                                                         input_z_low, input_box_size_mpc, output_dnu)
+    #Calculate the FoV in degrees at lowest z (largest one)
+    fov_deg = cm.angular_size_comoving(input_box_size_mpc, input_z_low)
+    #Calculate dimensions of output volume
+    n_cells_theta = fov_deg*60./output_dtheta
+    n_cells_nu = len(output_freqs)
+    #Go through each slice and make angular slices for each one
+    hf.print_msg('Binning in angle...')
+    output_volume = np.zeros((n_cells_theta, n_cells_theta, n_cells_nu))
+    for i in range(n_cells_nu):
+        if i%10 == 0:
+            hf.print_msg('Slice %d of %d' % (i, n_cells_nu))
+        z = cm.nu_to_z(output_freqs[i])
+        output_volume[:,:,i] = physical_slice_to_angular(lightcone_freq[:,:,i], z, \
+                                        slice_size_mpc=input_box_size_mpc, fov_deg=fov_deg,\
+                                        dtheta=output_dtheta, order=2)
+        
+    return output_volume, output_freqs
+
+
+def observational_lightcone_to_physical(observational_lightcone, input_freqs, input_dtheta):
+    '''
+    Interpolate a lightcone volume measured in observational (angle/frequency)
+    units into  physical (length) units. The output resolution will be set
+    to the coarest one, as determined either by the angular or the frequency
+    resolution. The lightcone must have the LoS as the last index, with 
+    frequencies decreasing along the LoS.
+    
+    Parameters:
+        * observational_lightcone (numpy array): the input lightcone volume
+        * input_freqs (numpy array): the frequency in MHz of each slice along the 
+            line of sight of the input
+        * input_dheta (float): the angular size of a cell in arcmin
+        
+    Returns:
+        * The output volume
+        * The redshifts along the LoS of the output
+        * The output cell size in Mpc
+    '''
+    assert input_freqs[0] > input_freqs[-1]
+    assert observational_lightcone.shape[0] == observational_lightcone.shape[1]
+    
+    #Determine new cell size - set either by frequency or angle.
+    #The FoV size in Mpc is set by the lowest redshift
+    dnu = input_freqs[0]-input_freqs[1]
+    z_low = cm.nu_to_z(input_freqs[0])
+    fov_deg = observational_lightcone.shape[0]*input_dtheta/60.
+    fov_mpc = fov_deg/cm.angular_size_comoving(1., z_low)
+    cell_size_perp = fov_mpc/observational_lightcone.shape[0]
+    cell_size_par = cm.nu_to_cdist(input_freqs[-1])-cm.nu_to_cdist(input_freqs[-2])
+    output_cell_size = max([cell_size_par, cell_size_perp])
+    hf.print_msg('Making physical lightcone with cell size %.2f Mpc' % output_cell_size)
+    #Go through each slice along frequency axis. Cut off excess and 
+    #interpolate down to correct resolution
+    n_cells_perp = int(fov_mpc/output_cell_size)
+    output_volume_par = np.zeros((n_cells_perp, n_cells_perp, observational_lightcone.shape[2]))
+    for i in range(output_volume_par.shape[2]):
+        z = cm.nu_to_z(input_freqs[i])
+        output_volume_par[:,:,i] = angular_slice_to_physical(observational_lightcone[:,:,i],\
+                                                    z, slice_size_deg=fov_deg, output_cell_size=output_cell_size,\
+                                                    output_size_mpc=fov_mpc, order=2)
+    #Bin along frequency axis
+    output_volume, output_redshifts = bin_lightcone_in_mpc(output_volume_par, \
+                                                input_freqs, output_cell_size)
+    
+    return output_volume, output_redshifts, output_cell_size
+
+
+def physical_slice_to_angular(input_slice, z, slice_size_mpc, fov_deg, dtheta, order=0):
+    '''
+    Interpolate a slice in physical coordinates to angular coordinates.
+    
+    Parameters:
+        * input_slice (numpy array): the 2D slice in physical coordinates
+        * z (float): the redshift of the input slice
+        * slice_size_Mpc (float): the size of the input slice in cMpc
+        * fov_deg (float): the field-of-view in degrees. The output will be
+            padded to match this size
+        * dtheta (float): the target resolution in arcmin
+        
+    Returns:
+        (angular_slice, size_deg)
+    
+    '''
+    #Resample
+    fov_mpc = cm.deg_to_cdist(fov_deg, z)
+    cell_size_mpc = fov_mpc/(fov_deg*60./dtheta)
+    n_cells_resampled = int(slice_size_mpc/cell_size_mpc)
+    #Avoid edge effects with even number of cells
+    if n_cells_resampled % 2 == 0: 
+        n_cells_resampled -= 1
+    resampled_slice = resample_slice(input_slice, n_cells_resampled, order)
+    
+    #Pad the array
+    slice_n = resampled_slice.shape[0]
+    padded_n = fov_deg*60./dtheta# np.round(slice_n*(fov_mpc/slice_size_mpc))
+    if padded_n < slice_n:
+        if slice_n - padded_n > 2:
+            print 'Warning! Padded slice is significantly smaller than original!'
+            print 'This should not happen...'
+        padded_n = slice_n
+    padded_slice = _get_padded_slice(resampled_slice, padded_n)
+    
+    return padded_slice
+    
+
+def angular_slice_to_physical(input_slice, z, slice_size_deg, output_cell_size, output_size_mpc, order=0, prefilter=True):
+    '''
+    Interpolate a slice in angular coordinates to physical
+    
+    Returns:
+        (physical_slice, size_mpc)
+    '''
+    #Resample
+    slice_size_mpc = cm.deg_to_cdist(slice_size_deg, z)
+    n_cells_resampled = int(slice_size_mpc/output_cell_size)
+    #Avoid edge effects with even number of cells
+    if n_cells_resampled % 2 == 0: 
+        n_cells_resampled += 1
+    resampled_slice = resample_slice(input_slice, n_cells_resampled, order, prefilter)
+    
+    #Remove cells to get correct size
+    n_cutout_cells = int(output_size_mpc/output_cell_size)# np.round(resampled_slice.shape[0]*output_size_mpc/slice_size_mpc)
+    if n_cutout_cells > input_slice.shape[0]:
+        if input_slice.shape[0] - n_cutout_cells > 2:
+            print 'Warning! Cutout slice is larger than original.'
+            print 'This should not happen'
+        n_cutout_cells = input_slice.shape[0]
+    slice_cutout = resampled_slice[:n_cutout_cells, :n_cutout_cells]
+        
+    return slice_cutout
+
+
+def resample_slice(input_slice, n_output_cells, order=0, prefilter=True):
+    '''
+    Resample a 2D slice to new dimensions.
+    '''
+    tophat_width = np.round(input_slice.shape[0]/n_output_cells)
+    if tophat_width < 1 or (not prefilter):
+        tophat_width = 1
+    slice_smoothed = smoothing.smooth_tophat(input_slice, tophat_width)
+
+    idx = np.linspace(0, slice_smoothed.shape[0], n_output_cells)
+    output_slice = smoothing.interpolate2d(slice_smoothed, idx, idx, order=order)
+
+    return output_slice
+
+
+def bin_lightcone_in_frequency(lightcone, z_low, box_size_mpc, dnu):
+    '''
+    Bin a lightcone in frequency bins.
+    
+    Parameters:
+        * lightcone (numpy array): the lightcone in length units
+        * z_low (float): the lowest redshift of the lightcone
+        * box_size_mpc (float): the side of the lightcone in Mpc
+        * dnu (float): the width of the frequency bins in MHz
+        
+    Returns:
+        The lightcone, binned in frequencies with high frequencies first
+        The frequencies along the line of sight in MHz
+    '''
+    #Figure out dimensions and make output volume
+    cell_size = box_size_mpc/lightcone.shape[0]
+    distances = cm.z_to_cdist(z_low) + np.arange(lightcone.shape[2])*cell_size
+    input_redshifts = cm.cdist_to_z(distances)
+    input_frequencies = cm.z_to_nu(input_redshifts)
+    nu1 = input_frequencies[0]
+    nu2 = input_frequencies[-1]
+    output_frequencies = np.arange(nu1, nu2, -dnu)
+    output_lightcone = np.zeros((lightcone.shape[0], lightcone.shape[1], \
+                                 len(output_frequencies)))
+    
+    #Bin in frequencies by smoothing and indexing
+    max_cell_size = cm.nu_to_cdist(output_frequencies[-1])-cm.nu_to_cdist(output_frequencies[-2])
+    smooth_scale = np.round(max_cell_size/cell_size)
+    if smooth_scale < 1:
+        smooth_scale = 1
+
+    hf.print_msg('Smooth along LoS with scale %f' % smooth_scale)
+    tophat3d = np.ones((1,1,smooth_scale))
+    tophat3d /= np.sum(tophat3d)
+    lightcone_smoothed = fftconvolve(lightcone, tophat3d)
+    
+    for i in range(output_lightcone.shape[2]):
+        nu = output_frequencies[i]
+        idx = hf.find_idx(input_frequencies, nu)
+        output_lightcone[:,:,i] = lightcone_smoothed[:,:,idx]
+
+    return output_lightcone, output_frequencies
+
+
+def bin_lightcone_in_mpc(lightcone, frequencies, cell_size_mpc):
+    '''
+    Bin a lightcone in Mpc slices along the LoS
+    '''
+    distances = cm.nu_to_cdist(frequencies)
+    n_output_cells = (distances[-1]-distances[0])/cell_size_mpc
+    output_distances = np.arange(distances[0], distances[-1], cell_size_mpc)
+    output_lightcone = np.zeros((lightcone.shape[0], lightcone.shape[1], n_output_cells))
+    
+    #Bin in Mpc by smoothing and indexing
+    smooth_scale = np.round(len(frequencies)/n_output_cells)
+
+    tophat3d = np.ones((1,1,smooth_scale))
+    tophat3d /= np.sum(tophat3d)
+    lightcone_smoothed = fftconvolve(lightcone, tophat3d, mode='same')
+    
+    for i in range(output_lightcone.shape[2]):
+        idx = hf.find_idx(distances, output_distances[i])
+        output_lightcone[:,:,i] = lightcone_smoothed[:,:,idx]
+    
+    output_redshifts = cm.cdist_to_z(output_distances)
+        
+    return output_lightcone, output_redshifts
+
+
+def _get_padded_slice(input_slice, padded_n):
+    slice_n = input_slice.shape[0]
+    padded_slice = np.zeros((padded_n, padded_n))
+    padded_slice[:slice_n, :slice_n] = input_slice
+    padded_slice[slice_n:, :slice_n] = input_slice[:(padded_n-slice_n),:slice_n]
+    padded_slice[:slice_n, slice_n:] = input_slice[:,:(padded_n-slice_n)]
+    padded_slice[slice_n:, slice_n:] = input_slice[:(padded_n-slice_n), :(padded_n-slice_n)]
+    return padded_slice
+
+
+
+
+
+

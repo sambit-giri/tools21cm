@@ -1,6 +1,9 @@
 import numpy as np
 import sys
-import c2raytools as c2t
+#import c2raytools as c2t
+import conv, const, helper_functions, lightcone
+import temperature as tm
+import density_file, vel_file, xfrac_file
 
 def loading_verbose(string):
 	msg = ("Completed: " + string )
@@ -8,10 +11,10 @@ def loading_verbose(string):
 	sys.stdout.flush()
 
 def Mgrid_2_Msolar(M):
-	return M*(c2t.conv.M_grid*c2t.const.solar_masses_per_gram)
+	return M*(conv.M_grid*const.solar_masses_per_gram)
 
 def Msolar_2_Mgrid(M):
-	return M/(c2t.conv.M_grid*c2t.const.solar_masses_per_gram)
+	return M/(conv.M_grid*const.solar_masses_per_gram)
 
 def get_zs_list(xfrac_dir, file_type='/xfrac3d_*.bin'):
 	"""
@@ -25,7 +28,7 @@ def get_zs_list(xfrac_dir, file_type='/xfrac3d_*.bin'):
 	"""
 	xfrac_files = glob.glob(xfrac_dir + file_type)	
 	xfrac_zs = None
-	xfrac_zs = c2t.lightcone._get_file_redshifts(xfrac_zs, xfrac_files)
+	xfrac_zs = lightcone._get_file_redshifts(xfrac_zs, xfrac_files)
 	return np.sort(xfrac_zs)
 
 			
@@ -38,7 +41,7 @@ def coeval_21cm(xfrac_dir, dens_dir, z, interpolation='linear', mean_subtract=Fa
 	"""
 	xfrac = coeval_xfrac(xfrac_dir, z, interpolation=interpolation)
 	dens  = coeval_dens(dens_dir, z, interpolation=interpolation)
-	dt    = c2t.calc_dt(xfrac, dens, z=z)
+	dt    = tm.calc_dt(xfrac, dens, z=z)
 	if mean_subtract: return dt-dt.mean()
 	else: return dt
 
@@ -53,14 +56,14 @@ def coeval_xfrac(xfrac_dir, z, interpolation='linear'):
 		raise ValueError('Unknown interpolation type: %s' % interpolation)
 	xfrac_files = glob.glob(xfrac_dir + '/xfrac3d_*.bin')
 	xfrac_zs = None
-	xfrac_zs = c2t.lightcone._get_file_redshifts(xfrac_zs, xfrac_files)
+	xfrac_zs = lightcone._get_file_redshifts(xfrac_zs, xfrac_files)
 	if z in xfrac_zs:
-		xfrac = c2t.XfracFile(xfrac_files[np.argwhere(z==xfrac_zs)]).xi
+		xfrac = xfrac_file.XfracFile(xfrac_files[np.argwhere(z==xfrac_zs)]).xi
 	else:
 		z_l = xfrac_zs[xfrac_zs<z].max()
 		z_h = xfrac_zs[xfrac_zs>z].min()
-		xfrac_l = c2t.XfracFile(xfrac_files[xfrac_zs[xfrac_zs<z].argmax()]).xi
-		xfrac_h = c2t.XfracFile(xfrac_files[xfrac_zs[xfrac_zs>z].argmin()]).xi
+		xfrac_l = xfrac_file.XfracFile(xfrac_files[xfrac_zs[xfrac_zs<z].argmax()]).xi
+		xfrac_h = xfrac_file.XfracFile(xfrac_files[xfrac_zs[xfrac_zs>z].argmin()]).xi
 		xfrac = xfrac_h + (xfrac_l-xfrac_h)*(z-z_h)/(z_l-z_h)
 		print "The xfrac cube has been interpolated using", interpolation, "interpolation."
 	return xfrac
@@ -75,14 +78,14 @@ def coeval_dens(dens_dir, z, interpolation='linear'):
 		raise ValueError('Unknown interpolation type: %s' % interpolation)
 	dens_files  = glob.glob(dens_dir + '/*n_all.dat')
 	dens_zs  = None
-	dens_zs  = c2t.lightcone._get_file_redshifts(dens_zs, dens_files)
+	dens_zs  = lightcone._get_file_redshifts(dens_zs, dens_files)
 	if z in dens_zs:
-		dens, dtype = c2t.helper_functions.get_data_and_type(dens_files[np.argwhere(z==dens_zs)])
+		dens, dtype = helper_functions.get_data_and_type(dens_files[np.argwhere(z==dens_zs)])
 	else:
 		z_l = dens_zs[dens_zs<z].max()
 		z_h = dens_zs[dens_zs>z].min()
-		dens_l, dtype = c2t.helper_functions.get_data_and_type(dens_files[dens_zs[dens_zs<z].argmax()])
-		dens_h, dtype = c2t.helper_functions.get_data_and_type(dens_files[dens_zs[dens_zs>z].argmin()])
+		dens_l, dtype = helper_functions.get_data_and_type(dens_files[dens_zs[dens_zs<z].argmax()])
+		dens_h, dtype = helper_functions.get_data_and_type(dens_files[dens_zs[dens_zs>z].argmin()])
 		dens = dens_h + (dens_l-dens_h)*(z-z_h)/(z_l-z_h)
 		print "The density cube has been interpolated using", interpolation, "interpolation."
 	return dens.astype(np.float64)
@@ -108,10 +111,10 @@ def coeval_vel(dens_dir, vel_dir, z, interpolation='linear'):
 	dens_files = glob.glob(dens_dir + '/*n_all.dat')
 	vel_files  = glob.glob(vel_dir + '/*v_all.dat')
 	vel_zs     = None
-	vel_zs     = c2t.lightcone._get_file_redshifts(vel_zs, vel_files)
+	vel_zs     = lightcone._get_file_redshifts(vel_zs, vel_files)
 	def get_vel(vel_file, dens_file):
-		dfile = c2t.density_file.DensityFile(dens_file)
-		vel_file = c2t.vel_file.VelocityFile(vel_file)
+		dfile = density_file.DensityFile(dens_file)
+		vel_file = vel_file.VelocityFile(vel_file)
 		vel = vel_file.get_kms_from_density(dfile)
 		return vel
 	if z in vel_zs:

@@ -1,7 +1,10 @@
 import numpy as np
-import c2raytools as c2t
+#import c2raytools as c2t
 from telescope_functions import *
 from usefuls import *
+import conv
+import cosmology as cm
+import smoothing as sm
 
 def noise_map(ncells, z, depth_mhz, obs_time=1000, filename=None, boxsize=None, total_int_time=4., int_time=10., declination=30., uv_map=np.array([]), N_ant=None, verbose=True):
 	"""
@@ -55,8 +58,8 @@ def make_uv_map_lightcone(ncells, zs, filename=None, total_int_time=4., int_time
 def telescope_response_on_coeval(array, z, depth_mhz=None, obs_time=1000, filename=None, boxsize=None, total_int_time=4., int_time=10., declination=30., uv_map=np.array([]), N_ant=None):
 	ncells = array.shape[-1]
 	if not filename: filename = 'input/SKA1_LowConfig_Sept2016.dat'
-	if not boxsize: boxsize = c2t.conv.LB
-	if not depth_mhz: depth_mhz = (c2t.z_to_nu(c2t.cdist_to_z(c2t.z_to_cdist(z)-boxsize/2))-c2t.z_to_nu(c2t.cdist_to_z(c2t.z_to_cdist(z)+boxsize/2)))/ncells
+	if not boxsize: boxsize = conv.LB
+	if not depth_mhz: depth_mhz = (cm.z_to_nu(cm.cdist_to_z(cm.z_to_cdist(z)-boxsize/2))-cm.z_to_nu(cm.cdist_to_z(cm.z_to_cdist(z)+boxsize/2)))/ncells
 	if not uv_map.size: uv_map, N_ant  = get_uv_map(ncells, z, filename=filename, total_int_time=total_int_time, int_time=int_time, boxsize=boxsize, declination=declination)
 	if not N_ant: N_ant = np.loadtxt(filename, dtype=str).shape[0]
 	data3d = np.zeros(array.shape)
@@ -79,8 +82,8 @@ def noise_cube_coeval(ncells, z, depth_mhz=None, obs_time=1000, filename=None, b
 	noise_map: A 2D slice of the interferometric noise at that frequency (in mK).
 	"""
 	if not filename: filename = 'input/SKA1_LowConfig_Sept2016.dat'
-	if not boxsize: boxsize = c2t.conv.LB
-	if not depth_mhz: depth_mhz = (c2t.z_to_nu(c2t.cdist_to_z(c2t.z_to_cdist(z)-boxsize/2))-c2t.z_to_nu(c2t.cdist_to_z(c2t.z_to_cdist(z)+boxsize/2)))/ncells
+	if not boxsize: boxsize = conv.LB
+	if not depth_mhz: depth_mhz = (cm.z_to_nu(cm.cdist_to_z(cm.z_to_cdist(z)-boxsize/2))-cm.z_to_nu(cm.cdist_to_z(cm.z_to_cdist(z)+boxsize/2)))/ncells
 	if not uv_map.size: uv_map, N_ant  = get_uv_map(ncells, z, filename=filename, total_int_time=total_int_time, int_time=int_time, boxsize=boxsize, declination=declination)
 	if not N_ant: N_ant = np.loadtxt(filename, dtype=str).shape[0]
 	noise3d = np.zeros((ncells,ncells,ncells))
@@ -107,16 +110,16 @@ def noise_cube_lightcone(ncells, z, obs_time=1000, filename=None, boxsize=None, 
 	noise_map: A 2D slice of the interferometric noise at that frequency (in mK).
 	"""
 	if not filename: filename = 'input/SKA1_LowConfig_Sept2016.dat'
-	if not boxsize: boxsize = c2t.conv.LB
-	zs = c2t.cdist_to_z(np.linspace(c2t.z_to_cdist(z)-boxsize/2, c2t.z_to_cdist(z)+boxsize/2, ncells))
+	if not boxsize: boxsize = conv.LB
+	zs = cm.cdist_to_z(np.linspace(cm.z_to_cdist(z)-boxsize/2, cm.z_to_cdist(z)+boxsize/2, ncells))
 	if not N_ant: N_ant = np.loadtxt(filename, dtype=str).shape[0]
 	noise3d = np.zeros((ncells,ncells,ncells))
 	print "Creating the noise cube"
 	verbose = True
 	for k in xrange(ncells):
 		zi = zs[k]
-		if k+1<ncells: depth_mhz = c2t.z_to_nu(zi[k+1])-c2t.z_to_nu(zi[k])
-		else: depth_mhz = c2t.z_to_nu(zi[k])-c2t.z_to_nu(zi[k-1])
+		if k+1<ncells: depth_mhz = cm.z_to_nu(zi[k+1])-cm.z_to_nu(zi[k])
+		else: depth_mhz = cm.z_to_nu(zi[k])-cm.z_to_nu(zi[k-1])
 		uv_map, N_ant  = get_uv_map(ncells, zi, filename=filename, total_int_time=total_int_time, int_time=int_time, boxsize=boxsize, declination=declination)
 		noise2d = noise_map(ncells, zi, depth_mhz, obs_time=obs_time, filename=filename, boxsize=boxsize, total_int_time=total_int_time, int_time=int_time, declination=declination, uv_map=uv_map, N_ant=N_ant, verbose=verbose)
 		noise3d[:,:,k] = noise2d
@@ -159,7 +162,7 @@ def gauss_kernel_3d(size, sigma=1.0, fwhm=None):
 
 def smooth_gauss_3d(array, fwhm):
 	gg = gauss_kernel_3d(array.shape[0],fwhm=fwhm)
-	out = c2t.smooth_with_kernel(array, gg)
+	out = sm.smooth_with_kernel(array, gg)
 	return out
 
 

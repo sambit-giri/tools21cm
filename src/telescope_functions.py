@@ -1,8 +1,10 @@
 import numpy as np
 import itertools
-import c2raytools as c2t
+#import c2raytools as c2t
 import sys
 from usefuls import *
+import cosmology as cm
+import conv
 
 KB_SI   = 1.38e-23
 c_light = 2.99792458e+10  #in cm/s
@@ -26,7 +28,7 @@ def from_antenna_config(filename, z, nu=None):
 	antll  = antll[:,-2:].astype(float)
 	Re     = 6.371e6                                            # in m
 	pp     = np.pi/180
-	if not nu: nu = c2t.z_to_nu(z)                              # MHz
+	if not nu: nu = cm.z_to_nu(z)                              # MHz
 	antxyz = np.zeros((antll.shape[0],3))		            # in m
 	antxyz[:,0] = Re*np.cos(antll[:,1]*pp)*np.cos(antll[:,0]*pp)
 	antxyz[:,1] = Re*np.cos(antll[:,1]*pp)*np.sin(antll[:,0]*pp)
@@ -118,9 +120,9 @@ def get_uv_coverage(Nbase, z, ncells, boxsize=None):
 	----------
 	uv_map  : ncells x ncells numpy array containing the number of baselines observing each pixel.
 	"""
-	if not boxsize: boxsize = c2t.conv.LB
+	if not boxsize: boxsize = conv.LB
 	uv_map = np.zeros((ncells,ncells))
-	theta_max = boxsize/c2t.z_to_cdist(z)
+	theta_max = boxsize/cm.z_to_cdist(z)
 	Nb  = (Nbase*theta_max).astype(int)
 	xx,yy,zz = Nb[:,0], Nb[:,1], Nb[:,2]
 	xx = xx[xx<ncells]
@@ -203,15 +205,15 @@ def kelvin_jansky_conversion(ncells, z, boxsize=None):
 	----------
 	The conversion factor multiplied to values in kelvin to get values in jansky.
 	"""
-	if not boxsize: boxsize = c2t.conv.LB
+	if not boxsize: boxsize = conv.LB
 	KB_SI       = 1.38e-23
 	janskytowatt= 1e-26
-	dist_z      = c2t.z_to_cdist(z)
+	dist_z      = cm.z_to_cdist(z)
 	boxsize_pp  = boxsize/dist_z				 #in rad	
 	omega_pixel = boxsize_pp**2/ncells**2
 	omega_total = boxsize_pp**2.0
 	c_light_SI  = 2.99792458e+8                              #in m
-	mktomujy_nuc= 2.0*KB_SI/c_light_SI/c_light_SI/janskytowatt*((c2t.z_to_nu(z)*1e6)**2.0)*1e3
+	mktomujy_nuc= 2.0*KB_SI/c_light_SI/c_light_SI/janskytowatt*((cm.z_to_nu(z)*1e6)**2.0)*1e3
 	con_sol     = mktomujy_nuc*omega_pixel
 	return con_sol
 
