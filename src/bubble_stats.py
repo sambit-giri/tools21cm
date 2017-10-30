@@ -3,7 +3,7 @@ from Friends_of_Friends import FoF_search
 #import zahnbubble
 import os
 import datetime, time
-import mfp_np, spa_np
+import mfp_np, spa_np, conv
 
 def fof(data, xth=0.5):
 	"""
