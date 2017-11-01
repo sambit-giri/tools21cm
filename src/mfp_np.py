@@ -6,9 +6,8 @@ def mfp3d(arr, xth=0.5, iterations=10000000, verbose=True):
 	#3D interpolation is required
 	#RegularGridInterpolator in scipy(>0.14) is used to do the interpolation
 	
-	info    = arr.shape
-	longy	= max([info[0], info[1], info[2]])
-	longest = int(np.sqrt(3)*longy)
+	info = arr.shape
+	longest = max(arr.shape)
 	num_sz  = np.zeros(longest)
 
 	ar  = np.zeros(arr.shape)

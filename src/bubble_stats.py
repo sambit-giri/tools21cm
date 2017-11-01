@@ -1,6 +1,6 @@
 import numpy as np
 from Friends_of_Friends import FoF_search
-#import zahnbubble
+from scipy import ndimage
 import os
 import datetime, time
 import mfp_np, spa_np, conv
@@ -121,7 +121,7 @@ def fof(data, xth=0.5):
 #	nn_   = nn[rr>=r_min]
 #	return rr_, ni_*ni.sum()/ni_.sum(), nn_*nn.sum()/nn_.sum()
 
-def spa(data, xth=0.95, boxsize=100, nscales=20, upper_lim=False, binning='log'):
+def spa(data, xth=0.95, boxsize=None, nscales=20, upper_lim=False, binning='log'):
 	"""
 	Spherical-Averege (SPA) bubble
 	
@@ -129,7 +129,7 @@ def spa(data, xth=0.95, boxsize=100, nscales=20, upper_lim=False, binning='log')
 	---------
 	input     : 3D array of ionization fraction.
 	xth       : The threshold value (Default: 0.5).
-	boxsize   : The boxsize in cMpc can be given (Default: 100).
+	boxsize   : The boxsize in cMpc can be given (Default: conv.LB).
 	nscales   : The number of different radii to consider (Default: 20).
 	upper_lim : It decides if the threshold is the upper limit or the lower limit (Default: True).
 
@@ -137,6 +137,7 @@ def spa(data, xth=0.95, boxsize=100, nscales=20, upper_lim=False, binning='log')
 	------
 	The output is a tuple containing three values: r, rdp/dr(ion).
 	"""
+	if boxsize is None: boxsize = conv.LB
 	if (upper_lim): 
 		data = -1.*data
 		xth  = -1.*xth
@@ -146,7 +147,7 @@ def spa(data, xth=0.95, boxsize=100, nscales=20, upper_lim=False, binning='log')
 	return rs_, ni_
 
 
-def mfp(data, xth=0.5, boxsize=100, iterations = 10000000, verbose=True, upper_lim=False):
+def mfp(data, xth=0.5, boxsize=None, iterations = 10000000, verbose=True, upper_lim=False):
 	"""
 	Mean-Free-Path (MFP) bubble
 	
@@ -154,7 +155,7 @@ def mfp(data, xth=0.5, boxsize=100, iterations = 10000000, verbose=True, upper_l
 	---------
 	input     : 2D/3D array of ionization fraction/brightness temperature.
 	xth       : The threshold value (Default: 0.5).
-	boxsize   : The boxsize in cMpc can be given (Default: 100).
+	boxsize   : The boxsize in cMpc can be given (Default: conv.LB).
 	iterations: Number of iterations (Default: 1e7).
 	verbose   : It prints the progress of the program (Default: True).
 	upper_lim : It decides if the threshold is the upper limit or the lower limit (Default: False).
@@ -163,6 +164,7 @@ def mfp(data, xth=0.5, boxsize=100, iterations = 10000000, verbose=True, upper_l
 	------
 	The output contains a tuple with three values: r, rdP/dr, most probable r.
 	"""
+	if boxsize is None: boxsize = conv.LB
 	dim = len(data.shape)
 	t1 = datetime.datetime.now()
 	if (upper_lim): 
@@ -255,5 +257,60 @@ def plot_fof_sizes(sizes, bins=100, boxsize=None, normalize='box'):
 	zz = np.hstack((zz,dummy))
 	print "The output is Size, Size**2 dP/d(Size), lowest value"
 	return xx, zz, dummy
+
+def disk_structure(n):
+    struct  = np.zeros((2*n+1, 2*n+1, 2*n+1))
+    x, y, z = np.indices((2*n+1, 2*n+1, 2*n+1))
+    mask = (x - n)**2 + (y - n)**2 + (z - n)**2 <= n**2
+    struct[mask] = 1
+    return struct.astype(np.bool)
+
+
+def granulometry_CDF(data, sizes=None, verbose=True):
+	s = max(data.shape)
+	if sizes is None: sizes = np.arange(1, s/2, 2)
+	granulo = np.zeros((len(sizes)))
+	for n in xrange(len(sizes)): granulo[n] = ndimage.binary_opening(data, structure=disk_structure(sizes[n])).sum()
+	#if verbose: print "Completed:", 100*(n+1)/len(sizes), "%"
+	print "Completed."
+	return granulo
+
+def granulometry_bsd(data, xth=0.5, boxsize=None, verbose=True, upper_lim=False, sampling=2):
+	"""
+	Granulometry (Gran) bubble
+	@ based on Kakiichi et al. (2017)
+	Parameter
+	---------
+	input     : 2D/3D array of ionization fraction/brightness temperature.
+	xth       : The threshold value (Default: 0.5).
+	boxsize   : The boxsize in cMpc can be given (Default: conv.LB).
+	verbose   : It prints the progress of the program (Default: True).
+	upper_lim : It decides if the threshold is the upper limit or the lower limit (Default: False).
+	sampling  : Give the resolution of the radii in the pixel units (Default: 2).
+
+	Output
+	------
+	The output contains a tuple with three values: r, rdP/dr.
+	"""
+	t1 = datetime.datetime.now()
+	if boxsize is None: boxsize = conv.LB
+	if (upper_lim): 
+		data = -1.*data
+		xth  = -1.*xth
+	mask = data > xth
+	sz   = np.arange(1, data.shape[0]/4, sampling)
+	granulo = granulometry_CDF(mask, sizes=sz, verbose=verbose)
+
+	rr = (sz*boxsize/data.shape[0])[:-1]
+	nn = np.array([granulo[i]-granulo[i+1] for i in xrange(len(granulo)-1)])
+
+	t2 = datetime.datetime.now()
+	runtime = (t2-t1).total_seconds()/60
+
+	print "\nProgram runtime: %f minutes." %runtime
+	print "The output contains a tuple with three values: r, rdP/dr"
+	print "The curve has been normalized."
+	return rr, nn/nn.sum()
+
 
 
