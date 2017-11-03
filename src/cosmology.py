@@ -71,6 +71,7 @@ precalc_table_cdist = np.array([   0.  ,     85.36535896,    170.02599243,
         13003.83791968,  13024.06206321,  13044.06144437,  13063.83836398,
         13083.39514428,  13102.73405492,  13121.8573761 ,  13140.76734823])
 
+
 def _ldist(z):
     # This function is used for the integration in luminosity_distance  
     # Only meant for internal use.
@@ -157,8 +158,13 @@ def cdist_to_z(dist):
     '''
     dist = np.atleast_1d(dist)
     z = np.zeros_like(dist)
-    func = interp1d(precalc_table_cdist, precalc_table_z, kind='cubic')
-
+    func        = interp1d(precalc_table_cdist, precalc_table_z, kind='cubic')
+    z_min_guess = func(dist)-1 if type(dist)==float else func(dist.min())-1
+    z_max_guess = func(dist)+1 if type(dist)==float else func(dist.max())+1
+    table_z     = precalc_table_z[precalc_table_z>z_min_guess]
+    table_z     = table_z[table_z<z_max_guess]
+    table_cdist = z_to_cdist(table_z)
+    func = interp1d(table_cdist, table_z, kind='cubic')
     for i in range(len(dist)):
         z[i] = func(dist[i])
     return outputify(z)
