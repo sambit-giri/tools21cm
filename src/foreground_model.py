@@ -50,7 +50,7 @@ def extragalactic_pointsource_fg(z, ncells, boxsize, S_max=100):
 	Ss = np.arange(0.1, S_max, dS)
 	solid_angle = boxsize**2/cm.z_to_cdist(z)**2
 	N  = int(10**3.75*np.trapz(Ss**(-1.6), x=Ss, dx=dS)*solid_angle)
-	x,y = np.random.random_integers(0, high=ncells, size=(2,N))
+	x,y = np.random.random_integers(0, high=ncells-1, size=(2,N))
 	alpha_ps = 0.7+0.1*np.random.random(size=N)
 	S_s  = np.random.choice(Ss, N)
 	nu_s = 150
