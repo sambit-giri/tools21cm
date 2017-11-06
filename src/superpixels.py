@@ -2,6 +2,7 @@ import numpy as np
 from scipy.stats import spearmanr
 from skimage.segmentation import slic, mark_boundaries
 from skimage.filters import threshold_otsu
+from scipy.signal import argrelextrema
 
 def slic_cube(cube, n_segments=5000, compactness=0.1, max_iter=20, sigma=0, min_size_factor=0.5, max_size_factor=3, cmap=None):
 	if cmap is not None: 
