@@ -80,8 +80,10 @@ def coeval_21cm_c2ray(xfrac_dir, dens_dir, z, interpolation='linear', mean_subtr
 	xfrac = coeval_xfrac_c2ray(xfrac_dir, z, interpolation=interpolation)
 	dens  = coeval_dens_c2ray(dens_dir, z)
 	dt    = tm.calc_dt(xfrac, dens, z=z)
-	if mean_subtract: return dt-dt.mean()
-	else: return dt
+	if mean_subtract: 
+		for i in xrange(dt.shape[2]): dt[:,:,i] -= dt[:,:,i].mean()
+		print "Mean is subtracted along third axis."
+	return dt
 
 
 def coeval_xfrac_c2ray(xfrac_dir, z, interpolation='linear'):
