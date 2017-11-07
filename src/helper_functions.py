@@ -242,7 +242,7 @@ def read_fits(filename):
 	return pf.open(filename)[0].data.astype('float64')
 
 
-def save_fits(data, filename):
+def save_fits(data, filename, header=None):
 	'''
 	Save data as a fits file. The data can be a file object,
 	a file to read or a pure data array.
@@ -261,7 +261,7 @@ def save_fits(data, filename):
 	
 	hdu = pf.PrimaryHDU(save_data.astype('float64'))
 	hdulist = pf.HDUList([hdu])
-	hdulist.writeto(filename, clobber=True)
+	hdulist.writeto(filename, clobber=True, header=header)
 	
 
 def determine_filetype(filename):
