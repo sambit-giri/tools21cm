@@ -226,20 +226,23 @@ def save_cbin(filename, data, bits=32, order='C'):
 	f.close()
 	
 	
-def read_fits(filename):
+def read_fits(filename, header=True):
 	'''
 	Read a fits file and return the data as a numpy array
 	
 	Parameters:
 		* filename (string): the fits file to read
-		
+		* header = True    : If True. the header is also returned
 	Returns:
 		numpy array containing the data
 	'''
-	
+
 	import pyfits as pf
-	
-	return pf.open(filename)[0].data.astype('float64')
+	hdulist = pf.open(filename)
+	header = hdulist[0].header
+	data = hdulist[0].data.astype('float64')
+	if header: return data, header
+	else: data
 
 
 def save_fits(data, filename, header=None):
@@ -250,6 +253,7 @@ def save_fits(data, filename, header=None):
 	Parameters:
 		* indata (XfracFile, DensityFile, string or numpy array): the data to save
 		* filename (string): the file to save to
+		* header = None    : header added to the fits file.
 		
 	Returns:
 		Nothing
@@ -259,9 +263,12 @@ def save_fits(data, filename, header=None):
 	
 	save_data, datatype = get_data_and_type(data)
 	
-	hdu = pf.PrimaryHDU(save_data.astype('float64'))
-	hdulist = pf.HDUList([hdu])
-	hdulist.writeto(filename, clobber=True, header=header)
+	#hdu = pf.PrimaryHDU(save_data.astype('float64'))
+	#hdulist = pf.HDUList([hdu])
+	#hdulist.writeto(filename, clobber=True)
+
+	if type(header)==pf.header.Header: pf.writeto(filename, save_data, header)
+	else: pf.writeto(filename, save_data)
 	
 
 def determine_filetype(filename):
