@@ -6,7 +6,6 @@ PREREQUISITES
 2. Scipy
 3. Sklearn
 4. Skimage
-5. C2raytools
 
 INSTALLATION
 ------------
