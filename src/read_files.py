@@ -4,6 +4,7 @@ import glob
 from xfrac_file import XfracFile
 import helper_functions, density_file, vel_file, lightcone
 import temperature as tm
+import sys
 
 def _load_binary_data(filename, dtype=np.float32): 
 	""" 
