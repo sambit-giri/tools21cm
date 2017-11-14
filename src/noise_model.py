@@ -1,10 +1,10 @@
 import numpy as np
-#import c2raytools as c2t
 from telescope_functions import *
 from usefuls import *
 import conv
 import cosmology as cm
 import smoothing as sm
+import scipy
 
 def noise_map(ncells, z, depth_mhz, obs_time=1000, filename=None, boxsize=None, total_int_time=4., int_time=10., declination=30., uv_map=np.array([]), N_ant=None, verbose=True):
 	"""
@@ -162,7 +162,7 @@ def gauss_kernel_3d(size, sigma=1.0, fwhm=None):
 
 def smooth_gauss_3d(array, fwhm):
 	gg = gauss_kernel_3d(array.shape[0],fwhm=fwhm)
-	out = sm.smooth_with_kernel(array, gg)
+	out = scipy.signal.fftconvolve(array, gg)
 	return out
 
 
