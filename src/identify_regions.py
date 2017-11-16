@@ -5,13 +5,15 @@ import superpixels
 from sklearn.cluster import KMeans
 import numpy as np
 
-def bubbles_from_slic(data, n_segments=5000, bins=50):
+def bubbles_from_slic(data, n_segments=5000, bins='knuth'):
 	"""
 	Parameters
 	----------
 	data      : The brightness temperature cube.
 	n_segments: No. of superpixels (Default: 2000).
-	bins      : No. of bins for the PDF used for stitching (Default: 50).
+	bins      : No. of bins for the PDF used for stitching.
+		    'blocks', 'knuth', 'scotts', 'freedman' rules to determine bins automatically
+	            can also be choosen. (Default: 'knuth').
 	Return
 	----------
 	Binary cube where regions pixels are the True values.

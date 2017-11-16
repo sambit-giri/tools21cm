@@ -2,10 +2,11 @@ tools21cm package is meant for analysing 21-cm signals from the Epoch of Reioniz
 
 PREREQUISITES
 -------------
-1. Numpy
-2. Scipy
-3. Sklearn
-4. Skimage
+1. Numpy   (http://www.numpy.org/)
+2. Scipy   (https://scipy.org/install.html)
+3. Sklearn (http://scikit-learn.org/stable/install.html)
+4. Skimage (http://scikit-image.org/docs/dev/install.html)
+5. AstroML (http://www.astroml.org/user_guide/installation.html)
 
 INSTALLATION
 ------------
