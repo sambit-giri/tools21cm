@@ -242,7 +242,7 @@ def read_fits(filename, header=True):
 	header = hdulist[0].header
 	data = hdulist[0].data.astype('float64')
 	if header: return data, header
-	else: data
+	else: return data
 
 
 def save_fits(data, filename, header=None):
