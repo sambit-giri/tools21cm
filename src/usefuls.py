@@ -4,6 +4,7 @@ import sys
 import conv, const, helper_functions, lightcone
 import temperature as tm
 import density_file, vel_file, xfrac_file
+import glob
 
 def loading_verbose(string):
 	msg = ("Completed: " + string )
