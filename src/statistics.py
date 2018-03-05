@@ -1,7 +1,7 @@
 #This file contains various useful statistical methods
 
 import numpy as np
-from lightcone import _get_slice
+#from lightcone import _get_slice
 
 def skewness(x):
 	''' 
@@ -142,4 +142,26 @@ def apply_func_along_los(signal, func, los_axis):
 		
 	return output
 
+def _get_slice(data, idx, los_axis, slice_depth=1):
+    '''
+    Slice a data cube along a given axis. For internal use.
+    '''
+    assert len(data.shape) == 3 or len(data.shape) == 4
+    assert los_axis >= 0 and los_axis < 3
+    
+    idx1 = idx
+    idx2 = idx1+slice_depth
 
+    if len(data.shape) == 3: #scalar field
+        if los_axis == 0:
+            return np.squeeze(data[idx1:idx2,:,:])
+        elif los_axis == 1:
+            return np.squeeze(data[:,idx1:idx2,:])
+        return np.squeeze(data[:,:,idx1:idx2])
+    else: #Vector field
+        if los_axis == 0:
+            return np.squeeze(data[:,idx1:idx2,:,:])
+        elif los_axis == 1:
+            return np.squeeze(data[:,:,idx1:idx2,:])
+        return np.squeeze(data[:,:,:,idx1:idx2])
+    

@@ -18,7 +18,7 @@ def noise_map(ncells, z, depth_mhz, obs_time=1000, filename=None, boxsize=None, 
 	Return
 	noise_map: A 2D slice of the interferometric noise at that frequency (in muJy).
 	"""
-	if not filename: filename = 'input/SKA1_LowConfig_Sept2016.dat'
+	if not filename: N_ant = SKA1_LowConfig_Sept2016().shape[0]
 	if not uv_map.size: uv_map, N_ant  = get_uv_map(ncells, z, filename=filename, total_int_time=total_int_time, int_time=int_time, boxsize=boxsize, declination=declination)
 	if not N_ant: N_ant = np.loadtxt(filename, dtype=str).shape[0]
 	sigma, rms_noi = kanan_noise_image_ska(z, uv_map, depth_mhz, obs_time, int_time, N_ant_ska=N_ant, verbose=False)
@@ -32,7 +32,7 @@ def noise_map(ncells, z, depth_mhz, obs_time=1000, filename=None, boxsize=None, 
 def telescope_response_on_image(array, z, depth_mhz, obs_time=1000, filename=None, boxsize=None, total_int_time=4., int_time=10., declination=30., uv_map=np.array([]), N_ant=None):
 	assert array.shape[0] == array.shape[1]
 	ncells = array.shape[0]
-	if not filename: filename = 'input/SKA1_LowConfig_Sept2016.dat'
+	if not filename: N_ant = SKA1_LowConfig_Sept2016().shape[0]
 	if not uv_map.size: uv_map, N_ant  = get_uv_map(ncells, z, filename=filename, total_int_time=total_int_time, int_time=int_time, boxsize=boxsize, declination=declination) 
 	if not N_ant: N_ant = np.loadtxt(filename, dtype=str).shape[0]
 	img_arr  = np.fft.fft2(array)
@@ -41,7 +41,7 @@ def telescope_response_on_image(array, z, depth_mhz, obs_time=1000, filename=Non
 	return np.real(img_map)
 
 def get_uv_map(ncells, z, filename=None, total_int_time=4., int_time=10., boxsize=None, declination=30., verbose=True):
-	if not filename: filename = 'input/SKA1_LowConfig_Sept2016.dat'
+	if not filename: N_ant = SKA1_LowConfig_Sept2016().shape[0]
 	uv_map, N_ant  = get_uv_daily_observation(ncells, z, filename, total_int_time=total_int_time, int_time=int_time, boxsize=boxsize, declination=declination, verbose=verbose)
 	return uv_map, N_ant
 
@@ -57,7 +57,7 @@ def make_uv_map_lightcone(ncells, zs, filename=None, total_int_time=4., int_time
 
 def telescope_response_on_coeval(array, z, depth_mhz=None, obs_time=1000, filename=None, boxsize=None, total_int_time=4., int_time=10., declination=30., uv_map=np.array([]), N_ant=None):
 	ncells = array.shape[-1]
-	if not filename: filename = 'input/SKA1_LowConfig_Sept2016.dat'
+	if not filename: N_ant = SKA1_LowConfig_Sept2016().shape[0]
 	if not boxsize: boxsize = conv.LB
 	if not depth_mhz: depth_mhz = (cm.z_to_nu(cm.cdist_to_z(cm.z_to_cdist(z)-boxsize/2))-cm.z_to_nu(cm.cdist_to_z(cm.z_to_cdist(z)+boxsize/2)))/ncells
 	if not uv_map.size: uv_map, N_ant  = get_uv_map(ncells, z, filename=filename, total_int_time=total_int_time, int_time=int_time, boxsize=boxsize, declination=declination)
@@ -81,7 +81,7 @@ def noise_cube_coeval(ncells, z, depth_mhz=None, obs_time=1000, filename=None, b
 	Return
 	noise_map: A 2D slice of the interferometric noise at that frequency (in mK).
 	"""
-	if not filename: filename = 'input/SKA1_LowConfig_Sept2016.dat'
+	if not filename: N_ant = SKA1_LowConfig_Sept2016().shape[0]
 	if not boxsize: boxsize = conv.LB
 	if not depth_mhz: depth_mhz = (cm.z_to_nu(cm.cdist_to_z(cm.z_to_cdist(z)-boxsize/2))-cm.z_to_nu(cm.cdist_to_z(cm.z_to_cdist(z)+boxsize/2)))/ncells
 	if not uv_map.size: uv_map, N_ant  = get_uv_map(ncells, z, filename=filename, total_int_time=total_int_time, int_time=int_time, boxsize=boxsize, declination=declination)
@@ -109,7 +109,7 @@ def noise_cube_lightcone(ncells, z, obs_time=1000, filename=None, boxsize=None, 
 	Return
 	noise_map: A 2D slice of the interferometric noise at that frequency (in mK).
 	"""
-	if not filename: filename = 'input/SKA1_LowConfig_Sept2016.dat'
+	if not filename: N_ant = SKA1_LowConfig_Sept2016().shape[0]
 	if not boxsize: boxsize = conv.LB
 	zs = cm.cdist_to_z(np.linspace(cm.z_to_cdist(z)-boxsize/2, cm.z_to_cdist(z)+boxsize/2, ncells))
 	if not N_ant: N_ant = np.loadtxt(filename, dtype=str).shape[0]
