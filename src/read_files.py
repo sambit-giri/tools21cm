@@ -126,8 +126,19 @@ def coeval_dens_c2ray(dens_dir, z):
 		#dens_l,dtype = helper_functions.get_data_and_type(dens_files[dens_zs[dens_zs<z].argmax()])
 		dens_h, dtype = helper_functions.get_data_and_type(dens_files[dens_zs[dens_zs>z].argmin()])
 		#dens = dens_h + (dens_l-dens_h)*(z-z_h)/(z_l-z_h)
-		dens = dens_h*(z/z_h)**3
+		dens = dens_h*(1+z_h)**3/(1+z)**3
 		#print "The density cube has been interpolated using", interpolation, "interpolation."
 		print "The density has been scaled from the density at the previous time."
 	return dens.astype(np.float64)
+
+def subtract_mean_channelwise(dt, axis=-1):
+	"""
+	dt  : Brightness temperature whose channel-wise should be subtracted.
+	axis: Frequency axis (Defualt:-1).
+	"""
+	assert dt.ndim == 3
+	if axis != -1 or axis != 2: dt = np.swapaxes(dt, axis, 2)
+	for i in xrange(dt.shape[2]): dt[:,:,i] -= dt[:,:,i].mean()
+	if axis != -1 or axis != 2: dt = np.swapaxes(dt, axis, 2)
+	return dt
 	
