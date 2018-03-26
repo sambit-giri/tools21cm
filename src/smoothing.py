@@ -327,7 +327,7 @@ def smooth_coeval(cube, z, box_size_mpc=False, max_baseline=2., ratio=1., nu_axi
 	Returns:
 		* Smoothed_coeval_cube
 	"""
-	if (~box_size_mpc): box_size_mpc=conv.LB	
+	if (not box_size_mpc): box_size_mpc=conv.LB	
         output_dtheta  = (1+z)*21e-5/max_baseline
         output_ang_res = output_dtheta*cm.z_to_cdist(z) * cube.shape[0]/box_size_mpc
         output_cube = smooth_coeval_tophat(cube, output_ang_res*ratio, nu_axis=nu_axis)
