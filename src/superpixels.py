@@ -63,7 +63,8 @@ def stitch_maximumdeviation(data, labels, bins='knuth', binary=True):
 	Ls = labels.reshape(-1,1)
 	mns = np.array([X[Ls==i].mean() for i in np.unique(Ls)])
 	ht  = histogram(mns, bins=bins)
-	peaks = argrelextrema(ht[0], np.greater, order=ht[0].size/3)[0]
+	if ht[0].argmax()==0: peaks = argrelextrema(np.hstack((0,ht[0])), np.greater)[0]
+	else: peaks = argrelextrema(ht[0], np.greater)[0]
 	if peaks.size==1:
 		x1,y1 = ht[1][0], ht[0][0]
 		y0 = ht[0].max()
