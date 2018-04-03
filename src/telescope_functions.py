@@ -36,16 +36,17 @@ def from_antenna_config(filename, z, nu=None):
 	antxyz[:,2] = Re*np.sin(antll[:,1]*pp)	
 	del pp, antll
 	N_ant = antxyz.shape[0]
-	Nbase = np.zeros((N_ant*(N_ant-1)/2,3))
 	pair_comb = itertools.combinations(xrange(N_ant), 2)
 	pair_comb = list(pair_comb)	
 	lam = c_light/(nu*1e6)/1e2 			            # in m
-	for i in xrange(Nbase.shape[0]):
-		ii,jj = pair_comb[i]
+	Nbase = []
+	for ii,jj in list(pair_comb):
 		ux = (antxyz[ii,0]-antxyz[jj,0])/lam
 		uy = (antxyz[ii,1]-antxyz[jj,1])/lam
 		uz = (antxyz[ii,2]-antxyz[jj,2])/lam
-		Nbase[i,:] = ux,uy,uz 
+		if ux==0: print ii,jj
+		Nbase.append([ux,uy,uz])
+	Nbase = np.array(Nbase)	
 	return Nbase, N_ant
 
 def earth_rotation_effect(Nbase, slice_num, int_time, declination=30.):
@@ -75,7 +76,7 @@ def earth_rotation_effect(Nbase, slice_num, int_time, declination=30.):
 	new_Nbase[:,2] = np.cos(delta)*np.cos(HA)*Nbase[:,0] - np.cos(delta)*np.sin(HA)*Nbase[:,1] + np.sin(delta)*Nbase[:,2]
 	return new_Nbase
 
-def get_uv_daily_observation(ncells, z, filename, total_int_time=4., int_time=10., boxsize=None, declination=30., verbose=True):
+def get_uv_daily_observation(ncells, z, filename=None, total_int_time=4., int_time=10., boxsize=None, declination=30., verbose=True):
 	"""
 	The radio telescopes observe the sky for 'total_int_time' hours each day. The signal is recorded 
 	every 'int_time' seconds. 
@@ -124,18 +125,15 @@ def get_uv_coverage(Nbase, z, ncells, boxsize=None):
 	if not boxsize: boxsize = conv.LB
 	uv_map = np.zeros((ncells,ncells))
 	theta_max = boxsize/cm.z_to_cdist(z)
-	Nb  = (Nbase*theta_max).astype(int)
+	Nb  = np.round(Nbase*theta_max)
+	Nb  = Nb[(Nb[:,0]<ncells/2)]
+	Nb  = Nb[(Nb[:,1]<ncells/2)]
+	Nb  = Nb[(Nb[:,2]<ncells/2)]
+	Nb  = Nb[(Nb[:,0]>-ncells/2)]
+	Nb  = Nb[(Nb[:,1]>-ncells/2)]
+	Nb  = Nb[(Nb[:,2]>-ncells/2)]
 	xx,yy,zz = Nb[:,0], Nb[:,1], Nb[:,2]
-	xx = xx[xx<ncells]
-	yy = yy[yy<ncells]
-	xx = xx[xx>-ncells]
-	yy = yy[yy>-ncells]
-	xx = xx[xx<ncells]
-	yy = yy[yy<ncells]
-	xx = xx[xx>-ncells]
-	yy = yy[yy>-ncells]
-	for p in xrange(xx.shape[0]):
-		uv_map[xx[p],yy[p]] += 1
+	for p in xrange(xx.shape[0]): uv_map[int(xx[p]),int(yy[p])] += 1
 	return uv_map
 
 
