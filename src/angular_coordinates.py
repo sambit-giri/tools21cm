@@ -240,18 +240,18 @@ def bin_lightcone_in_mpc(lightcone, frequencies, cell_size_mpc):
     distances = cm.nu_to_cdist(frequencies)
     n_output_cells = (distances[-1]-distances[0])/cell_size_mpc
     output_distances = np.arange(distances[0], distances[-1], cell_size_mpc)
-    output_lightcone = np.zeros((lightcone.shape[0], lightcone.shape[1], n_output_cells))
+    output_lightcone = np.zeros((lightcone.shape[0], lightcone.shape[1], int(n_output_cells)))
     
     #Bin in Mpc by smoothing and indexing
     smooth_scale = np.round(len(frequencies)/n_output_cells)
 
-    tophat3d = np.ones((1,1,smooth_scale))
+    tophat3d = np.ones((1,1,int(smooth_scale)))
     tophat3d /= np.sum(tophat3d)
     lightcone_smoothed = fftconvolve(lightcone, tophat3d, mode='same')
     
     for i in range(output_lightcone.shape[2]):
         idx = hf.find_idx(distances, output_distances[i])
-        output_lightcone[:,:,i] = lightcone_smoothed[:,:,idx]
+        output_lightcone[:,:,i] = lightcone_smoothed[:,:,int(idx)]
     
     output_redshifts = cm.cdist_to_z(output_distances)
         

@@ -46,6 +46,7 @@ from telescope_functions import *
 from superpixels import *
 from identify_regions import *
 from read_files import *
+from primary_beam import *
 
 #Suppress warnings from zero-divisions and nans
 import numpy
