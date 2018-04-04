@@ -15,10 +15,12 @@ def primary_beam(array, z, nu_axis=2, beam_func='Gaussian', boxsize=None, D=0.35
 	boxsize  : Size of the box in physical units (cMpc). Default: From set simulation constants.
 	D        : Diameter of the dish in metres. Default: 0.35
 	"""
-	if nu_axis!=2 : array = np.swapaxes(array, nu_axis, 2)
-	if np.array(z).size == 1: z = z*np.ones(array.shape[2])
+	assert array.ndim > 1
 	if boxsize is None: boxsize = t2c.conv.LB
 	beam = np.zeros(array.shape)
+	if array.ndim == 2: return array*circular_beam(array.shape[0], z, D=D, beam_func=beam_func, boxsize=boxsize)
+	if nu_axis!=2 : array = np.swapaxes(array, nu_axis, 2)
+	if np.array(z).size == 1: z = z*np.ones(array.shape[2])
 	for i in xrange(z.size): 
 		beam[:,:,i] = circular_beam(array.shape[0], z[i], D=D, beam_func=beam_func, boxsize=boxsize)
 	beamed = array*beam
