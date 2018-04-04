@@ -323,15 +323,15 @@ def get_data_and_type(indata, cbin_bits=32, cbin_order='c', raw_density=False):
 		and 'unknown'
 		
 	'''
-	import c2raytools.density_file
-	import c2raytools.xfrac_file
-        import c2raytools.temper_file
+	import tools21cm.density_file
+	import tools21cm.xfrac_file
+        import tools21cm.temper_file
 
-	if isinstance(indata, c2raytools.xfrac_file.XfracFile):
+	if isinstance(indata, tools21cm.xfrac_file.XfracFile):
 		return indata.xi, 'xfrac'
-        elif isinstance(indata, c2raytools.temper_file.TemperFile):
+        elif isinstance(indata, tools21cm.temper_file.TemperFile):
 		return indata.temper, 'temper'
-	elif isinstance(indata, c2raytools.density_file.DensityFile):
+	elif isinstance(indata, tools21cm.density_file.DensityFile):
 		if raw_density:
 			return indata.raw_density, 'density'
 		else:
@@ -339,11 +339,11 @@ def get_data_and_type(indata, cbin_bits=32, cbin_order='c', raw_density=False):
 	elif isinstance(indata, str):
 		filetype = determine_filetype(indata)
 		if filetype == 'xfrac':
-			return get_data_and_type(c2raytools.xfrac_file.XfracFile(indata))
+			return get_data_and_type(tools21cm.xfrac_file.XfracFile(indata))
                 elif filetype == 'temper':
-			return get_data_and_type(c2raytools.temper_file.TemperFile(indata))
+			return get_data_and_type(tools21cm.temper_file.TemperFile(indata))
 		elif filetype == 'density':
-			return get_data_and_type(c2raytools.density_file.DensityFile(indata))
+			return get_data_and_type(tools21cm.density_file.DensityFile(indata))
 		elif filetype == 'cbin':
 			return read_cbin(indata, bits=cbin_bits, \
 											order=cbin_order), 'cbin'
