@@ -49,7 +49,7 @@ def from_antenna_config(filename, z, nu=None):
 	Nbase = np.array(Nbase)	
 	return Nbase, N_ant
 
-def earth_rotation_effect(Nbase, slice_num, int_time, declination=30.):
+def earth_rotation_effect(Nbase, slice_num, int_time, declination=-30.):
 	"""
 	The rotation of the earth over the observation times makes changes the part of the 
 	sky measured by each antenna.
@@ -59,7 +59,7 @@ def earth_rotation_effect(Nbase, slice_num, int_time, declination=30.):
 	slice_num   : The number of the observed slice after each of the integration time.
 	int_time    : The integration time is the time after which the signal is recorded (in seconds).
 	declination : The angle of declination refers to the lattitute where telescope is located 
-		      (in degres). Default: 30
+		      (in degres). Default: -30
 	Return
 	----------
 	new_Nbase   : It is the new Nbase calculated for the rotated antenna configurations.
@@ -76,7 +76,7 @@ def earth_rotation_effect(Nbase, slice_num, int_time, declination=30.):
 	new_Nbase[:,2] = np.cos(delta)*np.cos(HA)*Nbase[:,0] - np.cos(delta)*np.sin(HA)*Nbase[:,1] + np.sin(delta)*Nbase[:,2]
 	return new_Nbase
 
-def get_uv_daily_observation(ncells, z, filename=None, total_int_time=4., int_time=10., boxsize=None, declination=30., verbose=True):
+def get_uv_daily_observation(ncells, z, filename=None, total_int_time=4., int_time=10., boxsize=None, declination=-30., verbose=True):
 	"""
 	The radio telescopes observe the sky for 'total_int_time' hours each day. The signal is recorded 
 	every 'int_time' seconds. 
@@ -126,12 +126,12 @@ def get_uv_coverage(Nbase, z, ncells, boxsize=None):
 	uv_map = np.zeros((ncells,ncells))
 	theta_max = boxsize/cm.z_to_cdist(z)
 	Nb  = np.round(Nbase*theta_max)
-	Nb  = Nb[(Nb[:,0]<ncells/2)]
-	Nb  = Nb[(Nb[:,1]<ncells/2)]
-	Nb  = Nb[(Nb[:,2]<ncells/2)]
-	Nb  = Nb[(Nb[:,0]>-ncells/2)]
-	Nb  = Nb[(Nb[:,1]>-ncells/2)]
-	Nb  = Nb[(Nb[:,2]>-ncells/2)]
+	Nb  = Nb[(Nb[:,0]<ncells)]
+	Nb  = Nb[(Nb[:,1]<ncells)]
+	Nb  = Nb[(Nb[:,2]<ncells)]
+	Nb  = Nb[(Nb[:,0]>-ncells)]
+	Nb  = Nb[(Nb[:,1]>-ncells)]
+	Nb  = Nb[(Nb[:,2]>-ncells)]
 	xx,yy,zz = Nb[:,0], Nb[:,1], Nb[:,2]
 	for p in xrange(xx.shape[0]): uv_map[int(xx[p]),int(yy[p])] += 1
 	return uv_map

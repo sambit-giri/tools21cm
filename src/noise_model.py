@@ -6,7 +6,7 @@ import cosmology as cm
 import smoothing as sm
 import scipy
 
-def noise_map(ncells, z, depth_mhz, obs_time=1000, filename=None, boxsize=None, total_int_time=4., int_time=10., declination=30., uv_map=np.array([]), N_ant=None, verbose=True):
+def noise_map(ncells, z, depth_mhz, obs_time=1000, filename=None, boxsize=None, total_int_time=4., int_time=10., declination=-30., uv_map=np.array([]), N_ant=None, verbose=True):
 	"""
 	Parameter
 	z: 		   Redshift.
@@ -29,7 +29,7 @@ def noise_map(ncells, z, depth_mhz, obs_time=1000, filename=None, boxsize=None, 
 	noise_map  = np.fft.ifft2(noise_four)*np.sqrt(int_time/3600./obs_time)
 	return np.real(noise_map)
 
-def telescope_response_on_image(array, z, depth_mhz, obs_time=1000, filename=None, boxsize=None, total_int_time=4., int_time=10., declination=30., uv_map=np.array([]), N_ant=None):
+def telescope_response_on_image(array, z, depth_mhz, obs_time=1000, filename=None, boxsize=None, total_int_time=4., int_time=10., declination=-30., uv_map=np.array([]), N_ant=None):
 	assert array.shape[0] == array.shape[1]
 	ncells = array.shape[0]
 	if not filename: N_ant = SKA1_LowConfig_Sept2016().shape[0]
@@ -40,12 +40,12 @@ def telescope_response_on_image(array, z, depth_mhz, obs_time=1000, filename=Non
 	img_map  = np.fft.ifft2(img_arr)
 	return np.real(img_map)
 
-def get_uv_map(ncells, z, filename=None, total_int_time=4., int_time=10., boxsize=None, declination=30., verbose=True):
+def get_uv_map(ncells, z, filename=None, total_int_time=4., int_time=10., boxsize=None, declination=-30., verbose=True):
 	if not filename: N_ant = SKA1_LowConfig_Sept2016().shape[0]
 	uv_map, N_ant  = get_uv_daily_observation(ncells, z, filename, total_int_time=total_int_time, int_time=int_time, boxsize=boxsize, declination=declination, verbose=verbose)
 	return uv_map, N_ant
 
-def make_uv_map_lightcone(ncells, zs, filename=None, total_int_time=4., int_time=10., boxsize=None, declination=30., verbose=True):
+def make_uv_map_lightcone(ncells, zs, filename=None, total_int_time=4., int_time=10., boxsize=None, declination=-30., verbose=True):
 	uv_lc = np.zeros((ncells,ncells,zs.shape[0]))
 	percc = np.round(100./zs.shape[0],decimals=2)
 	for i in xrange(zs.shape[0]):
@@ -55,7 +55,7 @@ def make_uv_map_lightcone(ncells, zs, filename=None, total_int_time=4., int_time
 		print "\nThe lightcone has been constructed upto", i*percc, "%"
 	return uv_lc, N_ant
 
-def telescope_response_on_coeval(array, z, depth_mhz=None, obs_time=1000, filename=None, boxsize=None, total_int_time=4., int_time=10., declination=30., uv_map=np.array([]), N_ant=None):
+def telescope_response_on_coeval(array, z, depth_mhz=None, obs_time=1000, filename=None, boxsize=None, total_int_time=4., int_time=10., declination=-30., uv_map=np.array([]), N_ant=None):
 	ncells = array.shape[-1]
 	if not filename: N_ant = SKA1_LowConfig_Sept2016().shape[0]
 	if not boxsize: boxsize = conv.LB
@@ -69,7 +69,7 @@ def telescope_response_on_coeval(array, z, depth_mhz=None, obs_time=1000, filena
 		data3d[:,:,k] = data2d
 	return data3d
 
-def noise_cube_coeval(ncells, z, depth_mhz=None, obs_time=1000, filename=None, boxsize=None, total_int_time=4., int_time=10., declination=30., uv_map=np.array([]), N_ant=None, verbose = True):
+def noise_cube_coeval(ncells, z, depth_mhz=None, obs_time=1000, filename=None, boxsize=None, total_int_time=4., int_time=10., declination=-30., uv_map=np.array([]), N_ant=None, verbose = True):
 	"""
 	Parameter
 	z        : Redshift.
@@ -97,7 +97,7 @@ def noise_cube_coeval(ncells, z, depth_mhz=None, obs_time=1000, filename=None, b
 	print "...Noise cube created."
 	return jansky_2_kelvin(noise3d, z, boxsize=boxsize)
 
-def noise_cube_lightcone(ncells, z, obs_time=1000, filename=None, boxsize=None, total_int_time=4., int_time=10., declination=30., N_ant=None):
+def noise_cube_lightcone(ncells, z, obs_time=1000, filename=None, boxsize=None, total_int_time=4., int_time=10., declination=-30., N_ant=None):
 	"""
 	Parameter
 	z        : Redshift.
