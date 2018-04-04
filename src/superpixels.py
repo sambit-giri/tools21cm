@@ -85,21 +85,21 @@ def stitch_maximumdeviation(data, labels, bins='knuth', binary=True):
 		else: return thres
 
 def get_superpixel_means(data, labels=None, slic_segments=3000):
-	if labels is None: labels = SLIC.slic_cube(data, n_segments=slic_segments)
+	if labels is None: labels = slic_cube(data, n_segments=slic_segments)
 	X   = data.reshape(-1,1)
 	y   = labels.reshape(-1,1)
 	mns = [X[y==i].mean() for i in np.unique(y)]
 	return np.array(mns)
 
 def get_superpixel_sigmas(data, labels=None, slic_segments=5000):
-	if labels is None: labels = SLIC.slic_cube(data, n_segments=slic_segments)
+	if labels is None: labels = slic_cube(data, n_segments=slic_segments)
 	X    = data.reshape(-1,1)
 	y    = labels.reshape(-1,1)
 	sigs = [X[y==i].std() for i in np.unique(y)]
 	return np.array(sigs)
 
 def get_superpixel_n_pixels(data, labels=None, slic_segments=5000):
-	if labels is None: labels = SLIC.slic_cube(data, n_segments=slic_segments)
+	if labels is None: labels = slic_cube(data, n_segments=slic_segments)
 	X    = data.reshape(-1,1)
 	y    = labels.reshape(-1,1)
 	n_pixels = [X[y==i].size for i in np.unique(y)]
@@ -120,7 +120,7 @@ def get_superpixel_SNRs(means=None, sigmas=None, n_pix=None, data=None, labels=N
 	return means/sigmas, means, sigmas, n_pix
 
 def get_superpixel_pixels(data=None, labels=None, slic_segments=5000):
-	if labels is None: labels = SLIC.slic_cube(data, n_segments=slic_segments)
+	if labels is None: labels = slic_cube(data, n_segments=slic_segments)
 	X   = data.reshape(-1,1)
 	y   = labels.reshape(-1,1)
 	pxl = [X[y==i] for i in np.unique(y)]
