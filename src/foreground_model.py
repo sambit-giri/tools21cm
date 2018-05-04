@@ -2,6 +2,7 @@ import numpy as np
 #import c2raytools as c2t
 from telescope_functions import jansky_2_kelvin, from_antenna_config
 import cosmology as cm
+import conv
 
 def galactic_synch_fg(z, ncells, boxsize, max_baseline=2.):
 	"""
@@ -57,6 +58,39 @@ def extragalactic_pointsource_fg(z, ncells, boxsize, S_max=100):
 	S_nu = S_s*(nu/nu_s)**(-alpha_ps)
 	for p in xrange(S_nu.size): fg[x[p],y[p]] = S_nu[p]
 	return jansky_2_kelvin(fg, z, boxsize=boxsize, ncells=ncells)
+
+def diabolo_filter(ncells, z, boxsize=None, mu=0.5, funct='step', small_base=40):
+	assert funct in ['step', 'sigmoid', 'gaussian']
+	if boxsize is None: boxsize = conv.LB
+	filt = np.zeros((ncells, ncells, ncells))
+	k0   = np.linspace(-ncells*np.pi/boxsize, ncells*np.pi/boxsize, ncells)
+	a = k0.reshape(-1,1)
+	for i in xrange(k0.size-1): a = np.hstack((a,k0.reshape(-1,1)))
+	b = k0.reshape(1,-1)
+	for i in xrange(k0.size-1): b = np.vstack((b,k0.reshape(1,-1)))
+	k2 = np.sqrt(a**2+b**2)
+	#mu1 = np.sqrt(1 - mu**2) 
+	kmin = np.pi/(cm.z_to_cdist(z)*(21./small_base/1e2))
+	for i in xrange(ncells):
+		kpp = k0[i]
+		kpr = np.abs(kpp)*(1-mu**2)/mu
+		if funct is 'sigmoid': 
+			ss = 1./(1+np.exp(10*(k2-kpr)))
+			if kmin>=kpr: ss = 1./(1+np.exp(10*(-kpr+kmin)))*1./(1+np.exp(10*(k2-kpr)))
+		else: 
+			ss = np.zeros(k2.shape)
+			if kmin<=kpr: ss[k2<=kpr] = 1
+			#else: ss[k2<=kmin] = 1
+		filt[:,:,i] = ss
+	print "A diabolo filter made with "+funct+" function."
+	return filt
+
+def remove_wedge_image(dt, z, mu=0.5, funct='step', boxsize=None, filt=None):
+	if filt is None: filt = diabolo_filter(dt.shape[0], z, mu=mu, funct=funct, boxsize=boxsize)
+	fft_dt = np.fft.fftn(dt)
+	apply_filt = np.fft.fftshift(np.fft.fftshift(fft_dt)*filt)
+	dt_new = np.real(np.fft.ifftn(apply_filt))
+	return dt_new
 	
 	
 	
