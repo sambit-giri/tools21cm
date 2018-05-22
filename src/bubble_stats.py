@@ -1,11 +1,11 @@
 import numpy as np
 from Friends_of_Friends import FoF_search
 from scipy import ndimage
-import os
+import os,sys
 import datetime, time
 import mfp_np, spa_np, conv
 
-def fof(data, xth=0.5):
+def fof(data, xth=0.5, neighbors=4):
 	"""
 	FOF bubble
 	
@@ -19,12 +19,17 @@ def fof(data, xth=0.5):
 	The output is a tuple containing output-map and volume-list array.
 	"""
 	t1 = datetime.datetime.now()
-	out_map, size_list = FoF_search(data, xth)
+	if 'skimage' in sys.modules:
+		from skimage import morphology
+		out_map = morphology.label(data, neighbors=neighbors)
+		elements, size_list = np.unique(out_map, return_counts=True)
+		size_list = size_list[1:]
+	else: out_map, size_list = FoF_search(data, xth)
 	t2 = datetime.datetime.now()
 	runtime = (t2-t1).total_seconds()/60
 
-	print "Program runtime: %f minutes." %runtime
-	print "The output is a tuple containing output-map and volume-list array respectively."
+	print("Program runtime: %f minutes." %runtime)
+	print("The output is a tuple containing output-map and volume-list array respectively.")
 
 	return out_map, size_list
 
@@ -186,9 +191,9 @@ def mfp(data, xth=0.5, boxsize=None, iterations = 10000000, verbose=True, upper_
 	t2 = datetime.datetime.now()
 	runtime = (t2-t1).total_seconds()/60
 
-	print "\nProgram runtime: %f minutes." %runtime
-	print "The output contains a tuple with three values: r, rdP/dr, Most Probable r"
-	print "The curve has been normalized."
+	print("\nProgram runtime: %f minutes." %runtime)
+	print("The output contains a tuple with three values: r, rdP/dr, Most Probable r")
+	print("The curve has been normalized.")
 
 	return rr*boxsize/data.shape[0], rr*nn, rr[nn.argmax()]*boxsize/data.shape[0]
 
@@ -223,7 +228,7 @@ def dist_from_volumes(sizes, resolution=1., bins=100):
 	rs       = 10.**ht_r[1]*resolution
 	d_r[1:]  = 1.*ht_r[0]/np.sum(ht_r[0])
 	d_r[0]   = d_r[d_r!=0].min()/1000.
-	print "The output is a tuple conatining 4 numpy array: V, VdP/dV, r, rdp/dr."
+	print("The output is a tuple conatining 4 numpy array: V, VdP/dV, r, rdp/dr.")
 	return vs, d_v, rs, d_r
 	
 
@@ -255,7 +260,7 @@ def plot_fof_sizes(sizes, bins=100, boxsize=None, normalize='box'):
 	dummy = zz[zz!=0].min()/10.
 	zz[zz==0] = dummy
 	zz = np.hstack((zz,dummy))
-	print "The output is Size, Size**2 dP/d(Size), lowest value"
+	print("The output is Size, Size**2 dP/d(Size), lowest value")
 	return xx, zz, dummy
 
 def disk_structure(n):
@@ -272,7 +277,7 @@ def granulometry_CDF(data, sizes=None, verbose=True):
 	granulo = np.zeros((len(sizes)))
 	for n in xrange(len(sizes)): granulo[n] = ndimage.binary_opening(data, structure=disk_structure(sizes[n])).sum()
 	#if verbose: print "Completed:", 100*(n+1)/len(sizes), "%"
-	print "Completed."
+	print("Completed.")
 	return granulo
 
 def granulometry_bsd(data, xth=0.5, boxsize=None, verbose=True, upper_lim=False, sampling=2):
@@ -307,9 +312,9 @@ def granulometry_bsd(data, xth=0.5, boxsize=None, verbose=True, upper_lim=False,
 	t2 = datetime.datetime.now()
 	runtime = (t2-t1).total_seconds()/60
 
-	print "\nProgram runtime: %f minutes." %runtime
-	print "The output contains a tuple with three values: r, rdP/dr"
-	print "The curve has been normalized."
+	print("\nProgram runtime: %f minutes." %runtime)
+	print("The output contains a tuple with three values: r, rdP/dr")
+	print("The curve has been normalized.")
 	return rr, nn/nn.sum()
 
 
