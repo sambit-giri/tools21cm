@@ -4,6 +4,7 @@ from scipy import ndimage
 import os,sys
 import datetime, time
 import mfp_np, spa_np, conv
+from scipy.interpolate import interp1d
 
 def fof(data, xth=0.5, neighbors=4):
 	"""
@@ -152,7 +153,7 @@ def spa(data, xth=0.95, boxsize=None, nscales=20, upper_lim=False, binning='log'
 	return rs_, ni_
 
 
-def mfp(data, xth=0.5, boxsize=None, iterations = 10000000, verbose=True, upper_lim=False):
+def mfp(data, xth=0.5, boxsize=None, iterations = 10000000, verbose=True, upper_lim=False, bins=None, r_min=None, r_max=None):
 	"""
 	Mean-Free-Path (MFP) bubble
 	
@@ -164,10 +165,13 @@ def mfp(data, xth=0.5, boxsize=None, iterations = 10000000, verbose=True, upper_
 	iterations: Number of iterations (Default: 1e7).
 	verbose   : It prints the progress of the program (Default: True).
 	upper_lim : It decides if the threshold is the upper limit or the lower limit (Default: False).
+	bins      : Give number of bins or an array of sizes to re-bin into (Default: None).
+	r_min     : Minimum size after rebinning (Default: None).
+	r_max     : Maximum size after rebinning (Default: None).
 
 	Output
 	------
-	The output contains a tuple with three values: r, rdP/dr, most probable r.
+	The output contains a tuple with three values: r, rdP/dr.
 	"""
 	if boxsize is None: boxsize = conv.LB
 	dim = len(data.shape)
@@ -195,9 +199,19 @@ def mfp(data, xth=0.5, boxsize=None, iterations = 10000000, verbose=True, upper_
 	print("The output contains a tuple with three values: r, rdP/dr, Most Probable r")
 	print("The curve has been normalized.")
 
-	return rr*boxsize/data.shape[0], rr*nn, rr[nn.argmax()]*boxsize/data.shape[0]
+	r0,p0 = rr*boxsize/data.shape[0], rr*nn #rr[nn.argmax()]*boxsize/data.shape[0]
+	if bins is not None: r0,p0 = rebin_bsd(r0, p0, bins=bins, r_min=r_min, r_max=r_max)
+	return r0, p0
 
 
+def rebin_bsd(rr, pp, bins=10, r_min=None, r_max=None):
+	fp = interp1d(rr, pp, kind='cubic')
+	if np.array(bins).size == 1:
+		if r_min is None: r_min = rr.min()+1
+		if r_max is None: r_max = rr.max()-10
+		rs = 10**np.linspace(np.log10(r_min), np.log10(r_max), bins)
+	else: rs = np.array(bins)
+	return rs, fp(rs)
 
 
 def dist_from_volumes(sizes, resolution=1., bins=100):
