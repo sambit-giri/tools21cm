@@ -6,6 +6,8 @@ PREREQUISITES
 2. Scipy   (https://scipy.org/install.html)
 3. Sklearn (http://scikit-learn.org/stable/install.html)
 4. Skimage (http://scikit-image.org/docs/dev/install.html)
+
+Optionals:
 5. AstroML (http://www.astroml.org/user_guide/installation.html)
 
 INSTALLATION

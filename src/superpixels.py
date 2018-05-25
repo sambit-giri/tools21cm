@@ -3,7 +3,7 @@ from scipy.stats import spearmanr
 from skimage.segmentation import slic, mark_boundaries
 from skimage.filters import threshold_otsu
 from scipy.signal import argrelextrema
-from astroML.density_estimation import histogram
+import sys
 
 def slic_cube(cube, n_segments=5000, compactness=0.1, max_iter=20, sigma=0, min_size_factor=0.5, max_size_factor=3, cmap=None):
 	if cmap is not None: 
@@ -59,6 +59,10 @@ def under_segmentation_error(labels, truths, b=0.25, verbose=True):
 	return U
 
 def stitch_maximumdeviation(data, labels, bins='knuth', binary=True):
+	if 'astroML' in sys.modules: from astroML.density_estimation import histogram
+	else:
+		from numpy import histogram
+		if bins=='knuth': bins = 'auto'
 	X  = data.reshape(-1,1)
 	Ls = labels.reshape(-1,1)
 	mns = np.array([X[Ls==i].mean() for i in np.unique(Ls)])
