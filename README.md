@@ -8,6 +8,7 @@ PREREQUISITES
 4. Skimage (http://scikit-image.org/docs/dev/install.html)
 
 Optionals:
+
 5. AstroML (http://www.astroml.org/user_guide/installation.html)
 
 INSTALLATION
