@@ -19,7 +19,7 @@ def bubbles_from_slic(data, n_segments=5000, bins='knuth'):
 	Binary cube where regions pixels are the True values.
 	"""
 	labels  = superpixels.slic_cube(data, n_segments=n_segments)
-	bin_sl  = superpixels.stitch_maximumdeviation(data, labels, bins=bins, binary=True)
+	bin_sl  = superpixels.stitch_superpixels(data, labels, bins=bins, binary=True)
 	return bin_sl
 
 def bubbles_from_kmeans(data, upper_lim=True, n_jobs=1, n_clusters=3):

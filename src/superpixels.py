@@ -58,14 +58,14 @@ def under_segmentation_error(labels, truths, b=0.25, verbose=True):
 	U = (uu-labels.size)/labels.size
 	return U
 
-def stitch_maximumdeviation(data, labels, bins='knuth', binary=True):
-	if 'astroML' in sys.modules: from astroML.density_estimation import histogram
+def stitch_using_histogram(data, mns, bins='knuth', binary=True):
+	if bins in ['knuth', 'scotts', 'freedman', 'blocks']:
+		if 'astroML' in sys.modules: from astroML.density_estimation import histogram
+		else: 
+			bins = 'auto'
+			from numpy import histogram
 	else:
 		from numpy import histogram
-		if bins=='knuth': bins = 'auto'
-	X  = data.reshape(-1,1)
-	Ls = labels.reshape(-1,1)
-	mns = np.array([X[Ls==i].mean() for i in np.unique(Ls)])
 	ht  = histogram(mns, bins=bins)
 	if ht[0].argmax()==0: peaks = argrelextrema(np.hstack((0,ht[0])), np.greater)[0]
 	else: peaks = argrelextrema(ht[0], np.greater)[0]
@@ -88,26 +88,40 @@ def stitch_maximumdeviation(data, labels, bins='knuth', binary=True):
 		if binary: return data<thres
 		else: return thres
 
+def stitch_superpixels(data, labels, bins='knuth', binary=True):
+	mns = get_superpixel_means(data, labels=labels)
+	stitched = stitch_using_histogram(data, mns, bins=bins, binary=binary)
+	return stitched
+
+def apply_operator_labelled_data(data, labels, operator=np.mean):
+	X   = data.flatten()
+	y   = labels.flatten()
+	elems, num = np.unique(y, return_counts=1)
+	X1  = X[y.argsort()]
+	out = []
+	idx_low = 0
+	for i in elems:
+		idx_high = idx_low + num[i]
+		out.append(operator(X1[idx_low:idx_high]))
+		idx_low  = idx_high
+	return out
+
 def get_superpixel_means(data, labels=None, slic_segments=3000):
 	if labels is None: labels = slic_cube(data, n_segments=slic_segments)
-	X   = data.reshape(-1,1)
-	y   = labels.reshape(-1,1)
-	mns = [X[y==i].mean() for i in np.unique(y)]
+	mns = apply_operator_labelled_data(data, labels, operator=np.mean)
 	return np.array(mns)
 
 def get_superpixel_sigmas(data, labels=None, slic_segments=5000):
 	if labels is None: labels = slic_cube(data, n_segments=slic_segments)
-	X    = data.reshape(-1,1)
-	y    = labels.reshape(-1,1)
-	sigs = [X[y==i].std() for i in np.unique(y)]
+	sigs = apply_operator_labelled_data(data, labels, operator=np.std)
 	return np.array(sigs)
 
 def get_superpixel_n_pixels(data, labels=None, slic_segments=5000):
 	if labels is None: labels = slic_cube(data, n_segments=slic_segments)
-	X    = data.reshape(-1,1)
-	y    = labels.reshape(-1,1)
-	n_pixels = [X[y==i].size for i in np.unique(y)]
-	return np.array(n_pixels)
+	X    = data.flatten()
+	y    = labels.flatten()
+	elems, n_pixels = np.unique(y, return_counts=1)
+	return n_pixels
 
 def get_superpixel_SNRs(means=None, sigmas=None, n_pix=None, data=None, labels=None, slic_segments=5000, pixels=False):
 	if means is None: means = get_superpixel_means(data, labels=labels, slic_segments=slic_segments)
@@ -125,9 +139,7 @@ def get_superpixel_SNRs(means=None, sigmas=None, n_pix=None, data=None, labels=N
 
 def get_superpixel_pixels(data=None, labels=None, slic_segments=5000):
 	if labels is None: labels = slic_cube(data, n_segments=slic_segments)
-	X   = data.reshape(-1,1)
-	y   = labels.reshape(-1,1)
-	pxl = [X[y==i] for i in np.unique(y)]
+	pxl = apply_operator_labelled_data(data, labels, operator=np.array)
 	return pxl
 
 def mean_estimate(data, means=None, sigmas=None, n_pix=None, labels=None, slic_segments=5000, SNR_thres=5):
