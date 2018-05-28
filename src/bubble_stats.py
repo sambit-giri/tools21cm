@@ -6,7 +6,7 @@ import datetime, time
 import mfp_np, spa_np, conv
 from scipy.interpolate import interp1d
 
-def fof(data, xth=0.5, neighbors=4):
+def fof(data, xth=0.5, neighbors=4, use_skimage=False):
 	"""
 	FOF bubble
 	
@@ -20,7 +20,7 @@ def fof(data, xth=0.5, neighbors=4):
 	The output is a tuple containing output-map and volume-list array.
 	"""
 	t1 = datetime.datetime.now()
-	if 'skimage' in sys.modules:
+	if 'skimage' in sys.modules and use_skimage:
 		from skimage import morphology
 		out_map = morphology.label(data, neighbors=neighbors)
 		elements, size_list = np.unique(out_map, return_counts=True)
