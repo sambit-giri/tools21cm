@@ -1,5 +1,4 @@
 import numpy as np
-import c2raytools as c2t
 import usefuls
 from scipy.signal import fftconvolve
 
