@@ -179,12 +179,16 @@ def mfp(data, xth=0.5, boxsize=None, iterations = 10000000, verbose=True, upper_
 	if (upper_lim): 
 		data = -1.*data
 		xth  = -1.*xth
+	check_box = (data>=xth).sum()
+	if check_box==0:
+		data = np.ones(data.shape)
+		iterations = 3
 	if dim == 2:
-		print "MFP method applied on 2D data (ver 0.2)"
+		print "MFP method applied on 2D data (ver 1.0)"
 		#out = mfp2d(data, xth, iterations=iterations, verbose=verbose)
 		out = mfp_np.mfp2d(data, xth, iterations=iterations, verbose=verbose)
 	elif dim == 3:
-		print "MFP method applied on 3D data (ver 0.2)"
+		print "MFP method applied on 3D data (ver 1.0)"
 		#out = mfp3d(data, xth, iterations=iterations, verbose=verbose)
 		out = mfp_np.mfp3d(data, xth, iterations=iterations, verbose=verbose)
 	else:
@@ -196,6 +200,9 @@ def mfp(data, xth=0.5, boxsize=None, iterations = 10000000, verbose=True, upper_
 	runtime = (t2-t1).total_seconds()/60
 
 	print("\nProgram runtime: %f minutes." %runtime)
+	if check_box==0:
+		print("There is no ROI in the data. Therefore, the BSD is zero everywhere.")
+		return rr*boxsize/data.shape[0], np.zeros(rr.shape)
 	print("The output contains a tuple with three values: r, rdP/dr, Most Probable r")
 	print("The curve has been normalized.")
 
