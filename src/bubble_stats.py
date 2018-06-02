@@ -243,13 +243,14 @@ def dist_from_volumes(sizes, resolution=1., bins=100, null_factor=None):
 	vs, d_v  = np.zeros(len(ht_v[0])+1), np.zeros(len(ht_v[0])+1)
 	vs       = 10.**ht_v[1]*resolution**3
 	d_v[:-1] = 1.*ht_v[0]/np.sum(ht_v[0])
-	dummy = d_v[d_v!=0].min()/1000.
+	if null_factor is None: dummy = d_v[d_v!=0].min()/1000.
+	else: dummy = null_factor
 	d_v[d_v==0] = dummy
 	rs, d_r  = np.zeros(len(ht_r[0])+1), np.zeros(len(ht_r[0])+1)
 	rs       = 10.**ht_r[1]*resolution
 	d_r[1:]  = 1.*ht_r[0]/np.sum(ht_r[0])
 	if null_factor is None: d_r[0]   = d_r[d_r!=0].min()/1000.
-	else: d_r[0]   = null_factor
+	else: d_r[0]  = null_factor
 	print("The output is a tuple conatining 4 numpy array: V, VdP/dV, r, rdp/dr.")
 	return vs, d_v, rs, d_r
 	
