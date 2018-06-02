@@ -221,7 +221,7 @@ def rebin_bsd(rr, pp, bins=10, r_min=None, r_max=None):
 	return rs, fp(rs)
 
 
-def dist_from_volumes(sizes, resolution=1., bins=100):
+def dist_from_volumes(sizes, resolution=1., bins=100, null_factor=None):
 	"""
 	Volume distribution and effective radius distribution.
 	
@@ -248,7 +248,8 @@ def dist_from_volumes(sizes, resolution=1., bins=100):
 	rs, d_r  = np.zeros(len(ht_r[0])+1), np.zeros(len(ht_r[0])+1)
 	rs       = 10.**ht_r[1]*resolution
 	d_r[1:]  = 1.*ht_r[0]/np.sum(ht_r[0])
-	d_r[0]   = d_r[d_r!=0].min()/1000.
+	if null_factor is None: d_r[0]   = d_r[d_r!=0].min()/1000.
+	else: d_r[0]   = null_factor
 	print("The output is a tuple conatining 4 numpy array: V, VdP/dV, r, rdp/dr.")
 	return vs, d_v, rs, d_r
 	
