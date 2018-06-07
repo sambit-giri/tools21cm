@@ -182,13 +182,13 @@ def apply_uv_response(array, uv_map):
 	new_array : It is the 'array' after degrading the resoltion with the baseline configuration.
 	"""
 	noise_real = np.real(array)
-	noise_img  = np.imag(array)
+	noise_imag = np.imag(array)
 	noise_four = np.zeros(noise_real.shape)+1.j*np.zeros(noise_real.shape)
 	ncells     = noise_real.shape[0]
 	for i in xrange(ncells):
 		for j in xrange(ncells):
 			if uv_map[i,j] == 0: noise_four[i,j] = 0
-			else: noise_four[i,j] = noise_real[i,j]/np.sqrt(uv_map[i,j]) + 1.j*noise_img[i,j]/np.sqrt(uv_map[i,j])
+			else: noise_four[i,j] = noise_real[i,j]/np.sqrt(uv_map[i,j]) + 1.j*noise_imag[i,j]/np.sqrt(uv_map[i,j])
 	return noise_four
 
 
