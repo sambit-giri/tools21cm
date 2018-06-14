@@ -59,9 +59,11 @@ def extragalactic_pointsource_fg(z, ncells, boxsize, S_max=100):
 	for p in xrange(S_nu.size): fg[x[p],y[p]] = S_nu[p]
 	return jansky_2_kelvin(fg, z, boxsize=boxsize, ncells=ncells)
 
-def diabolo_filter(ncells, z, boxsize=None, mu=0.5, funct='step', small_base=40):
+def diabolo_filter(z, ncells=None, array=None, boxsize=None, mu=0.5, funct='step', small_base=40):
 	assert funct in ['step', 'sigmoid', 'gaussian']
+	assert ncells or array is not None
 	if boxsize is None: boxsize = conv.LB
+	if array is not None: ncells = max(array.shape)
 	filt = np.zeros((ncells, ncells, ncells))
 	k0   = np.linspace(-ncells*np.pi/boxsize, ncells*np.pi/boxsize, ncells)
 	a = k0.reshape(-1,1)
@@ -75,18 +77,43 @@ def diabolo_filter(ncells, z, boxsize=None, mu=0.5, funct='step', small_base=40)
 		kpp = k0[i]
 		kpr = np.abs(kpp)*(1-mu**2)/mu
 		if funct is 'sigmoid': 
-			ss = 1./(1+np.exp(10*(k2-kpr)))
-			if kmin>=kpr: ss = 1./(1+np.exp(10*(-kpr+kmin)))*1./(1+np.exp(10*(k2-kpr)))
+			ss = 1-1./(1+np.exp(10*(k2-kpr)))
+			#ss = 1./(1+np.exp(10*(-kpr+kmin)))*1./(1+np.exp(10*(k2-kpr)))
 		else: 
-			ss = np.zeros(k2.shape)
-			if kmin<=kpr: ss[k2<=kpr] = 1
-			#else: ss[k2<=kmin] = 1
+			ss = np.ones(k2.shape)
+			ss[k2<=kpr]  = 0
+		ss[k2<=kmin] = 0
 		filt[:,:,i] = ss
-	print "A diabolo filter made with "+funct+" function."
+
+	if array.shape[2]<ncells: filt = filt[:,:,ncells/2-array.shape[2]/2:ncells/2+array.shape[2]/2]
+	print("A diabolo filter made with %s function."%funct)
 	return filt
 
+def barrel_filter(z, ncells=None, array=None, boxsize=None, k_par_min=0.5, small_base=40):
+	assert ncells or array is not None
+	if boxsize is None: boxsize = conv.LB
+	if array is not None: ncells = max(array.shape)
+	filt = np.zeros((ncells, ncells, ncells))
+	k0   = np.linspace(-ncells*np.pi/boxsize, ncells*np.pi/boxsize, ncells)
+	a = k0.reshape(-1,1)
+	for i in xrange(k0.size-1): a = np.hstack((a,k0.reshape(-1,1)))
+	b = k0.reshape(1,-1)
+	for i in xrange(k0.size-1): b = np.vstack((b,k0.reshape(1,-1)))
+	k2 = np.sqrt(a**2+b**2)
+	kmin = np.pi/(cm.z_to_cdist(z)*(21./small_base/1e2))
+	for i in xrange(ncells):
+		ss = np.ones(k2.shape)
+		kpp = k0[i]
+		if kpp<=kmin: ss[k2<=kmin] = 0
+		ss[k2<=k_par_min] = 0
+		filt[:,:,i] = ss
+
+	if array.shape[2]<ncells: filt = filt[:,:,ncells/2-array.shape[2]/2:ncells/2+array.shape[2]/2]
+	print("A barrel filter made with step function.")
+	return filt	
+
 def remove_wedge_image(dt, z, mu=0.5, funct='step', boxsize=None, filt=None):
-	if filt is None: filt = diabolo_filter(dt.shape[0], z, mu=mu, funct=funct, boxsize=boxsize)
+	if filt is None: filt = diabolo_filter(z, array=dt, mu=mu, funct=funct, boxsize=boxsize)
 	fft_dt = np.fft.fftn(dt)
 	apply_filt = np.fft.fftshift(np.fft.fftshift(fft_dt)*filt)
 	dt_new = np.real(np.fft.ifftn(apply_filt))
