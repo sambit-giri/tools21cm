@@ -169,4 +169,10 @@ def xfrac_mass_estimate(dT, z):
 def xfrac_volume_estimate(binary):
 	return binary.mean()
 
+def superpixel_map(data, labels, mns=None):
+	if mns is None: mns = get_superpixel_means(data, labels=labels)
+	sp_map = np.zeros(data.shape)
+	for i in xrange(mns.size): sp_map[labels==i] = mns[i]
+	return sp_map
+
 
