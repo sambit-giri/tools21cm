@@ -20,7 +20,13 @@ except:
 	numexpr_available = False
 
 
-
+def real_to_fourier_amplitude_phase(data):
+	data_fft = fftn(data)
+	a, b     = np.real(data_fft), np.imag(data_fft)
+	R        = np.sqrt(a**2+b**2)
+	phi      = np.arctan(b/a)
+	return R, phi
+	
 def get_xfrac_redshifts(xfrac_dir, z_low = None, z_high = None, bracket=False):
 	''' 
 	Make a list of the redshifts of all the xfrac files in a directory.
