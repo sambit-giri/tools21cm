@@ -158,13 +158,13 @@ def cdist_to_z(dist):
     '''
     dist = np.atleast_1d(dist)
     z = np.zeros_like(dist)
-    func        = interp1d(precalc_table_cdist, precalc_table_z, kind='cubic')
+    func        = interp1d(precalc_table_cdist, precalc_table_z, kind='cubic', bounds_error=False, fill_value="extrapolate")
     z_min_guess = func(dist)-1 if type(dist)==float else func(dist.min())-1
     z_max_guess = func(dist)+1 if type(dist)==float else func(dist.max())+1
     table_z     = precalc_table_z[precalc_table_z>z_min_guess]
     table_z     = table_z[table_z<z_max_guess]
     table_cdist = z_to_cdist(table_z)
-    func = interp1d(table_cdist, table_z, kind='cubic')
+    func = interp1d(table_cdist, table_z, kind='cubic', bounds_error=False, fill_value="extrapolate")
     for i in range(len(dist)):
         z[i] = func(dist[i])
     return outputify(z)
