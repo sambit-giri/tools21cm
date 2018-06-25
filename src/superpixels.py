@@ -58,7 +58,7 @@ def under_segmentation_error(labels, truths, b=0.25, verbose=True):
 	U = (uu-labels.size)/labels.size
 	return U
 
-def stitch_using_histogram(data, mns, bins='knuth', binary=True):
+def stitch_using_histogram(data, mns, labels, bins='knuth', binary=True, on_superpixel_map=True):
 	if bins in ['knuth', 'scotts', 'freedman', 'blocks']:
 		if 'astroML' in sys.modules: from astroML.density_estimation import histogram
 		else: 
@@ -78,19 +78,27 @@ def stitch_using_histogram(data, mns, bins='knuth', binary=True):
 		d2 = np.array([np.abs((ht[0][i]-y1)-m0*(ht[1][i]-x1)) for i in xrange(bla)])
 		thres = ht[1][d2.argmax()]/2. + ht[1][d2.argmax()+1]/2.
 		if binary:
-			y = np.zeros(Ls.shape)
-			for i in np.unique(Ls): y[Ls==i] = mns[i]
-			y = y<thres
-			return y.reshape(data.shape)
+			#y = np.zeros(Ls.shape)
+			#for i in np.unique(Ls): y[Ls==i] = mns[i]
+			if on_superpixel_map: 
+				out = superpixel_map(data, labels, mns=mns)
+				out = out<thres
+			else: out = data<thres
+			return out
 		else: return thres
 	else:
 		thres = threshold_otsu(mns)
-		if binary: return data<thres
+		if binary: 
+			if on_superpixel_map: 
+				out = superpixel_map(data, labels, mns=mns)
+				out = out<thres
+			else: out = data<thres
+			return out
 		else: return thres
 
-def stitch_superpixels(data, labels, bins='knuth', binary=True):
+def stitch_superpixels(data, labels, bins='knuth', binary=True, on_superpixel_map=True):
 	mns = get_superpixel_means(data, labels=labels)
-	stitched = stitch_using_histogram(data, mns, bins=bins, binary=binary)
+	stitched = stitch_using_histogram(data, mns, labels, bins=bins, binary=binary, on_superpixel_map=on_superpixel_map)
 	return stitched
 
 def apply_operator_labelled_data(data, labels, operator=np.mean):
