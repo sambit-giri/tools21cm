@@ -84,30 +84,25 @@ def diabolo_filter(z, ncells=None, array=None, boxsize=None, mu=0.5, funct='step
 			ss[k2<=kpr]  = 0
 		ss[k2<=kmin] = 0
 		filt[:,:,i] = ss
-
 	if array.shape[2]<ncells: filt = filt[:,:,ncells/2-array.shape[2]/2:ncells/2+array.shape[2]/2]
 	print("A diabolo filter made with %s function."%funct)
 	return filt
 
-def barrel_filter(z, ncells=None, array=None, boxsize=None, k_par_min=0.5, small_base=40):
+def barrel_filter(z, ncells=None, array=None, boxsize=None, k_par_min=None, small_base=40):
 	assert ncells or array is not None
 	if boxsize is None: boxsize = conv.LB
 	if array is not None: ncells = max(array.shape)
-	filt = np.zeros((ncells, ncells, ncells))
 	k0   = np.linspace(-ncells*np.pi/boxsize, ncells*np.pi/boxsize, ncells)
 	a = k0.reshape(-1,1)
 	for i in xrange(k0.size-1): a = np.hstack((a,k0.reshape(-1,1)))
 	b = k0.reshape(1,-1)
 	for i in xrange(k0.size-1): b = np.vstack((b,k0.reshape(1,-1)))
 	k2 = np.sqrt(a**2+b**2)
-	kmin = np.pi/(cm.z_to_cdist(z)*(21./small_base/1e2))
-	for i in xrange(ncells):
-		ss = np.ones(k2.shape)
-		kpp = k0[i]
-		if kpp<=kmin: ss[k2<=kmin] = 0
-		ss[k2<=k_par_min] = 0
-		filt[:,:,i] = ss
-
+	if k_par_min is None: k_par_min = np.pi/(cm.z_to_cdist(z)*(21./small_base/1e2))
+	ss = np.ones(k2.shape)
+	ss[k2<=k_par_min] = 0
+	filt = np.zeros((ncells,ncells,ncells))
+	for i in xrange(ncells): filt[:,:,i] = filt
 	if array.shape[2]<ncells: filt = filt[:,:,ncells/2-array.shape[2]/2:ncells/2+array.shape[2]/2]
 	print("A barrel filter made with step function.")
 	return filt	
