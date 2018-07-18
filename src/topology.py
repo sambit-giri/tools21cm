@@ -2,7 +2,21 @@ import numpy as np
 from sklearn.neighbors import BallTree, KDTree
 from sklearn.neighbors import NearestNeighbors
 import scipy
+import ViteBetti
 
+def EulerCharacteristic(data, thres=0.5):
+	"""
+	Parameters
+	----------
+	data : The data cube containing the structure.
+	thres: The threshold to create the binary field from the data (Default: 0.5)
+	       Ignore this parameter if data is already a binary field.
+	"""
+        A = data>thres
+	B = (A*1)
+	C = ViteBetti.CubeMap(A)
+        E = ViteBetti.EulerCharacteristic_seq(C)
+	return E
 
 def genus(data, xth=0.5):
 	"""
