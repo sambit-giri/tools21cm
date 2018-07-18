@@ -6,6 +6,7 @@ PREREQUISITES
 2. Scipy   (https://scipy.org/install.html)
 3. Sklearn (http://scikit-learn.org/stable/install.html)
 4. Skimage (http://scikit-image.org/docs/dev/install.html)
+5. Numba   (https://numba.pydata.org/)
 
 Optionals:
 
