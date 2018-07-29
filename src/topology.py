@@ -17,7 +17,7 @@ def EulerCharacteristic(data, thres=0.5):
 	B = (A*1)
 	C = ViteBetti.CubeMap(B)
 	D = ViteBetti.CubeMap(1-B)
-        E = ViteBetti.EulerCharacteristic_seq(C)/2. + ViteBetti.EulerCharacteristic_seq(C)/2.
+        E = ViteBetti.EulerCharacteristic_seq(C)/2. + ViteBetti.EulerCharacteristic_seq(D)/2
 	return E
 
 def beta0(data, thres=0.5):
