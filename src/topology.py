@@ -3,6 +3,7 @@ from sklearn.neighbors import BallTree, KDTree
 from sklearn.neighbors import NearestNeighbors
 import scipy
 import ViteBetti
+from bubble_stats import fof
 
 def EulerCharacteristic(data, thres=0.5):
 	"""
@@ -18,6 +19,45 @@ def EulerCharacteristic(data, thres=0.5):
 	D = ViteBetti.CubeMap(1-B)
         E = ViteBetti.EulerCharacteristic_seq(C)/2. + ViteBetti.EulerCharacteristic_seq(C)/2.
 	return E
+
+def beta0(data, thres=0.5):
+	"""
+	Parameters
+	----------
+	data : The data cube containing the structure.
+	thres: The threshold to create the binary field from the data (Default: 0.5)
+	       Ignore this parameter if data is already a binary field.
+	"""
+	A = data>thres
+	B = (A*1)
+	b0 = np.unique(fof(B, use_skimage=1)[0]).size-1
+	return b0
+
+def beta2(data, thres=0.5):
+	"""
+	Parameters
+	----------
+	data : The data cube containing the structure.
+	thres: The threshold to create the binary field from the data (Default: 0.5)
+	       Ignore this parameter if data is already a binary field.
+	"""
+	A = data>thres
+	B = (A*1)
+	b2 = np.unique(fof(1-B, use_skimage=1)[0]).size-1
+	return b2
+
+def beta1(data, thres=0.5):
+	"""
+	Parameters
+	----------
+	data : The data cube containing the structure.
+	thres: The threshold to create the binary field from the data (Default: 0.5)
+	       Ignore this parameter if data is already a binary field.
+	"""
+	chi = EulerCharacteristic(data, thres=thres)
+	b0  = beta0(data, thres=thres)
+	b2  = beta2(data, thres=thres)
+	return b0 + b2 - chi
 
 def genus(data, xth=0.5):
 	"""
