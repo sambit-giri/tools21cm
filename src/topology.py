@@ -14,8 +14,9 @@ def EulerCharacteristic(data, thres=0.5):
 	"""
         A = data>thres
 	B = (A*1)
-	C = ViteBetti.CubeMap(A)
-        E = ViteBetti.EulerCharacteristic_seq(C)
+	C = ViteBetti.CubeMap(B)
+	D = ViteBetti.CubeMap(1-B)
+        E = ViteBetti.EulerCharacteristic_seq(C)/2. + ViteBetti.EulerCharacteristic_seq(C)/2.
 	return E
 
 def genus(data, xth=0.5):
