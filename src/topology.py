@@ -2,7 +2,6 @@ import numpy as np
 from sklearn.neighbors import BallTree, KDTree
 from sklearn.neighbors import NearestNeighbors
 import scipy
-import ViteBetti
 from bubble_stats import fof
 
 def EulerCharacteristic(data, thres=0.5):
@@ -14,10 +13,11 @@ def EulerCharacteristic(data, thres=0.5):
 	       Ignore this parameter if data is already a binary field.
 	"""
         A = data>thres
-	B = (A*1)
-	C = ViteBetti.CubeMap(B)
-	D = ViteBetti.CubeMap(1-B)
-        E = ViteBetti.EulerCharacteristic_seq(C)/2. + ViteBetti.EulerCharacteristic_seq(D)/2
+	if 'numba' in sys.modules: import ViteBetti_numba as VB
+	else: import ViteBetti as VB
+	C = VB.CubeMap(A)
+	D = VB.CubeMap(1-A)
+        E = VB.EulerCharacteristic_seq(C)/2. + VB.EulerCharacteristic_seq(D)/2.
 	return E
 
 def beta0(data, thres=0.5):
