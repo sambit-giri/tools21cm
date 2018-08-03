@@ -9,6 +9,7 @@ For example:
 >>> help(c2t.calc_dt)
 '''
 
+import sys
 ### From c2raytools
 #Import sub-modules 
 import conv
@@ -40,9 +41,12 @@ from gaussian_random_field import *
 from bubble_stats import *
 #from zahnbubble import zahn
 #from c2raytools import *
-from noise_model import *
 from foreground_model import *
 from telescope_functions import *
+#if 'numba' in sys.modules: 
+#from numba_functions import *
+from usefuls import *
+from noise_model import *
 from superpixels import *
 from identify_regions import *
 from read_files import *
