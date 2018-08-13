@@ -1,7 +1,6 @@
 import numpy as np
 import sys
-if 'numba' in sys.modules: from telescope_functions_numba import *
-else: from telescope_functions import *
+from telescope_functions import *
 from usefuls import *
 import conv
 import cosmology as cm
