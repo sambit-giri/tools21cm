@@ -24,6 +24,7 @@ def from_antenna_config(filename, z, nu=None):
 	          from the antenna positions.
 	N_ant   : Number of antennas.
 	"""
+	z = float(z)
 	if filename is None: antll  = SKA1_LowConfig_Sept2016()
 	else: antll  = np.loadtxt(filename, dtype=str)
 	antll  = antll[:,-2:].astype(float)
@@ -91,6 +92,7 @@ def get_uv_daily_observation(ncells, z, filename=None, total_int_time=4., int_ti
 			 simulation constants set.
 	declination    : The declination angle of the SKA (in degree). Default: 30. 
 	"""
+	z = float(z)
 	if 'numba' in sys.modules: 
 		from numba_functions import get_uv_daily_observation_numba
 		uv_map, N_ant = get_uv_daily_observation_numba(ncells, z, filename=filename, total_int_time=total_int_time, int_time=int_time, boxsize=boxsize, declination=declination, verbose=verbose)
@@ -126,6 +128,7 @@ def get_uv_coverage(Nbase, z, ncells, boxsize=None):
 	----------
 	uv_map  : ncells x ncells numpy array containing the number of baselines observing each pixel.
 	"""
+	z = float(z)
 	if not boxsize: boxsize = conv.LB
 	uv_map = np.zeros((ncells,ncells))
 	theta_max = boxsize/cm.z_to_cdist(z)
@@ -156,6 +159,7 @@ def kanan_noise_image_ska(z, uv_map, depth_mhz, obs_time, int_time, N_ant_ska=56
 	sigma     : The rms of the noise in the image produced by SKA for uniformly distributed antennas.
 	rms_noise : The rms of the noise due to the antenna positions in uv field.
 	"""
+	z = float(z)
 	nuso  = 1420.0/(1.0 + z)
 	delnu = depth_mhz*1e3	                                            # in kHz
 	effective_baseline = np.sum(uv_map)
@@ -208,6 +212,7 @@ def kelvin_jansky_conversion(ncells, z, boxsize=None):
 	----------
 	The conversion factor multiplied to values in kelvin to get values in jansky.
 	"""
+	z = float(z)
 	if not boxsize: boxsize = conv.LB
 	KB_SI       = 1.38e-23
 	janskytowatt= 1e-26
@@ -234,6 +239,7 @@ def jansky_2_kelvin(array, z, boxsize=None, ncells=None):
 	----------
 	A numpy array with values in mK.
 	"""
+	z = float(z)
 	if not ncells: ncells  = array.shape[0]
 	con_sol = kelvin_jansky_conversion(ncells, z, boxsize=boxsize)	
 	return  array/con_sol
@@ -250,6 +256,7 @@ def kelvin_2_jansky(array, z, boxsize=None, ncells=None):
 	----------
 	A numpy array with values in muJy.
 	"""
+	z = float(z)
 	if not ncells: ncells  = array.shape[0]
 	con_sol = kelvin_jansky_conversion(ncells, z, boxsize=boxsize)	
 	return  array*con_sol
