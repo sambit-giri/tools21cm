@@ -26,7 +26,9 @@ kms = 1.e5 #1 km/s in cm/s
 h = 0.7
 Omega0 = 0.27
 OmegaB = 0.044
-lam = 1.0-Omega0
+lam = 1.0-Omega0; OmegaL = lam
+n_s = 0.96
+sigma_8 = 0.8
 
 # Set cosmological parameter
 def set_hubble_h(value): 
@@ -46,6 +48,15 @@ def set_omega_baryon(value):
 def set_omega_lambda(value): 
 	global lam
 	lam = value 
+	OmegaL = value
+
+def set_ns(value): 
+	global n_s
+	n_s = value 
+
+def set_sigma_8(value): 
+	global sigma_8
+	sigma_8 = value 
 
 # Cosmology
 H0 = 100.0*h
