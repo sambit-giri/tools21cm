@@ -1,12 +1,13 @@
 '''
-c2raytools is a Python package for reading and 
-analyzing data files produced with C2Ray and CubeP3M.
-For documentation, see: http://ttt.astro.su.se/~hjens/c2raytools/
+Tools21cm is a Python package for analysing simulations of the 21-cm signal
+during Epoch of Reionization and Cosmic Dawn.
+We incorpoarte its predecessor, c2raytools, into this package.
+
 You can also get documentation for all routines directory from
 the interpreter using Python's built-in help() function.
 For example:
->>> import c2raytools as c2t
->>> help(c2t.calc_dt)
+>>> import tools21cm as t2c
+>>> help(t2c.calc_dt)
 '''
 
 import sys
