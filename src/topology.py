@@ -4,60 +4,71 @@ from sklearn.neighbors import BallTree, KDTree
 from sklearn.neighbors import NearestNeighbors
 import scipy
 from bubble_stats import fof
+from scipy.ndimage import label
 
-def EulerCharacteristic(data, thres=0.5):
+def EulerCharacteristic(data, thres=0.5, neighbors=6):
 	"""
 	Parameters
 	----------
-	data : The data cube containing the structure.
-	thres: The threshold to create the binary field from the data (Default: 0.5)
-	       Ignore this parameter if data is already a binary field.
+	data     : The data cube containing the structure.
+	thres    : The threshold to create the binary field from the data (Default: 0.5)
+	           Ignore this parameter if data is already a binary field.
+	neighbors: Define the connectivity to the neighbors (Default: 6).
 	"""
-        A = data>thres
+        A = 1*(data>thres)
 	if 'numba' in sys.modules: import ViteBetti_numba as VB
 	else: import ViteBetti as VB
-	C = VB.CubeMap(A)
-	D = VB.CubeMap(1-A)
-        E = VB.EulerCharacteristic_seq(C)/2. + VB.EulerCharacteristic_seq(D)/2.
-	return E
+	if neighbors==6 or neighbors==4: C = VB.CubeMap(A)
+	else: C = VB.CubeMap(1-A)
+	#D = VB.CubeMap(1-A)
+        #E = VB.EulerCharacteristic_seq(C)/2. + VB.EulerCharacteristic_seq(D)/2.
+	elem, count = np.unique(C, return_counts=1)
+	V = count[elem==1] if len(count[elem==1])!=0 else 0
+	E = count[elem==2] if len(count[elem==1])!=0 else 0
+	F = count[elem==3] if len(count[elem==1])!=0 else 0
+	C = count[elem==4] if len(count[elem==1])!=0 else 0
+	return float(V-E+F-C)
 
-def beta0(data, thres=0.5):
+def beta0(data, thres=0.5, neighbors=6):
 	"""
 	Parameters
 	----------
-	data : The data cube containing the structure.
-	thres: The threshold to create the binary field from the data (Default: 0.5)
-	       Ignore this parameter if data is already a binary field.
+	data     : The data cube containing the structure.
+	thres    : The threshold to create the binary field from the data (Default: 0.5)
+	           Ignore this parameter if data is already a binary field.
+	neighbors: Define the connectivity to the neighbors (Default: 6).
 	"""
-	A = data>thres
-	B = (A*1)
-	b0 = np.unique(fof(B, use_skimage=1)[0]).size-1
+	A = (data>thres)*1
+	if neighbors==6 or neighbors==4: b0 = label(A, return_num=1, neighbors=4)[1]#np.unique(fof(B, use_skimage=1)[0]).size-1
+	else: b0 = label(A, return_num=1, neighbors=8)[1]
 	return b0
 
-def beta2(data, thres=0.5):
+def beta2(data, thres=0.5, neighbors=6):
 	"""
 	Parameters
 	----------
-	data : The data cube containing the structure.
-	thres: The threshold to create the binary field from the data (Default: 0.5)
-	       Ignore this parameter if data is already a binary field.
+	data     : The data cube containing the structure.
+	thres    : The threshold to create the binary field from the data (Default: 0.5)
+	           Ignore this parameter if data is already a binary field.
+	neighbors: Define the connectivity to the neighbors (Default: 6).
 	"""
-	A = data>thres
-	B = (A*1)
-	b2 = np.unique(fof(1-B, use_skimage=1)[0]).size-1
+	A = (data>thres)*1
+	if neighbors==6 or neighbors==4: b2 = label(1-A, return_num=1, neighbors=8)[1]#b2 = np.unique(fof(1-B, use_skimage=1)[0]).size-1
+	else: b2 = label(1-A, return_num=1, neighbors=4)[1]
 	return b2
 
-def beta1(data, thres=0.5):
+def beta1(data, thres=0.5, neighbors=6):
 	"""
 	Parameters
 	----------
-	data : The data cube containing the structure.
-	thres: The threshold to create the binary field from the data (Default: 0.5)
-	       Ignore this parameter if data is already a binary field.
+	data     : The data cube containing the structure.
+	thres    : The threshold to create the binary field from the data (Default: 0.5)
+	           Ignore this parameter if data is already a binary field.
+	neighbors: Define the connectivity to the neighbors (Default: 6).
 	"""
-	chi = EulerCharacteristic(data, thres=thres)
-	b0  = beta0(data, thres=thres)
-	b2  = beta2(data, thres=thres)
+	chi = EulerCharacteristic(data, thres=thres, neighbors=neighbors)
+	b0  = beta0(data, thres=thres, neighbors=neighbors)
+	b2  = beta2(data, thres=thres, neighbors=neighbors)
 	return b0 + b2 - chi
 
 def genus(data, xth=0.5):
