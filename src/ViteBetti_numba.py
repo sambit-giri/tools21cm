@@ -5,7 +5,7 @@ from numba import autojit, prange
 @autojit
 def CubeMap(arr, multi_marker=True):
 	nx, ny, nz = arr.shape
-	Nx, Ny, Nz = 2*nx-1,2*ny-1,2*nz-1#2*nx,2*ny,2*nz#
+	Nx, Ny, Nz = 2*nx,2*ny,2*nz#2*nx-1,2*ny-1,2*nz-1
 	cubemap    = np.zeros((Nx,Ny,Nz))
 	markers    = 1, 1, 1, 1
 	if multi_marker: markers = 1, 2, 3, 4
@@ -20,27 +20,27 @@ def CubeMap(arr, multi_marker=True):
 		for j in xrange(Ny):
 			for k in xrange(Nz):
 				if cubemap[i,j,k] == 0:
-					if cubemap[(i-1)%Nx,j,k] and cubemap[(i+1)%Nx,j,k]: cubemap[i,j,k] = markers[1]
-					elif cubemap[i,(j-1)%Ny,k] and cubemap[i,(j+1)%Ny,k]: cubemap[i,j,k] = markers[1]
-					elif cubemap[i,j,(k-1)%Nz] and cubemap[i,j,(k+1)%Nz]: cubemap[i,j,k] = markers[1]
+					if cubemap[(i-1),j,k]==markers[0] and cubemap[(i+1)%Nx,j,k]==markers[0]: cubemap[i,j,k] = markers[1]
+					elif cubemap[i,(j-1),k]==markers[0] and cubemap[i,(j+1)%Ny,k]==markers[0]: cubemap[i,j,k] = markers[1]
+					elif cubemap[i,j,(k-1)]==markers[0] and cubemap[i,j,(k+1)%Nz]==markers[0]: cubemap[i,j,k] = markers[1]
 
 	## Faces 
 	for i in prange(Nx):
 		for j in xrange(Ny):
 			for k in xrange(Nz):
 				if cubemap[i,j,k] == 0:
-					if cubemap[(i-1)%Nx,j,k] and cubemap[(i+1)%Nx,j,k] and cubemap[i,(j-1)%Ny,k] and cubemap[i,(j+1)%Ny,k]: cubemap[i,j,k] = markers[2]
-					elif cubemap[i,(j-1)%Ny,k] and cubemap[i,(j+1)%Ny,k] and cubemap[i,j,(k-1)%Nz] and cubemap[i,j,(k+1)%Nz]: cubemap[i,j,k] = markers[2]
-					elif cubemap[i,j,(k-1)%Nz] and cubemap[i,j,(k+1)%Nz] and cubemap[(i-1)%Nx,j,k] and cubemap[(i+1)%Nx,j,k]: cubemap[i,j,k] = markers[2]
+					if cubemap[(i-1),j,k]==markers[1] and cubemap[(i+1)%Nx,j,k]==markers[1] and cubemap[i,(j-1),k]==markers[1] and cubemap[i,(j+1)%Ny,k]==markers[1]: cubemap[i,j,k] = markers[2]
+					elif cubemap[i,(j-1),k]==markers[1] and cubemap[i,(j+1)%Ny,k]==markers[1] and cubemap[i,j,(k-1)]==markers[1] and cubemap[i,j,(k+1)%Nz]==markers[1]: cubemap[i,j,k] = markers[2]
+					elif cubemap[i,j,(k-1)]==markers[1] and cubemap[i,j,(k+1)%Nz]==markers[1] and cubemap[(i-1),j,k]==markers[1] and cubemap[(i+1)%Nx,j,k]==markers[1]: cubemap[i,j,k] = markers[2]
 	
 	## Cubes
 	for i in prange(Nx):
 		for j in xrange(Ny):
 			for k in xrange(Nz):
 				if cubemap[i,j,k] == 0:
-					if cubemap[(i-1)%Nx,j,k] and cubemap[(i+1)%Nx,j,k]: 
-						if cubemap[i,(j-1)%Ny,k] and cubemap[i,(j+1)%Ny,k]: 
-							if cubemap[i,j,(k-1)%Nz] and cubemap[i,j,(k+1)%Nz]: cubemap[i,j,k] = markers[3]
+					if cubemap[(i-1),j,k]==markers[2] and cubemap[(i+1)%Nx,j,k]==markers[2]: 
+						if cubemap[i,(j-1),k]==markers[2] and cubemap[i,(j+1)%Ny,k]==markers[2]: 
+							if cubemap[i,j,(k-1)]==markers[2] and cubemap[i,j,(k+1)%Nz]==markers[2]: cubemap[i,j,k] = markers[3]
 
 	return cubemap	
 
