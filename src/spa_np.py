@@ -33,6 +33,6 @@ def put_sphere(array, centre, radius, label=1, periodic=True, verbose=False):
 		array[RR2<=radius**2] = label
 		if verbose: print("Periodic circle of radius %d made at (%d,%d,%d)"%(radius, centre[0], centre[1], centre[2]))
 	else: 
-		if verbose: print "Non-periodic circle of radius %d made at (%d,%d,%d)"%(radius, centre[0], centre[1], centre[2]))
+		if verbose: print("Non-periodic circle of radius %d made at (%d,%d,%d)"%(radius, centre[0], centre[1], centre[2]))
 	return array
 
