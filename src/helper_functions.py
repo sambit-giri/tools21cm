@@ -108,7 +108,7 @@ def print_msg(message, print_time=True):
 		if print_time:
 			timestr = time.strftime('%Y/%m/%d %H:%M:%S')
 			message = '%s --- %s' % (timestr, message)
-		print message
+		print(message)
 		
 
 def flt_comp(x,y, epsilon=0.0001):

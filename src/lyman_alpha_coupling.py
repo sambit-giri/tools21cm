@@ -54,7 +54,7 @@ def one_source(z, ncells, boxsize, source_pos, mass, sed_func):
 	eng[lms<=lam_HII] = 0.
 	n_a = eng/h_planck/nu_lya
 	stop  = timeit.default_timer()
-	print stop-start
+	print(stop-start)
 	return n_a
 
 def Lya_coupling_coeff_MPI(ncells, boxsize, sourcelist_loc, z=-1, SED_loc=None, n_jobs=5, lum=None, lam=None):
@@ -111,7 +111,7 @@ def one_source_(xx, yy, zz, z, ncells, boxsize, source_pos, mass, eng_func, zs_H
 	eng[zss>=zs_HII] = 0.
 	n_a = eng*mass/E_lya
 	stop  = timeit.default_timer()
-	print stop-start
+	print(stop-start)
 	return n_a
 
 def Lya_coupling_coeff_useprofile(z, ncells, boxsize, source_dir, source_file='*-coarsest_sources_used_wfgamma.dat', SED=None, lum=None, lam=None, tstep=11.5):
@@ -125,7 +125,7 @@ def Lya_coupling_coeff_useprofile(z, ncells, boxsize, source_dir, source_file='*
 	source_zs   = np.array([float(ss.split('/')[-1].split('-')[0]) for ss in sourcelists])
 	if not(z in source_zs): 
 		z = source_zs[np.abs(source_zs-z).argmin()]
-		print "The nearest sourcelist in the given directory is of z =", z
+		print("The nearest sourcelist in the given directory is of z =%.3f"%z)
 	z_max   = z+(lam_lya/lam_HII - 1.)
 	src_zs  = source_zs[source_zs>=z]
 	src_zs  = src_zs[src_zs<=z_max]
@@ -150,7 +150,7 @@ def _get_xc(sources, engs, ncells, mass_axis=3, time_taken=False):
 		eng_  = engs[(ncells-i):(2*ncells-i),(ncells-j):(2*ncells-j),(ncells-k):(2*ncells-k)]
 		xc_cube += eng_
 	stop  = timeit.default_timer()
-	if time_taken: print (stop-start), "seconds"
+	if time_taken: print("%d seconds"%(stop-start))
 	return xc_cube
 	
 

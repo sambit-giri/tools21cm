@@ -66,7 +66,7 @@ def coeval_xfrac(xfrac_dir, z, interpolation='linear'):
 		xfrac_l = xfrac_file.XfracFile(xfrac_files[xfrac_zs[xfrac_zs<z].argmax()]).xi
 		xfrac_h = xfrac_file.XfracFile(xfrac_files[xfrac_zs[xfrac_zs>z].argmin()]).xi
 		xfrac = xfrac_h + (xfrac_l-xfrac_h)*(z-z_h)/(z_l-z_h)
-		print "The xfrac cube has been interpolated using", interpolation, "interpolation."
+		print("The xfrac cube has been interpolated using", interpolation, "interpolation.")
 	return xfrac
 
 def coeval_dens(dens_dir, z, interpolation='linear'):
@@ -88,7 +88,7 @@ def coeval_dens(dens_dir, z, interpolation='linear'):
 		dens_l, dtype = helper_functions.get_data_and_type(dens_files[dens_zs[dens_zs<z].argmax()])
 		dens_h, dtype = helper_functions.get_data_and_type(dens_files[dens_zs[dens_zs>z].argmin()])
 		dens = dens_h + (dens_l-dens_h)*(z-z_h)/(z_l-z_h)
-		print "The density cube has been interpolated using", interpolation, "interpolation."
+		print("The density cube has been interpolated using", interpolation, "interpolation.")
 	return dens.astype(np.float64)
 
 def coeval_overdens(dens_dir, z, interpolation='linear'):
@@ -126,6 +126,6 @@ def coeval_vel(dens_dir, vel_dir, z, interpolation='linear'):
 		vel_l = get_vel(vel_files[vel_zs[vel_zs<z].argmax()],dens_files[vel_zs[vel_zs<z].argmax()])
 		vel_h = get_vel(vel_files[vel_zs[vel_zs>z].argmin()],dens_files[vel_zs[vel_zs>z].argmin()])
 		vel = vel_h + (vel_l-vel_h)*(z-z_h)/(z_l-z_h)
-		print "The velocity cube has been interpolated using", interpolation, "interpolation."
+		print("The velocity cube has been interpolated using", interpolation, "interpolation.")
 	return vel
 

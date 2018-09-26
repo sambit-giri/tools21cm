@@ -90,4 +90,4 @@ if __name__ == "__main__":
         with open(outfile, 'w') as out_file:
             out_file.write(str(sizes))
     except IndexError as e:
-        print "Error: expected an input ionised fraction file and an output file"
+        print("Error: expected an input ionised fraction file and an output file")

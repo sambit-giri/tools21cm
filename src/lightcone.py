@@ -215,9 +215,9 @@ def _get_output_z(file_redshifts, z_low, z_high, box_grid_n):
     output_z = redshifts_at_equal_comoving_distance(z_low, z_high, box_grid_n)
 
     if min(output_z) < min(file_redshifts) or max(output_z) > max(file_redshifts):
-        print 'Warning! You have specified a redshift range of %.3f < z < %.3f' % (min(output_z), max(output_z))
-        print 'but you only have files for the range %.3f < z < %.3f.' % (min(file_redshifts), max(file_redshifts))
-        print 'The redshift range will be truncated.'
+        print('Warning! You have specified a redshift range of %.3f < z < %.3f' % (min(output_z), max(output_z)))
+        print('but you only have files for the range %.3f < z < %.3f.' % (min(file_redshifts), max(file_redshifts)))
+        print('The redshift range will be truncated.')
         output_z = output_z[output_z >= min(file_redshifts)]
         output_z = output_z[output_z <= max(file_redshifts)]
     if len(output_z) < 1:

@@ -51,7 +51,8 @@ while(count < local_n):
 	na_cube  = one_source(ncells, boxsize, source_pos, mass, sed_func)
 	xc_cube += na_cube
 	if rank+1 == size:
-		print s+1, "sources or", size*count*100/n_src, "% done"
+		#print s+1, "sources or", size*count*100/n_src, "% done"
+		print('%d sources or %.1f \% done'%(s+1,size*count*100/n_src))
 
 remain = n_src%size
 if rank==1 and remain!=0:
@@ -61,7 +62,8 @@ if rank==1 and remain!=0:
 		source_pos, mass = src[-cc,:-1]-np.ones(3), src[s,-1]
 		na_cube  = one_source(ncells, boxsize, source_pos, mass, sed_func)
 		xc_cube += na_cube
-		print n_src-remain+cc, "sources or 100 % done"
+		#print n_src-remain+cc, "sources or 100 % done"
+		print('sources or 100 \% done'%(n_src-remain+cc))
 	
 if rank == 0:
         for i in range(1, size):

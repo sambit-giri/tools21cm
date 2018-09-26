@@ -17,7 +17,7 @@ def spa_np(data, xth=0.95, nscales=30, binning='log'):
 		kernel = put_sphere(np.zeros((Rmx,Rmx,Rmx)), [Rmx/2.,Rmx/2.,Rmx/2.], ra, label=1.)
 		smooth = fftconvolve(data, kernel/kernel.sum(), mode='same')
 		rad[smooth>=xth] = ra
-		print "Comepleted", 100*(i+1)/int(nscales), "%"	
+		print("Comepleted %d \%")	
 	for i in xrange(nscales): ins[i] = rad[rad==Rs_[i]].size
 	return Rs_, ins
 
@@ -31,8 +31,8 @@ def put_sphere(array, centre, radius, label=1, periodic=True, verbose=False):
 	if periodic: 
 		RR2 = ((aw[:,0]+nx-centre[0])**2 + (aw[:,1]+ny-centre[1])**2 + (aw[:,2]+nz-centre[2])**2).reshape(array.shape)
 		array[RR2<=radius**2] = label
-		if verbose: print "Periodic circle of radius", radius, "made at", centre
+		if verbose: print("Periodic circle of radius %d made at (%d,%d,%d)"%(radius, centre[0], centre[1], centre[2]))
 	else: 
-		if verbose: print "Non-periodic circle of radius", radius, "made at", centre
+		if verbose: print "Non-periodic circle of radius %d made at (%d,%d,%d)"%(radius, centre[0], centre[1], centre[2]))
 	return array
 

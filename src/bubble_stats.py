@@ -184,15 +184,15 @@ def mfp(data, xth=0.5, boxsize=None, iterations = 10000000, verbose=True, upper_
 		data = np.ones(data.shape)
 		iterations = 3
 	if dim == 2:
-		print "MFP method applied on 2D data (ver 1.0)"
+		print("MFP method applied on 2D data (ver 1.0)")
 		#out = mfp2d(data, xth, iterations=iterations, verbose=verbose)
 		out = mfp_np.mfp2d(data, xth, iterations=iterations, verbose=verbose)
 	elif dim == 3:
-		print "MFP method applied on 3D data (ver 1.0)"
+		print("MFP method applied on 3D data (ver 1.0)")
 		#out = mfp3d(data, xth, iterations=iterations, verbose=verbose)
 		out = mfp_np.mfp3d(data, xth, iterations=iterations, verbose=verbose)
 	else:
-		print "The data doesn't have the correct dimension"
+		print("The data doesn't have the correct dimension")
 		return 0
 	nn = out[0]/iterations
 	rr = out[1]
@@ -203,7 +203,7 @@ def mfp(data, xth=0.5, boxsize=None, iterations = 10000000, verbose=True, upper_
 	if check_box==0:
 		print("There is no ROI in the data. Therefore, the BSD is zero everywhere.")
 		return rr*boxsize/data.shape[0], np.zeros(rr.shape)
-	print("The output contains a tuple with three values: r, rdP/dr, Most Probable r")
+	print("The output contains a tuple with three values: r, rdP/dr")
 	print("The curve has been normalized.")
 
 	r0,p0 = rr*boxsize/data.shape[0], rr*nn #rr[nn.argmax()]*boxsize/data.shape[0]
@@ -264,7 +264,7 @@ def get_distribution(array, resolution=1., bins=100, sizes=False):
 		for i in xrange(int(mx)):
 			label = i+1
 			sizes[i] = len(array[array==label])
-			print label,
+			print(label,)
 	ht   = np.histogram(np.log(sizes), bins=bins)
 	vols, dist = np.zeros(len(ht[0])+1), np.zeros(len(ht[0])+1)
 	vols      = np.exp(ht[1])*resolution

@@ -68,7 +68,7 @@ def make_uv_map_lightcone(ncells, zs, filename=None, total_int_time=6., int_time
 		z = zs[i]
 		uv_map, N_ant = get_uv_map(ncells, z, filename=filename, total_int_time=total_int_time, int_time=int_time, boxsize=boxsize, declination=declination, verbose=verbose)
 		uv_lc[:,:,i] = uv_map
-		print "\nThe lightcone has been constructed upto", i*percc, "%"
+		print("\nThe lightcone has been constructed upto %.1f \%" %(i*percc))
 	return uv_lc, N_ant
 
 def telescope_response_on_coeval(array, z, depth_mhz=None, obs_time=1000, filename=None, boxsize=None, total_int_time=6., int_time=10., declination=-30., uv_map=np.array([]), N_ant=None):
@@ -79,7 +79,7 @@ def telescope_response_on_coeval(array, z, depth_mhz=None, obs_time=1000, filena
 	if not uv_map.size: uv_map, N_ant  = get_uv_map(ncells, z, filename=filename, total_int_time=total_int_time, int_time=int_time, boxsize=boxsize, declination=declination)
 	if not N_ant: N_ant = np.loadtxt(filename, dtype=str).shape[0]
 	data3d = np.zeros(array.shape)
-	print "Creating the noise cube"
+	print("Creating the noise cube")
 	for k in xrange(ncells):
 		data2d = telescope_response_on_image(array[:,:,k], z, depth_mhz, obs_time=obs_time, filename=filename, boxsize=boxsize, total_int_time=total_int_time, int_time=int_time, declination=declination, uv_map=uv_map, N_ant=N_ant)
 		data3d[:,:,k] = data2d
@@ -104,14 +104,14 @@ def noise_cube_coeval(ncells, z, depth_mhz=None, obs_time=1000, filename=None, b
 	if not uv_map.size: uv_map, N_ant  = get_uv_map(ncells, z, filename=filename, total_int_time=total_int_time, int_time=int_time, boxsize=boxsize, declination=declination)
 	if not N_ant: N_ant = np.loadtxt(filename, dtype=str).shape[0]
 	noise3d = np.zeros((ncells,ncells,ncells))
-	print "\nCreating the noise cube..."
+	print("\nCreating the noise cube...")
 	for k in xrange(ncells):
 		noise2d = noise_map(ncells, z, depth_mhz, obs_time=obs_time, filename=filename, boxsize=boxsize, total_int_time=total_int_time, int_time=int_time, declination=declination, uv_map=uv_map, N_ant=N_ant, verbose=verbose, fft_wrap=fft_wrap)
 		noise3d[:,:,k] = noise2d
 		verbose = False
 		perc = (k+1)*100/ncells
 		loading_verbose(str(perc)+'%')
-	print "...Noise cube created."
+	print("...Noise cube created.")
 	return jansky_2_kelvin(noise3d, z, boxsize=boxsize)
 
 def noise_cube_lightcone(ncells, z, obs_time=1000, filename=None, boxsize=None, total_int_time=6., int_time=10., declination=-30., N_ant=None, fft_wrap=False):
@@ -132,7 +132,7 @@ def noise_cube_lightcone(ncells, z, obs_time=1000, filename=None, boxsize=None, 
 	zs = cm.cdist_to_z(np.linspace(cm.z_to_cdist(z)-boxsize/2, cm.z_to_cdist(z)+boxsize/2, ncells))
 	if not N_ant: N_ant = np.loadtxt(filename, dtype=str).shape[0]
 	noise3d = np.zeros((ncells,ncells,ncells))
-	print "Creating the noise cube"
+	print("Creating the noise cube")
 	verbose = True
 	for k in xrange(ncells):
 		zi = zs[k]

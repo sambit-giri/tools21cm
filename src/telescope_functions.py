@@ -45,7 +45,7 @@ def from_antenna_config(filename, z, nu=None):
 		ux = (antxyz[ii,0]-antxyz[jj,0])/lam
 		uy = (antxyz[ii,1]-antxyz[jj,1])/lam
 		uz = (antxyz[ii,2]-antxyz[jj,2])/lam
-		if ux==0: print ii,jj
+		if ux==0: print(ii,jj)
 		Nbase.append([ux,uy,uz])
 	Nbase = np.array(Nbase)	
 	return Nbase, N_ant
@@ -101,7 +101,7 @@ def get_uv_daily_observation(ncells, z, filename=None, total_int_time=4., int_ti
 	uv_map0      = get_uv_coverage(Nbase, z, ncells, boxsize=boxsize)
 	uv_map       = np.zeros(uv_map0.shape)
 	tot_num_obs  = int(3600.*total_int_time/int_time)
-	print "Making uv map from daily observations."
+	print("Making uv map from daily observations.")
 	for i in xrange(tot_num_obs-1):
 		new_Nbase = earth_rotation_effect(Nbase, i+1, int_time, declination=declination)
 		uv_map1   = get_uv_coverage(new_Nbase, z, ncells, boxsize=boxsize)
@@ -174,9 +174,9 @@ def kanan_noise_image_ska(z, uv_map, depth_mhz, obs_time, int_time, N_ant_ska=56
 	rms_noi  = 1e6*np.sqrt(2)*KB_SI*T_sys/A_ant_ska/np.sqrt(depth_mhz*1e6*int_time)/janskytowatt #in muJy
 	sigma    = rms_noi/np.sqrt(N_ant_ska*(N_ant_ska-1)/2.0)/np.sqrt(3600*obs_time/int_time)      #in muJy
 	if verbose:
-		print '\nExpected: rms in image in muJy per beam for full =', sigma
-		print 'Effective baseline =', sigma*np.sqrt(N_ant_ska*N_ant_ska/2.0)/np.sqrt(effective_baseline), 'm'
-		print 'Calculated: rms in the visibility =', rms_noi, 'muJy'
+		print('\nExpected: rms in image in muJy per beam for full =', sigma)
+		print('Effective baseline =', sigma*np.sqrt(N_ant_ska*N_ant_ska/2.0)/np.sqrt(effective_baseline), 'm')
+		print('Calculated: rms in the visibility =', rms_noi, 'muJy')
 	return sigma, rms_noi
 
 def apply_uv_response(array, uv_map):

@@ -43,6 +43,6 @@ def circular_beam(ncells, z, D=0.35, beam_func='Gaussian', boxsize=None):
 		r2 = xx**2+yy**2
 		beam = 1.-1/(1+np.exp(b*r0-b*r2**0.5))
 	else:
-		print "Please choose between step, gaussian and sigmoid functions."
+		print("Please choose between step, gaussian and sigmoid functions.")
 
 	return beam/beam.max()

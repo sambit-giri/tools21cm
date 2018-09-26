@@ -139,8 +139,8 @@ def physical_slice_to_angular(input_slice, z, slice_size_mpc, fov_deg, dtheta, o
     padded_n = fov_deg*60./dtheta# np.round(slice_n*(fov_mpc/slice_size_mpc))
     if padded_n < slice_n:
         if slice_n - padded_n > 2:
-            print 'Warning! Padded slice is significantly smaller than original!'
-            print 'This should not happen...'
+            print('Warning! Padded slice is significantly smaller than original!')
+            print('This should not happen...')
         padded_n = slice_n
     padded_slice = _get_padded_slice(resampled_slice, padded_n)
     
@@ -166,8 +166,8 @@ def angular_slice_to_physical(input_slice, z, slice_size_deg, output_cell_size, 
     n_cutout_cells = int(output_size_mpc/output_cell_size)# np.round(resampled_slice.shape[0]*output_size_mpc/slice_size_mpc)
     if n_cutout_cells > input_slice.shape[0]:
         if input_slice.shape[0] - n_cutout_cells > 2:
-            print 'Warning! Cutout slice is larger than original.'
-            print 'This should not happen'
+            print('Warning! Cutout slice is larger than original.')
+            print('This should not happen')
         n_cutout_cells = input_slice.shape[0]
     slice_cutout = resampled_slice[:n_cutout_cells, :n_cutout_cells]
         

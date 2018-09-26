@@ -68,7 +68,7 @@ def calc_dt_full(xfrac, dens, temp, z = -1, correct=True):
 	
 	print_msg('Making full dT box for z=%f' % z)
 	
-        print "Calculating corrected dbt"
+        print("Calculating corrected dbt")
 	return _dt_full(rho, xi, Ts, z, correct)
 
 def calc_dt_lightcone(xfrac, dens, lowest_z, los_axis = 2):
@@ -145,7 +145,7 @@ def calc_dt_full_lightcone(xfrac, temp, dens, lowest_z, los_axis = 2, correct=Tr
 	cdist_low = cosmology.z_to_cdist(lowest_z)
 	cdist = np.arange(xfrac.shape[los_axis])*cell_size + cdist_low
 	z = cosmology.cdist_to_z(cdist)
-        print "Redshift: ", str(z)
+        print("Redshift: ", str(z))
 	return _dt_full(dens, xfrac,temp, z, correct)
 
 def mean_dt(z):
@@ -178,7 +178,7 @@ def _dt(rho, xi, z):
 
 def _dt_full(rho, xi, Ts, z, correct):
         z = np.mean(z)
-        print "Redshift:" , str(z)
+        print("Redshift:" , str(z))
         rho_mean = const.rho_crit_0*const.OmegaB
         Tcmb 	 = const.Tcmb0*(1+z) 
         Cdt      = mean_dt(z)
@@ -206,7 +206,7 @@ def _dt_full(rho, xi, Ts, z, correct):
                 # the temperature of the ionized part is T_HII
 		Ts_new = Ts-xi*T_HII/(1.-xi)
 		Ts_new[Ts_new < T_min] = T_min
-                if np.any(Ts_new < 0): print "WARNING: negative temperatures"
+                if np.any(Ts_new < 0): print("WARNING: negative temperatures")
         # Calculate the differential temperature brightness
         dt = ((Ts_new-Tcmb)/Ts_new)*Cdt*(1.0-xi)*rho/rho_mean
         return dt

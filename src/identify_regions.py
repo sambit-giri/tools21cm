@@ -72,7 +72,7 @@ def threshold_kmeans(cube, upper_lim=False, mean_remove=True, n_jobs=1):
 	else: t_th = X[y==1].max()
 	if upper_lim: array[cube<=t_th] = 1
 	else: array[cube>t_th] = 1
-	print "The output contains a tuple with binary-cube and determined-threshold."
+	print("The output contains a tuple with binary-cube and determined-threshold.")
 	return array, t_th
 	
 def threshold_kmeans_3cluster(cube, upper_lim=False, n_jobs=1):

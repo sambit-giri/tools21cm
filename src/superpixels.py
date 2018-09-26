@@ -14,13 +14,13 @@ def slic_cube(cube, n_segments=5000, compactness=0.1, max_iter=20, sigma=0, min_
 	else:
 		multichannel = False
 	labels = slic(cube, n_segments=n_segments, compactness=compactness, max_iter=max_iter, sigma=sigma, max_size_factor=max_size_factor, slic_zero=True, multichannel=multichannel)
-	print "The output contains the labels created by SLIC with", n_segments, "segments."
+	print("The output contains the labels created by SLIC with %d segments"%(label.max()+1))
 	return labels
 
 def see_label(out_map, label):
 	binary = np.zeros(out_map.shape)
 	if out_map[out_map==label].size: binary[out_map==label] = 1
-	else: print "The entered label in not present in the map."
+	else: print("The entered label in not present in the map.")
 	return binary
 
 def binary_stitch(data, labels, stitch='mean', thres=None):
@@ -54,7 +54,7 @@ def under_segmentation_error(labels, truths, b=0.25, verbose=True):
 			ss[labels==j] = 1
 			inter = gg+ss
 			if inter[inter==2].size > b*ss.sum(): uu += ss.sum()
-			if verbose: print i, j
+			if verbose: print(i, j)
 	U = (uu-labels.size)/labels.size
 	return U
 

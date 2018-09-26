@@ -83,7 +83,7 @@ def coeval_21cm_c2ray(xfrac_dir, dens_dir, z, interpolation='linear', mean_subtr
 	dt    = tm.calc_dt(xfrac, dens, z=z)
 	if mean_subtract: 
 		for i in xrange(dt.shape[2]): dt[:,:,i] -= dt[:,:,i].mean()
-		print "Mean is subtracted along third axis."
+		print("Mean is subtracted along third axis.")
 	return dt
 
 
@@ -106,8 +106,8 @@ def coeval_xfrac_c2ray(xfrac_dir, z, interpolation='linear'):
 		xfrac_l = XfracFile(xfrac_files[xfrac_zs[xfrac_zs<z].argmax()]).xi
 		xfrac_h = XfracFile(xfrac_files[xfrac_zs[xfrac_zs>z].argmin()]).xi
 		xfrac = xfrac_h + (xfrac_l-xfrac_h)*(z-z_h)/(z_l-z_h)
-		print "The xfrac cube has been interpolated using", interpolation, "interpolation."
-		print "CAUTION: This data should be used with care."
+		print("The xfrac cube has been interpolated using %s interpolation." %interpolation)
+		print("CAUTION: This data should be used with care.")
 	return xfrac
 
 def coeval_dens_c2ray(dens_dir, z):
@@ -127,8 +127,8 @@ def coeval_dens_c2ray(dens_dir, z):
 		dens_h, dtype = helper_functions.get_data_and_type(dens_files[dens_zs[dens_zs>z].argmin()])
 		#dens = dens_h + (dens_l-dens_h)*(z-z_h)/(z_l-z_h)
 		dens = dens_h*(1+z_h)**3/(1+z)**3
-		#print "The density cube has been interpolated using", interpolation, "interpolation."
-		print "The density has been scaled from the density at the previous time."
+		#print("The density cube has been interpolated using %s interpolation."%interpolation)
+		print("The density has been scaled from the density at the previous time.")
 	return dens.astype(np.float64)
 
 def subtract_mean_channelwise(dt, axis=-1):

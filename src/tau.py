@@ -39,7 +39,7 @@ def tau(ionfractions, redshifts, num_points = 50):
 	'''
 	
 	if len(ionfractions) != len(redshifts):
-		print 'Incorrect length of ionfractions'
+		print('Incorrect length of ionfractions')
 		raise Exception()
 
 	sigma_T = 6.65e-25
