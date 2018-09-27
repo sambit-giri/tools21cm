@@ -54,10 +54,10 @@ def calc_dt_full(xfrac, dens, temp, z = -1, correct=True):
 	'''
 
 	xi, xi_type   = get_data_and_type(xfrac)
-        Ts, Ts_type   = get_data_and_type(temp)
+	Ts, Ts_type   = get_data_and_type(temp)
 	rho, rho_type = get_data_and_type(dens)
 	xi  = xi.astype('float64')
-        Ts  = Ts.astype('float64')
+	Ts  = Ts.astype('float64')
 	rho = rho.astype('float64')
 	
 	if z < 0:
@@ -68,7 +68,7 @@ def calc_dt_full(xfrac, dens, temp, z = -1, correct=True):
 	
 	print_msg('Making full dT box for z=%f' % z)
 	
-        print("Calculating corrected dbt")
+	print("Calculating corrected dbt")
 	return _dt_full(rho, xi, Ts, z, correct)
 
 def calc_dt_lightcone(xfrac, dens, lowest_z, los_axis = 2):
@@ -131,7 +131,7 @@ def calc_dt_full_lightcone(xfrac, temp, dens, lowest_z, los_axis = 2, correct=Tr
 		xfrac = read_cbin(xfrac)
 	except Exception:
 		pass
-        try:
+	try:
 		temp = read_cbin(temp)
 	except Exception:
 		pass
@@ -145,7 +145,7 @@ def calc_dt_full_lightcone(xfrac, temp, dens, lowest_z, los_axis = 2, correct=Tr
 	cdist_low = cosmology.z_to_cdist(lowest_z)
 	cdist = np.arange(xfrac.shape[los_axis])*cell_size + cdist_low
 	z = cosmology.cdist_to_z(cdist)
-        print("Redshift: ", str(z))
+	print("Redshift: ", str(z))
 	return _dt_full(dens, xfrac,temp, z, correct)
 
 def mean_dt(z):
@@ -204,8 +204,8 @@ def _dt_full(rho, xi, Ts, z, correct):
                 # assuming that the ionized part of the cell is fully ionized
                 # (so a fraction xi of the cell's volume is ionized) and that
                 # the temperature of the ionized part is T_HII
-		Ts_new = Ts-xi*T_HII/(1.-xi)
-		Ts_new[Ts_new < T_min] = T_min
+                Ts_new = Ts-xi*T_HII/(1.-xi)
+                Ts_new[Ts_new < T_min] = T_min
                 if np.any(Ts_new < 0): print("WARNING: negative temperatures")
         # Calculate the differential temperature brightness
         dt = ((Ts_new-Tcmb)/Ts_new)*Cdt*(1.0-xi)*rho/rho_mean

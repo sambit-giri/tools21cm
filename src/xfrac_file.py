@@ -48,12 +48,12 @@ class XfracFile:
 		self.filename = filename
 
 		f = open(filename, 'rb')
-                if binary_format:
-                        temp_mesh = np.fromfile(f, count=3, dtype='int32')
-                        self.mesh_x, self.mesh_y, self.mesh_z = temp_mesh[0:2]
-                else:
-                        temp_mesh = np.fromfile(f, count=6, dtype='int32')
-                        self.mesh_x, self.mesh_y, self.mesh_z = temp_mesh[1:4]
+		if binary_format:
+			temp_mesh = np.fromfile(f, count=3, dtype='int32')
+			self.mesh_x, self.mesh_y, self.mesh_z = temp_mesh[0:2]
+		else:
+			temp_mesh = np.fromfile(f, count=6, dtype='int32')
+			self.mesh_x, self.mesh_y, self.mesh_z = temp_mesh[1:4]
 
 		if old_format:
 			self.xi = np.fromfile(f, dtype='float32')
@@ -62,7 +62,7 @@ class XfracFile:
 		self.xi = self.xi.reshape((self.mesh_x, self.mesh_y, self.mesh_z), order='F')
 
 		if neutral:
-                        self.xi = 1.0-self.xi
+			self.xi = 1.0-self.xi
 
 		f.close()
 		print_msg('...done')

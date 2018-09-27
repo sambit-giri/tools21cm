@@ -3,7 +3,8 @@ import sys
 from mpi4py import MPI
 from mpi4py.MPI import ANY_SOURCE
 from scipy.interpolate import interp1d
-import c2raytools as c2t
+#import c2raytools as c2t
+import cosmology as cm
 
 lam_lya   = 1215.                #Ang
 lam_HII   = 912.                 #Ang
@@ -34,7 +35,7 @@ def one_source(ncells, boxsize, source_pos, mass, sed_func):
 	xx,yy,zz = np.mgrid[0:ncells,0:ncells,0:ncells]
 	rr2 = ((xx-i)**2 + (yy-j)**2 + (zz-k)**2)*boxsize**2/ncells**2
 	rr  = np.sqrt(rr2)
-	zss = c2t.cdist_to_z(rr)
+	zss = cm.cdist_to_z(rr)
 	lms = lam_lya/(1+zss)
 	eng = sed_func(lms)*mass*dlam/(4*np.pi*rr2)
 	eng[lms<=lam_HII] = 0
@@ -66,13 +67,13 @@ if rank==1 and remain!=0:
 		print('sources or 100 \% done'%(n_src-remain+cc))
 	
 if rank == 0:
-        for i in range(1, size):
+	for i in range(1, size):
 		recv_buffer = np.empty(local_n, dtype=np.int)
-                comm.Recv(recv_buffer, ANY_SOURCE)
-                xc_cube += recv_buffer
+		comm.Recv(recv_buffer, ANY_SOURCE)
+		xc_cube += recv_buffer
 else:
-        # all other process send their result
-        comm.Send(np.array(xc_cube))
+	# all other process send their result
+	comm.Send(np.array(xc_cube))
 
 if comm.rank == 0:
 	np.save(flname, xc_cube)

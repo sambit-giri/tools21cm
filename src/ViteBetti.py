@@ -47,7 +47,7 @@ def EulerCharacteristic_seq(A):
 	chi = 0;
 	nx,ny,nz = A.shape
 	for x in xrange(nx):
-		  for y in xrange(ny):
+		for y in xrange(ny):
 			for z in xrange(nz):
 				if(A[x,y,z] == 1):
 					if (x+y+z)%2 == 0: chi += 1

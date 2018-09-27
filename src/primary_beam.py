@@ -1,7 +1,7 @@
 import numpy as np
-import tools21cm as t2c
+import cosmology as cm
 from glob import glob
-
+import conv
 
 def primary_beam(array, z, nu_axis=2, beam_func='Gaussian', boxsize=None, D=0.35):
 	"""
@@ -16,7 +16,7 @@ def primary_beam(array, z, nu_axis=2, beam_func='Gaussian', boxsize=None, D=0.35
 	D        : Diameter of the dish in metres. Default: 0.35
 	"""
 	assert array.ndim > 1
-	if boxsize is None: boxsize = t2c.conv.LB
+	if boxsize is None: boxsize = conv.LB
 	beam = np.zeros(array.shape)
 	if array.ndim == 2: return array*circular_beam(array.shape[0], z, D=D, beam_func=beam_func, boxsize=boxsize)
 	if nu_axis!=2 : array = np.swapaxes(array, nu_axis, 2)
@@ -28,9 +28,9 @@ def primary_beam(array, z, nu_axis=2, beam_func='Gaussian', boxsize=None, D=0.35
 	return beamed
 
 def circular_beam(ncells, z, D=0.35, beam_func='Gaussian', boxsize=None):
-	if boxsize is None: boxsize = t2c.conv.LB
-	HWHM_beam = t2c.nu_to_wavel(t2c.z_to_nu(z))/D/2
-	n_FWHM = ncells*HWHM_beam*2/t2c.angular_size_comoving(boxsize, z)
+	if boxsize is None: boxsize = conv.LB
+	HWHM_beam = cm.nu_to_wavel(cm.z_to_nu(z))/D/2
+	n_FWHM = ncells*HWHM_beam*2/cm.angular_size_comoving(boxsize, z)
 	xx, yy = np.mgrid[-ncells/2:ncells/2,-ncells/2:ncells/2]
 	if beam_func.lower()=='step':
 		beam = np.zeros((nx,ny))

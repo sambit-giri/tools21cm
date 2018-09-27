@@ -15,7 +15,7 @@ def EulerCharacteristic(data, thres=0.5, neighbors=6):
 	           Ignore this parameter if data is already a binary field.
 	neighbors: Define the connectivity to the neighbors (Default: 6).
 	"""
-        A = 1*(data>thres)
+	A = 1*(data>thres)
 	if 'numba' in sys.modules: import ViteBetti_numba as VB
 	else: import ViteBetti as VB
 	if neighbors==6 or neighbors==4: C = VB.CubeMap(A)
