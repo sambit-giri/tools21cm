@@ -4,8 +4,8 @@ Created on 12 April 2017
 Setup script
 '''
 
-from setuptools import setup, find_packages
-#from distutils.core import setup
+#from setuptools import setup, find_packages
+from distutils.core import setup
 
 
 setup(name='tools21cm',
