@@ -46,7 +46,7 @@ def one_source(z, ncells, boxsize, source_pos, mass, sed_func):
 	xx,yy,zz = np.mgrid[0:ncells,0:ncells,0:ncells]
 	rr2 = ((xx-i)**2 + (yy-j)**2 + (zz-k)**2)*boxsize**2/ncells**2
 	rr  = np.sqrt(rr2)
-	zss = c2t.cdist_to_z(rr+c2t.z_to_cdist(z))
+	zss = cm.cdist_to_z(rr+cm.z_to_cdist(z))
 	rp2 = rr2/(1.0+zss)**2
 	lms = lam_lya*(1+z)/(1+zss)
 	eng = sed_func(lms)*mass*dlam/(4*np.pi*rp2)
@@ -82,7 +82,7 @@ def Lya_coupling_coeff_(ncells, boxsize, sourcelist, z=-1, SED=None, lum=None, l
 		if type(lam)==str: lam = np.loadtxt(lam)   # angstrom
 	sed_func = interp1d(lam, lum, kind='cubic')
 	rr  = 10**np.linspace(-2,np.log10(boxsize*1.8),1000)
-	zs  = c2t.cdist_to_z(rr+c2t.z_to_cdist(z))
+	zs  = cm.cdist_to_z(rr+cm.z_to_cdist(z))
 	lms = lam_lya*(1+z)/(1+zs)
 	zs_HII = zs[lms<=lam_HII].min()
 	rp  = rr/(1.0+zs)
@@ -105,7 +105,7 @@ def one_source_(xx, yy, zz, z, ncells, boxsize, source_pos, mass, eng_func, zs_H
 	i,j,k = source_pos
 	rr2 = ((xx-i)**2 + (yy-j)**2 + (zz-k)**2)*boxsize**2/ncells**2
 	rr  = np.sqrt(rr2); rr[rr==0] = 0.1
-	zss = c2t.cdist_to_z(rr+c2t.z_to_cdist(z))
+	zss = cm.cdist_to_z(rr+cm.z_to_cdist(z))
 	eng = eng_func(zss)
 	eng[zss>=zs_HII] = 0.
 	n_a = eng*mass/E_lya
@@ -156,7 +156,7 @@ def _get_xc(sources, engs, ncells, mass_axis=3, time_taken=False):
 def _get_profile(z, lam, lum, boxsize, ncells, r_min, r_max):
 	sed_func = interp1d(lam, lum, kind='cubic')
 	rs = 10**np.linspace(-2,np.log10(boxsize*1.8),1000)
-	zs  = c2t.cdist_to_z(rs+c2t.z_to_cdist(z))
+	zs  = cm.cdist_to_z(rs+cm.z_to_cdist(z))
 	lms = lam_lya*(1+z)/(1+zs)
 	rp  = rs/(1.0+zs)
 	rs_HII = rs[lms<=lam_HII].min()
