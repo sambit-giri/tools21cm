@@ -24,9 +24,9 @@ def EulerCharacteristic(data, thres=0.5, neighbors=6):
         #E = VB.EulerCharacteristic_seq(C)/2. + VB.EulerCharacteristic_seq(D)/2.
 	elem, count = np.unique(C, return_counts=1)
 	V = count[elem==1] if len(count[elem==1])!=0 else 0
-	E = count[elem==2] if len(count[elem==1])!=0 else 0
-	F = count[elem==3] if len(count[elem==1])!=0 else 0
-	C = count[elem==4] if len(count[elem==1])!=0 else 0
+	E = count[elem==2] if len(count[elem==2])!=0 else 0
+	F = count[elem==3] if len(count[elem==3])!=0 else 0
+	C = count[elem==4] if len(count[elem==4])!=0 else 0
 	return float(V-E+F-C)
 
 def betti0(data, thres=0.5, neighbors=6):
