@@ -103,7 +103,7 @@ def barrel_filter(z, ncells=None, array=None, boxsize=None, k_par_min=None, smal
 	ss[k2<=k_par_min] = 0
 	filt = np.zeros((ncells,ncells,ncells))
 	for i in xrange(ncells): filt[:,:,i] = filt
-	if array.shape[2]<ncells: filt = filt[:,:,ncells/2-array.shape[2]/2:ncells/2+array.shape[2]/2]
+	if array is not None: if array.shape[2]<ncells: filt = filt[:,:,ncells/2-array.shape[2]/2:ncells/2+array.shape[2]/2]
 	print("A barrel filter made with step function.")
 	return filt	
 
