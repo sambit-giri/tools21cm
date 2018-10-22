@@ -30,7 +30,7 @@ def read_21cmfast_files(filename):
 	Numpy array
 	"""
 	bla = _load_binary_data(filename)
-	dim = round(bla.size**0.333333)
+	dim = int(round(bla.size**0.333333))
 	return bla.reshape(dim,dim,dim)
 
 def read_c2ray_files(filename, file_type='xfrac', density_file=None):
