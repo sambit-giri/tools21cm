@@ -49,7 +49,7 @@ def physical_lightcone_to_observational(physical_lightcone, input_z_low, output_
     n_cells_nu = len(output_freqs)
     #Go through each slice and make angular slices for each one
     hf.print_msg('Binning in angle...')
-    output_volume = np.zeros((n_cells_theta, n_cells_theta, n_cells_nu))
+    output_volume = np.zeros((int(n_cells_theta), int(n_cells_theta), int(n_cells_nu)))
     for i in range(n_cells_nu):
         if i%10 == 0:
             hf.print_msg('Slice %d of %d' % (i, n_cells_nu))
@@ -216,7 +216,7 @@ def bin_lightcone_in_frequency(lightcone, z_low, box_size_mpc, dnu):
     
     #Bin in frequencies by smoothing and indexing
     max_cell_size = cm.nu_to_cdist(output_frequencies[-1])-cm.nu_to_cdist(output_frequencies[-2])
-    smooth_scale = np.round(max_cell_size/cell_size)
+    smooth_scale = np.round(max_cell_size/cell_size).astype(int)
     if smooth_scale < 1:
         smooth_scale = 1
 
@@ -260,6 +260,7 @@ def bin_lightcone_in_mpc(lightcone, frequencies, cell_size_mpc):
 
 def _get_padded_slice(input_slice, padded_n):
     slice_n = input_slice.shape[0]
+    padded_n = int(padded_n)
     padded_slice = np.zeros((padded_n, padded_n))
     padded_slice[:slice_n, :slice_n] = input_slice
     padded_slice[slice_n:, :slice_n] = input_slice[:(padded_n-slice_n),:slice_n]

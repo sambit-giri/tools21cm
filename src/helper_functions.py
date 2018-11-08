@@ -493,7 +493,7 @@ def find_idx(ar, values):
 	if decreasing:
 		out = len(ar)-1-out
 	
-	return outputify(out)
+	return outputify(out).astype(int)
 
 
 def get_eval():
