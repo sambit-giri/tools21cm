@@ -243,7 +243,7 @@ def read_fits(filename, header=True):
 		numpy array containing the data
 	'''
 
-	import pyfits as pf
+	import astropy.io.fits as pf
 	hdulist = pf.open(filename)
 	header = hdulist[0].header
 	data = hdulist[0].data.astype('float64')
@@ -265,7 +265,7 @@ def save_fits(data, filename, header=None):
 		Nothing
 	
 	'''
-	import pyfits as pf
+	import astropy.io.fits as pf
 	
 	save_data, datatype = get_data_and_type(data)
 	
