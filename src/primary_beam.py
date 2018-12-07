@@ -11,7 +11,7 @@ def primary_beam(array, z, nu_axis=2, beam_func='Gaussian', boxsize=None, D=0.35
 	           frequency axis of the array.
 	nu_axis  : The frequency axis of the array (Default: 2) 
 	beam_func: The type of function to model the primary beam. The options are 'gaussian', 'sigmoid'
-		   and 'step'. Default: 'circular'
+		   and 'step'. Default: 'gaussian'
 	boxsize  : Size of the box in physical units (cMpc). Default: From set simulation constants.
 	D        : Diameter of the dish in metres. Default: 0.35
 	"""
