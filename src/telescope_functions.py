@@ -132,13 +132,13 @@ def get_uv_coverage(Nbase, z, ncells, boxsize=None):
 	if not boxsize: boxsize = conv.LB
 	uv_map = np.zeros((ncells,ncells))
 	theta_max = boxsize/cm.z_to_cdist(z)
-	Nb  = np.round(Nbase*theta_max)
-	Nb  = Nb[(Nb[:,0]<ncells)]
-	Nb  = Nb[(Nb[:,1]<ncells)]
-	Nb  = Nb[(Nb[:,2]<ncells)]
-	Nb  = Nb[(Nb[:,0]>-ncells)]
-	Nb  = Nb[(Nb[:,1]>-ncells)]
-	Nb  = Nb[(Nb[:,2]>-ncells)]
+	Nb  = np.round(Nbase*theta_max/2)
+	Nb  = Nb[(Nb[:,0]<ncells/2)]
+	Nb  = Nb[(Nb[:,1]<ncells/2)]
+	Nb  = Nb[(Nb[:,2]<ncells/2)]
+	Nb  = Nb[(Nb[:,0]>=-ncells/2)]
+	Nb  = Nb[(Nb[:,1]>=-ncells/2)]
+	Nb  = Nb[(Nb[:,2]>=-ncells/2)]
 	xx,yy,zz = Nb[:,0], Nb[:,1], Nb[:,2]
 	for p in xrange(xx.shape[0]): uv_map[int(xx[p]),int(yy[p])] += 1
 	return uv_map
