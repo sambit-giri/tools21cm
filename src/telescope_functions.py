@@ -130,19 +130,29 @@ def get_uv_coverage(Nbase, z, ncells, boxsize=None):
 	"""
 	z = float(z)
 	if not boxsize: boxsize = conv.LB
-	uv_map = np.zeros((ncells,ncells))
+	uv_map = np.zeros((ncells+2,ncells+2))
 	theta_max = boxsize/cm.z_to_cdist(z)
-	Nb  = np.round(Nbase*theta_max/2)
-	Nb  = Nb[(Nb[:,0]<ncells/2)]
-	Nb  = Nb[(Nb[:,1]<ncells/2)]
-	Nb  = Nb[(Nb[:,2]<ncells/2)]
-	Nb  = Nb[(Nb[:,0]>=-ncells/2)]
-	Nb  = Nb[(Nb[:,1]>=-ncells/2)]
-	Nb  = Nb[(Nb[:,2]>=-ncells/2)]
-	xx,yy,zz = Nb[:,0], Nb[:,1], Nb[:,2]
-	for p in xrange(xx.shape[0]): uv_map[int(xx[p]),int(yy[p])] += 1
+	Nb  = np.round(np.abs(Nbase)*theta_max)
+	#xi,yi = np.arange(ncells+2),np.arange(ncells+2)
+	for xx,yy,zz in Nb: 
+		if xx<ncells+2 and yy<ncells+2: uv_map[int(xx), int(yy)] += 1
+	#uv_map[np.abs(xi-xx).argmin(), np.abs(yi-yy).argmin()] += 1
+	#Nb  = Nb[(Nb[:,0]<ncells)]
+	#Nb  = Nb[(Nb[:,1]<ncells)]
+	#Nb  = Nb[(Nb[:,2]<ncells)]
+	#Nb  = Nb[(Nb[:,0]>0)]
+	#Nb  = Nb[(Nb[:,1]>0)]
+	#Nb  = Nb[(Nb[:,2]>0)]
+	#xx,yy,zz = Nb.T
+	#for xx,yy,zz in Nb:#p in xrange(xx.shape[0]): 
+	#	#if xx!=0 and yy!=0:
+	#	ii = xx if xx<ncells/2 else -xx
+	#	jj = yy if yy<ncells/2 else -yy
+	#	uv_map[ii,jj] += 1
+	uv_map = uv_map[1:-1,1:-1]
+	uv_map = np.fliplr(uv_map)+uv_map
+	uv_map = np.flipud(uv_map)+uv_map
 	return uv_map
-
 
 def kanan_noise_image_ska(z, uv_map, depth_mhz, obs_time, int_time, N_ant_ska=564., verbose=True):
 	"""
