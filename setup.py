@@ -9,7 +9,7 @@ from distutils.core import setup
 
 
 setup(name='tools21cm',
-      version='0.1',
+      version='1.0',
       author='Sambit Giri',
       author_email='sambit.giri@astro.su.se',
       package_dir = {'tools21cm' : 'src'},
