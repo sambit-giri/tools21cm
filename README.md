@@ -1,6 +1,6 @@
 Tools21cm
 -------------
-Tools21cm python2 package is meant for analysing 21-cm signals from the Epoch of Reionization (EoR) and Cosmic Dawn (CD).
+Tools21cm python3 package is meant for analysing 21-cm signals from the Epoch of Reionization (EoR) and Cosmic Dawn (CD).
 
 PREREQUISITES
 -------------
