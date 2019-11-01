@@ -54,7 +54,7 @@ def tau(ionfractions, redshifts, num_points = 50):
 	#Optical depth for a completely ionized Universe
 	tau0[0:num_points] = coeff*(np.sqrt(const.Omega0*(1+tau_z[0:num_points])**3+const.lam) - 1)
 
-	for i in xrange(num_points, len(redshifts)+num_points):
+	for i in range(num_points, len(redshifts)+num_points):
 		tau0[i] =tau0[i-1]+1.5*coeff*const.Omega0 * \
 		(ionfractions[i-1-num_points]*(1+tau_z[i-1])**2/np.sqrt(const.Omega0*(1+tau_z[i-1])**3+const.lam) \
 		+ ionfractions[i-num_points]*(1+tau_z[i])**2/np.sqrt(const.Omega0*(1+tau_z[i])**3+const.lam) ) * \
