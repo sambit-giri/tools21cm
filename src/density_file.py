@@ -1,7 +1,7 @@
 import numpy as np
-import const
-import conv
-from helper_functions import print_msg
+from . import const
+from . import conv
+from .helper_functions import print_msg
 
 class DensityFile:
 	'''

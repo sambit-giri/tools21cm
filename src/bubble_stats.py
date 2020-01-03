@@ -1,9 +1,9 @@
 import numpy as np
-from Friends_of_Friends import FoF_search
+from .Friends_of_Friends import FoF_search
 from scipy import ndimage
 import os,sys
 import datetime, time
-import mfp_np, spa_np, conv
+from . import mfp_np, spa_np, conv
 from scipy.interpolate import interp1d
 
 def fof(data, xth=0.5, neighbors=4, use_skimage=False):
@@ -173,7 +173,9 @@ def mfp(data, xth=0.5, boxsize=None, iterations = 10000000, verbose=True, upper_
 	------
 	The output contains a tuple with three values: r, rdP/dr.
 	"""
-	if boxsize is None: boxsize = conv.LB
+	if boxsize is None:
+		boxsize = conv.LB
+		print('Boxsize is set to %.2f Mpc.'%boxsize) 
 	dim = len(data.shape)
 	t1 = datetime.datetime.now()
 	if (upper_lim): 

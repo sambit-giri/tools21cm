@@ -1,8 +1,8 @@
 import numpy as np
 #import c2raytools as c2t
-from telescope_functions import jansky_2_kelvin, from_antenna_config
-import cosmology as cm
-import conv
+from .telescope_functions import jansky_2_kelvin, from_antenna_config
+from . import cosmology as cm
+from . import conv
 
 def galactic_synch_fg(z, ncells, boxsize, max_baseline=2.):
 	"""
@@ -84,8 +84,7 @@ def diabolo_filter(z, ncells=None, array=None, boxsize=None, mu=0.5, funct='step
 			ss[k2<=kpr]  = 0
 		ss[k2<=kmin] = 0
 		filt[:,:,i] = ss
-	if array is not None:
-		if array.shape[2]<ncells: filt = filt[:,:,ncells/2-array.shape[2]/2:ncells/2+array.shape[2]/2]
+	if array.shape[2]<ncells: filt = filt[:,:,ncells/2-array.shape[2]/2:ncells/2+array.shape[2]/2]
 	print("A diabolo filter made with %s function."%funct)
 	return filt
 
@@ -104,8 +103,7 @@ def barrel_filter(z, ncells=None, array=None, boxsize=None, k_par_min=None, smal
 	ss[k2<=k_par_min] = 0
 	filt = np.zeros((ncells,ncells,ncells))
 	for i in xrange(ncells): filt[:,:,i] = filt
-	if array is not None: 
-		if array.shape[2]<ncells: filt = filt[:,:,ncells/2-array.shape[2]/2:ncells/2+array.shape[2]/2]
+	if array.shape[2]<ncells: filt = filt[:,:,ncells/2-array.shape[2]/2:ncells/2+array.shape[2]/2]
 	print("A barrel filter made with step function.")
 	return filt	
 

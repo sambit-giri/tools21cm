@@ -1,7 +1,6 @@
-import const
-import conv
-from helper_functions import print_msg
-import density_file as df
+from . import const, conv
+from .helper_functions import print_msg
+from . import density_file as df
 import numpy as np
 
 class VelocityFile:

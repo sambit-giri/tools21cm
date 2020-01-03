@@ -1,9 +1,9 @@
 #Various functions for calculating some cosmological stuff
-import const
+from .import const
 import numpy as np
 from scipy.integrate import quadrature
 from scipy.interpolate import interp1d
-from helper_functions import outputify
+from .helper_functions import outputify
 
 #Precalculated table of comoving distances at various redshifts
 precalc_table_z = np.hstack((np.arange(0,1,0.02), 10**np.linspace(0,2,200)))
@@ -112,7 +112,7 @@ def luminosity_distance(z, k=0):
         return dlum
     else:
         dlum = np.zeros(n)
-        for i in xrange(n):
+        for i in range(n):
             if z[i] <= 0:
                 dlum[i] = 0.0
             else:

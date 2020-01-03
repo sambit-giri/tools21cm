@@ -1,8 +1,8 @@
 import numpy as np
-import xfrac_file
-import density_file
-import conv
-from helper_functions import get_data_and_type
+from . import xfrac_file
+from . import density_file
+from . import conv
+from .helper_functions import get_data_and_type
 
 def plot_slice(data, los_axis = 0, slice_num = 0, logscale = False, **kwargs):
     '''

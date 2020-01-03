@@ -1,7 +1,7 @@
 import numpy as np
-import const
-import conv
-from helper_functions import print_msg, get_eval
+from . import const
+from . import conv
+from .helper_functions import print_msg, get_eval
 from scipy import fftpack
 
 
@@ -33,7 +33,7 @@ def power_spectrum_nd(input_array, box_dims=None):
 	print_msg( '...done')
 
 	# scale
-	boxvol = np.product(map(float,box_dims))
+	boxvol = np.product(box_dims)
 	pixelsize = boxvol/(np.product(input_array.shape))
 	power_spectrum *= pixelsize**2/boxvol
 	

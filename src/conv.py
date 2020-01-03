@@ -1,8 +1,8 @@
 #Various values and functions to deal with unit conversions regarding file types
 
-import const
+from . import const
 import numpy as np
-import helper_functions as hf
+from . import helper_functions as hf
 
 #Conversion factors and other stuff relating to C2Ray simulations
 boxsize=244.0

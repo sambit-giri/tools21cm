@@ -1,7 +1,5 @@
-
 import numpy as np
-from power_spectrum import _get_dims, power_spectrum_nd, _get_k,\
- _get_kbins, _get_mu, get_eval, _get_nonzero_idx
+from .power_spectrum import _get_dims, power_spectrum_nd, _get_k, _get_kbins, _get_mu, get_eval, _get_nonzero_idx
 
 def power_spectrum_multipoles(input_array, kbins = 10, box_dims = None,\
                                los_axis = 0, output=['P0', 'P2', 'P4', 'nmodes'], exclude_zero_modes=False):

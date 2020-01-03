@@ -1,15 +1,13 @@
-import const
-import conv
+from . import const, conv
 import numpy as np
-import os
-import glob
-from helper_functions import get_mesh_size, \
+import os, glob
+from .helper_functions import get_mesh_size, \
     determine_redshift_from_filename, get_data_and_type, print_msg, find_idx
-from density_file import DensityFile
-from vel_file import VelocityFile
-import cosmology as cm
-import statistics as st
-import smoothing
+from .density_file import DensityFile
+from .vel_file import VelocityFile
+from . import cosmology as cm
+from . import statistics as st
+from . import smoothing
 import scipy.interpolate
 
 def make_lightcone(filenames, z_low = None, z_high = None, file_redshifts = None, \
@@ -94,7 +92,7 @@ def make_lightcone(filenames, z_low = None, z_high = None, file_redshifts = None
         if z_bracket_low_new != z_bracket_low:
             z_bracket_low = z_bracket_low_new
             file_idx = np.argmin(np.abs(file_redshifts - z_bracket_low))
-            if data_high is None:
+            if data_high == None:
                 data_low, datatype = get_data_and_type(filenames[file_idx], cbin_bits, cbin_order, raw_density)
             else: #No need to read the file again
                 data_low = data_high
@@ -441,7 +439,7 @@ def _get_file_redshifts(redshifts_in, filenames):
     
     if hasattr(redshifts_in, '__iter__'):
         redshifts_out = redshifts_in
-    elif redshifts_in is None:
+    elif redshifts_in == None:
         redshifts_out = [determine_redshift_from_filename(f) for f in filenames]
         redshifts_out = np.array(redshifts_out)
     elif os.path.exists(redshifts_in):

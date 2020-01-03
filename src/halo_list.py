@@ -1,7 +1,7 @@
 import numpy as np
-from helper_functions import print_msg
-import const
-import conv
+from .helper_functions import print_msg
+from . import const
+from . import conv
 
 #A simple struct to hold info about single halo
 class Halo:

@@ -6,7 +6,7 @@ Created on Apr 23, 2015
 
 import numpy as np
 from scipy import fftpack
-from power_spectrum import _get_dims, _get_k, power_spectrum_1d
+from .power_spectrum import _get_dims, _get_k, power_spectrum_1d
 from scipy.interpolate import interp1d
 
 def make_gaussian_random_field(dims, box_dims, power_spectrum, random_seed=None):

@@ -1,6 +1,6 @@
-import const
+from . import const
 import numpy as np
-from helper_functions import print_msg
+from .helper_functions import print_msg
 
 class IonRateFile:
     '''

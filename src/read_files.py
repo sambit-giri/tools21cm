@@ -1,9 +1,8 @@
 import numpy as np
-#import c2raytools as c2t
 import glob
-from xfrac_file import XfracFile
-import helper_functions, density_file, vel_file, lightcone
-import temperature as tm
+from .xfrac_file import XfracFile
+from . import helper_functions, density_file, vel_file, lightcone
+from . import temperature as tm
 import sys
 
 def _load_binary_data(filename, dtype=np.float32): 
@@ -30,7 +29,7 @@ def read_21cmfast_files(filename):
 	Numpy array
 	"""
 	bla = _load_binary_data(filename)
-	dim = int(round(bla.size**0.333333))
+	dim = round(bla.size**0.333333)
 	return bla.reshape(dim,dim,dim)
 
 def read_c2ray_files(filename, file_type='xfrac', density_file=None):

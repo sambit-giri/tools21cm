@@ -1,6 +1,6 @@
 import numpy as np
 from scipy.interpolate import interp1d, interp2d
-from usefuls import *
+from .usefuls import *
 import os, glob
 import time, timeit
 

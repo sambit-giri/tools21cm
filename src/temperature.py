@@ -1,8 +1,7 @@
 import numpy as np
-import const
-import conv
-import cosmology
-from helper_functions import print_msg, read_cbin, \
+from . import const, conv
+from . import cosmology
+from .helper_functions import print_msg, read_cbin, \
 	get_data_and_type, determine_redshift_from_filename
 
 def calc_dt(xfrac, dens, z = -1):

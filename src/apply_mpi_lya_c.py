@@ -4,7 +4,7 @@ from mpi4py import MPI
 from mpi4py.MPI import ANY_SOURCE
 from scipy.interpolate import interp1d
 #import c2raytools as c2t
-import cosmology as cm
+from . import cosmology as cm
 
 lam_lya   = 1215.                #Ang
 lam_HII   = 912.                 #Ang

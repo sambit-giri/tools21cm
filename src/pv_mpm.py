@@ -1,9 +1,9 @@
 import numpy as np
-import const
-import conv
-from helper_functions import print_msg, get_interpolated_array, read_cbin
-import vel_file
-import density_file
+from . import const
+from . import conv
+from .helper_functions import print_msg, get_interpolated_array, read_cbin
+from . import vel_file
+from . import density_file
 
 def get_distorted_dt(dT, kms, redsh, los_axis=0, velocity_axis = 0, num_particles=10, periodic=True):
     ''' 

@@ -1,7 +1,7 @@
-import const
+from . import const
 import numpy as np
-import density_file as df
-from helper_functions import print_msg 
+from . import density_file as df
+from .helper_functions import print_msg 
 
 class XfracFile:
 	'''

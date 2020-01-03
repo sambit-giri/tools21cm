@@ -12,7 +12,8 @@ sizes_list = ast.literal_eval(sizes_string)
 
 import numpy as np
 from itertools import count
-from Queue import Queue
+#from Queue import Queue
+from multiprocessing import Queue
 
 
 def FoF_search(array, threshold):

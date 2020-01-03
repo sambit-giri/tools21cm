@@ -3,9 +3,9 @@ Created on Feb 27, 2015
 
 @author: Hannes Jensen
 '''
-import const
+from . import const
 import numpy as np
-import cosmology as cm
+from . import cosmology as cm
 
 def noise_error_ps(nu_c, k, t, **kwargs):
     '''

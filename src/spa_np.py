@@ -1,5 +1,5 @@
 import numpy as np
-import usefuls
+from . import usefuls
 from scipy.signal import fftconvolve
 
 def spa_np(data, xth=0.95, nscales=30, binning='log'):

@@ -2,11 +2,9 @@
 
 import numpy as np
 from scipy.interpolate import interp1d
-import const
-import os
-import glob
+from . import const
+import glob, os, time
 import os.path
-import time
 from numpy import array, asarray, rank, roll
 from numpy.linalg import matrix_rank
 from scipy.fftpack import fft, ifft, fftn, ifftn
@@ -243,7 +241,7 @@ def read_fits(filename, header=True):
 		numpy array containing the data
 	'''
 
-	import astropy.io.fits as pf
+	import pyfits as pf
 	hdulist = pf.open(filename)
 	header = hdulist[0].header
 	data = hdulist[0].data.astype('float64')
@@ -265,7 +263,7 @@ def save_fits(data, filename, header=None):
 		Nothing
 	
 	'''
-	import astropy.io.fits as pf
+	import pyfits as pf
 	
 	save_data, datatype = get_data_and_type(data)
 	
@@ -493,7 +491,7 @@ def find_idx(ar, values):
 	if decreasing:
 		out = len(ar)-1-out
 	
-	return outputify(out).astype(int)
+	return outputify(out)
 
 
 def get_eval():

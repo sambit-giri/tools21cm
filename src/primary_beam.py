@@ -1,7 +1,7 @@
 import numpy as np
-import cosmology as cm
+from . import cosmology as cm
 from glob import glob
-import conv
+from . import conv
 
 def primary_beam(array, z, nu_axis=2, beam_func='Gaussian', boxsize=None, D=0.35):
 	"""
@@ -11,7 +11,7 @@ def primary_beam(array, z, nu_axis=2, beam_func='Gaussian', boxsize=None, D=0.35
 	           frequency axis of the array.
 	nu_axis  : The frequency axis of the array (Default: 2) 
 	beam_func: The type of function to model the primary beam. The options are 'gaussian', 'sigmoid'
-		   and 'step'. Default: 'gaussian'
+		   and 'step'. Default: 'circular'
 	boxsize  : Size of the box in physical units (cMpc). Default: From set simulation constants.
 	D        : Diameter of the dish in metres. Default: 0.35
 	"""

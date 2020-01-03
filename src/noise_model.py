@@ -1,10 +1,10 @@
 import numpy as np
 import sys
-from telescope_functions import *
-from usefuls import *
-import conv
-import cosmology as cm
-import smoothing as sm
+from .telescope_functions import *
+from .usefuls import *
+from . import conv
+from . import cosmology as cm
+from . import smoothing as sm
 import scipy
 
 def noise_map(ncells, z, depth_mhz, obs_time=1000, filename=None, boxsize=None, total_int_time=6., int_time=10., declination=-30., uv_map=np.array([]), N_ant=None, verbose=True, fft_wrap=False):
@@ -64,7 +64,7 @@ def get_uv_map(ncells, z, filename=None, total_int_time=6., int_time=10., boxsiz
 def make_uv_map_lightcone(ncells, zs, filename=None, total_int_time=6., int_time=10., boxsize=None, declination=-30., verbose=True):
 	uv_lc = np.zeros((ncells,ncells,zs.shape[0]))
 	percc = np.round(100./zs.shape[0],decimals=2)
-	for i in xrange(zs.shape[0]):
+	for i in range(zs.shape[0]):
 		z = zs[i]
 		uv_map, N_ant = get_uv_map(ncells, z, filename=filename, total_int_time=total_int_time, int_time=int_time, boxsize=boxsize, declination=declination, verbose=verbose)
 		uv_lc[:,:,i] = uv_map
@@ -80,7 +80,7 @@ def telescope_response_on_coeval(array, z, depth_mhz=None, obs_time=1000, filena
 	if not N_ant: N_ant = np.loadtxt(filename, dtype=str).shape[0]
 	data3d = np.zeros(array.shape)
 	print("Creating the noise cube")
-	for k in xrange(ncells):
+	for k in range(ncells):
 		data2d = telescope_response_on_image(array[:,:,k], z, depth_mhz, obs_time=obs_time, filename=filename, boxsize=boxsize, total_int_time=total_int_time, int_time=int_time, declination=declination, uv_map=uv_map, N_ant=N_ant)
 		data3d[:,:,k] = data2d
 	return data3d
@@ -105,7 +105,7 @@ def noise_cube_coeval(ncells, z, depth_mhz=None, obs_time=1000, filename=None, b
 	if not N_ant: N_ant = np.loadtxt(filename, dtype=str).shape[0]
 	noise3d = np.zeros((ncells,ncells,ncells))
 	print("\nCreating the noise cube...")
-	for k in xrange(ncells):
+	for k in range(ncells):
 		noise2d = noise_map(ncells, z, depth_mhz, obs_time=obs_time, filename=filename, boxsize=boxsize, total_int_time=total_int_time, int_time=int_time, declination=declination, uv_map=uv_map, N_ant=N_ant, verbose=verbose, fft_wrap=fft_wrap)
 		noise3d[:,:,k] = noise2d
 		verbose = False
@@ -134,7 +134,7 @@ def noise_cube_lightcone(ncells, z, obs_time=1000, filename=None, boxsize=None, 
 	noise3d = np.zeros((ncells,ncells,ncells))
 	print("Creating the noise cube")
 	verbose = True
-	for k in xrange(ncells):
+	for k in range(ncells):
 		zi = zs[k]
 		if k+1<ncells: depth_mhz = cm.z_to_nu(zi[k+1])-cm.z_to_nu(zi[k])
 		else: depth_mhz = cm.z_to_nu(zi[k])-cm.z_to_nu(zi[k-1])

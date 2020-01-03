@@ -9,13 +9,13 @@ for compatibility reasons
 
 import numpy as np
 import os
-from lightcone import redshifts_at_equal_comoving_distance, _get_interp_slice
-from xfrac_file import XfracFile
-from density_file import DensityFile
-from helper_functions import print_msg, get_dens_redshifts, get_mesh_size, \
+from .lightcone import redshifts_at_equal_comoving_distance, _get_interp_slice
+from .xfrac_file import XfracFile
+from .density_file import DensityFile
+from .helper_functions import print_msg, get_dens_redshifts, get_mesh_size, \
     determine_redshift_from_filename, get_data_and_type, read_cbin, save_cbin
-from temperature import calc_dt
-import smoothing
+from .temperature import calc_dt
+from . import smoothing
 
 def freq_box(xfrac_dir, dens_dir, z_low, z_high):
     ''' 

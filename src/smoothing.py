@@ -1,7 +1,6 @@
 import numpy as np
-import const
-import conv
-import cosmology as cm
+from . import const, conv
+from . import cosmology as cm
 import scipy.ndimage as ndimage
 import scipy.interpolate
 from scipy import signal
@@ -9,7 +8,7 @@ from scipy.fftpack import fft, ifft, fftn, ifftn
 from numpy.fft import rfftn, irfftn
 from math import ceil, floor
 from numpy import array, asarray, rank, roll
-from helper_functions import fftconvolve, find_idx
+from .helper_functions import fftconvolve, find_idx
 
 def gauss_kernel(size, sigma=1.0, fwhm=None):
 	''' 
@@ -147,7 +146,7 @@ def smooth_tophat(input_array, tophat_width):
 	#an even number of cells, so we pad the array with an extra pixel
 	#if this is the case
 	if input_array.shape[0] % 2 == 0:
-		from angular_coordinates import _get_padded_slice
+		from .angular_coordinates import _get_padded_slice
 		padded = _get_padded_slice(input_array, input_array.shape[0]+1)
 		out = smooth_tophat(padded, tophat_width)
 		return out[:-1,:-1]
@@ -304,7 +303,7 @@ def smooth_lightcone(lightcone, z_array, box_size_mpc=False, max_baseline=2., ra
 	output_dtheta  = (1+input_redshifts)*21e-5/max_baseline
 	output_ang_res = output_dtheta*cm.z_to_cdist(input_redshifts)
 	output_dz      = ratio*output_ang_res/const.c
-	for i in xrange(len(output_dz)):
+	for i in range(len(output_dz)):
 		output_dz[i] = output_dz[i] * hubble_parameter(input_redshifts[i])
 	output_lightcone = smooth_lightcone_tophat(lightcone, input_redshifts, output_dz)
 	output_lightcone = smooth_lightcone_gauss(output_lightcone, output_ang_res*lightcone.shape[0]/box_size_mpc)
@@ -338,10 +337,10 @@ def smooth_coeval_tophat(cube, width, nu_axis):
 	kernel = tophat_kernel(cube.shape[nu_axis], width)
 	output_cube = np.zeros(cube.shape)
 	if nu_axis==0:
-		for i in xrange(cube.shape[1]):
+		for i in range(cube.shape[1]):
 			output_cube[:,i,:] = smooth_with_kernel(cube[:,i,:], kernel)
 	else:
-		for i in xrange(cube.shape[0]):
+		for i in range(cube.shape[0]):
 			output_cube[i,:,:] = smooth_with_kernel(cube[i,:,:], kernel)
 	return output_cube
 
@@ -352,7 +351,7 @@ def smooth_coeval_gauss(cube, fwhm, nu_axis):
 
 def smooth_lightcone_tophat(lightcone, redshifts, dz):
         output_lightcone = np.zeros(lightcone.shape)
-        for i in xrange(output_lightcone.shape[2]):
+        for i in range(output_lightcone.shape[2]):
                 z_out_low  = redshifts[i]-dz[i]/2
                 z_out_high = redshifts[i]+dz[i]/2
                 idx_low  = int(np.ceil(find_idx(redshifts, z_out_low)))
@@ -363,7 +362,7 @@ def smooth_lightcone_tophat(lightcone, redshifts, dz):
 def smooth_lightcone_gauss(lightcone,fwhm,nu_axis=2):
 	assert lightcone.shape[nu_axis] == len(fwhm)
 	output_lightcone = np.zeros(lightcone.shape)
-	for i in xrange(output_lightcone.shape[nu_axis]):
+	for i in range(output_lightcone.shape[nu_axis]):
 		if nu_axis==0: output_lightcone[i,:,:] = smooth_gauss(lightcone[i,:,:], fwhm=fwhm[i])
 		elif nu_axis==1: output_lightcone[:,i,:] = smooth_gauss(lightcone[:,i,:], fwhm=fwhm[i])
 		else: output_lightcone[:,:,i] = smooth_gauss(lightcone[:,:,i], fwhm=fwhm[i])

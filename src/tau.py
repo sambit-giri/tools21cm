@@ -1,5 +1,4 @@
-import const
-import conv
+from . import const, conv
 import numpy as np
 
 def tau(ionfractions, redshifts, num_points = 50):

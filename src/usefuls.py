@@ -1,9 +1,8 @@
 import numpy as np
 import sys
-#import c2raytools as c2t
-import conv, const, helper_functions, lightcone
-import temperature as tm
-import density_file, vel_file, xfrac_file
+from . import conv, const, helper_functions, lightcone
+from . import temperature as tm
+from . import density_file, vel_file, xfrac_file
 import glob
 
 def loading_verbose(string):
