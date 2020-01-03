@@ -15,6 +15,6 @@ setup(name='tools21cm',
       package_dir = {'tools21cm' : 'src'},
       packages=['tools21cm'],
       package_data={'share':['*'],},
-      install_requires=['numpy','scipy','scikit-learn','scikit-image'],
+      install_requires=['numpy','scipy','scikit-learn','scikit-image', 'numba'],
       #include_package_data=True,
 )
