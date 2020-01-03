@@ -20,6 +20,6 @@ In order to install it in a separate directory:
 
 python setup.py install --home=directory
 
-On can also install it using pip by running the following command:
+One can also install it using pip by running the following command:
 
 pip install git+https://github.com/sambit-giri/tools21cm.git
