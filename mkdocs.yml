@@ -4,3 +4,5 @@ nav:
     - About: about.md
 
 theme: readthedocs
+
+docs_dir: docs
