@@ -9,26 +9,18 @@ tools21cm
 tools21cm package is meant for analysing 21-cm signals from the Epoch of Reionization (EoR) and Cosmic Dawn (CD).
 
 
-Contents
-========
 
-Main modules:
+.. toctree::
+   :maxdepth: 2
 
+Modules
+=======
 
 .. toctree::
    :maxdepth: 2
 
    angular_coordinates
-   module_rst/cosmology
 
-
-Other modules
--------------
-.. toctree::
-   :maxdepth: 2
-
-   module_rst/const
-   module_rst/conv
 
 Indices and tables
 ==================
