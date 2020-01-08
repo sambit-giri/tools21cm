@@ -13,7 +13,7 @@ Contents
 ========
 
 Main modules:
--------------
+
 
 .. toctree::
    :maxdepth: 2
