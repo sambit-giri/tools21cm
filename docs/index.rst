@@ -16,6 +16,7 @@ Contents
    :maxdepth: 2
 
    contents
+   modules
 
 Indices and tables
 ==================

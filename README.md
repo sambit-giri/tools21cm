@@ -1,12 +1,13 @@
 tools21cm package is meant for analysing 21-cm signals from the Epoch of Reionization (EoR) and Cosmic Dawn (CD).
+For full documentation, look [here](https://tools21cm.readthedocs.io/en/latest/).
 
 PREREQUISITES
 -------------
-1. Numpy   (http://www.numpy.org/)
-2. Scipy   (https://scipy.org/install.html)
-3. Sklearn (http://scikit-learn.org/stable/install.html)
-4. Skimage (http://scikit-image.org/docs/dev/install.html)
-5. Numba   (https://numba.pydata.org/)
+1. [Numpy](http://www.numpy.org/)
+2. [Scipy](https://scipy.org/install.html)
+3. [Sklearn](http://scikit-learn.org/stable/install.html)
+4. [Skimage](http://scikit-image.org/docs/dev/install.html)
+5. [Numba](https://numba.pydata.org/)
 
 Optionals:
 
