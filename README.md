@@ -11,7 +11,7 @@ PREREQUISITES
 
 Optionals:
 
-5. AstroML (http://www.astroml.org/user_guide/installation.html)
+5. [AstroML](http://www.astroml.org/user_guide/installation.html)
 
 INSTALLATION
 ------------
