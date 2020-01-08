@@ -18,7 +18,7 @@ Main modules:
 .. toctree::
    :maxdepth: 2
 
-   module_rst/angular_coordinates
+   angular_coordinates
    module_rst/cosmology
 
 
