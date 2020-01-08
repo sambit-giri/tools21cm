@@ -18,7 +18,17 @@ Main modules:
 .. toctree::
    :maxdepth: 2
 
-   module_rst/modules
+   module_rst/angular_coordinates
+   module_rst/cosmology
+
+
+Other modules
+-------------
+.. toctree::
+   :maxdepth: 2
+
+   module_rst/const
+   module_rst/conv
 
 Indices and tables
 ==================
