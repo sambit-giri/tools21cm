@@ -1,7 +1,0 @@
-site_name: tools21cm
-nav:
-    - Home: index.md
-    - About: about.md
-
-theme: readthedocs
-

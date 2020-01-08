@@ -4,7 +4,7 @@ Created on Sep 17, 2014
 @author: Hannes Jensen
 
 Methods to convert data between physical (cMpc) coordinates
-and observational (angular-frequency) coordinates
+and observational (angular-frequency) coordinates.
 '''
 
 import numpy as np
