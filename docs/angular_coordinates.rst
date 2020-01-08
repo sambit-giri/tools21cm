@@ -1,6 +1,6 @@
 
 angular coordinates
 ===================
-.. automodule:: t2c.angular_coordinates
+.. automodule:: tools21cm.angular_coordinates
     :members:
 
