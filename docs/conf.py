@@ -30,19 +30,30 @@ release = '2.0.1'
 # If your documentation needs a minimal Sphinx version, state it here.
 #needs_sphinx = '2.3'
 
-pygments_style = 'sphinx'
+#pygments_style = 'sphinx'
 
 # Add any Sphinx extension module names here, as strings. They can be
 # extensions coming with Sphinx (named 'sphinx.ext.*') or your custom
 # ones.
 extensions = [
-    'sphinx.ext.autodoc', 'sphinx.ext.intersphinx', 'sphinx.ext.viewcode', 'sphinx.ext.autosummary',
-    'sphinx.ext.mathjax', 'sphinx.ext.coverage', 'sphinx.ext.napoleon'
+    "sphinx.ext.autodoc",
+    "sphinx.ext.autosummary",
+    "sphinx.ext.coverage",
+    "sphinx.ext.doctest",
+    "sphinx.ext.extlinks",
+    "sphinx.ext.ifconfig",
+    "sphinx.ext.napoleon",
+    "sphinx.ext.todo",
+    "sphinx.ext.viewcode",
+    "sphinx.ext.mathjax",
+    "sphinx.ext.autosectionlabel",
+    "numpydoc",
+    "nbsphinx",
+    #"IPython.sphinxext.ipython_console_highlighting",
 ]
 
-
 # Add any paths that contain templates here, relative to this directory.
-templates_path = ['_templates']
+templates_path = ['templates']
 
 # List of patterns, relative to source directory, that match files and
 # directories to ignore when looking for source files.
@@ -60,24 +71,29 @@ html_theme = "sphinx_rtd_theme"
 #html_theme = 'bootstrap'
 #html_theme_path = sphinx_bootstrap_theme.get_html_theme_path()
 
-'''
-html_theme_options = {
-    'canonical_url': '',
-    'analytics_id': 'UA-XXXXXXX-1',  #  Provided by Google in your dashboard
-    'logo_only': False,
-    'display_version': True,
-    'prev_next_buttons_location': 'bottom',
-    'style_external_links': False,
-    'vcs_pageview_mode': '',
-    'style_nav_header_background': 'white',
-    # Toc options
-    'collapse_navigation': False,
-    'sticky_navigation': True,
-    'navigation_depth': 4,
-    'includehidden': True,
-    'titles_only': False
-}
-'''
+pygments_style = "trac"
+
+html_use_smartypants = True
+html_last_updated_fmt = "%b %d, %Y"
+html_split_index = False
+html_sidebars = {"**": ["searchbox.html", "globaltoc.html", "sourcelink.html"]}
+html_short_title = "%s-%s" % (project, version)
+
+napoleon_use_ivar = True
+napoleon_use_rtype = False
+napoleon_use_param = False
+
+mathjax_path = (
+    "http://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML"
+)
+
+exclude_patterns = [
+    "_build",
+    "Thumbs.db",
+    ".DS_Store",
+    "templates",
+    #"**.ipynb_checkpoints",
+]
 
 # Add any paths that contain custom static files (such as style sheets) here,
 # relative to this directory. They are copied after the builtin static files,
