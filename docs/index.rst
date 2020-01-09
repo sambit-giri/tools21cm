@@ -13,8 +13,8 @@ tools21cm package is meant for analysing 21-cm signals from the Epoch of Reioniz
 .. toctree::
    :maxdepth: 2
 
-Modules
-=======
+Documentation
+=============
 
 .. toctree::
    :maxdepth: 2

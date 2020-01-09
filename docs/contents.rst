@@ -1,5 +1,5 @@
-Modules
-=======
+Main modules
+============
 
 Angular coordinates
 -------------------
@@ -15,4 +15,27 @@ Cosmological calculators
 ------------------------
 .. automodule:: tools21cm.cosmology
     :members:
+
+
+Other modules
+=============
+
+Pre-defined constants
+--------------------
+.. automodule:: tools21cm.const
+    :members:
+
+For CUBEP3M and C2RAY simulations
+---------------------------------
+
+Conversion factors
+~~~~~~~~~~~~~~~~~~
+.. automodule:: tools21cm.conv
+    :members:
+
+Density file
+~~~~~~~~~~~~
+.. automodule:: tools21cm.density_file
+    :members:
+
 
