@@ -1,5 +1,5 @@
 tools21cm package is meant for analysing 21-cm signals from the Epoch of Reionization (EoR) and Cosmic Dawn (CD).
-For full documentation, look [here](https://tools21cm.readthedocs.io/en/latest/).
+For full documentation, look [here](https://tools21cm.readthedocs.io/).
 
 PREREQUISITES
 -------------
