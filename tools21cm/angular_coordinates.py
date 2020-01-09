@@ -1,8 +1,4 @@
 '''
-Created on Sep 17, 2014
-
-@author: Hannes Jensen, Sambit Giri
-
 Methods to convert data between physical (cMpc) coordinates
 and observational (angular-frequency) coordinates.
 '''
