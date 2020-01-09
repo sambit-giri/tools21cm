@@ -1,6 +1,6 @@
 
 density file
 ------------
-.. automodule:: t2c.density_file
+.. automodule:: tools21cm.density_file
     :members:
 

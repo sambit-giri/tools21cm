@@ -1,6 +1,6 @@
 
 deprecated
 ----------
-.. automodule:: t2c.deprecated
+.. automodule:: tools21cm.deprecated
     :members:
 

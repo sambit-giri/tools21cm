@@ -1,6 +1,6 @@
 
 temper file
 -----------
-.. automodule:: t2c.temper_file
+.. automodule:: tools21cm.temper_file
     :members:
 

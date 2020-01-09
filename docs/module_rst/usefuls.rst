@@ -1,6 +1,6 @@
 
 usefuls
 -------
-.. automodule:: t2c.usefuls
+.. automodule:: tools21cm.usefuls
     :members:
 

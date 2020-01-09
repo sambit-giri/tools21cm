@@ -1,6 +1,6 @@
 
 ViteBetti numba
 ---------------
-.. automodule:: t2c.ViteBetti_numba
+.. automodule:: tools21cm.ViteBetti_numba
     :members:
 

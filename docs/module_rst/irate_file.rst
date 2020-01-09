@@ -1,6 +1,6 @@
 
 irate file
 ----------
-.. automodule:: t2c.irate_file
+.. automodule:: tools21cm.irate_file
     :members:
 

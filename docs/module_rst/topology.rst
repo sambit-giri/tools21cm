@@ -1,6 +1,6 @@
 
 topology
 --------
-.. automodule:: t2c.topology
+.. automodule:: tools21cm.topology
     :members:
 

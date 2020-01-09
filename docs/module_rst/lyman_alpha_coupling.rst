@@ -1,6 +1,6 @@
 
 lyman alpha coupling
 --------------------
-.. automodule:: t2c.lyman_alpha_coupling
+.. automodule:: tools21cm.lyman_alpha_coupling
     :members:
 

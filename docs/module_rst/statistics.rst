@@ -1,6 +1,6 @@
 
 statistics
 ----------
-.. automodule:: t2c.statistics
+.. automodule:: tools21cm.statistics
     :members:
 

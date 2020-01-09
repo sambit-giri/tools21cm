@@ -1,6 +1,6 @@
 
 lightcone
 ---------
-.. automodule:: t2c.lightcone
+.. automodule:: tools21cm.lightcone
     :members:
 

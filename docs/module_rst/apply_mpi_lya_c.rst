@@ -1,6 +1,6 @@
 
 apply mpi lya c
 ---------------
-.. automodule:: t2c.apply_mpi_lya_c
+.. automodule:: tools21cm.apply_mpi_lya_c
     :members:
 

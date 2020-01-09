@@ -1,6 +1,6 @@
 
 numba functions
 ---------------
-.. automodule:: t2c.numba_functions
+.. automodule:: tools21cm.numba_functions
     :members:
 

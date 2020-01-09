@@ -1,6 +1,6 @@
 
 vel file
 --------
-.. automodule:: t2c.vel_file
+.. automodule:: tools21cm.vel_file
     :members:
 

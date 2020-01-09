@@ -1,6 +1,6 @@
 
 identify regions
 ----------------
-.. automodule:: t2c.identify_regions
+.. automodule:: tools21cm.identify_regions
     :members:
 

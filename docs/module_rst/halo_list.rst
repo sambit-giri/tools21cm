@@ -1,6 +1,6 @@
 
 halo list
 ---------
-.. automodule:: t2c.halo_list
+.. automodule:: tools21cm.halo_list
     :members:
 

@@ -1,6 +1,6 @@
 
 telescope functions
 -------------------
-.. automodule:: t2c.telescope_functions
+.. automodule:: tools21cm.telescope_functions
     :members:
 

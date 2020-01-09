@@ -1,0 +1,7 @@
+numpy
+scipy
+astropy
+numba
+pyfftw
+scikit-learn
+scikit-image

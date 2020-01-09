@@ -1,6 +1,6 @@
 
 helper functions
 ----------------
-.. automodule:: t2c.helper_functions
+.. automodule:: tools21cm.helper_functions
     :members:
 

@@ -1,6 +1,6 @@
 
 cosmology
 ---------
-.. automodule:: t2c.cosmology
+.. automodule:: tools21cm.cosmology
     :members:
 

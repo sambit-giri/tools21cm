@@ -1,6 +1,6 @@
 
 gaussian random field
 ---------------------
-.. automodule:: t2c.gaussian_random_field
+.. automodule:: tools21cm.gaussian_random_field
     :members:
 

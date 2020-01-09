@@ -1,6 +1,6 @@
 
 noise model
 -----------
-.. automodule:: t2c.noise_model
+.. automodule:: tools21cm.noise_model
     :members:
 

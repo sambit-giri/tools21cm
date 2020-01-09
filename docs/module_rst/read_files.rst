@@ -1,6 +1,6 @@
 
 read files
 ----------
-.. automodule:: t2c.read_files
+.. automodule:: tools21cm.read_files
     :members:
 

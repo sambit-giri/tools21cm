@@ -1,6 +1,6 @@
 
 ViteBetti
 ---------
-.. automodule:: t2c.ViteBetti
+.. automodule:: tools21cm.ViteBetti
     :members:
 

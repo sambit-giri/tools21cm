@@ -1,6 +1,6 @@
 
 primary beam
 ------------
-.. automodule:: t2c.primary_beam
+.. automodule:: tools21cm.primary_beam
     :members:
 

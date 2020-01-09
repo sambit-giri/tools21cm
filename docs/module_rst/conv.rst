@@ -1,6 +1,6 @@
 
 conv
 ----
-.. automodule:: t2c.conv
+.. automodule:: tools21cm.conv
     :members:
 

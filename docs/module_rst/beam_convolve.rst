@@ -1,6 +1,6 @@
 
 beam convolve
 -------------
-.. automodule:: t2c.beam_convolve
+.. automodule:: tools21cm.beam_convolve
     :members:
 

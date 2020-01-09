@@ -1,6 +1,6 @@
 
 tau
 ---
-.. automodule:: t2c.tau
+.. automodule:: tools21cm.tau
     :members:
 

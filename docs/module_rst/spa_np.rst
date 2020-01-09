@@ -1,6 +1,6 @@
 
 spa np
 ------
-.. automodule:: t2c.spa_np
+.. automodule:: tools21cm.spa_np
     :members:
 

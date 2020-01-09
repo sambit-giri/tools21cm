@@ -1,6 +1,6 @@
 
 superpixels
 -----------
-.. automodule:: t2c.superpixels
+.. automodule:: tools21cm.superpixels
     :members:
 

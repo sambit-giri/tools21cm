@@ -1,6 +1,6 @@
 
 bubble stats
 ------------
-.. automodule:: t2c.bubble_stats
+.. automodule:: tools21cm.bubble_stats
     :members:
 

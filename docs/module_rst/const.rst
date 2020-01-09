@@ -1,6 +1,6 @@
 
 const
 -----
-.. automodule:: t2c.const
+.. automodule:: tools21cm.const
     :members:
 

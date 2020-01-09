@@ -1,6 +1,6 @@
 
 power legendre
 --------------
-.. automodule:: t2c.power_legendre
+.. automodule:: tools21cm.power_legendre
     :members:
 

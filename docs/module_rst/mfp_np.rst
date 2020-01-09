@@ -1,6 +1,6 @@
 
 mfp np
 ------
-.. automodule:: t2c.mfp_np
+.. automodule:: tools21cm.mfp_np
     :members:
 

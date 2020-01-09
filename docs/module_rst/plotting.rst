@@ -1,6 +1,6 @@
 
 plotting
 --------
-.. automodule:: t2c.plotting
+.. automodule:: tools21cm.plotting
     :members:
 

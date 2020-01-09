@@ -1,6 +1,6 @@
 
 power spectrum noise
 --------------------
-.. automodule:: t2c.power_spectrum_noise
+.. automodule:: tools21cm.power_spectrum_noise
     :members:
 

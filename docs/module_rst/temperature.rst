@@ -1,6 +1,6 @@
 
 temperature
 -----------
-.. automodule:: t2c.temperature
+.. automodule:: tools21cm.temperature
     :members:
 

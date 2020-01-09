@@ -1,6 +1,6 @@
 
 Friends of Friends
 ------------------
-.. automodule:: t2c.Friends_of_Friends
+.. automodule:: tools21cm.Friends_of_Friends
     :members:
 

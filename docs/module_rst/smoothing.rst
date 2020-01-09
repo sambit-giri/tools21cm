@@ -1,6 +1,6 @@
 
 smoothing
 ---------
-.. automodule:: t2c.smoothing
+.. automodule:: tools21cm.smoothing
     :members:
 

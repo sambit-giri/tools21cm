@@ -1,6 +1,6 @@
 
   init  
 --------
-.. automodule:: t2c.__init__
+.. automodule:: tools21cm.__init__
     :members:
 
