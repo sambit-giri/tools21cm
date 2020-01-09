@@ -1,7 +1,9 @@
 numpy
 scipy
+matplotlib
 astropy
 numba
 pyfftw
 scikit-learn
 scikit-image
+pyfits
