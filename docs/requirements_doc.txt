@@ -2,5 +2,5 @@ ipython
 nbsphinx
 numpydoc
 sphinx-rtd-theme
-sphinx-fancy-theme
+sphinx_readable_theme
 sphinx>=2.3

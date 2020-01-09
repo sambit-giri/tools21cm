@@ -70,18 +70,19 @@ exclude_patterns = ['_build', 'Thumbs.db', '.DS_Store']
 #html_theme = "sphinx_rtd_theme"
 #html_theme = 'bootstrap'
 #html_theme_path = sphinx_bootstrap_theme.get_html_theme_path()
-import sphinx_fancy_theme
 
-html_theme = 'fancy'
-html_theme_path = sphinx_fancy_theme.get_html_theme_path()
+import sphinx_readable_theme
+
+html_theme_path = [sphinx_readable_theme.get_html_theme_path()]
+html_theme = 'readable'
 
 pygments_style = "trac"
 
 html_use_smartypants = True
 html_last_updated_fmt = "%b %d, %Y"
 html_split_index = False
-html_sidebars = {"**": ["searchbox.html", "globaltoc.html", "sourcelink.html"]}
-html_short_title = "%s-%s" % (project, version)
+html_sidebars = {"**": ["globaltoc.html", "sourcelink.html", "searchbox.html"]}
+html_short_title = "%s" % (project)
 
 napoleon_use_ivar = True
 napoleon_use_rtype = False
