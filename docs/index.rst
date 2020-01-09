@@ -7,7 +7,7 @@ Contents
 
    installation
    tutorials
-   authors
+
 
 Indices and tables
 ==================
