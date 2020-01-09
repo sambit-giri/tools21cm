@@ -6,8 +6,9 @@ Contents
    :maxdepth: 2
 
    installation
+   contents
    tutorials
-
+   authors
 
 Indices and tables
 ==================
