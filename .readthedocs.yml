@@ -5,6 +5,7 @@ python:
   system_packages: true
   install:
     - requirements: requirements.txt
+    - requirements: docs/requirements_doc.txt
 
 sphinx:
   configuration: docs/conf.py
