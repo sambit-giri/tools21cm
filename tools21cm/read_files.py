@@ -20,13 +20,11 @@ def _load_binary_data(filename, dtype=np.float32):
 
 def read_21cmfast_files(filename):
 	"""
-	Parameter
-	---------
-	filename: Give the filename of the 21cmFAST output files.
+	Parameters:
+		* filename: Give the filename of the 21cmFAST output files.
 
-	Return
-	---------
-	Numpy array
+	Returns:
+		numpy array
 	"""
 	bla = _load_binary_data(filename)
 	dim = round(bla.size**0.333333)
@@ -34,15 +32,15 @@ def read_21cmfast_files(filename):
 
 def read_c2ray_files(filename, file_type='xfrac', density_file=None):
 	"""
-	Parameter
+	Parameters
 	---------
 	filename    : Give the filename of the C2Ray output files.
 	file_type   : The file of file being read has to be mentioned. The options are 
 	               'xfrac', 'dens', 'vel'. (Default: 'xfrac')
 	density_file: This is necessary if file_type=='vel'. (Default: None)
 
-	Return
-	---------
+	Returns
+	-------
 	Numpy array
 	"""
 	assert file_type in ['xfrac', 'dens', 'vel']
@@ -59,23 +57,27 @@ def read_c2ray_files(filename, file_type='xfrac', density_file=None):
 
 def read_grizzly_files(filename):
 	"""
-	Parameter
-	---------
-	filename: Give the filename of the GRIZZLY xfrac files.
+	Parameters:
+		* filename: Give the filename of the GRIZZLY xfrac files.
 
-	Return
-	---------
-	Numpy array
+	Returns:
+		numpy array
 	"""
 	return XfracFile(filename).xi
 
 
 def coeval_21cm_c2ray(xfrac_dir, dens_dir, z, interpolation='linear', mean_subtract=False):
 	"""
+	Parameters
+	----------
 	xfrac_dir     : Give the path that contains the xfrac-files.
 	dens_dir      : Give the path that contains the density-files.
 	z	      : Redshift.
 	interpolation : This is used when the xfrac cube at that redshift is not available.
+	
+	Returns
+	-------
+	numpy array of brightness temperature in mK.
 	"""
 	xfrac = coeval_xfrac_c2ray(xfrac_dir, z, interpolation=interpolation)
 	dens  = coeval_dens_c2ray(dens_dir, z)

@@ -3,24 +3,19 @@
    You can adapt this file completely to your liking, but it should at least
    contain the root `toctree` directive.
 
-tools21cm
-=========
-
-tools21cm package is meant for analysing 21-cm signals from the Epoch of Reionization (EoR) and Cosmic Dawn (CD).
+.. include:: readme.rst
 
 
-
-.. toctree::
-   :maxdepth: 2
-
-Documentation
-=============
+Contents
+========
 
 .. toctree::
    :maxdepth: 2
 
-   contents
-
+   installation
+   documentation
+   tutorials
+   authors
 
 Indices and tables
 ==================

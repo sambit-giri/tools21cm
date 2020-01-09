@@ -104,6 +104,6 @@ Ionisation rate file
 
 Ionisation fraction file
 ~~~~~~~~~~~~~~~~~~~~~~~~
-.. automodule:: tools21cm.irate_file
+.. automodule:: tools21cm.xfrac_file
     :members:
 
