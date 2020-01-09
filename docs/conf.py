@@ -14,7 +14,7 @@ import os
 import sys
 sys.path.insert(0, os.path.abspath('..'))
 
-import sphinx_bootstrap_theme
+#import sphinx_bootstrap_theme
 
 # -- Project information -----------------------------------------------------
 
@@ -27,12 +27,17 @@ release = '2.0.1'
 
 
 # -- General configuration ---------------------------------------------------
+# If your documentation needs a minimal Sphinx version, state it here.
+needs_sphinx = '2.3'
 
 # Add any Sphinx extension module names here, as strings. They can be
 # extensions coming with Sphinx (named 'sphinx.ext.*') or your custom
 # ones.
-extensions = ['sphinx.ext.autodoc', 'sphinx.ext.coverage', 'sphinx.ext.napoleon'
+extensions = [
+    'sphinx.ext.autodoc', 'sphinx.ext.intersphinx', 'sphinx.ext.viewcode', 'sphinx.ext.autosummary',
+    'sphinx.ext.mathjax', 'sphinx.ext.coverage', 'sphinx.ext.napoleon'
 ]
+
 
 # Add any paths that contain templates here, relative to this directory.
 templates_path = ['_templates']
@@ -49,9 +54,9 @@ exclude_patterns = ['_build', 'Thumbs.db', '.DS_Store']
 # a list of builtin themes.
 #
 #html_theme = 'alabaster'
-#html_theme = "sphinx_rtd_theme"
-html_theme = 'bootstrap'
-html_theme_path = sphinx_bootstrap_theme.get_html_theme_path()
+html_theme = "sphinx_rtd_theme"
+#html_theme = 'bootstrap'
+#html_theme_path = sphinx_bootstrap_theme.get_html_theme_path()
 
 # Add any paths that contain custom static files (such as style sheets) here,
 # relative to this directory. They are copied after the builtin static files,

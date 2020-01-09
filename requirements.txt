@@ -5,4 +5,3 @@ numba
 pyfftw
 scikit-learn
 scikit-image
-sphinx_bootstrap_theme
