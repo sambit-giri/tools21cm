@@ -7,8 +7,7 @@ tools21cm
 Documentation
 -------------
 
-Full documentation (with examples, installation instructions and full API reference)
-found [here](https://tools21cm.readthedocs.io/).
+Full documentation (with examples, installation instructions and complete module description) can be found [here](https://tools21cm.readthedocs.io/).
 
 
 INSTALLATION
