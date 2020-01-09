@@ -7,8 +7,10 @@ Contents
 
    installation
    contents
+   contents_other
    tutorials
    authors
+   changelog
 
 Indices and tables
 ==================
