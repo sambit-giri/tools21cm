@@ -19,7 +19,7 @@ Modules
 .. toctree::
    :maxdepth: 2
 
-   angular_coordinates
+   contents
 
 
 Indices and tables

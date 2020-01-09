@@ -3,16 +3,16 @@ Modules
 
 Angular coordinates
 -------------------
-.. automodule:: t2c.angular_coordinates
+.. automodule:: tools21cm.angular_coordinates
     :members:
 
 Bubble Statistics
 -----------------
-.. automodule:: t2c.bubble_stats
+.. automodule:: tools21cm.bubble_stats
     :members:
 
 Cosmological calculators
 ------------------------
-.. automodule:: t2c.cosmology
+.. automodule:: tools21cm.cosmology
     :members:
 
