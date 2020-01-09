@@ -26,6 +26,54 @@ Identifying regions
 .. automodule:: tools21cm.identify_regions
     :members:
 
+Lightcone
+---------
+.. automodule:: tools21cm.lightcone
+    :members:
+
+Telescope noise
+---------------
+.. automodule:: tools21cm.noise_model
+    :members:
+
+.. automodule:: tools21cm.telescope_functions
+    :members:
+
+Power spectrum
+--------------
+.. automodule:: tools21cm.power_spectrum
+    :members:
+
+Primary beam
+------------
+.. automodule:: tools21cm.primary_beam
+    :members:
+
+Reading simuation outputs
+-------------------------
+.. automodule:: tools21cm.read_files
+    :members:
+
+Smoothing
+---------
+.. automodule:: tools21cm.smoothing
+    :members:
+
+Point statistics
+----------------
+.. automodule:: tools21cm.statistics
+    :members:
+
+Temperature
+-----------
+.. automodule:: tools21cm.temperature
+    :members:
+
+Topology
+--------
+.. automodule:: tools21cm.topology
+    :members:
+
 
 Other modules
 =============
@@ -48,5 +96,14 @@ Density file
 .. automodule:: tools21cm.density_file
     :members:
 
+Ionisation rate file
+~~~~~~~~~~~~~~~~~~~~
+.. automodule:: tools21cm.irate_file
+    :members:
 
+
+Ionisation fraction file
+~~~~~~~~~~~~~~~~~~~~~~~~
+.. automodule:: tools21cm.irate_file
+    :members:
 
