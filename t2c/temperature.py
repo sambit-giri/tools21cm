@@ -1,3 +1,7 @@
+'''
+Methods to estimate the brightness temperature.
+'''
+
 import numpy as np
 from . import const, conv
 from . import cosmology
@@ -9,9 +13,9 @@ def calc_dt(xfrac, dens, z = -1):
 	Calculate the differential brightness temperature assuming T_s >> T_CMB
 	
 	Parameters:
-		* xfrac (XfracFile object, string or numpy array): the ionization fraction
-		* dens (DensityFile object, string or numpy array): density in cgs units
-		* z = -1 (float): The redshift (if < 0 this will be figured out from the files)
+		xfrac (XfracFile object, string or numpy array): the ionization fraction
+		dens (DensityFile object, string or numpy array): density in cgs units
+		z = -1 (float): The redshift (if < 0 this will be figured out from the files)
 		
 	Returns:
 		The differential brightness temperature as a numpy array with
@@ -37,15 +41,16 @@ def calc_dt(xfrac, dens, z = -1):
 
 def calc_dt_full(xfrac, dens, temp, z = -1, correct=True):
 	'''
-	Calculate the differential brightness temperature assuming only that Lyman alpha is fully coupled so T_s = T_k
-    (NOT T_s >> T_CMB)
+	Calculate the differential brightness temperature assuming only that Lyman alpha is fully coupled so T_s = T_k 
+
+	(NOT T_s >> T_CMB)
 	
 	Parameters:
-		* xfrac (XfracFile object, string or numpy array): the ionization fraction
-		* dens (DensityFile object, string or numpy array): density in cgs units
-        	* temp (TemperFile object, string or numpy array): the temperature in K
-		* z = -1 (float): The redshift (if < 0 this will be figured out from the files)
-		* correct = True (bool): if true include a correction for partially ionized cells.
+		xfrac (XfracFile object, string or numpy array): the ionization fraction
+		dens (DensityFile object, string or numpy array): density in cgs units
+        	temp (TemperFile object, string or numpy array): the temperature in K
+		z = -1 (float): The redshift (if < 0 this will be figured out from the files)
+		correct = True (bool): if true include a correction for partially ionized cells.
 
 	Returns:
 		The differential brightness temperature as a numpy array with
@@ -76,12 +81,12 @@ def calc_dt_lightcone(xfrac, dens, lowest_z, los_axis = 2):
 	for lightcone data.
 	
 	Parameters:
-		* xfrac (string or numpy array): the name of the ionization 
+		xfrac (string or numpy array): the name of the ionization 
 			fraction file (must be cbin), or the xfrac lightcone data
-		* dens (string or numpy array): the name of the density 
+		dens (string or numpy array): the name of the density 
 			file (must be cbin), or the density data
-		* lowest_z (float): the lowest redshift of the lightcone volume
-		* los_axis = 2 (int): the line-of-sight axis
+		lowest_z (float): the lowest redshift of the lightcone volume
+		los_axis = 2 (int): the line-of-sight axis
 		
 	Returns:
 		The differential brightness temperature as a numpy array with
@@ -107,18 +112,19 @@ def calc_dt_lightcone(xfrac, dens, lowest_z, los_axis = 2):
 def calc_dt_full_lightcone(xfrac, temp, dens, lowest_z, los_axis = 2, correct=True):
 	'''
 	Calculate the differential brightness temperature assuming only that Lyman alpha is fully coupled so T_s = T_k
-    (NOT T_s >> T_CMB) for lightcone data. UNTESTED
+
+	(NOT T_s >> T_CMB) for lightcone data. UNTESTED
 	
 	Parameters:
-		* xfrac (string or numpy array): the name of the ionization 
+		xfrac (string or numpy array): the name of the ionization 
 			fraction file (must be cbin), or the xfrac lightcone data
-                * temp (string or numpy array): the name of the temperature
+                temp (string or numpy array): the name of the temperature
                        file (must be cbin), or the temp lightcone data
-		* dens (string or numpy array): the name of the density 
+		dens (string or numpy array): the name of the density 
 			file (must be cbin), or the density data
-		* lowest_z (float): the lowest redshift of the lightcone volume
-		* los_axis = 2 (int): the line-of-sight axis
-		* correct = True (bool): if true include a correction for 
+		lowest_z (float): the lowest redshift of the lightcone volume
+		los_axis = 2 (int): the line-of-sight axis
+		correct = True (bool): if true include a correction for 
                         partially ionized cells.
 
 	Returns:
@@ -152,7 +158,7 @@ def mean_dt(z):
 	Get the mean dT at redshift z
 	
 	Parameters:
-		* z (float or numpy array): the redshift
+		z (float or numpy array): the redshift
 		
 	Returns:
 		dT (float or numpy array) the mean brightness temperature

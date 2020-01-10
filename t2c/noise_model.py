@@ -16,6 +16,10 @@ import scipy
 
 def noise_map(ncells, z, depth_mhz, obs_time=1000, filename=None, boxsize=None, total_int_time=6., int_time=10., declination=-30., uv_map=np.array([]), N_ant=None, verbose=True, fft_wrap=False):
 	"""
+	@ Ghara et al. (2017), Giri et al. (2018b)
+
+	It creates a noise map by simulating the radio observation strategy.
+
 	Parameters
 	----------
 	z: float
@@ -33,11 +37,15 @@ def noise_map(ncells, z, depth_mhz, obs_time=1000, filename=None, boxsize=None, 
 	declination: float
 		Declination angle in deg
 	uv_map: ndarray
-		numpy array containing gridded uv coverage
+		numpy array containing gridded uv coverage. If nothing given, then the uv map 
+		will be simulated
 	N_ant: int
 		Number of antennae
 	filename: str
 		The path to the file containing the telescope configuration.
+
+			- As a default, it takes the SKA-Low configuration from Sept 2016
+			- It is not used if uv_map and N_ant is provided
 	boxsize: float
 		Boxsize in Mpc
 	verbose: bool
@@ -96,11 +104,15 @@ def telescope_response_on_image(array, z, depth_mhz, obs_time=1000, filename=Non
 	declination: float
 		Declination angle in deg
 	uv_map: ndarray
-		numpy array containing gridded uv coverage
+		numpy array containing gridded uv coverage. If nothing given, then the uv map 
+		will be simulated
 	N_ant: int
 		Number of antennae
 	filename: str
 		The path to the file containing the telescope configuration.
+
+			- As a default, it takes the SKA-Low configuration from Sept 2016
+			- It is not used if uv_map and N_ant is provided
 	boxsize: float
 		Boxsize in Mpc
 	
@@ -122,41 +134,68 @@ def get_uv_map(ncells, z, filename=None, total_int_time=6., int_time=10., boxsiz
 	"""
 	Parameters
 	----------
+	ncells: int
+		Number of cells
 	z: float
 		Redshift.
-	ncells: int
-		The grid size.
-	depth_mhz: float
-		The bandwidth in MHz.
-	obs_time: float
-		The observation time in hours.
 	total_int_time: float
 		Total observation per day time in hours
 	int_time: float
 		Intergration time in seconds
 	declination: float
 		Declination angle in deg
-	uv_map: ndarray
-		numpy array containing gridded uv coverage
-	N_ant: int
-		Number of antennae
 	filename: str
 		The path to the file containing the telescope configuration.
+
+			- As a default, it takes the SKA-Low configuration from Sept 2016
+			- It is not used if uv_map and N_ant is provided
 	boxsize: float
-		Boxsize in Mpc
+		Boxsize in Mpc	
 	verbose: bool
 		If True, verbose is shown
 	
 	Returns
 	-------
-	noise_map: ndarray
-		A 2D slice of the interferometric noise at that frequency (in muJy).
+	uv_map: ndarray
+		array of gridded uv coverage.
+	N_ant: int
+		Number of antennae
 	"""
 	if not filename: N_ant = SKA1_LowConfig_Sept2016().shape[0]
 	uv_map, N_ant  = get_uv_daily_observation(ncells, z, filename, total_int_time=total_int_time, int_time=int_time, boxsize=boxsize, declination=declination, verbose=verbose)
 	return uv_map, N_ant
 
 def make_uv_map_lightcone(ncells, zs, filename=None, total_int_time=6., int_time=10., boxsize=None, declination=-30., verbose=True):
+	"""
+	Parameters
+	----------
+	ncells: int
+		Number of cells
+	zs: ndarray
+		array of redshift values.
+	total_int_time: float
+		Total observation per day time in hours
+	int_time: float
+		Intergration time in seconds
+	declination: float
+		Declination angle in deg
+	filename: str
+		The path to the file containing the telescope configuration.
+
+			- As a default, it takes the SKA-Low configuration from Sept 2016
+			- It is not used if uv_map and N_ant is provided
+	boxsize: float
+		Boxsize in Mpc	
+	verbose: bool
+		If True, verbose is shown
+	
+	Returns
+	-------
+	uv_lc: ndarray
+		array of gridded uv coverage at all the redshifts.
+	N_ant: int
+		Number of antennae
+	"""
 	uv_lc = np.zeros((ncells,ncells,zs.shape[0]))
 	percc = np.round(100./zs.shape[0],decimals=2)
 	for i in range(zs.shape[0]):
@@ -182,16 +221,46 @@ def telescope_response_on_coeval(array, z, depth_mhz=None, obs_time=1000, filena
 
 def noise_cube_coeval(ncells, z, depth_mhz=None, obs_time=1000, filename=None, boxsize=None, total_int_time=6., int_time=10., declination=-30., uv_map=np.array([]), N_ant=None, verbose=True, fft_wrap=False):
 	"""
-	Parameter
-	z        : Redshift.
-	ncells   : The grid size.
-	depth_mhz: The bandwidth in MHz.
-	obs_time : The observation time in hours.
-	filename : The path to the file containing the telescope configuration.	
+	@ Ghara et al. (2017), Giri et al. (2018b)
+
+	It creates a noise coeval cube by simulating the radio observation strategy.
+
+	Parameters
+	----------
+	ncells: int
+		The grid size.
+	z: float
+		Redshift.
+	depth_mhz: float
+		The bandwidth in MHz.
+	obs_time: float
+		The observation time in hours.
+	total_int_time: float
+		Total observation per day time in hours
+	int_time: float
+		Intergration time in seconds
+	declination: float
+		Declination angle in deg
+	uv_map: ndarray
+		numpy array containing gridded uv coverage. If nothing given, then the uv map 
+		will be simulated
+	N_ant: int
+		Number of antennae
+	filename: str
+		The path to the file containing the telescope configuration.
+
+			- As a default, it takes the SKA-Low configuration from Sept 2016
+			- It is not used if uv_map and N_ant is provided
+	boxsize: float
+		Boxsize in Mpc
+	verbose: bool
+		If True, verbose is shown
 	
-	Return
-	noise_coeval:A 3D cube of the interferometric noise (in mK).
-		     The frequency is assumed to be the same along the assumed frequency (last) axis.	
+	Returns
+	-------
+	noise_cube: ndarray
+		A 3D cube of the interferometric noise (in mK).
+		The frequency is assumed to be the same along the assumed frequency (last) axis.	
 	"""
 	if not filename: N_ant = SKA1_LowConfig_Sept2016().shape[0]
 	if not boxsize: boxsize = conv.LB
@@ -211,16 +280,40 @@ def noise_cube_coeval(ncells, z, depth_mhz=None, obs_time=1000, filename=None, b
 
 def noise_cube_lightcone(ncells, z, obs_time=1000, filename=None, boxsize=None, total_int_time=6., int_time=10., declination=-30., N_ant=None, fft_wrap=False):
 	"""
-	Parameter
-	z        : Redshift.
-	ncells   : The grid size.
-	depth_mhz: The bandwidth in MHz.
-	obs_time : The observation time in hours.
-	filename : The path to the file containing the telescope configuration.	
+	@ Ghara et al. (2017), Giri et al. (2018b)
+
+	It creates a noise coeval cube by simulating the radio observation strategy.
+
+	Parameters
+	----------
+	ncells: int
+		The grid size.
+	z: float
+		Redshift.
+	obs_time: float
+		The observation time in hours.
+	total_int_time: float
+		Total observation per day time in hours
+	int_time: float
+		Intergration time in seconds
+	declination: float
+		Declination angle in deg
+	N_ant: int
+		Number of antennae
+	filename: str
+		The path to the file containing the telescope configuration.
+
+			- As a default, it takes the SKA-Low configuration from Sept 2016
+			- It is not used if uv_map and N_ant is provided
+	boxsize: float
+		Boxsize in Mpc
+	verbose: bool
+		If True, verbose is shown
 	
-	Return
+	Returns
+	-------
 	noise_lightcone: A 3D lightcone of the interferometric noise with frequency varying 
-	along last axis(in mK).
+	along last axis(in mK).	
 	"""
 	if not filename: N_ant = SKA1_LowConfig_Sept2016().shape[0]
 	if not boxsize: boxsize = conv.LB
@@ -247,9 +340,9 @@ def gauss_kernel_3d(size, sigma=1.0, fwhm=None):
 	
 	
 	Parameters:
-		* size (int): Width of output array in pixels.
-		* sigma = 1.0 (float): The sigma parameter for the Gaussian.
-		* fwhm = None (float or None): The full width at half maximum.
+		size (int): Width of output array in pixels.
+		sigma = 1.0 (float): The sigma parameter for the Gaussian.
+		fwhm = None (float or None): The full width at half maximum.
 				If this parameter is given, it overrides sigma.
 		
 	Returns:

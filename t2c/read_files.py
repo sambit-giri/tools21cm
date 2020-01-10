@@ -1,3 +1,7 @@
+'''
+Methods to read simulations outputs of few popular codes.
+'''
+
 import numpy as np
 import glob
 from .xfrac_file import XfracFile
@@ -21,7 +25,7 @@ def _load_binary_data(filename, dtype=np.float32):
 def read_21cmfast_files(filename):
 	"""
 	Parameters:
-		* filename: Give the filename of the 21cmFAST output files.
+		filename (str): Give the filename of the 21cmFAST output files.
 
 	Returns:
 		numpy array
@@ -33,15 +37,18 @@ def read_21cmfast_files(filename):
 def read_c2ray_files(filename, file_type='xfrac', density_file=None):
 	"""
 	Parameters
-	---------
-	filename    : Give the filename of the C2Ray output files.
-	file_type   : The file of file being read has to be mentioned. The options are 
+	----------
+	filename    : str
+		Give the filename of the C2Ray output files.
+	file_type   : str
+		The file of file being read has to be mentioned. The options are 
 	               'xfrac', 'dens', 'vel'. (Default: 'xfrac')
-	density_file: This is necessary if file_type=='vel'. (Default: None)
+	density_file: str
+		This is necessary if file_type=='vel'. (Default: None)
 
 	Returns
 	-------
-	Numpy array
+	numpy array
 	"""
 	assert file_type in ['xfrac', 'dens', 'vel']
 	if file_type=='xfrac': out = XfracFile(filename).xi
@@ -58,7 +65,7 @@ def read_c2ray_files(filename, file_type='xfrac', density_file=None):
 def read_grizzly_files(filename):
 	"""
 	Parameters:
-		* filename: Give the filename of the GRIZZLY xfrac files.
+		filename (str): Give the filename of the GRIZZLY xfrac files.
 
 	Returns:
 		numpy array
@@ -70,10 +77,14 @@ def coeval_21cm_c2ray(xfrac_dir, dens_dir, z, interpolation='linear', mean_subtr
 	"""
 	Parameters
 	----------
-	xfrac_dir     : Give the path that contains the xfrac-files.
-	dens_dir      : Give the path that contains the density-files.
-	z	      : Redshift.
-	interpolation : This is used when the xfrac cube at that redshift is not available.
+	xfrac_dir     : str
+		Give the path that contains the xfrac-files.
+	dens_dir      : str
+		Give the path that contains the density-files.
+	z	      : float
+		Redshift.
+	interpolation : str
+		This is used when the xfrac cube at that redshift is not available.
 	
 	Returns
 	-------
@@ -90,9 +101,18 @@ def coeval_21cm_c2ray(xfrac_dir, dens_dir, z, interpolation='linear', mean_subtr
 
 def coeval_xfrac_c2ray(xfrac_dir, z, interpolation='linear'):
 	"""
-	xfrac_dir     : Give the path that contains the xfrac-files.
-	z	      : Redshift.
-	interpolation : This is used when the coveal cube at that redshift is not available.
+	Parameters
+	----------
+	xfrac_dir     : str
+		Give the path that contains the xfrac-files.
+	z	      : float
+		Redshift.
+	interpolation : str
+		This is used when the coveal cube at that redshift is not available.
+
+	Returns
+	-------
+	numpy array
 	"""
 	if not interpolation in ['linear']: #, 'step', 'sigmoid', 'step_cell'
 		raise ValueError('Unknown interpolation type: %s' % interpolation)
@@ -113,8 +133,16 @@ def coeval_xfrac_c2ray(xfrac_dir, z, interpolation='linear'):
 
 def coeval_dens_c2ray(dens_dir, z):
 	"""
-	dens_dir      : Give the path that contains the density-files.
-	z	      : Redshift.
+	Parameters
+	----------
+	dens_dir  : str
+		Give the path that contains the density-files.
+	z	  : float
+		Redshift.
+
+	Returns
+	-------
+	numpy array
 	"""
 	dens_files  = glob.glob(dens_dir + '/*n_all.dat')
 	dens_zs  = None
@@ -134,8 +162,12 @@ def coeval_dens_c2ray(dens_dir, z):
 
 def subtract_mean_channelwise(dt, axis=-1):
 	"""
-	dt  : Brightness temperature whose channel-wise should be subtracted.
-	axis: Frequency axis (Defualt:-1).
+	Parameters:
+		dt  (ndarray): Brightness temperature whose channel-wise should be subtracted.
+		axis (int): Frequency axis (Defualt:-1).
+
+	Returns:
+		numpy array
 	"""
 	assert dt.ndim == 3
 	if axis != -1 or axis != 2: dt = np.swapaxes(dt, axis, 2)

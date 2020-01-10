@@ -11,8 +11,8 @@ class XfracFile:
 	pass the filename to the constructor.
 	
 	Some useful attributes of this class are:
-		* xi (numpy array): the ionized fraction
-		* z (float): the redshift of the file (-1 if it couldn't be determined from the file name)
+		xi (numpy array): the ionized fraction
+		z (float): the redshift of the file (-1 if it couldn't be determined from the file name)
 	
 	'''
 	def __init__(self, filename = None, old_format=False):
@@ -21,8 +21,8 @@ class XfracFile:
 		do nothing.
 		
 		Parameters:
-			* filename = None (string): the file to read from.
-			* old_format = False (bool): whether to use the old-style 
+			filename = None (string): the file to read from.
+			old_format = False (bool): whether to use the old-style 
 				file format.
 		Returns:
 			Nothing
@@ -36,11 +36,11 @@ class XfracFile:
 		Read data from file.
 		
 		Parameters:
-			* filename (string): the file to read from.
-			* old_format = False (bool): whether to use the old-style (32 bits)
+			filename (string): the file to read from.
+			old_format = False (bool): whether to use the old-style (32 bits)
 				file format.
-                        * neutral = False (bool): whether the content is the neutral or ionized fraction
-                        * binary_format = False (bool): whether the file is in Fortran unformatted or binary (no record separators) format 
+                        neutral = False (bool): whether the content is the neutral or ionized fraction
+                        binary_format = False (bool): whether the file is in Fortran unformatted or binary (no record separators) format 
 		Returns:
 			Nothing
 		'''

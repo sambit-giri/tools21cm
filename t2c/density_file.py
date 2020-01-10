@@ -12,9 +12,9 @@ class DensityFile:
 	
 	Some useful attributes of this class are:
 	
-	* raw_density (numpy array): the density in simulation units
-	* cgs_density (numpy array): the baryonic density in g/cm^3
-	* z (float): the redshift of the file (-1 if it couldn't be determined from the file name)
+	raw_density (numpy array): the density in simulation units
+	cgs_density (numpy array): the baryonic density in g/cm^3
+	z (float): the redshift of the file (-1 if it couldn't be determined from the file name)
 	
 	'''
 	
@@ -24,9 +24,9 @@ class DensityFile:
 		do nothing.
 		
 		Parameters:
-			* filename = None (string): the file to read from.
-			* old_format = False (bool): whether to use the old-style 
-				file format.
+			filename = None (string): the file to read from.
+			old_format = False (bool): whether to use the old-style file format.
+
 		Returns:
 			Nothing
 		'''
@@ -38,9 +38,9 @@ class DensityFile:
 		Read data from file.
 		
 		Parameters:
-			* filename (string): the file to read from.
-			* old_format = False (bool): whether to use the old-style 
-				file format.
+			filename (string): the file to read from.
+			old_format = False (bool): whether to use the old-style file format.
+
 		Returns:
 			Nothing
 		'''

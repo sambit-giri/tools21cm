@@ -1,3 +1,7 @@
+'''
+Methods to smooth or reduce resolution of the data to reduce noise.
+'''
+
 import numpy as np
 from . import const, conv
 from . import cosmology as cm
@@ -17,9 +21,9 @@ def gauss_kernel(size, sigma=1.0, fwhm=None):
 	
 	
 	Parameters:
-		* size (int): Width of output array in pixels.
-		* sigma = 1.0 (float): The sigma parameter for the Gaussian.
-		* fwhm = None (float or None): The full width at half maximum.
+		size (int): Width of output array in pixels.
+		sigma = 1.0 (float): The sigma parameter for the Gaussian.
+		fwhm = None (float or None): The full width at half maximum.
 				If this parameter is given, it overrides sigma.
 		
 	Returns:
@@ -49,8 +53,8 @@ def tophat_kernel(size, tophat_width):
 	Generate a square tophat kernel
 	
 	Parameters:
-		* size (int): the size of the array
-		* tophat_width (int): the size of the tophat kernel
+		size (int): the size of the array
+		tophat_width (int): the size of the tophat kernel
 		
 	Returns:
 		The kernel as a (size,size) array
@@ -70,7 +74,7 @@ def tophat_kernel_3d(size):
 	the specified size
 	
 	Parameters:
-		* size (integer or list-like): the size of
+		size (integer or list-like): the size of
 			the tophat kernel along each dimension. If
 			size is an integer, the kernel will be cubic.
 	Returns:
@@ -89,8 +93,8 @@ def lanczos_kernel(size, kernel_width):
 	Generate a 2D Lanczos kernel.
 	
 	Parameters:
-		* size (int): the size of the array
-		* kernel_width (int): the width of the kernel
+		size (int): the size of the array
+		kernel_width (int): the width of the kernel
 		
 	Returns:
 		The kernel as a (size,size) array
@@ -117,9 +121,9 @@ def smooth_gauss(input_array, sigma=1.0, fwhm=None):
         the resolution of a telescope.
 	
 	Parameters:
-		* input_array (numpy array): the array to smooth
-		* sigma=1.0 (float): the width of the kernel (variance)
-		* fwhm = None (float or None): The full width at half maximum.
+		input_array (numpy array): the array to smooth
+		sigma=1.0 (float): the width of the kernel (variance)
+		fwhm = None (float or None): The full width at half maximum.
 				If this parameter is given, it overrides sigma.
 
 	Returns:
@@ -135,8 +139,8 @@ def smooth_tophat(input_array, tophat_width):
 	Smooth the input array with a square tophat kernel.
 	
 	Parameters:
-		* input_array (numpy array): the array to smooth
-		* tophat_width (int): the width of the kernel in cells
+		input_array (numpy array): the array to smooth
+		tophat_width (int): the width of the kernel in cells
 
 	Returns:
 		The smoothed array. A numpy array with the same
@@ -160,8 +164,8 @@ def smooth_lanczos(input_array, kernel_width):
 	Smooth the input array with a Lanczos kernel.
 	
 	Parameters:
-		* input_array (numpy array): the array to smooth
-		* kernel_width (int): the width of the kernel in cells
+		input_array (numpy array): the array to smooth
+		kernel_width (int): the width of the kernel in cells
 
 	Returns:
 		The smoothed array. A numpy array with the same
@@ -177,8 +181,8 @@ def smooth_with_kernel(input_array, kernel):
 	Smooth the input array with an arbitrary kernel.
 	
 	Parameters:
-		* input_array (numpy array): the array to smooth
-		* kernel (numpy array): the smoothing kernel. Must
+		input_array (numpy array): the array to smooth
+		kernel (numpy array): the smoothing kernel. Must
 			be the same size as the input array
 
 	Returns:
@@ -200,8 +204,8 @@ def get_beam_w(baseline, z):
 	lambda = 21*(1+z) cm
 	
 	Parameters:
-		* baseline (float): the maximum baseline in meters
-		* z (float): the redshift
+		baseline (float): the maximum baseline in meters
+		z (float): the redshift
 		
 	Returns:
 		The beam width in arcminutes
@@ -220,14 +224,14 @@ def interpolate3d(input_array, x, y, z, order=0):
 	to a new size, which can be irregularly spaced.
 	
 	Parameters:
-		* input_array (numpy array): the array to interpolate
-		* x (numpy array): the output coordinates along the x axis
+		input_array (numpy array): the array to interpolate
+		x (numpy array): the output coordinates along the x axis
 			expressed as (fractional) indices 
-		* y (numpy array): the output coordinates along the y axis
+		y (numpy array): the output coordinates along the y axis
 			expressed as (fractional) indices 
-		* z (numpy array): the output coordinates along the z axis
+		z (numpy array): the output coordinates along the z axis
 			expressed as (fractional) indices
-		* order (int): the order of the spline interpolation. Default
+		order (int): the order of the spline interpolation. Default
 			is 0 (linear interpolation). Setting order=1 gives the same
 			behaviour as IDL's interpolate function with default parameters.
 
@@ -252,12 +256,12 @@ def interpolate2d(input_array, x, y, order=0):
 	Same as interpolate2d but for 2D data
 	
 	Parameters:
-		* input_array (numpy array): the array to interpolate
-		* x (numpy array): the output coordinates along the x axis
+		input_array (numpy array): the array to interpolate
+		x (numpy array): the output coordinates along the x axis
 			expressed as (fractional) indices 
-		* y (numpy array): the output coordinates along the y axis
+		y (numpy array): the output coordinates along the y axis
 			expressed as (fractional) indices 
-		* order (int): the order of the spline interpolation. Default
+		order (int): the order of the spline interpolation. Default
 			is 0 (linear interpolation). Setting order=1 gives the same
 			results as IDL's interpolate function
 
@@ -279,17 +283,17 @@ def smooth_lightcone(lightcone, z_array, box_size_mpc=False, max_baseline=2., ra
 	This smooths in both angular and frequency direction assuming both to be smoothed by same scale.
 
 	Parameters:
-		* lightcone (numpy array): The lightcone that is to be smoothed.
-		* z_array (float)        : The lowest value of the redshift in the lightcone or the whole redshift array.
-		* box_size_mpc (float)   : The box size in Mpc. Default value is determined from 
+		lightcone (numpy array): The lightcone that is to be smoothed.
+		z_array (float)        : The lowest value of the redshift in the lightcone or the whole redshift array.
+		box_size_mpc (float)   : The box size in Mpc. Default value is determined from 
 					   the box size set for the simulation (set_sim_constants)
-		* max_baseline (float)   : The maximun baseline of the telescope in km. Default value 
+		max_baseline (float)   : The maximun baseline of the telescope in km. Default value 
 					   is set as 2 km (SKA core).
-		* ratio (int)            : It is the ratio of smoothing scale in frequency direction and 
+		ratio (int)            : It is the ratio of smoothing scale in frequency direction and 
                                            the angular direction (Default value: 1).
 
 	Returns:
-		* (Smoothed_lightcone, redshifts) 
+		(Smoothed_lightcone, redshifts) 
 	"""
 	if (not box_size_mpc): box_size_mpc=conv.LB
 	if(z_array.shape[0] == lightcone.shape[2]):
@@ -314,17 +318,18 @@ def smooth_coeval(cube, z, box_size_mpc=False, max_baseline=2., ratio=1., nu_axi
 	This smooths the coeval cube by Gaussian in angular direction and by tophat along the third axis.
 
 	Parameters:
-		* coeval_cube (numpy array): The lightcone that is to be smoothed.
-		* z (float)                : The redshift of the coeval cube.
-		* box_size_mpc (float)     : The box size in Mpc. Default value is determined from 
+		coeval_cube (numpy array): The data cube that is to be smoothed.
+		z (float)                : The redshift of the coeval cube.
+		box_size_mpc (float)     : The box size in Mpc. Default value is determined from 
 					     the box size set for the simulation (set_sim_constants)
-		* max_baseline (float)     : The maximun baseline of the telescope in km. Default value 
+		max_baseline (float)     : The maximun baseline of the telescope in km. Default value 
 					     is set as 2 km (SKA core).
-		* ratio (int)              : It is the ratio of smoothing scale in frequency direction and 
+		ratio (int)              : It is the ratio of smoothing scale in frequency direction and 
                                              the angular direction (Default value: 1).
+		nu_axis (int)            : Frequency axis
 
 	Returns:
-		* Smoothed_coeval_cube
+		Smoothed_coeval_cube
 	"""
 	if (not box_size_mpc): box_size_mpc=conv.LB	
 	output_dtheta  = (1+z)*21e-5/max_baseline
@@ -334,6 +339,17 @@ def smooth_coeval(cube, z, box_size_mpc=False, max_baseline=2., ratio=1., nu_axi
 	return output_cube
 
 def smooth_coeval_tophat(cube, width, nu_axis):
+	"""
+	This smooths the slices perpendicular to the given axis of the cube by tophat filter.
+
+	Parameters:
+		cube (numpy array)  : The data cube that is to be smoothed.
+		width (float)       : The width of the tophat filter.
+		nu_axis (int)       : Frequency axis
+
+	Returns:
+		Smoothed_cube
+	"""
 	kernel = tophat_kernel(cube.shape[nu_axis], width)
 	output_cube = np.zeros(cube.shape)
 	if nu_axis==0:
@@ -345,21 +361,54 @@ def smooth_coeval_tophat(cube, width, nu_axis):
 	return output_cube
 
 def smooth_coeval_gauss(cube, fwhm, nu_axis):
-        one = np.ones(cube.shape[nu_axis])
-        output_cube = smooth_lightcone_gauss(cube, fwhm*one, nu_axis=nu_axis)
-        return output_cube
+	"""
+	This smooths the slices parallel to the given axis of the cube by Gaussian filter.
+
+	Parameters:
+		cube (numpy array)  : The data cube that is to be smoothed.
+		fwhm (float)        : The fwhm of the Gaussian filter.
+		nu_axis (int)       : Frequency axis
+
+	Returns:
+		Smoothed_cube
+	"""
+	one = np.ones(cube.shape[nu_axis])
+	output_cube = smooth_lightcone_gauss(cube, fwhm*one, nu_axis=nu_axis)
+	return output_cube
 
 def smooth_lightcone_tophat(lightcone, redshifts, dz):
-        output_lightcone = np.zeros(lightcone.shape)
-        for i in range(output_lightcone.shape[2]):
-                z_out_low  = redshifts[i]-dz[i]/2
-                z_out_high = redshifts[i]+dz[i]/2
-                idx_low  = int(np.ceil(find_idx(redshifts, z_out_low)))
-                idx_high = int(np.ceil(find_idx(redshifts, z_out_high)))
-                output_lightcone[:,:,i] = np.mean(lightcone[:,:,idx_low:idx_high+1], axis=2)
-        return output_lightcone
+	"""
+	This smooths the slices perpendicular to the third axis of the lightcone by tophat filter.
+
+	Parameters:
+		lightcone (numpy array) : The lightcone that is to be smoothed.
+		redshifts (numpy array) : The redshift of each slice along the third axis.
+		dz (float)              : redshift width 
+
+	Returns:
+		Smoothed_lightcone
+	"""
+	output_lightcone = np.zeros(lightcone.shape)
+	for i in range(output_lightcone.shape[2]):
+		z_out_low  = redshifts[i]-dz[i]/2
+		z_out_high = redshifts[i]+dz[i]/2
+		idx_low  = int(np.ceil(find_idx(redshifts, z_out_low)))
+		idx_high = int(np.ceil(find_idx(redshifts, z_out_high)))
+		output_lightcone[:,:,i] = np.mean(lightcone[:,:,idx_low:idx_high+1], axis=2)
+	return output_lightcone
 
 def smooth_lightcone_gauss(lightcone,fwhm,nu_axis=2):
+	"""
+	This smooths the slices perpendicular to the third axis of the lightcone by tophat filter.
+
+	Parameters:
+		lightcone (numpy array) : The lightcone that is to be smoothed.
+		fwhm (numpy array)      : The fwhm values of the Gaussian filter at each slice along frequency axis.
+		nu_axis (int)           : frequency axis 
+
+	Returns:
+		Smoothed_lightcone
+	"""
 	assert lightcone.shape[nu_axis] == len(fwhm)
 	output_lightcone = np.zeros(lightcone.shape)
 	for i in range(output_lightcone.shape[nu_axis]):

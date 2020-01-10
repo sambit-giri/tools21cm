@@ -1,3 +1,7 @@
+'''
+Contains functions to estimate various two point statistics.
+'''
+
 import numpy as np
 from . import const
 from . import conv
@@ -13,9 +17,9 @@ def power_spectrum_nd(input_array, box_dims=None):
 	the internal box size is used
 	
 	Parameters:
-		* input_array (numpy array): the array to calculate the 
+		input_array (numpy array): the array to calculate the 
 			power spectrum of. Can be of any dimensions.
-		* box_dims = None (float or array-like): the dimensions of the 
+		box_dims = None (float or array-like): the dimensions of the 
 			box. If this is None, the current box volume is used along all
 			dimensions. If it is a float, this is taken as the box length
 			along all dimensions. If it is an array-like, the elements are
@@ -48,11 +52,11 @@ def cross_power_spectrum_nd(input_array1, input_array2, box_dims):
 	the internal box size is used
 	
 	Parameters:
-		* input_array1 (numpy array): the first array to calculate the 
+		input_array1 (numpy array): the first array to calculate the 
 			power spectrum of. Can be of any dimensions.
-		* input_array2 (numpy array): the second array. Must have same 
+		input_array2 (numpy array): the second array. Must have same 
 			dimensions as input_array1.
-		* box_dims = None (float or array-like): the dimensions of the 
+		box_dims = None (float or array-like): the dimensions of the 
 			box. If this is None, the current box volume is used along all
 			dimensions. If it is a float, this is taken as the box length
 			along all dimensions. If it is an array-like, the elements are
@@ -89,13 +93,13 @@ def radial_average(input_array, box_dims, kbins=10, binning='log', breakpoint=0.
 	Radially average data. Mostly for internal use.
 	
 	Parameters: 
-		* input_array (numpy array): the data array
-		* box_dims = None (float or array-like): the dimensions of the 
+		input_array (numpy array): the data array
+		box_dims = None (float or array-like): the dimensions of the 
 			box. If this is None, the current box volume is used along all
 			dimensions. If it is a float, this is taken as the box length
 			along all dimensions. If it is an array-like, the elements are
 			taken as the box length along each axis.
-		* kbins = 10 (integer or array-like): The number of bins,
+		kbins = 10 (integer or array-like): The number of bins,
 			or a list containing the bin edges. If an integer is given, the bins
 			are logarithmically spaced.
 			
@@ -128,18 +132,18 @@ def power_spectrum_1d(input_array_nd, kbins=100, box_dims=None, return_n_modes=F
 	and return it as a one-dimensional array.
 	
 	Parameters: 
-		* input_array_nd (numpy array): the data array
-		* kbins = 100 (integer or array-like): The number of bins,
+		input_array_nd (numpy array): the data array
+		kbins = 100 (integer or array-like): The number of bins,
 			or a list containing the bin edges. If an integer is given, the bins
 			are logarithmically spaced.
-		* box_dims = None (float or array-like): the dimensions of the 
+		box_dims = None (float or array-like): the dimensions of the 
 			box. If this is None, the current box volume is used along all
 			dimensions. If it is a float, this is taken as the box length
 			along all dimensions. If it is an array-like, the elements are
 			taken as the box length along each axis.
-		* return_n_modes = False (bool): if true, also return the
+		return_n_modes = False (bool): if true, also return the
 			number of modes in each bin
-		* binning = 'log' : It defines the type of binning in k-space. The other option is 
+		binning = 'log' : It defines the type of binning in k-space. The other option is 
 				    'linear' or 'mixed'.
 			
 	Returns: 
@@ -162,19 +166,19 @@ def cross_power_spectrum_1d(input_array1_nd, input_array2_nd, kbins=100, box_dim
 	and return it as a one-dimensional array.
 	
 	Parameters: 
-		* input_array1_nd (numpy array): the first data array
-		* input_array2_nd (numpy array): the second data array
-		* kbins = 100 (integer or array-like): The number of bins,
+		input_array1_nd (numpy array): the first data array
+		input_array2_nd (numpy array): the second data array
+		kbins = 100 (integer or array-like): The number of bins,
 			or a list containing the bin edges. If an integer is given, the bins
 			are logarithmically spaced.
-		* box_dims = None (float or array-like): the dimensions of the 
+		box_dims = None (float or array-like): the dimensions of the 
 			box. If this is None, the current box volume is used along all
 			dimensions. If it is a float, this is taken as the box length
 			along all dimensions. If it is an array-like, the elements are
 			taken as the box length along each axis.
-		* return_n_modes = False (bool): if true, also return the
+		return_n_modes = False (bool): if true, also return the
 			number of modes in each bin
-		* binning = 'log' : It defines the type of binning in k-space. The other option is 
+		binning = 'log' : It defines the type of binning in k-space. The other option is 
 				    'linear' or 'mixed'.
 			
 	Returns: 
@@ -199,18 +203,18 @@ def power_spectrum_mu(input_array, los_axis = 0, mubins=20, kbins=10, box_dims =
 	input_array is the array to calculate the power spectrum from
 	
 	Parameters: 
-		* input_array (numpy array): the data array
-		* los_axis = 0 (integer): the line-of-sight axis
-		* mubins = 20 (integer): the number of mu bins
-		* kbins = 10 (integer or array-like): The number of bins,
+		input_array (numpy array): the data array
+		los_axis = 0 (integer): the line-of-sight axis
+		mubins = 20 (integer): the number of mu bins
+		kbins = 10 (integer or array-like): The number of bins,
 			or a list containing the bin edges. If an integer is given, the bins
 			are logarithmically spaced.
-		* box_dims = None (float or array-like): the dimensions of the 
+		box_dims = None (float or array-like): the dimensions of the 
 			box. If this is None, the current box volume is used along all
 			dimensions. If it is a float, this is taken as the box length
 			along all dimensions. If it is an array-like, the elements are
 			taken as the box length along each axis.
-		* exlude_zero_modes = True (bool): if true, modes with any components
+		exlude_zero_modes = True (bool): if true, modes with any components
 			of k equal to zero will be excluded.
 			
 	Returns: 
@@ -236,19 +240,19 @@ def cross_power_spectrum_mu(input_array1, input_array2, los_axis = 0, mubins=20,
 	input_array is the array to calculate the power spectrum from
 	
 	Parameters: 
-		* input_array1 (numpy array): the first data array
-		* input_array2 (numpy array): the second data array
-		* los_axis = 0 (integer): the line-of-sight axis
-		* mubins = 20 (integer): the number of mu bins
-		* kbins = 10 (integer or array-like): The number of bins,
+		input_array1 (numpy array): the first data array
+		input_array2 (numpy array): the second data array
+		los_axis = 0 (integer): the line-of-sight axis
+		mubins = 20 (integer): the number of mu bins
+		kbins = 10 (integer or array-like): The number of bins,
 			or a list containing the bin edges. If an integer is given, the bins
 			are logarithmically spaced.
-		* box_dims = None (float or array-like): the dimensions of the 
+		box_dims = None (float or array-like): the dimensions of the 
 			box. If this is None, the current box volume is used along all
 			dimensions. If it is a float, this is taken as the box length
 			along all dimensions. If it is an array-like, the elements are
 			taken as the box length along each axis.
-		* exlude_zero_modes = True (bool): if true, modes with any components
+		exlude_zero_modes = True (bool): if true, modes with any components
 			of k equal to zero will be excluded.
 		
 	Returns: 
@@ -414,15 +418,23 @@ def _get_dims(box_dims, ashape):
 
 def dimensionless_ps(data, kbins=100, box_dims=None, binning='log', factor=10):
 	'''
+	Dimensionless power spectrum is P(k)*k^3/(2pi^2)
+
 	Parameters
 	----------
-	data    : The numpy data whose power spectrum is to be determined.
-	kbins   : Number of bins for in the k-space (Default: 100).
-	box_dims: The size of the box in Mpc (Default: Takes the value from the set_sim_constants).
-	binning : The type of binning to be used for the k-space (Default: 'log').
-	factor  : The factor multiplied to the given kbins to smooth the spectrum from (Default: 10).
-	Return
-	----------
+	data    : ndarray
+		The numpy data whose power spectrum is to be determined.
+	kbins   : int
+		Number of bins for in the k-space (Default: 100).
+	box_dims: float
+		The size of the box in Mpc (Default: Takes the value from the set_sim_constants).
+	binning : str
+		The type of binning to be used for the k-space (Default: 'log').
+	factor  : int
+		The factor multiplied to the given kbins to smooth the spectrum from (Default: 10).
+
+	Returns
+	-------
 	(\Delta^2, ks)
 	'''
 	Pk, ks = power_spectrum_1d(data, kbins=kbins*factor, box_dims=box_dims, binning=binning)

@@ -10,10 +10,17 @@ def EulerCharacteristic(data, thres=0.5, neighbors=6):
 	"""
 	Parameters
 	----------
-	data     : The data cube containing the structure.
-	thres    : The threshold to create the binary field from the data (Default: 0.5)
-	           Ignore this parameter if data is already a binary field.
-	neighbors: Define the connectivity to the neighbors (Default: 6).
+	data     : ndarray
+		The data cube containing the structure.
+	thres    : float
+		The threshold to create the binary field from the data (Default: 0.5)
+		Ignore this parameter if data is already a binary field.
+	neighbors: int
+		Define the connectivity to the neighbors (Default: 6).
+
+	Returns
+	-------
+	Euler characteristics value.
 	"""
 	A = 1*(data>thres)
 	if 'numba' in sys.modules: import ViteBetti_numba as VB
@@ -33,10 +40,17 @@ def betti0(data, thres=0.5, neighbors=6):
 	"""
 	Parameters
 	----------
-	data     : The data cube containing the structure.
-	thres    : The threshold to create the binary field from the data (Default: 0.5)
-	           Ignore this parameter if data is already a binary field.
-	neighbors: Define the connectivity to the neighbors (Default: 6).
+	data     : ndarray
+		The data cube containing the structure.
+	thres    : float
+		The threshold to create the binary field from the data (Default: 0.5)
+		Ignore this parameter if data is already a binary field.
+	neighbors: int
+		Define the connectivity to the neighbors (Default: 6).
+
+	Returns
+	-------
+	Betti 0
 	"""
 	A = (data>thres)*1
 	if neighbors==6 or neighbors==4: b0 = label(A, return_num=1, neighbors=4)[1]#np.unique(fof(B, use_skimage=1)[0]).size-1
@@ -47,10 +61,17 @@ def betti2(data, thres=0.5, neighbors=6):
 	"""
 	Parameters
 	----------
-	data     : The data cube containing the structure.
-	thres    : The threshold to create the binary field from the data (Default: 0.5)
-	           Ignore this parameter if data is already a binary field.
-	neighbors: Define the connectivity to the neighbors (Default: 6).
+	data     : ndarray
+		The data cube containing the structure.
+	thres    : float
+		The threshold to create the binary field from the data (Default: 0.5)
+		Ignore this parameter if data is already a binary field.
+	neighbors: int
+		Define the connectivity to the neighbors (Default: 6).
+
+	Returns
+	-------
+	Betti 2
 	"""
 	A = (data>thres)*1
 	if neighbors==6 or neighbors==4: b2 = label(1-A, return_num=1, neighbors=8)[1]#b2 = np.unique(fof(1-B, use_skimage=1)[0]).size-1
@@ -61,10 +82,17 @@ def betti1(data, thres=0.5, neighbors=6, b0=None, b2=None, chi=None):
 	"""
 	Parameters
 	----------
-	data     : The data cube containing the structure.
-	thres    : The threshold to create the binary field from the data (Default: 0.5)
-	           Ignore this parameter if data is already a binary field.
-	neighbors: Define the connectivity to the neighbors (Default: 6).
+	data     : ndarray
+		The data cube containing the structure.
+	thres    : float
+		The threshold to create the binary field from the data (Default: 0.5)
+		Ignore this parameter if data is already a binary field.
+	neighbors: int
+		Define the connectivity to the neighbors (Default: 6).
+
+	Returns
+	-------
+	Betti 1
 	"""
 	if chi is None: chi = EulerCharacteristic(data, thres=thres, neighbors=neighbors)
 	if b0 is None: b0  = betti0(data, thres=thres, neighbors=neighbors)
@@ -73,14 +101,19 @@ def betti1(data, thres=0.5, neighbors=6, b0=None, b2=None, chi=None):
 
 def genus(data, xth=0.5):
 	"""
-	It is an implementation of Gauss-Bonnet theorem in digital spaces.
 	@ Chen & Rong (2010) 
+
+	It is an implementation of Gauss-Bonnet theorem in digital spaces.
+
 	Parameters
 	----------
-	data : The input data set which contains the structures.
-	xth  : The threshold to put on the data set (Default: 0.5).
-	Return
-	----------
+	data : ndarray
+		The input data set which contains the structures.
+	xth  : float
+		The threshold to put on the data set (Default: 0.5).
+
+	Returns
+	-------
 	Genus
 	"""
 	data = data>=xth

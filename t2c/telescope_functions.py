@@ -12,16 +12,23 @@ janskytowatt = 1e-26
 def from_antenna_config(filename, z, nu=None):
 	"""
 	The function reads the antenna positions (N_ant antennas) from the file given.
+
 	Parameters
 	----------
-	filename: Name of the file containing the antenna configurations (text file).
-	z       : Redhsift of the slice observed.
-	nu      : The frequency observed by the telescope.
+	filename: str
+		Name of the file containing the antenna configurations (text file).
+	z       : float
+		Redhsift of the slice observed.
+	nu      : float
+		The frequency observed by the telescope.
+
 	Returns
-	----------
-	Nbase   : Numpy array (N_ant(N_ant-1)/2 x 3) containing the ux,uy,uz values derived 
+	-------
+	Nbase   : ndarray
+		Numpy array (N_ant(N_ant-1)/2 x 3) containing the (ux,uy,uz) values derived 
 	          from the antenna positions.
-	N_ant   : Number of antennas.
+	N_ant   : int
+		Number of antennas.
 	"""
 	z = float(z)
 	if filename is None: antll  = SKA1_LowConfig_Sept2016()
@@ -53,16 +60,23 @@ def earth_rotation_effect(Nbase, slice_num, int_time, declination=-30.):
 	"""
 	The rotation of the earth over the observation times makes changes the part of the 
 	sky measured by each antenna.
-	Parameter:
-	---------
-	Nbase       : The array containing all the ux,uy,uz values of the antenna configuration.
-	slice_num   : The number of the observed slice after each of the integration time.
-	int_time    : The integration time is the time after which the signal is recorded (in seconds).
-	declination : The angle of declination refers to the lattitute where telescope is located 
-		      (in degres). Default: -30
-	Return
+
+	Parameters
 	----------
-	new_Nbase   : It is the new Nbase calculated for the rotated antenna configurations.
+	Nbase       : ndarray
+		The array containing all the ux,uy,uz values of the antenna configuration.
+	slice_num   : int
+		The number of the observed slice after each of the integration time.
+	int_time    : float
+		The integration time is the time after which the signal is recorded (in seconds).
+	declination : float
+		The angle of declination refers to the lattitute where telescope is located 
+		(in degres). Default: -30
+	
+	Returns
+	-------
+	new_Nbase   : ndarray
+		It is the new Nbase calculated for the rotated antenna configurations.
 	"""
 
 	p     = np.pi/180.
@@ -80,16 +94,27 @@ def get_uv_daily_observation(ncells, z, filename=None, total_int_time=4., int_ti
 	"""
 	The radio telescopes observe the sky for 'total_int_time' hours each day. The signal is recorded 
 	every 'int_time' seconds. 
+
 	Parameters
 	----------
-	ncells         : The number of cell used to make the image.
-	z              : Redhsift of the slice observed.
-	filename       : Name of the file containing the antenna configurations (text file).
-	total_int_time : Total hours of observation per day (in hours).
-	int_time       : Integration time of the telescope observation (in seconds).
-	boxsize        : The comoving size of the sky observed. Default: It is determined from the 
-			 simulation constants set.
-	declination    : The declination angle of the SKA (in degree). Default: 30. 
+	ncells         : int
+		The number of cell used to make the image.
+	z              : float
+		Redhsift of the slice observed.
+	filename       : str
+		Name of the file containing the antenna configurations (text file).
+	total_int_time : float
+		Total hours of observation per day (in hours).
+	int_time       : float
+		Integration time of the telescope observation (in seconds).
+	boxsize        : float
+		The comoving size of the sky observed. Default: It is determined from the simulation constants set.
+	declination    : float
+		The declination angle of the SKA (in degree). Default: 30. 
+
+	Returns
+	-------
+	(uv_map, N_ant)
 	"""
 	z = float(z)
 	if 'numba' in sys.modules: 
@@ -116,16 +141,21 @@ def get_uv_daily_observation(ncells, z, filename=None, total_int_time=4., int_ti
 def get_uv_coverage(Nbase, z, ncells, boxsize=None):
 	"""
 	It calculated the uv_map for the uv-coverage.
+
 	Parameters
 	----------
-	Nbase   : The array containing all the ux,uy,uz values of the antenna configuration.
-	z       : Redhsift of the slice observed.
-	ncells  : The number of cell used to make the image.
-	boxsize : The comoving size of the sky observed. Default: It is determined from the 
-	          simulation constants set.
+	Nbase   : ndarray
+		The array containing all the ux,uy,uz values of the antenna configuration.
+	z       : float
+		Redhsift of the slice observed.
+	ncells  : int
+		The number of cell used to make the image.
+	boxsize : float
+		The comoving size of the sky observed. Default: It is determined from the simulation constants set.
 	Returns
-	----------
-	uv_map  : ncells x ncells numpy array containing the number of baselines observing each pixel.
+	-------
+	uv_map  : ndarray
+		ncells x ncells numpy array containing the number of baselines observing each pixel.
 	"""
 	z = float(z)
 	if not boxsize: boxsize = conv.LB
@@ -145,18 +175,29 @@ def get_uv_coverage(Nbase, z, ncells, boxsize=None):
 
 def kanan_noise_image_ska(z, uv_map, depth_mhz, obs_time, int_time, N_ant_ska=564., verbose=True):
 	"""
+	@ Kanan Datta
+	
 	It calculates the rms of the noise added by the interferrometers of ska. 
+
 	Parameters
 	----------
-	z         : Redhsift of the slice observed.
-	uv_map    : ncells x ncells numpy array containing the number of baselines observing each pixel.
-	depth_mhz : The bandwidth of the observation (in MHz).
-	obs_time  : The total hours of observations time.
-	N_ant_ska : Number of anntennas in SKA. Default: 564.
+	z         : float
+		Redhsift of the slice observed.
+	uv_map    : ndarray
+		ncells x ncells numpy array containing the number of baselines observing each pixel.
+	depth_mhz : float
+		The bandwidth of the observation (in MHz).
+	obs_time  : float
+		The total hours of observations time.
+	N_ant_ska : float
+		Number of anntennas in SKA. Default: 564.
+
 	Returns
-	----------
-	sigma     : The rms of the noise in the image produced by SKA for uniformly distributed antennas.
-	rms_noise : The rms of the noise due to the antenna positions in uv field.
+	-------
+	sigma     : float
+		The rms of the noise in the image produced by SKA for uniformly distributed antennas.
+	rms_noise : float
+		The rms of the noise due to the antenna positions in uv field.
 	"""
 	z = float(z)
 	nuso  = 1420.0/(1.0 + z)
@@ -203,12 +244,15 @@ def kelvin_jansky_conversion(ncells, z, boxsize=None):
 	"""
 	Parameters
 	----------
-	ncells  : Number of cells/pixels in the image.
-	z       : Redshift
-	boxsize : The comoving size of the sky observed. Default: It is determined from the 
-	          simulation constants set.	
+	ncells  : int
+		Number of cells/pixels in the image.
+	z       : float
+		Redshift
+	boxsize : float
+		The comoving size of the sky observed. Default: It is determined from the simulation constants set.	
+
 	Returns
-	----------
+	-------
 	The conversion factor multiplied to values in kelvin to get values in jansky.
 	"""
 	z = float(z)
@@ -228,14 +272,17 @@ def jansky_2_kelvin(array, z, boxsize=None, ncells=None):
 	"""
 	Parameters
 	----------
-	array   : Numpy array containing the values in jansky.
-	z       : Redshift
-	boxsize : The comoving size of the sky observed. Default: It is determined from the 
-	          simulation constants set.
-	ncells  : The number of grid cells. Default: None
+	array   : ndarray
+		Numpy array containing the values in jansky.
+	z       : float
+		Redshift
+	boxsize : float
+		The comoving size of the sky observed. Default: It is determined from the simulation constants set.
+	ncells  : int
+		The number of grid cells. Default: None
 	
 	Returns
-	----------
+	-------
 	A numpy array with values in mK.
 	"""
 	z = float(z)
@@ -247,12 +294,15 @@ def kelvin_2_jansky(array, z, boxsize=None, ncells=None):
 	"""
 	Parameters
 	----------
-	array   : Numpy array containing the values in mK.
-	z       : Redshift
-	boxsize : The comoving size of the sky observed. Default: It is determined from the 
-	          simulation constants set.
+	array   : ndarray
+		Numpy array containing the values in mK.
+	z       : float
+		Redshift
+	boxsize : float
+		The comoving size of the sky observed. Default: It is determined from the simulation constants set.
+
 	Returns
-	----------
+	-------
 	A numpy array with values in muJy.
 	"""
 	z = float(z)

@@ -27,8 +27,7 @@ def make_lightcone(filenames, z_low = None, z_high = None, file_redshifts = None
                 
                 - A text file containing the file names
                 
-                - The directory containing the files (must only contain 
-                one type of files)
+                - The directory containing the files (must only contain one type of files)
         z_low (float): the lowest redshift. If not given, the redshift of the 
             lowest-z coeval cube is used.
         z_high (float): the highest redshift. If not given, the redshift of the 
@@ -132,8 +131,7 @@ def make_velocity_lightcone(vel_filenames, dens_filenames, z_low = None, \
                 
                 - A text file containing the file names
                 
-                - The directory containing the files (must only contain 
-                one type of files)
+                - The directory containing the files (must only contain one type of files)
         dens_filenames (string or array): The coeval density cubes.
             Same format as vel_filenames.
         z_low (float): the lowest redshift. If not given, the redshift of the 

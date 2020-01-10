@@ -1,4 +1,6 @@
-#Various values and functions to deal with unit conversions regarding file types
+'''
+Various values and functions to deal with unit conversions regarding file types
+'''
 
 from . import const
 import numpy as np
@@ -22,8 +24,7 @@ def set_sim_constants(boxsize_cMpc):
 	simulation
 	
 	Parameters:
-		* boxsize_cMpc (float): the box size in cMpc/h
-		Valid values are 37, 47, 64, 114, 200, 244, 425 or 500
+		boxsize_cMpc (float): the box size in cMpc/h. Valid values are 37, 47, 64, 114, 200, 244, 425 or 500
 		
 	Returns:
 		Nothing.
@@ -71,7 +72,7 @@ def gridpos_to_mpc(gridpos):
 	Convert a position or length in simulation grid units to Mpc
 	
 	Parameters:
-		* gridpos (float or numpy array): the position in simulation grid units
+		gridpos (float or numpy array): the position in simulation grid units
 		
 	Returns:
 		The position converted to Mpc with the origin unchanged
@@ -84,8 +85,8 @@ def gridvel_to_kms(gridvel, z):
 	Convert a velocity in simulation grid units to km/s
 	
 	Parameters:
-		* gridvel (float or numpy array): the velocity in simulation grid units
-		* z (float or numpy array): the redshift
+		gridvel (float or numpy array): the velocity in simulation grid units
+		z (float or numpy array): the redshift
 		
 	Returns:
 		The velocity in km/s
@@ -98,7 +99,7 @@ def gridmass_to_msol(grid_mass):
 	Convert a halo mass from simulation grid units to solar masses
 	
 	Parameters:
-		* gridmass (float or numpy array): the mass in grid mass units
+		gridmass (float or numpy array): the mass in grid mass units
 		
 	Returns:
 		The mass in log10(Msol) 

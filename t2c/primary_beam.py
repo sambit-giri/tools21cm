@@ -1,3 +1,7 @@
+'''
+Methods to simulate the primary beam of radio telescope
+'''
+
 import numpy as np
 from . import cosmology as cm
 from glob import glob
@@ -5,15 +9,21 @@ from . import conv
 
 def primary_beam(array, z, nu_axis=2, beam_func='Gaussian', boxsize=None, D=0.35):
 	"""
-	array    : The array of brightness temperature.
-	z        : redshift. With one value, the function will assume the array to be coeval. 
+	array    : ndarray
+		The array of brightness temperature.
+	z        : float
+		redshift. With one value, the function will assume the array to be coeval. 
 	           In case of light-cone, provide size of z should be equivalent to the length of 
 	           frequency axis of the array.
-	nu_axis  : The frequency axis of the array (Default: 2) 
-	beam_func: The type of function to model the primary beam. The options are 'gaussian', 'sigmoid'
+	nu_axis  : int
+		The frequency axis of the array (Default: 2) 
+	beam_func: str
+		The type of function to model the primary beam. The options are 'gaussian', 'sigmoid'
 		   and 'step'. Default: 'circular'
-	boxsize  : Size of the box in physical units (cMpc). Default: From set simulation constants.
-	D        : Diameter of the dish in metres. Default: 0.35
+	boxsize  : float
+		Size of the box in physical units (cMpc). Default: From set simulation constants.
+	D        : float
+		Diameter of the dish in metres. Default: 0.35
 	"""
 	assert array.ndim > 1
 	if boxsize is None: boxsize = conv.LB

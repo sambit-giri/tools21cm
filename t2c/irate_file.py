@@ -10,8 +10,8 @@ class IonRateFile:
     pass the filename to the constructor.
     
     Some useful attributes of this class are:
-    * irate (numpy array): the ionization rate
-    * z (float): the redshift of the file (-1 if it couldn't be determined from the file name)
+    irate (numpy array): the ionization rate
+    z (float): the redshift of the file (-1 if it couldn't be determined from the file name)
     
     '''
     def __init__(self, filename = None, old_format=False):
@@ -20,8 +20,8 @@ class IonRateFile:
         do nothing.
         
         Parameters:
-          * filename = None (string): the file to read from.
-          * old_format = False (bool): whether to use the old-style 
+          filename = None (string): the file to read from.
+          old_format = False (bool): whether to use the old-style 
         file format.
         Returns:
           Nothing
@@ -34,8 +34,8 @@ class IonRateFile:
         Read data from file.
             
         Parameters:
-            * filename (string): the file to read from.
-            * old_format = False (bool): whether to use the old-style (32 bits)
+            filename (string): the file to read from.
+            old_format = False (bool): whether to use the old-style (32 bits)
                 file format.
         Returns:
             Nothing

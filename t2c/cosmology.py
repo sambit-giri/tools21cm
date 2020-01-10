@@ -1,4 +1,7 @@
-#Various functions for calculating some cosmological stuff
+'''
+Various functions for calculating some cosmological stuff
+'''
+
 from .import const
 import numpy as np
 from scipy.integrate import quadrature

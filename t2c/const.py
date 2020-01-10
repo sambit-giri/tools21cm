@@ -1,4 +1,8 @@
-# This file contains cosmological constants, physical constants and conversion factors
+'''
+The default cosmological constants in this package are the values derived from 7 year WMAP data. You can define new values using the following functions.
+'''
+
+# This file contains cosmological constants, physical constants and conversion factors.
 
 import numpy as np
 
@@ -31,30 +35,48 @@ n_s = 0.96
 sigma_8 = 0.8
 
 # Set cosmological parameter
-def set_hubble_h(value): 
+def set_hubble_h(value):
+	'''
+	Define new hubble constant value (little h).
+	'''
 	global h, H0
 	h  = value 
 	H0 = 100.0*h
 
 def set_omega_matter(value): 
+	'''
+	Define new omega matter value.
+	'''
 	global Omega0, lam
 	Omega0 = value
 	lam = 1.0-Omega0
 
-def set_omega_baryon(value): 
+def set_omega_baryon(value):
+	'''
+	Define new omega baryon value.
+	'''
 	global OmegaB
 	OmegaB = value 
 
-def set_omega_lambda(value): 
+def set_omega_lambda(value):
+	'''
+	Define new omega lambda value.
+	'''
 	global lam
 	lam = value 
 	OmegaL = value
 
-def set_ns(value): 
+def set_ns(value):
+	'''
+	Define new ns value.
+	'''
 	global n_s
 	n_s = value 
 
 def set_sigma_8(value): 
+	'''
+	Define new sigma_8 value.
+	'''
 	global sigma_8
 	sigma_8 = value 
 
