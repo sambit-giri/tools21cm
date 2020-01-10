@@ -23,7 +23,7 @@ copyright = '2020, Sambit Giri'
 author = 'Sambit Giri'
 
 # The full version, including alpha/beta/rc tags
-version = release = '2.0.1'
+version = release = '2.1'
 
 
 # -- General configuration ---------------------------------------------------

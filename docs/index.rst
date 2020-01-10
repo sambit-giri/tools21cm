@@ -6,9 +6,9 @@ Contents
    :maxdepth: 2
 
    installation
+   tutorials
    contents
    contents_other
-   tutorials
    authors
    changelog
 

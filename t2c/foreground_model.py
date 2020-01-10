@@ -1,5 +1,8 @@
+'''
+Methods to simulate and analyse the foreground signal for 21 cm signal.
+'''
+
 import numpy as np
-#import c2raytools as c2t
 from .telescope_functions import jansky_2_kelvin, from_antenna_config
 from . import cosmology as cm
 from . import conv
@@ -7,14 +10,19 @@ from . import conv
 def galactic_synch_fg(z, ncells, boxsize, max_baseline=2.):
 	"""
 	@ Ghara et al. (2017)
-	Parameter
-	---------
-	z           : Redshift observed with 21-cm.
-	ncells      : Number of cells on each axis.
-	boxsize     : Size of the FOV in Mpc.
-	max_baseline: Maximum baseline of the radio telescope in km (Default: 2).
-	Return
-	------
+
+	Parameters
+	----------
+	z           : float
+		Redshift observed with 21-cm.
+	ncells      : int
+		Number of cells on each axis.
+	boxsize     : float
+		Size of the FOV in Mpc.
+	max_baseline: float
+		Maximum baseline of the radio telescope in km (Default: 2).
+	Returns
+	-------
 	A 2D numpy array of brightness temperature in mK.
 	"""
 	X  = np.random.normal(size=(ncells, ncells))
@@ -35,14 +43,20 @@ def galactic_synch_fg(z, ncells, boxsize, max_baseline=2.):
 def extragalactic_pointsource_fg(z, ncells, boxsize, S_max=100):
 	"""
 	@ Ghara et al. (2017)
-	Parameter
-	---------
-	z           : Redshift observed with 21-cm.
-	ncells      : Number of cells on each axis.
-	boxsize     : Size of the FOV in Mpc.
-	S_max       : Maximum flux of the point source to model in muJy (Default: 100).
-	Return
-	------
+
+	Parameters
+	----------
+	z           : float
+		Redshift observed with 21-cm.
+	ncells      : int
+		Number of cells on each axis.
+	boxsize     : float
+		Size of the FOV in Mpc.
+	S_max       : float
+		Maximum flux of the point source to model in muJy (Default: 100).
+
+	Returns
+	-------
 	A 2D numpy array of brightness temperature in mK.
 	"""
 	nu = cm.z_to_nu(z)

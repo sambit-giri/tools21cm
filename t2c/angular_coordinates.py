@@ -19,11 +19,11 @@ def physical_lightcone_to_observational(physical_lightcone, input_z_low, output_
     to observational (angle/frequency) units.
     
     Parameters:
-        * physical_lightcone (numpy array): the lightcone volume
-        * input_z_low (float): the lowest redshift of the input lightcone
-        * output_dnu (float): the frequency resolution of the output volume in MHz
-        * output_dtheta (float): the angular resolution of the output in arcmin
-        * input_box_size_mpc (float): the size of the input FoV in Mpc.
+        physical_lightcone (ndarray): the lightcone volume
+        input_z_low (float): the lowest redshift of the input lightcone
+        output_dnu (float): the frequency resolution of the output volume in MHz
+        output_dtheta (float): the angular resolution of the output in arcmin
+        input_box_size_mpc (float): the size of the input FoV in Mpc.
             If None (default), this will be set to conv.LB
             
     Returns:
@@ -66,10 +66,10 @@ def observational_lightcone_to_physical(observational_lightcone, input_freqs, in
     frequencies decreasing along the LoS.
     
     Parameters:
-        * observational_lightcone (numpy array): the input lightcone volume
-        * input_freqs (numpy array): the frequency in MHz of each slice along the 
+        observational_lightcone (numpy array): the input lightcone volume
+        input_freqs (numpy array): the frequency in MHz of each slice along the 
             line of sight of the input
-        * input_dheta (float): the angular size of a cell in arcmin
+        input_dheta (float): the angular size of a cell in arcmin
         
     Returns:
         * The output volume
@@ -110,12 +110,12 @@ def physical_slice_to_angular(input_slice, z, slice_size_mpc, fov_deg, dtheta, o
     Interpolate a slice in physical coordinates to angular coordinates.
     
     Parameters:
-        * input_slice (numpy array): the 2D slice in physical coordinates
-        * z (float): the redshift of the input slice
-        * slice_size_Mpc (float): the size of the input slice in cMpc
-        * fov_deg (float): the field-of-view in degrees. The output will be
+        input_slice (numpy array): the 2D slice in physical coordinates
+        z (float): the redshift of the input slice
+        slice_size_Mpc (float): the size of the input slice in cMpc
+        fov_deg (float): the field-of-view in degrees. The output will be
             padded to match this size
-        * dtheta (float): the target resolution in arcmin
+        dtheta (float): the target resolution in arcmin
         
     Returns:
         (angular_slice, size_deg)
@@ -147,6 +147,13 @@ def angular_slice_to_physical(input_slice, z, slice_size_deg, output_cell_size, 
     '''
     Interpolate a slice in angular coordinates to physical
     
+    Parameters:
+        input_slice (numpy array): the 2D slice in observational coordinates
+        z (float): the redshift of the input slice
+        slice_size_deg (float): the size of the input slice in deg
+        output_cell_size (float): the output cell size in cMpc
+        output_size_mpc (float): the output size in mpc
+
     Returns:
         (physical_slice, size_mpc)
     '''
@@ -173,6 +180,13 @@ def angular_slice_to_physical(input_slice, z, slice_size_deg, output_cell_size, 
 def resample_slice(input_slice, n_output_cells, order=0, prefilter=True):
     '''
     Resample a 2D slice to new dimensions.
+    
+    Parameters:
+        input_slice (ndarray): the input slice
+        n_output_cells (int) : the number of output cells
+
+    Returns:
+        output slice
     '''
     tophat_width = np.round(input_slice.shape[0]/n_output_cells)
     if tophat_width < 1 or (not prefilter):
@@ -190,14 +204,14 @@ def bin_lightcone_in_frequency(lightcone, z_low, box_size_mpc, dnu):
     Bin a lightcone in frequency bins.
     
     Parameters:
-        * lightcone (numpy array): the lightcone in length units
-        * z_low (float): the lowest redshift of the lightcone
-        * box_size_mpc (float): the side of the lightcone in Mpc
-        * dnu (float): the width of the frequency bins in MHz
+        lightcone (ndarray): the lightcone in length units
+        z_low (float): the lowest redshift of the lightcone
+        box_size_mpc (float): the side of the lightcone in Mpc
+        dnu (float): the width of the frequency bins in MHz
         
     Returns:
-        The lightcone, binned in frequencies with high frequencies first
-        The frequencies along the line of sight in MHz
+        * The lightcone, binned in frequencies with high frequencies first
+        * The frequencies along the line of sight in MHz
     '''
     #Figure out dimensions and make output volume
     cell_size = box_size_mpc/lightcone.shape[0]

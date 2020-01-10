@@ -1,3 +1,8 @@
+'''
+Methods to calcluate the sizes of the regions of interest 
+and estimate the size distributions.
+'''
+
 import numpy as np
 from .Friends_of_Friends import FoF_search
 from scipy import ndimage
@@ -8,16 +13,22 @@ from scipy.interpolate import interp1d
 
 def fof(data, xth=0.5, neighbors=4, use_skimage=False):
 	"""
-	FOF bubble
+	Determines the sizes using the friends-of-friends approach.
+	It assumes the length of the grid as the linking length.
 	
-	Parameter
-	---------
-	input  : 3D array of ionization fraction.
-	xth    : The threshold value (Default: 0.5).
+	Parameters
+	----------
+	data: ndarray 
+		The array containing the input data
+	xth: float 
+		The threshold value (Default: 0.5)
 
-	Output
-	------
-	The output is a tuple containing output-map and volume-list array.
+	Returns
+	-------
+	map: ndarray
+		array with each regions of interest label
+	sizes: list
+		all the sizes
 	"""
 	t1 = datetime.datetime.now()
 	if 'skimage' in sys.modules and use_skimage:
@@ -36,6 +47,18 @@ def fof(data, xth=0.5, neighbors=4, use_skimage=False):
 
 
 #def zahn(data, xth=0.5, boxsize=100, nscales=20, upper_lim=False):
+	"""
+	Determines the sizes using the friends-of-friends approach.
+	It assumes the length of the grid as the linking length.
+	
+	Parameters:
+		data (ndarray): The array containing the input data
+		xth (float): The threshold value (Default: 0.5)
+
+	Returns:
+		* numpy array with each regions of interest label
+		* list of all sizes
+	"""
 #	"""
 #	ZAHN bubble
 #	
@@ -129,19 +152,27 @@ def fof(data, xth=0.5, neighbors=4, use_skimage=False):
 
 def spa(data, xth=0.95, boxsize=None, nscales=20, upper_lim=False, binning='log'):
 	"""
-	Spherical-Averege (SPA) bubble
+	Determines the sizes using the Spherical-Averege (SPA) approach.
 	
-	Parameter
-	---------
-	input     : 3D array of ionization fraction.
-	xth       : The threshold value (Default: 0.5).
-	boxsize   : The boxsize in cMpc can be given (Default: conv.LB).
-	nscales   : The number of different radii to consider (Default: 20).
-	upper_lim : It decides if the threshold is the upper limit or the lower limit (Default: True).
+	Parameters
+	----------
+	input     : ndarray
+		3D array of ionization fraction.
+	xth       : float
+		The threshold value (Default: 0.5).
+	boxsize   : float
+		The boxsize in cMpc can be given (Default: conv.LB).
+	nscales   : int
+		The number of different radii to consider (Default: 20).
+	upper_lim : bool
+		It decides if the threshold is the upper limit or the lower limit (Default: True).
 
-	Output
-	------
-	The output is a tuple containing three values: r, rdp/dr(ion).
+	Returns
+	-------
+	r  : ndarray
+		sizes of the regions
+	dn : ndarray
+		probability of finding the corresponding size 
 	"""
 	if boxsize is None: boxsize = conv.LB
 	if (upper_lim): 
@@ -155,23 +186,35 @@ def spa(data, xth=0.95, boxsize=None, nscales=20, upper_lim=False, binning='log'
 
 def mfp(data, xth=0.5, boxsize=None, iterations = 10000000, verbose=True, upper_lim=False, bins=None, r_min=None, r_max=None):
 	"""
-	Mean-Free-Path (MFP) bubble
+	Determines the sizes using the Mean-Free-Path (MFP) approach.
 	
-	Parameter
-	---------
-	input     : 2D/3D array of ionization fraction/brightness temperature.
-	xth       : The threshold value (Default: 0.5).
-	boxsize   : The boxsize in cMpc can be given (Default: conv.LB).
-	iterations: Number of iterations (Default: 1e7).
-	verbose   : It prints the progress of the program (Default: True).
-	upper_lim : It decides if the threshold is the upper limit or the lower limit (Default: False).
-	bins      : Give number of bins or an array of sizes to re-bin into (Default: None).
-	r_min     : Minimum size after rebinning (Default: None).
-	r_max     : Maximum size after rebinning (Default: None).
+	Parameters
+	----------
+	input     : ndarray
+		2D/3D array of ionization fraction/brightness temperature.
+	xth       : float
+		The threshold value (Default: 0.5).
+	boxsize   : float
+		The boxsize in cMpc can be given (Default: conv.LB).
+	iterations: float
+		Number of iterations (Default: 1e7).
+	verbose   : bool
+		It prints the progress of the program (Default: True).
+	upper_lim : bool
+		It decides if the threshold is the upper limit or the lower limit (Default: False).
+	bins      : int
+		Give number of bins or an array of sizes to re-bin into (Default: None).
+	r_min     : float
+		Minimum size after rebinning (Default: None).
+	r_max     : float
+		Maximum size after rebinning (Default: None).
 
-	Output
-	------
-	The output contains a tuple with three values: r, rdP/dr.
+	Returns
+	-------
+	r  : ndarray
+		sizes of the regions
+	dn : ndarray
+		probability of finding the corresponding size 
 	"""
 	if boxsize is None:
 		boxsize = conv.LB
@@ -227,16 +270,25 @@ def dist_from_volumes(sizes, resolution=1., bins=100, null_factor=None):
 	"""
 	Volume distribution and effective radius distribution.
 	
-	Parameter
-	---------
-	sizes      : List of volumes in pixel**3 units.
-	resolution : Distance between two pixels in cMpc (Default: 1).
-	bins       : Number of bins of volumes in log space.
+	Parameters
+	----------
+	sizes      : list
+		List of volumes in pixel**3 units.
+	resolution : float
+		Distance between two pixels in cMpc (Default: 1).
+	bins       : int
+		Number of bins of volumes in log space.
 
-	Output
-	------
-	The output is a tuple conatining 4 numpy arrays: V, VdP/dV, r, rdp/dr.
-	The radius calculated here is the effective radius.
+	Returns
+	-------
+	v  : ndarray
+		volumes of the regions
+	Pv : ndarray
+		probability of finding the corresponding volume 
+	r  : ndarray
+		effective radii of the regions
+	Pr : ndarray
+		probability of finding the corresponding effective radius
 	"""
 	vols  = np.array(sizes)
 	radii = (vols*3./4./np.pi)**(1./3.)
@@ -307,20 +359,30 @@ def granulometry_CDF(data, sizes=None, verbose=True):
 
 def granulometry_bsd(data, xth=0.5, boxsize=None, verbose=True, upper_lim=False, sampling=2):
 	"""
-	Granulometry (Gran) bubble
-	@ based on Kakiichi et al. (2017)
-	Parameter
-	---------
-	input     : 2D/3D array of ionization fraction/brightness temperature.
-	xth       : The threshold value (Default: 0.5).
-	boxsize   : The boxsize in cMpc can be given (Default: conv.LB).
-	verbose   : It prints the progress of the program (Default: True).
-	upper_lim : It decides if the threshold is the upper limit or the lower limit (Default: False).
-	sampling  : Give the resolution of the radii in the pixel units (Default: 2).
+	Determined the sizes using the Granulometry (Gran) approach.
+	It is based on Kakiichi et al. (2017)
 
-	Output
-	------
-	The output contains a tuple with three values: r, rdP/dr.
+	Parameters
+	----------
+	input     : ndarray
+		2D/3D array of ionization fraction/brightness temperature.
+	xth       : float
+		The threshold value (Default: 0.5).
+	boxsize   : float
+		The boxsize in cMpc can be given (Default: conv.LB).
+	verbose   : bool
+		It prints the progress of the program (Default: True).
+	upper_lim : bool
+		It decides if the threshold is the upper limit or the lower limit (Default: False).
+	sampling  : int
+		Give the resolution of the radii in the pixel units (Default: 2).
+
+	Returns
+	-------
+	r  : ndarray
+		sizes of the regions
+	dn : ndarray
+		probability of finding the corresponding size 
 	"""
 	t1 = datetime.datetime.now()
 	if boxsize is None: boxsize = conv.LB

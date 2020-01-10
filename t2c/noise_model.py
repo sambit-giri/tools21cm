@@ -1,3 +1,10 @@
+'''
+Methods:
+
+* simulate the radio telescope observation strategy
+* simulate telescope noise
+'''
+
 import numpy as np
 import sys
 from .telescope_functions import *
@@ -9,15 +16,37 @@ import scipy
 
 def noise_map(ncells, z, depth_mhz, obs_time=1000, filename=None, boxsize=None, total_int_time=6., int_time=10., declination=-30., uv_map=np.array([]), N_ant=None, verbose=True, fft_wrap=False):
 	"""
-	Parameter
-	z: 	   Redshift.
-	ncells:    The grid size.
-	depth_mhz: The bandwidth in MHz.
-	obs_time:  The observation time in hours.
-	filename:  The path to the file containing the telescope configuration.	
+	Parameters
+	----------
+	z: float
+		Redshift.
+	ncells: int
+		The grid size.
+	depth_mhz: float
+		The bandwidth in MHz.
+	obs_time: float
+		The observation time in hours.
+	total_int_time: float
+		Total observation per day time in hours
+	int_time: float
+		Intergration time in seconds
+	declination: float
+		Declination angle in deg
+	uv_map: ndarray
+		numpy array containing gridded uv coverage
+	N_ant: int
+		Number of antennae
+	filename: str
+		The path to the file containing the telescope configuration.
+	boxsize: float
+		Boxsize in Mpc
+	verbose: bool
+		If True, verbose is shown
 	
-	Return
-	noise_map: A 2D slice of the interferometric noise at that frequency (in muJy).
+	Returns
+	-------
+	noise_map: ndarray
+		A 2D slice of the interferometric noise at that frequency (in muJy).
 	"""
 	if not filename: N_ant = SKA1_LowConfig_Sept2016().shape[0]
 	if not uv_map.size: uv_map, N_ant  = get_uv_map(ncells, z, filename=filename, total_int_time=total_int_time, int_time=int_time, boxsize=boxsize, declination=declination)
@@ -32,6 +61,9 @@ def noise_map(ncells, z, depth_mhz, obs_time=1000, filename=None, boxsize=None, 
 	return np.real(noise_map)
 
 def apply_uv_response_noise(noise, uv_map):
+	'''
+	Apply the effect of uv coverage on the noise array.
+	'''
 	out = noise/np.sqrt(uv_map)
 	out[uv_map==0] = 0.
 	return out
@@ -46,6 +78,36 @@ def ifft2_wrap(nn1):
 	return imap[nn1.shape[0]/2:-nn1.shape[0]/2,nn1.shape[1]/2:-nn1.shape[1]/2]
 
 def telescope_response_on_image(array, z, depth_mhz, obs_time=1000, filename=None, boxsize=None, total_int_time=6., int_time=10., declination=-30., uv_map=np.array([]), N_ant=None):
+	"""
+	Parameters
+	----------
+	array: ndarray
+		Image array
+	z: float
+		Redshift.
+	depth_mhz: float
+		The bandwidth in MHz.
+	obs_time: float
+		The observation time in hours.
+	total_int_time: float
+		Total observation per day time in hours
+	int_time: float
+		Intergration time in seconds
+	declination: float
+		Declination angle in deg
+	uv_map: ndarray
+		numpy array containing gridded uv coverage
+	N_ant: int
+		Number of antennae
+	filename: str
+		The path to the file containing the telescope configuration.
+	boxsize: float
+		Boxsize in Mpc
+	
+	Returns
+	-------
+	Radio image after applying the effect of radio observation strategy.
+	"""
 	assert array.shape[0] == array.shape[1]
 	ncells = array.shape[0]
 	if not filename: N_ant = SKA1_LowConfig_Sept2016().shape[0]
@@ -57,6 +119,39 @@ def telescope_response_on_image(array, z, depth_mhz, obs_time=1000, filename=Non
 	return np.real(img_map)
 
 def get_uv_map(ncells, z, filename=None, total_int_time=6., int_time=10., boxsize=None, declination=-30., verbose=True):
+	"""
+	Parameters
+	----------
+	z: float
+		Redshift.
+	ncells: int
+		The grid size.
+	depth_mhz: float
+		The bandwidth in MHz.
+	obs_time: float
+		The observation time in hours.
+	total_int_time: float
+		Total observation per day time in hours
+	int_time: float
+		Intergration time in seconds
+	declination: float
+		Declination angle in deg
+	uv_map: ndarray
+		numpy array containing gridded uv coverage
+	N_ant: int
+		Number of antennae
+	filename: str
+		The path to the file containing the telescope configuration.
+	boxsize: float
+		Boxsize in Mpc
+	verbose: bool
+		If True, verbose is shown
+	
+	Returns
+	-------
+	noise_map: ndarray
+		A 2D slice of the interferometric noise at that frequency (in muJy).
+	"""
 	if not filename: N_ant = SKA1_LowConfig_Sept2016().shape[0]
 	uv_map, N_ant  = get_uv_daily_observation(ncells, z, filename, total_int_time=total_int_time, int_time=int_time, boxsize=boxsize, declination=declination, verbose=verbose)
 	return uv_map, N_ant

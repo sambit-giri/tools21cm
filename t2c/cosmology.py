@@ -95,8 +95,8 @@ def luminosity_distance(z, k=0):
     ''' Calculate the luminosity distance for a given redshift.
     
     Parameters:
-        * z (float or array): the redshift(s)
-        * k = 0 (float): the curvature constant.
+        z (float or array): the redshift(s)
+        k (float): the curvature constant.
         
     Returns:
         The luminosity distance in Mpc
@@ -146,7 +146,7 @@ def cdist_to_z(dist):
     ''' Calculate the redshift correspoding to the given redshift. 
 
     Parameters:
-        * dist (float or array): the distance in comoving Mpc
+        dist (float or array): the distance in comoving Mpc
 
     Returns:
         redshift corresponding to the distance.
@@ -175,8 +175,8 @@ def angular_size(dl, z):
     redshift.
     
     Parameters:
-        * dl (float or array): the physical size in kpc
-        * z (float or array): the redshift of the object
+        dl (float or array): the physical size in kpc
+        z (float or array): the redshift of the object
         
     Returns:
         The angluar size in arcseconds 
@@ -193,8 +193,8 @@ def angular_size_comoving(cMpc, z):
     comoving size.
     
     Parameters:
-        * cMpc (float or array): the size in comoving Mpc
-        * z (float or array): the redshift of the object
+        cMpc (float or array): the size in comoving Mpc
+        z (float or array): the redshift of the object
         
     Returns:
         The angular size in degrees
@@ -211,8 +211,8 @@ def deg_to_cdist(deg, z):
     with given angular diameter.
     
     Parameters:
-        * deg (float or array): the size in degrees
-        * z (float or array): the redshift
+        deg (float or array): the size in degrees
+        z (float or array): the redshift
         
     Returns:
         The size in cMpc
@@ -224,7 +224,7 @@ def nu_to_z(nu21):
     ''' Convert 21 cm frequency in MHz to redshift 
 
     Parameters:
-        * nu21 (float or array): redshifted 21 cm frequency in MHz
+        nu21 (float or array): redshifted 21 cm frequency in MHz
 
     Returns:
         Redshift
@@ -237,7 +237,7 @@ def z_to_nu(z):
     ''' Get the 21 cm frequency that corresponds to redshift z 
 
     Parameters:
-        * z (float or array): redshift
+        z (float or array): redshift
 
     Returns:
         redshifted 21 cm frequency in MHz
@@ -251,7 +251,7 @@ def nu_to_wavel(nu):
     Convert frequency to wavelength
     
     Parameters:
-        * nu (float or array): the frequency in MHz
+        nu (float or array): the frequency in MHz
         
     Returns:
         The wavelength in meters
@@ -263,7 +263,7 @@ def nu_to_cdist(nu21):
     ''' Calculate the comoving distance to a given 21 cm frequency 
 
     Parameters:
-        * nu21 (float or array): redshifted 21 cm frequency in MHz
+        nu21 (float or array): redshifted 21 cm frequency in MHz
 
     Returns:
         Comoving distance in Mpc
@@ -278,8 +278,8 @@ def c_to_p(z_to_cdist, z):
     Convert comoving distance to proper distance
     
     Parameters:
-        * z_to_cdist: The comoving distance
-        * z: the redshift
+        z_to_cdist (float or array): The comoving distance
+        z (float): the redshift
         
     Returns:
         Proper distance
@@ -292,8 +292,8 @@ def p_to_c(pdist, z):
     Convert proper distance to comoving distance
     
     Parameters:
-        * pdist: The proper distance
-        * z: the redshift
+        pdist (float or array): The proper distance
+        z (float): the redshift
         
     Returns:
         Comoving distance

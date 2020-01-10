@@ -1,3 +1,7 @@
+'''
+Methods to construct lightcones.
+'''
+
 from . import const, conv
 import numpy as np
 import os, glob
@@ -16,7 +20,7 @@ def make_lightcone(filenames, z_low = None, z_high = None, file_redshifts = None
     Make a lightcone from xfrac, density or dT data. Replaces freq_box.
     
     Parameters:
-        * filenames (string or array): The coeval cubes. 
+        filenames (string or array): The coeval cubes. 
             Can be either any of the following:
             
                 - An array with the file names
@@ -25,11 +29,11 @@ def make_lightcone(filenames, z_low = None, z_high = None, file_redshifts = None
                 
                 - The directory containing the files (must only contain 
                 one type of files)
-        * z_low (float): the lowest redshift. If not given, the redshift of the 
+        z_low (float): the lowest redshift. If not given, the redshift of the 
             lowest-z coeval cube is used.
-        * z_high (float): the highest redshift. If not given, the redshift of the 
+        z_high (float): the highest redshift. If not given, the redshift of the 
             highest-z coeval cube is used.
-        * file_redshifts (string or array): The redshifts of the coeval cubes.
+        file_redshifts (string or array): The redshifts of the coeval cubes.
             Can be any of the following types:
             
             - None: determine the redshifts from file names
@@ -38,24 +42,24 @@ def make_lightcone(filenames, z_low = None, z_high = None, file_redshifts = None
             
             - filename: the name of a data file to read the redshifts from
             
-        * cbin_bits (int): If the data files are in cbin format, you may specify 
+        cbin_bits (int): If the data files are in cbin format, you may specify 
             the number of bits.
-        * cbin_order (char): If the data files are in cbin format, you may specify 
+        cbin_order (char): If the data files are in cbin format, you may specify 
             the order of the data.
-        * los_axis (int): the axis to use as line-of-sight for the coeval cubes
-        * raw_density (bool): if this is true, and the data is a 
+        los_axis (int): the axis to use as line-of-sight for the coeval cubes
+        raw_density (bool): if this is true, and the data is a 
             density file, the raw (simulation units) density will be returned
             instead of the density in cgs units
-        * interpolation (string): can be 'linear', 'step', 'sigmoid' or
+        interpolation (string): can be 'linear', 'step', 'sigmoid' or
             'step_cell'. 
             Determines how slices in between output redshifts are interpolated.
+
     Returns:
         (lightcone, z) tuple
         
-        lightcone is the lightcone volume where the first two axes
-        have the same size as the input cubes
+        - lightcone is the lightcone volume where the first two axes have the same size as the input cubes
         
-        z is an array containing the redshifts along the line-of-sight
+        - z is an array containing the redshifts along the line-of-sight
         
     .. note::
         If z_low is given, that redshift will be the lowest one included,
@@ -121,7 +125,7 @@ def make_velocity_lightcone(vel_filenames, dens_filenames, z_low = None, \
     and density.
     
     Parameters:
-        * vel_filenames (string or array): The coeval velocity cubes. 
+        vel_filenames (string or array): The coeval velocity cubes. 
             Can be any of the following:
             
                 - An array with the file names
@@ -130,13 +134,13 @@ def make_velocity_lightcone(vel_filenames, dens_filenames, z_low = None, \
                 
                 - The directory containing the files (must only contain 
                 one type of files)
-        * dens_filenames (string or array): The coeval density cubes.
+        dens_filenames (string or array): The coeval density cubes.
             Same format as vel_filenames.
-        * z_low (float): the lowest redshift. If not given, the redshift of the 
+        z_low (float): the lowest redshift. If not given, the redshift of the 
             lowest-z coeval cube is used.
-        * z_high (float): the highest redshift. If not given, the redshift of the 
+        z_high (float): the highest redshift. If not given, the redshift of the 
             highest-z coeval cube is used.
-        * file_redshifts (string or array): The redshifts of the coeval cubes.
+        file_redshifts (string or array): The redshifts of the coeval cubes.
             Can be any of the following types:
             
             - None: determine the redshifts from file names
@@ -145,15 +149,14 @@ def make_velocity_lightcone(vel_filenames, dens_filenames, z_low = None, \
             
             - filename: the name of a data file to read the redshifts from
             
-        * los_axis (int): the axis to use as line-of-sight for the coeval cubes
+        los_axis (int): the axis to use as line-of-sight for the coeval cubes
         
     Returns:
         (lightcone, z) tuple
         
-        lightcone is the lightcone volume where the first two axes
-        have the same size as the input cubes
+        - lightcone is the lightcone volume where the first two axes have the same size as the input cubes
         
-        z is an array containing the redshifts along the line-of-sight
+        - z is an array containing the redshifts along the line-of-sight
     '''
     
     dens_filenames = _get_filenames(dens_filenames)
@@ -232,10 +235,10 @@ def redshifts_at_equal_comoving_distance(z_low, z_high, box_grid_n=256, \
     size of the box.
     
     Parameters:
-        * z_low (float): The lower redshift
-        * z_high (float): The upper redhisft 
-        * box_grid_n = 256 (int): the number of slices in an input box
-        * box_length_mpc (float): the size of the box in cMpc. If None,
+        z_low (float): The lower redshift
+        z_high (float): The upper redhisft 
+        box_grid_n = 256 (int): the number of slices in an input box
+        box_length_mpc (float): the size of the box in cMpc. If None,
         set to conv.LB
              
     Returns:
@@ -267,16 +270,16 @@ def get_lightcone_subvolume(lightcone, redshifts, central_z, \
     You must give exactly one of these parameters.
     
     Parameters:
-        * ligthcone (numpy array): the lightcone
-        * redshifts (numpy array): the redshifts along the LOS
-        * central_z (float): the central redshift of the subvolume
-        * depth_mhz (float): the depth of the subvolume in MHz
-        * depth_mpc (float): the depth of the subvolume in Mpc
-        * odd_num_cells (bool): if true, the depth of the box will always 
+        ligthcone (numpy array): the lightcone
+        redshifts (numpy array): the redshifts along the LOS
+        central_z (float): the central redshift of the subvolume
+        depth_mhz (float): the depth of the subvolume in MHz
+        depth_mpc (float): the depth of the subvolume in Mpc
+        odd_num_cells (bool): if true, the depth of the box will always 
                 be an odd number of cells. This avoids problems with 
                 power spectrum calculations.
-        * subtract_mean (bool): if true, subtract the mean of the signal (Default: True)
-        * fov_Mpc (float): the FoV size in Mpc
+        subtract_mean (bool): if true, subtract the mean of the signal (Default: True)
+        fov_Mpc (float): the FoV size in Mpc
         
     Returns:
         Tuple with (subvolume, dims) where dims is a tuple

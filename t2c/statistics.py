@@ -1,4 +1,6 @@
-#This file contains various useful statistical methods
+'''
+This file contains various useful statistical methods
+'''
 
 import numpy as np
 #from lightcone import _get_slice
@@ -10,7 +12,7 @@ def skewness(x):
 	This routine uses the IDL definition. 
 	
 	Parameters:
-		* x (numpy array): The array containing the input data
+		x (ndarray): The array containing the input data.
 		
 	Returns:
 		The skewness.
@@ -29,7 +31,7 @@ def kurtosis(x):
         This routine uses the IDL definition. 
         
         Parameters:
-                * x (numpy array): The array containing the input data
+                x (ndarray): The array containing the input data
                 
         Returns:
                 The skewness.
@@ -46,8 +48,8 @@ def mass_weighted_mean_xi(xi, rho):
 	''' Calculate the mass-weighted mean ionization fraction.
 	
 	Parameters:
-		* xi (numpy array): the ionized fraction
-		* rho (numpy array): the density (arbitrary units)
+		xi (ndarray): the ionized fraction
+		rho (ndarray): the density (arbitrary units)
 		
 	Returns:
 		The mean mass-weighted ionized fraction.
@@ -63,8 +65,8 @@ def subtract_mean_signal(signal, los_axis):
 	Subtract the mean of the signal along the los axis. 
 	
 	Parameters:
-		* signal (numpy array): the signal to subtract the mean from
-		* los_axis (integer): the line-of-sight axis
+		signal (ndarray): the signal to subtract the mean from
+		los_axis (int): the line-of-sight axis
 			
 	Returns:
 		The signal with the mean subtracted
@@ -89,8 +91,8 @@ def signal_overdensity(signal, los_axis):
 	Divide by the mean of the signal along the los axis and subtract one.
 	
 	Parameters:
-		* signal (numpy array): the signal to subtract the mean from
-		* los_axis (integer): the line-of-sight axis
+		signal (ndarray): the signal to subtract the mean from
+		los_axis (int): the line-of-sight axis
 			
 	Returns:
 		The signal with the mean subtracted
@@ -117,9 +119,9 @@ def apply_func_along_los(signal, func, los_axis):
 	per-slice basis.
 	
 	Parameters:
-		* signal (numpy array): the signal
-		* func (callable): the function to apply
-		* los_axis (integer): the line-of-sight axis
+		signal (ndarray): the signal
+		func (callable): the function to apply
+		los_axis (int): the line-of-sight axis
 		
 	Returns:
 		An array of length signal.shape[los_axis]
