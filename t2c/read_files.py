@@ -94,7 +94,7 @@ def coeval_21cm_c2ray(xfrac_dir, dens_dir, z, interpolation='linear', mean_subtr
 	dens  = coeval_dens_c2ray(dens_dir, z)
 	dt    = tm.calc_dt(xfrac, dens, z=z)
 	if mean_subtract: 
-		for i in xrange(dt.shape[2]): dt[:,:,i] -= dt[:,:,i].mean()
+		for i in range(dt.shape[2]): dt[:,:,i] -= dt[:,:,i].mean()
 		print("Mean is subtracted along third axis.")
 	return dt
 
@@ -171,7 +171,7 @@ def subtract_mean_channelwise(dt, axis=-1):
 	"""
 	assert dt.ndim == 3
 	if axis != -1 or axis != 2: dt = np.swapaxes(dt, axis, 2)
-	for i in xrange(dt.shape[2]): dt[:,:,i] -= dt[:,:,i].mean()
+	for i in range(dt.shape[2]): dt[:,:,i] -= dt[:,:,i].mean()
 	if axis != -1 or axis != 2: dt = np.swapaxes(dt, axis, 2)
 	return dt
 	
