@@ -7,8 +7,8 @@ Pre-defined constants
 .. automodule:: t2c.const
     :members:
 
-For CUBEP3M and C2RAY simulations
----------------------------------
+For CUBEP\ :sup:`3`\M and C\ :sup:`2`\RAY simulations
+-----------------------------------------------------
 
 Conversion factors
 ~~~~~~~~~~~~~~~~~~
