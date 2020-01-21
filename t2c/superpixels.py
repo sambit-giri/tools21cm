@@ -14,7 +14,7 @@ def slic_cube(cube, n_segments=5000, compactness=0.1, max_iter=20, sigma=0, min_
 	else:
 		multichannel = False
 	labels = slic(cube, n_segments=n_segments, compactness=compactness, max_iter=max_iter, sigma=sigma, max_size_factor=max_size_factor, slic_zero=True, multichannel=multichannel)
-	print("The output contains the labels created by SLIC with %d segments"%(label.max()+1))
+	print("The output contains the labels created by SLIC with %d segments"%(labels.max()+1))
 	return labels
 
 def see_label(out_map, label):
