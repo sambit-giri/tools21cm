@@ -1,3 +1,11 @@
 =========
 Tutorials
 =========
+
+
+The following examples will help you get started with ``tools21cm``:
+
+.. toctree::
+   :maxdepth: 2
+
+   examples/read_write_plot
