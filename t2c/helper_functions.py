@@ -5,7 +5,7 @@ from scipy.interpolate import interp1d
 from . import const
 import glob, os, time
 import os.path
-from numpy import array, asarray, rank, roll
+from numpy import array, asarray, roll
 from numpy.linalg import matrix_rank
 from scipy.fftpack import fft, ifft, fftn, ifftn
 from numpy.fft import rfftn, irfftn
