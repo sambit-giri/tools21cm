@@ -11,7 +11,7 @@ from scipy import signal
 from scipy.fftpack import fft, ifft, fftn, ifftn
 from numpy.fft import rfftn, irfftn
 from math import ceil, floor
-from numpy import array, asarray, rank, roll
+from numpy import array, asarray, roll
 from .helper_functions import fftconvolve, find_idx
 
 def gauss_kernel(size, sigma=1.0, fwhm=None):
