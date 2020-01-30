@@ -37,7 +37,7 @@ def mfp3d(arr, xth=0.5, iterations=10000000, verbose=True):
 			msg  = '%.1f'%perc + '%'
 			loading_verbose(msg)
 		if not xs.size: break
-	msg  = str(100) + '%'
+	msg  = '100.0' + '%'
 	loading_verbose(msg)
 	size_px = np.arange(longest)
 	return num_sz, size_px
@@ -77,7 +77,7 @@ def mfp2d(arr, xth=0.5, iterations=1000000, verbose=True):
 			msg  = '%.1f'%perc + '%'
 			loading_verbose(msg)
 		if not xs.size: break
-	msg  = str(100) + '%'
+	msg  = '100.0' + '%'
 	loading_verbose(msg)
 	size_px = np.arange(longest)
 	return num_sz, size_px
