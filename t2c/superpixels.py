@@ -75,7 +75,7 @@ def stitch_using_histogram(data, mns, labels, bins='knuth', binary=True, on_supe
 		bla = ht[0].argmax()
 		x0 = ht[1][bla]
 		m0 = 1.*(y0-y1)/(x0-x1)
-		d2 = np.array([np.abs((ht[0][i]-y1)-m0*(ht[1][i]-x1)) for i in xrange(bla)])
+		d2 = np.array([np.abs((ht[0][i]-y1)-m0*(ht[1][i]-x1)) for i in range(bla)])
 		thres = ht[1][d2.argmax()]/2. + ht[1][d2.argmax()+1]/2.
 		if binary:
 			#y = np.zeros(Ls.shape)
@@ -188,7 +188,7 @@ def superpixel_map(data, labels, mns=None):
 		return sp_map
 	if mns is None: mns = get_superpixel_means(data, labels=labels)
 	sp_map = np.zeros(data.shape)
-	for i in xrange(mns.size): sp_map[labels==i] = mns[i]
+	for i in range(mns.size): sp_map[labels==i] = mns[i]
 	return sp_map
 
 
