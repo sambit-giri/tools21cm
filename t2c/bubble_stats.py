@@ -103,7 +103,7 @@ def fof(data, xth=0.5, neighbors=4, use_skimage=False):
 #	radius2   = []
 #	avg_ion   = []
 #
-#	for i in xrange(len(names1)):
+#	for i in range(len(names1)):
 #		row = np.array(names1[i].split())
 #		row.astype(np.float)
 #		radius.append(row[0])
@@ -112,7 +112,7 @@ def fof(data, xth=0.5, neighbors=4, use_skimage=False):
 #		inbin.append(row[3])
 #		filternum.append(row[4])
 #
-#	for i in xrange(len(names2)):
+#	for i in range(len(names2)):
 #		row = np.array(names2[i].split())
 #		row.astype(np.float)
 #		radius2.append(row[0])
@@ -315,7 +315,7 @@ def get_distribution(array, resolution=1., bins=100, sizes=False):
 	else:
 		mn, mx = array.min(), array.max()
 		sizes  = np.arange(mx)+1.
-		for i in xrange(int(mx)):
+		for i in range(int(mx)):
 			label = i+1
 			sizes[i] = len(array[array==label])
 			print(label,)
@@ -352,7 +352,7 @@ def granulometry_CDF(data, sizes=None, verbose=True):
 	s = max(data.shape)
 	if sizes is None: sizes = np.arange(1, s/2, 2)
 	granulo = np.zeros((len(sizes)))
-	for n in xrange(len(sizes)): granulo[n] = ndimage.binary_opening(data, structure=disk_structure(sizes[n])).sum()
+	for n in range(len(sizes)): granulo[n] = ndimage.binary_opening(data, structure=disk_structure(sizes[n])).sum()
 	#if verbose: print "Completed:", 100*(n+1)/len(sizes), "%"
 	print("Completed.")
 	return granulo
@@ -394,7 +394,7 @@ def granulometry_bsd(data, xth=0.5, boxsize=None, verbose=True, upper_lim=False,
 	granulo = granulometry_CDF(mask, sizes=sz, verbose=verbose)
 
 	rr = (sz*boxsize/data.shape[0])[:-1]
-	nn = np.array([granulo[i]-granulo[i+1] for i in xrange(len(granulo)-1)])
+	nn = np.array([granulo[i]-granulo[i+1] for i in range(len(granulo)-1)])
 
 	t2 = datetime.datetime.now()
 	runtime = (t2-t1).total_seconds()/60
