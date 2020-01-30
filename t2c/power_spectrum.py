@@ -195,6 +195,65 @@ def cross_power_spectrum_1d(input_array1_nd, input_array2_nd, kbins=100, box_dim
 		return ps, bins, n_modes
 	return ps, bins
 
+def power_spect_2d(input_array, kbins=10, binning='log', box_dims=244/.7, return_modes=False, nu_axis=2):
+	'''
+	Calculate the power spectrum and bin it in kper and kpar
+	input_array is the array to calculate the power spectrum from
+	
+	Parameters: 
+		input_array (numpy array): the data array
+		nu_axis = 2 (integer): the line-of-sight axis
+		kbins = 10 (integer or array-like): The number of bins,
+			If you want different bins for kper and kpar, then provide a list [n_kper, n_par]
+		box_dims = 244/.7 (float or array-like): the dimensions of the 
+			box. If this is None, the current box volume is used along all
+			dimensions. If it is a float, this is taken as the box length
+			along all dimensions. If it is an array-like, the elements are
+			taken as the box length along each axis.
+		return_n_modes = False (bool): if true, also return the
+			number of modes in each bin
+		binning = 'log' : It defines the type of binning in k-space. The other option is 
+				    'linear' or 'mixed'.
+			
+	Returns: 
+		A tuple with (Pk, kper_bins, kpar_bins), where Pk is an array with the 
+		power spectrum of dimensions (n_kper x n_kpar), 
+		mubins is an array with the mu bin centers and
+		kbins is an array with the k bin centers.
+	
+	'''
+	if np.array(kbins).size==1: kbins = [kbins, kbins]
+	power = power_spect_nd(input_array, box_dims, verbose=0)
+	[kx,ky,kz], k = _get_k(input_array, box_dims)
+	kdict = {}
+	kdict['0'], kdict['1'], kdict['2'] = kx, ky, kz
+	del kx, ky, kz
+	kz = kdict[str(nu_axis)]
+	kp = np.sqrt(kdict[str(np.setdiff1d([0,1,2],nu_axis)[0])]**2+kdict[str(np.setdiff1d([0,1,2],nu_axis)[1])]**2)
+	if binning=='log': 
+		kper = np.linspace(np.log10(np.abs(kp[kp!=0]).min()), np.log10(kp.max()), kbins[0]+1)
+		kpar = np.linspace(np.log10(np.abs(kz[kz!=0]).min()), np.log10(kz.max()), kbins[1]+1)
+		kp, kz  = np.log10(kp), np.log10(kz)
+	elif binning=='linear':
+		kper = np.linspace(np.abs(kp[kp!=0]).min(), kp.max(), kbins[0]+1)
+		kpar = np.linspace(np.abs(kz[kz!=0]).min(), kz.max(), kbins[1]+1)
+	k_width = kper[1]-kper[0], kpar[1]-kpar[0]
+	kper = (kper[:-1]+kper[1:])/2.
+	kpar = (kpar[:-1]+kpar[1:])/2.
+	ps = np.zeros((kbins[0],kbins[1]))
+	n_modes = np.zeros((kbins[0],kbins[1]))
+	kp, kz, power = kp.flatten(), kz.flatten(), power.flatten()
+	for i,a in enumerate(kper):
+		for j,b in enumerate(kpar):
+			arg = np.intersect1d(np.argwhere(np.abs(kp-a)<=k_width[0]/2.), np.argwhere(np.abs(kz-b)<=k_width[1]/2.))
+			ps[i,j] = power[arg].sum()
+			n_modes[i,j] = arg.size
+
+	ps = ps/n_modes
+	if binning=='log': kper, kpar = 10**kper, 10**kpar
+	if return_modes: return ps, kper, kpar, n_modes
+	return ps, kper, kpar
+
 
 def power_spectrum_mu(input_array, los_axis = 0, mubins=20, kbins=10, box_dims = None, weights=None,
 					exclude_zero_modes = True):
@@ -457,3 +516,18 @@ def _get_nonzero_idx(ps_shape, los_axis):
 	good_idx = np.invert(zero_idx)
 	return good_idx
 
+
+def plot_2d_power(ps, xticks, yticks, xlabel, ylabel):
+	import matplotlib.pyplot as plt
+	xticks, yticks = np.round(xticks, decimals=2), np.round(yticks, decimals=2)
+	plt.imshow(ps, origin='lower')
+	locs, labels = plt.yticks()
+	new_labels = yticks[locs.astype(int)[1:-1]]
+	plt.yticks(locs[1:-1], new_labels)
+	plt.ylabel(ylabel)
+	locs, labels = plt.xticks()
+	new_labels = xticks[locs.astype(int)[1:-1]]
+	plt.xticks(locs[1:-1], new_labels)
+	plt.xlabel(xlabel)
+	plt.colorbar()
+	plt.show()
