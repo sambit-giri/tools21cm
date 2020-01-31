@@ -182,10 +182,10 @@ def xfrac_volume_estimate(binary):
 	return binary.mean()
 
 def superpixel_map(data, labels, mns=None):
-	if 'numba' in sys.modules: 
-		from .numba_functions import superpixel_map_numba
-		sp_map = superpixel_map_numba(data, labels, mns=mns)
-		return sp_map
+	#if 'numba' in sys.modules: 
+	#	from .numba_functions import superpixel_map_numba
+	#	sp_map = superpixel_map_numba(data, labels, mns=mns)
+	#	return sp_map
 	if mns is None: mns = get_superpixel_means(data, labels=labels)
 	sp_map = np.zeros(data.shape)
 	for i in range(mns.size): sp_map[labels==i] = mns[i]
