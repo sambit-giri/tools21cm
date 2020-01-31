@@ -29,12 +29,17 @@ def power_spectrum_nd(input_array, box_dims=None):
 		The power spectrum in the same dimensions as the input array.		
 	'''
 
-	box_dims = _get_dims(box_dims, input_array.shape)
+	#box_dims = _get_dims(box_dims, input_array.shape)
 
-	print_msg( 'Calculating power spectrum...')
-	ft = fftpack.fftshift(fftpack.fftn(input_array.astype('float64')))
+	#print_msg( 'Calculating power spectrum...')
+	#ft = fftpack.fftshift(fftpack.fftn(input_array.astype('float64')))
+	#power_spectrum = np.abs(ft)**2
+	#print_msg( '...done')
+	if np.array(box_dims).size!=3: box_dims = np.array([box_dims,box_dims,box_dims])
+	if verbose: print( 'Calculating power spectrum...')
+	ft = np.fft.fftshift(np.fft.fftn(input_array.astype('float64')))
 	power_spectrum = np.abs(ft)**2
-	print_msg( '...done')
+	if verbose: print( '...done')
 
 	# scale
 	boxvol = np.product(box_dims)
