@@ -132,7 +132,7 @@ def physical_slice_to_angular(input_slice, z, slice_size_mpc, fov_deg, dtheta, o
     
     #Pad the array
     slice_n = resampled_slice.shape[0]
-    padded_n = fov_deg*60./dtheta# np.round(slice_n*(fov_mpc/slice_size_mpc))
+    padded_n = int(fov_deg*60./dtheta)# np.round(slice_n*(fov_mpc/slice_size_mpc))
     if padded_n < slice_n:
         if slice_n - padded_n > 2:
             print('Warning! Padded slice is significantly smaller than original!')
