@@ -11,3 +11,5 @@ Contributors
 
 * `Hannah Ross <https://crd.lbl.gov/departments/computational-science/c3/c3-people/hannah-ross/>`_
 * `Raghunath Ghara <https://scholar.google.com/citations?user=WmNdlCkAAAAJ&hl=en>`_
+* Ilian Iliev
+* Michele Bianco
