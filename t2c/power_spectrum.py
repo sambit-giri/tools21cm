@@ -9,7 +9,7 @@ from .helper_functions import print_msg, get_eval
 from scipy import fftpack
 
 
-def power_spectrum_nd(input_array, box_dims=None):
+def power_spectrum_nd(input_array, box_dims=None, verbose=True):
 	''' 
 	Calculate the power spectrum of input_array and return it as an n-dimensional array,
 	where n is the number of dimensions in input_array
