@@ -231,7 +231,7 @@ def bin_lightcone_in_frequency(lightcone, z_low, box_size_mpc, dnu):
         smooth_scale = 1
 
     hf.print_msg('Smooth along LoS with scale %f' % smooth_scale)
-    tophat3d = np.ones((1,1,smooth_scale))
+    tophat3d = np.ones((1,1,int(smooth_scale)))
     tophat3d /= np.sum(tophat3d)
     lightcone_smoothed = fftconvolve(lightcone, tophat3d)
     
