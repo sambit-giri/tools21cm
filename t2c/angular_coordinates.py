@@ -237,7 +237,7 @@ def bin_lightcone_in_frequency(lightcone, z_low, box_size_mpc, dnu):
     
     for i in range(output_lightcone.shape[2]):
         nu = output_frequencies[i]
-        idx = hf.find_idx(input_frequencies, nu)
+        idx = int(hf.find_idx(input_frequencies, nu))
         output_lightcone[:,:,i] = lightcone_smoothed[:,:,idx]
 
     return output_lightcone, output_frequencies
