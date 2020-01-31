@@ -260,7 +260,7 @@ def bin_lightcone_in_mpc(lightcone, frequencies, cell_size_mpc):
     lightcone_smoothed = fftconvolve(lightcone, tophat3d, mode='same')
     
     for i in range(output_lightcone.shape[2]):
-        idx = hf.find_idx(distances, output_distances[i])
+        idx = int(hf.find_idx(distances, output_distances[i]))
         output_lightcone[:,:,i] = lightcone_smoothed[:,:,int(idx)]
     
     output_redshifts = cm.cdist_to_z(output_distances)
