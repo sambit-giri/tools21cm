@@ -223,7 +223,7 @@ def power_spect_2d(input_array, kbins=10, binning='log', box_dims=244/.7, return
 	
 	'''
 	if np.array(kbins).size==1: kbins = [kbins, kbins]
-	power = power_spect_nd(input_array, box_dims, verbose=0)
+	power = power_spectrum_nd(input_array, box_dims, verbose=0)
 	[kx,ky,kz], k = _get_k(input_array, box_dims)
 	kdict = {}
 	kdict['0'], kdict['1'], kdict['2'] = kx, ky, kz
