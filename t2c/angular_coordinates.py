@@ -41,7 +41,7 @@ def physical_lightcone_to_observational(physical_lightcone, input_z_low, output_
     #Calculate the FoV in degrees at lowest z (largest one)
     fov_deg = cm.angular_size_comoving(input_box_size_mpc, input_z_low)
     #Calculate dimensions of output volume
-    n_cells_theta = fov_deg*60./output_dtheta
+    n_cells_theta = int(fov_deg*60./output_dtheta)
     n_cells_nu = len(output_freqs)
     #Go through each slice and make angular slices for each one
     hf.print_msg('Binning in angle...')
