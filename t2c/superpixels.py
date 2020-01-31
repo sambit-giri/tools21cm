@@ -102,10 +102,10 @@ def stitch_superpixels(data, labels, bins='knuth', binary=True, on_superpixel_ma
 	return stitched
 
 def apply_operator_labelled_data(data, labels, operator=np.mean):
-	if 'numba' in sys.modules: 
-		from numba_functions import apply_operator_labelled_data_numba
-		out = apply_operator_labelled_data_numba(data, labels, operator=np.mean)
-		return out
+	#if 'numba' in sys.modules: 
+	#	from numba_functions import apply_operator_labelled_data_numba
+	#	out = apply_operator_labelled_data_numba(data, labels, operator=np.mean)
+	#	return out
 	X   = data.flatten()
 	y   = labels.flatten()
 	elems, num = np.unique(y, return_counts=1)
