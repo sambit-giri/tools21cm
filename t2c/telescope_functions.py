@@ -117,10 +117,10 @@ def get_uv_daily_observation(ncells, z, filename=None, total_int_time=4., int_ti
 	(uv_map, N_ant)
 	"""
 	z = float(z)
-	#if 'numba' in sys.modules: 
-	#	from .numba_functions import get_uv_daily_observation_numba
-	#	uv_map, N_ant = get_uv_daily_observation_numba(ncells, z, filename=filename, total_int_time=total_int_time, int_time=int_time, boxsize=boxsize, declination=declination, verbose=verbose)
-	#	return uv_map, N_ant
+	if 'numba' in sys.modules: 
+		from .numba_functions import get_uv_daily_observation_numba
+		uv_map, N_ant = get_uv_daily_observation_numba(ncells, z, filename=filename, total_int_time=total_int_time, int_time=int_time, boxsize=boxsize, declination=declination, verbose=verbose)
+		return uv_map, N_ant
 	Nbase, N_ant = from_antenna_config(filename, z)
 	uv_map0      = get_uv_coverage(Nbase, z, ncells, boxsize=boxsize)
 	uv_map       = np.zeros(uv_map0.shape)

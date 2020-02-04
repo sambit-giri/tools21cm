@@ -102,10 +102,10 @@ def stitch_superpixels(data, labels, bins='knuth', binary=True, on_superpixel_ma
 	return stitched
 
 def apply_operator_labelled_data(data, labels, operator=np.mean):
-	#if 'numba' in sys.modules: 
-	#	from numba_functions import apply_operator_labelled_data_numba
-	#	out = apply_operator_labelled_data_numba(data, labels, operator=np.mean)
-	#	return out
+	if 'numba' in sys.modules: 
+		from .numba_functions import apply_operator_labelled_data_numba
+		out = apply_operator_labelled_data_numba(data, labels, operator=np.mean)
+		return out
 	X   = data.flatten()
 	y   = labels.flatten()
 	elems, num = np.unique(y, return_counts=1)
@@ -182,10 +182,10 @@ def xfrac_volume_estimate(binary):
 	return binary.mean()
 
 def superpixel_map(data, labels, mns=None):
-	#if 'numba' in sys.modules: 
-	#	from .numba_functions import superpixel_map_numba
-	#	sp_map = superpixel_map_numba(data, labels, mns=mns)
-	#	return sp_map
+	if 'numba' in sys.modules: 
+		from .numba_functions import superpixel_map_numba
+		sp_map = superpixel_map_numba(data, labels, mns=mns)
+		return sp_map
 	if mns is None: mns = get_superpixel_means(data, labels=labels)
 	sp_map = np.zeros(data.shape)
 	for i in range(mns.size): sp_map[labels==i] = mns[i]
