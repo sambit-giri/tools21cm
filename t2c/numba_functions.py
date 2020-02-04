@@ -69,6 +69,7 @@ def get_uv_daily_observation_numba(ncells, z, filename=None, total_int_time=4., 
 	uv_map = (uv_map+uv_map0)/tot_num_obs
 	return uv_map, N_ant
 
+@jit
 def from_antenna_config(filename, z, nu=None):
 	"""
 	The function reads the antenna positions (N_ant antennas) from the file given.
