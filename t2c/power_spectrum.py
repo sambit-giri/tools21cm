@@ -437,9 +437,9 @@ def dimensionless_ps(data, kbins=100, box_dims=None, binning='log', factor=10):
 	(\Delta^2, ks)
 	'''
 	Pk, ks = power_spectrum_1d(data, kbins=kbins*factor, box_dims=box_dims, binning=binning)
-	ks_new = np.array([ks[factor*(i+0.5)] for i in xrange(kbins)])
+	ks_new = np.array([ks[factor*(i+0.5)] for i in range(kbins)])
 	k3Pk   = ks**3*Pk
-	k3Pk_  = np.array([k3Pk[factor*i:factor*(i+1)].mean() for i in xrange(kbins)])
+	k3Pk_  = np.array([k3Pk[factor*i:factor*(i+1)].mean() for i in range(kbins)])
 	return k3Pk_/2/np.pi**2, ks_new
 
 def _get_nonzero_idx(ps_shape, los_axis):
