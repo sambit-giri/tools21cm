@@ -80,9 +80,8 @@ def cross_power_spectrum_nd(input_array1, input_array2, box_dims):
 	print_msg( '...done')
 
 	# scale
-	#boxvol = float(box_side)**len(input_array1.shape)
-	boxvol = np.product(map(float,box_dims))
-	pixelsize = boxvol/(np.product(map(float,input_array1.shape)))
+	boxvol = np.product(box_dims)
+	pixelsize = boxvol/(np.product(input_array1.shape))
 	power_spectrum *= pixelsize**2/boxvol
 
 	return power_spectrum
