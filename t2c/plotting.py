@@ -26,8 +26,8 @@ def plot_slice(data, los_axis = 0, slice_num = 0, logscale = False, **kwargs):
         Nothing.
         
     Example (plot an xfrac file with a custom color map):
-        >>> xfile = c2t.XfracFile('xfrac3d_8.515.bin')
-        >>> c2t.plot_slice(xfile, cmap = pl.cmap.hot)
+        >>> xfile = t2c.XfracFile('xfrac3d_8.515.bin')
+        >>> t2c.plot_slice(xfile, cmap = pl.cmap.hot)
     '''
     
     import pylab as pl
@@ -119,21 +119,21 @@ def plot_hist(data, logscale = False, **kwargs):
         pl.xlabel('$\\rho \; \mathrm{[g \; cm^{-3}]}$')
         
 if __name__ == '__main__':
-    import c2raytools as c2t
+    import tools21cm as t2c
     import pylab as pl
     
-    c2t.set_verbose(True)
+    t2c.set_verbose(True)
     
     pl.figure()
     
     dfilename = '/disk/sn-12/garrelt/Science/Simulations/Reionization/C2Ray_WMAP5/114Mpc_WMAP5/coarser_densities/nc256_halos_removed/6.905n_all.dat'
     xfilename = '/disk/sn-12/garrelt/Science/Simulations/Reionization/C2Ray_WMAP5/114Mpc_WMAP5/114Mpc_f2_10S_256/results_ranger/xfrac3d_8.958.bin'
     
-    dfile = c2t.DensityFile(dfilename)
+    dfile = t2c.DensityFile(dfilename)
 #    plot_slice(dfile, los_axis=1, logscale=True, cmap=pl.cm.hot)
 #    ax2 = pl.subplot(1,2,2)
 #    plot_slice(xfilename)
-    plot_slice(c2t.XfracFile(xfilename))
+    plot_slice(t2c.XfracFile(xfilename))
     pl.show()
     
     

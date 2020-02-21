@@ -95,7 +95,7 @@ def make_lightcone(filenames, z_low = None, z_high = None, file_redshifts = None
         if z_bracket_low_new != z_bracket_low:
             z_bracket_low = z_bracket_low_new
             file_idx = np.argmin(np.abs(file_redshifts - z_bracket_low))
-            if data_high == None:
+            if data_high is None:
                 data_low, datatype = get_data_and_type(filenames[file_idx], cbin_bits, cbin_order, raw_density)
             else: #No need to read the file again
                 data_low = data_high
@@ -206,9 +206,9 @@ def _get_output_z(file_redshifts, z_low, z_high, box_grid_n):
     '''
     Determine the output redshifts. For internal use.
     '''
-    if z_low == None:
+    if z_low is None:
         z_low = file_redshifts.min()
-    if z_high == None:
+    if z_high is None:
         z_high = file_redshifts.max()
         
     output_z = redshifts_at_equal_comoving_distance(z_low, z_high, box_grid_n)
@@ -243,7 +243,7 @@ def redshifts_at_equal_comoving_distance(z_low, z_high, box_grid_n=256, \
         numpy array containing the redshifts
         
     '''
-    if box_length_mpc == None:
+    if box_length_mpc is None:
         box_length_mpc = conv.LB
     assert(z_high > z_low)
 
@@ -286,7 +286,7 @@ def get_lightcone_subvolume(lightcone, redshifts, central_z, \
     
     assert len(np.nonzero([depth_mhz, depth_mpc])) == 1
     
-    if fov_Mpc == None:
+    if fov_Mpc is None:
         fov_Mpc = conv.LB
         
     central_nu = cm.z_to_nu(central_z)
@@ -440,7 +440,7 @@ def _get_file_redshifts(redshifts_in, filenames):
     
     if hasattr(redshifts_in, '__iter__'):
         redshifts_out = redshifts_in
-    elif redshifts_in == None:
+    elif redshifts_in is None:
         redshifts_out = [determine_redshift_from_filename(f) for f in filenames]
         redshifts_out = np.array(redshifts_out)
     elif os.path.exists(redshifts_in):
