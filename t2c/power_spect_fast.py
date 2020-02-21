@@ -1,5 +1,5 @@
 import numpy as np
-from numba import jit, prange
+#from numba import jit, prange
 #from astropy.stats import histogram 
 
 def power_spect_nd(input_array, box_dims, verbose=True):
