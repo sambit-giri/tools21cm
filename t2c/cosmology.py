@@ -304,3 +304,48 @@ def p_to_c(pdist, z):
     
     return pdist*(1+z)
 
+
+def Tvir_to_M(Tvir, z):
+    '''
+    Convert virial temperature to mass.
+    
+    Parameters:
+        Tvir (float or array): The virial temperature(s) in K.
+        z (float): the redshift.
+        
+    Returns:
+        Mass in solar mass unit.
+    '''
+    Om = const.Omega0
+    Ol = const.OmegaL
+    Ok = 1-Om-Ol
+    Omz  = Om*(1+z)**3/(Om*(1+z)**3+Ol+Ok*(1+z)**2)
+    d    = Omz-1
+    Delc = 18*np.pi**2+82*d-39*d**2
+    mu   = 0.6 # 0.59 for fully ionized primordial gas, 0.61 for a gas with ionized H and singly ionized He, 1.22 for neutral primordial gas.
+    conv_fact = 1.98e4*(mu/0.6)*(Om*Delc/Omz/18/np.pi**2)**(1./3)*((1+z)/10)
+    M    = 1e8/const.h*(Tvir/conv_fact)**(3./2)
+    return M
+
+def M_to_Tvir(M, z):
+    '''
+    Convert mass to virial temperature.
+    
+    Parameters:
+        M (float or array): The mass(es) in solar mass unit.
+        z (float): the redshift.
+        
+    Returns:
+        Virial temperature in K.
+    '''
+    Om = const.Omega0
+    Ol = const.OmegaL
+    Ok = 1-Om-Ol
+    Omz  = Om*(1+z)**3/(Om*(1+z)**3+Ol+Ok*(1+z)**2)
+    d    = Omz-1
+    Delc = 18*np.pi**2+82*d-39*d**2
+    mu   = 0.6 # 0.59 for fully ionized primordial gas, 0.61 for a gas with ionized H and singly ionized He, 1.22 for neutral primordial gas.
+    conv_fact = 1.98e4*(mu/0.6)*(Om*Delc/Omz/18/np.pi**2)**(1./3)*((1+z)/10)
+    Tvir = conv_fact*(M*const.h/1e8)**(2./3)
+    return Tvir
+
