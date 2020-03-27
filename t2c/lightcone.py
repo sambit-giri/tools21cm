@@ -14,8 +14,7 @@ from . import statistics as st
 from . import smoothing
 import scipy.interpolate
 
-def make_lightcone(filenames, z_low = None, z_high = None, file_redshifts = None, \
-                cbin_bits = 32, cbin_order = 'c', los_axis = 0, raw_density = False, interpolation='linear'):
+def make_lightcone(filenames, z_low = None, z_high = None, file_redshifts = None, cbin_bits = 32, cbin_order = 'c', los_axis = 0, raw_density = False, interpolation='linear', reading_function=None, box_length_mpc=None):
     '''
     Make a lightcone from xfrac, density or dT data. Replaces freq_box.
     
@@ -70,13 +69,18 @@ def make_lightcone(filenames, z_low = None, z_high = None, file_redshifts = None
     if not interpolation in ['linear', 'step', 'sigmoid', 'step_cell']:
         raise ValueError('Unknown interpolation type: %s' % interpolation)
     
-    #Figure out output redshifts, file names and size of output
-    filenames = _get_filenames(filenames)
-    file_redshifts = _get_file_redshifts(file_redshifts, filenames)
+    if reading_function is None:
+        #Figure out output redshifts, file names and size of output
+        filenames = _get_filenames(filenames)
+        file_redshifts = _get_file_redshifts(file_redshifts, filenames)
+        mesh_size = get_mesh_size(filenames[0])
+    else:
+        assert file_redshifts is not None
+        mesh_size = reading_function(filenames[0]).shape
+
     assert len(file_redshifts) == len(filenames)
-    mesh_size = get_mesh_size(filenames[0])
     
-    output_z = _get_output_z(file_redshifts, z_low, z_high, mesh_size[0])
+    output_z = _get_output_z(file_redshifts, z_low, z_high, mesh_size[0], box_length_mpc=box_length_mpc)
 
     #Make the output 32-bit to save memory 
     lightcone = np.zeros((mesh_size[0], mesh_size[1], len(output_z)), dtype='float32')
@@ -87,7 +91,7 @@ def make_lightcone(filenames, z_low = None, z_high = None, file_redshifts = None
     
     #Make the lightcone, one slice at a time
     print_msg('Making lightcone between %f < z < %f' % (output_z.min(), output_z.max()))
-    for z in output_z:
+    for ii,z in enumerate(output_z):
         z_bracket_low_new = file_redshifts[file_redshifts <= z].max()
         z_bracket_high_new = file_redshifts[file_redshifts > z].min()
         
@@ -96,7 +100,8 @@ def make_lightcone(filenames, z_low = None, z_high = None, file_redshifts = None
             z_bracket_low = z_bracket_low_new
             file_idx = np.argmin(np.abs(file_redshifts - z_bracket_low))
             if data_high is None:
-                data_low, datatype = get_data_and_type(filenames[file_idx], cbin_bits, cbin_order, raw_density)
+                if reading_function is None: data_low, datatype = get_data_and_type(filenames[file_idx], cbin_bits, cbin_order, raw_density)
+                else: data_low = reading_function(filenames[file_idx])#; print('yes')
             else: #No need to read the file again
                 data_low = data_high
             
@@ -104,13 +109,14 @@ def make_lightcone(filenames, z_low = None, z_high = None, file_redshifts = None
         if z_bracket_high_new != z_bracket_high:
             z_bracket_high = z_bracket_high_new
             file_idx = np.argmin(np.abs(file_redshifts - z_bracket_high))
-            data_high, datatype = get_data_and_type(filenames[file_idx], cbin_bits, cbin_order, raw_density)
+            if reading_function is None: data_high, datatype = get_data_and_type(filenames[file_idx], cbin_bits, cbin_order, raw_density)
+            else: data_high = reading_function(filenames[file_idx])
         
         #Make the slice by interpolating, then move to next index
         data_interp = _get_interp_slice(data_high, data_low, z_bracket_high, \
                                     z_bracket_low, z, comoving_pos_idx, los_axis, interpolation)
         lightcone[:,:,comoving_pos_idx] = data_interp
-        
+        print('%.2f %% completed.'%(100*(ii+1)/output_z.size))
         comoving_pos_idx += 1
         
     return lightcone, output_z
@@ -202,7 +208,7 @@ def make_velocity_lightcone(vel_filenames, dens_filenames, z_low = None, \
     return lightcone, output_z
 
 
-def _get_output_z(file_redshifts, z_low, z_high, box_grid_n):
+def _get_output_z(file_redshifts, z_low, z_high, box_grid_n, box_length_mpc=None):
     '''
     Determine the output redshifts. For internal use.
     '''
@@ -211,7 +217,7 @@ def _get_output_z(file_redshifts, z_low, z_high, box_grid_n):
     if z_high is None:
         z_high = file_redshifts.max()
         
-    output_z = redshifts_at_equal_comoving_distance(z_low, z_high, box_grid_n)
+    output_z = redshifts_at_equal_comoving_distance(z_low, z_high, box_grid_n, box_length_mpc=box_length_mpc)
 
     if min(output_z) < min(file_redshifts) or max(output_z) > max(file_redshifts):
         print('Warning! You have specified a redshift range of %.3f < z < %.3f' % (min(output_z), max(output_z)))
