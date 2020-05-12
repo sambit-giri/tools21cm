@@ -305,7 +305,7 @@ def mu_binning(powerspectrum, los_axis = 0, mubins=20, kbins=10, box_dims=None, 
 	n_mubins = len(mubins)-1
 
 	#Remove the zero component from the power spectrum. mu is undefined here
-	powerspectrum[tuple(np.array(powerspectrum.shape)/2)] = 0.
+	powerspectrum[tuple((np.array(powerspectrum.shape)/2).astype(int))] = 0.
 
 	#Bin the data
 	print_msg('Binning data...')
@@ -314,12 +314,12 @@ def mu_binning(powerspectrum, los_axis = 0, mubins=20, kbins=10, box_dims=None, 
 		print_msg('Bin %d of %d' % (ki, n_kbins))
 		kmin = kbins[ki]
 		kmax = kbins[ki+1]
-		kidx = get_eval()('(k >= kmin) & (k < kmax)')
-		kidx *= good_idx
+		kidx = (k >= kmin) & (k < kmax)
+		kidx = kidx*good_idx
 		for i in range(n_mubins):
 			mu_min = mubins[i]
 			mu_max = mubins[i+1]
-			idx = get_eval()('(mu >= mu_min) & (mu < mu_max) & kidx')
+			idx = (mu >= mu_min) & (mu < mu_max) & kidx.astype(bool)
 			outdata[i,ki] = np.mean(powerspectrum[idx])
 
 			if weights != None:
@@ -357,7 +357,7 @@ def _get_k(input_array, box_dims):
 		ky = 2.*np.pi * (y-center[1])/box_dims[1]
 		kz = 2.*np.pi * (z-center[2])/box_dims[2]
 
-		k = get_eval()('(kx**2 + ky**2 + kz**2 )**(1./2.)') 		
+		k = np.sqrt(kx**2 + ky**2 + kz**2 )		
 		return [kx,ky,kz], k
 
 
