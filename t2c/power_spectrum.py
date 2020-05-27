@@ -196,7 +196,7 @@ def cross_power_spectrum_1d(input_array1_nd, input_array2_nd, kbins=100, box_dim
 
 
 def power_spectrum_mu(input_array, los_axis = 0, mubins=20, kbins=10, box_dims = None, weights=None,
-					exclude_zero_modes = True, return_n_modes=False):
+					exclude_zero_modes = True, return_n_modes=False, mu_range=[-1,1]):
 	'''
 	Calculate the power spectrum and bin it in mu=cos(theta) and k
 	input_array is the array to calculate the power spectrum from
@@ -231,14 +231,14 @@ def power_spectrum_mu(input_array, los_axis = 0, mubins=20, kbins=10, box_dims =
 	#Calculate the power spectrum
 	powerspectrum = power_spectrum_nd(input_array, box_dims=box_dims)	
 
-	ps, mu_bins, k_bins, n_modes = mu_binning(powerspectrum, los_axis, mubins, kbins, box_dims, weights, exclude_zero_modes)
+	ps, mu_bins, k_bins, n_modes = mu_binning(powerspectrum, los_axis, mubins, kbins, box_dims, weights, exclude_zero_modes, mu_range=mu_range)
 	if return_n_modes:
 		return ps, mu_bins, k_bins, n_modes
 	return ps, mu_bins, k_bins
 
 
 def cross_power_spectrum_mu(input_array1, input_array2, los_axis = 0, mubins=20, kbins=10, 
-						box_dims = None, weights=None, exclude_zero_modes = True, return_n_modes=False):
+						box_dims = None, weights=None, exclude_zero_modes = True, return_n_modes=False, mu_range=[-1,1]):
 	'''
 	Calculate the cross power spectrum and bin it in mu=cos(theta) and k
 	input_array is the array to calculate the power spectrum from
@@ -276,7 +276,7 @@ def cross_power_spectrum_mu(input_array1, input_array2, los_axis = 0, mubins=20,
 	#Calculate the power spectrum
 	powerspectrum = cross_power_spectrum_nd(input_array1, input_array2, box_dims=box_dims)	
 	
-	ps, mu_bins, k_bins, n_modes = mu_binning(powerspectrum, los_axis, mubins, kbins, box_dims, weights, exclude_zero_modes)
+	ps, mu_bins, k_bins, n_modes = mu_binning(powerspectrum, los_axis, mubins, kbins, box_dims, weights, exclude_zero_modes, mu_range=mu_range)
 	if return_n_modes:
 		return ps, mu_bins, k_bins, n_modes
 	return ps, mu_bins, k_bins
@@ -310,7 +310,7 @@ def mu_binning(powerspectrum, los_axis = 0, mubins=20, kbins=10, box_dims=None, 
 
 	#Make mu bins
 	if isinstance(mubins,int):
-		mubins = np.linspace(-1., 1., mubins+1)
+		mubins = np.linspace(min(mu_range), max(mu_range), mubins+1)
 	dmu = (mubins[1:]-mubins[:-1])/2.
 	n_mubins = len(mubins)-1
 
