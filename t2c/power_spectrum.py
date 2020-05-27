@@ -341,7 +341,9 @@ def mu_binning(powerspectrum, los_axis = 0, mubins=20, kbins=10, box_dims=None, 
 def get_k(input_array, box_dims):
 	return _get_k(input_array, box_dims)
 	
-def get_kbins(kbins, box_dims, k, binning='log'):
+def get_kbins(kbins, box_dims, k=None, array=None, binning='log'):
+	assert k is not None or array is not None
+	if k is None: k_comp, k = _get_k(array, box_dims)
 	return _get_kbins(kbins, box_dims, k, binning=binning)
 
 #Some methods for internal use
