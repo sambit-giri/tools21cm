@@ -283,7 +283,7 @@ def cross_power_spectrum_mu(input_array1, input_array2, los_axis = 0, mubins=20,
 
 
 def mu_binning(powerspectrum, los_axis = 0, mubins=20, kbins=10, box_dims=None, weights=None,
-			exclude_zero_modes=True, binning='log'):
+			exclude_zero_modes=True, binning='log', mu_range=[-1,1]):
 	'''
 	This function is for internal use only.
 	'''
