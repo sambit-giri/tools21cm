@@ -338,7 +338,9 @@ def mu_binning(powerspectrum, los_axis = 0, mubins=20, kbins=10, box_dims=None, 
 
 	return outdata, mubins[:-1]+dmu, kbins[:-1]+dk, n_modes
 
-
+def get_k(input_array, box_dims):
+	return _get_k(input_array, box_dims)
+	
 #Some methods for internal use
 
 def _get_k(input_array, box_dims):
