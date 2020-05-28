@@ -196,7 +196,7 @@ def cross_power_spectrum_1d(input_array1_nd, input_array2_nd, kbins=100, box_dim
 
 
 def power_spectrum_mu(input_array, los_axis = 0, mubins=20, kbins=10, box_dims = None, weights=None,
-					exclude_zero_modes = True, return_n_modes=False):
+					exclude_zero_modes = True, return_n_modes=False, positive_mus = True):
 	'''
 	Calculate the power spectrum and bin it in mu=cos(theta) and k
 	input_array is the array to calculate the power spectrum from
@@ -231,7 +231,11 @@ def power_spectrum_mu(input_array, los_axis = 0, mubins=20, kbins=10, box_dims =
 	#Calculate the power spectrum
 	powerspectrum = power_spectrum_nd(input_array, box_dims=box_dims)	
 
-	ps, mu_bins, k_bins, n_modes = mu_binning(powerspectrum, los_axis, mubins, kbins, box_dims, weights, exclude_zero_modes)
+	if positive_mus:
+		ps, mu_bins, k_bins, n_modes = positive_mu_binning(powerspectrum, los_axis, mubins, kbins, box_dims, weights, exclude_zero_modes)
+	else:
+		ps, mu_bins, k_bins, n_modes = mu_binning(powerspectrum, los_axis, mubins, kbins, box_dims, weights, exclude_zero_modes)
+
 	if return_n_modes:
 		return ps, mu_bins, k_bins, n_modes
 	return ps, mu_bins, k_bins
@@ -338,6 +342,62 @@ def mu_binning(powerspectrum, los_axis = 0, mubins=20, kbins=10, box_dims=None, 
 
 	return outdata, mubins[:-1]+dmu, kbins[:-1]+dk, n_modes
 
+def positive_mu_binning(powerspectrum, los_axis = 0, mubins=20, kbins=10, box_dims=None, weights=None,
+			exclude_zero_modes=True, binning='log'):
+	'''
+	This function is for internal use only.
+	'''
+	
+	if weights != None:
+		powerspectrum *= weights
+
+	assert(len(powerspectrum.shape)==3)
+
+	k_comp, k = _get_k(powerspectrum, box_dims)
+
+	mu = _get_positive_mu(k_comp, k, los_axis)
+
+	#Calculate k values, and make k bins
+	kbins = _get_kbins(kbins, box_dims, k, binning=binning)
+	dk = (kbins[1:]-kbins[:-1])/2.
+	n_kbins = len(kbins)-1
+		
+	#Exclude k_perp = 0 modes
+	if exclude_zero_modes:
+		good_idx = _get_nonzero_idx(powerspectrum.shape, los_axis)
+	else:
+		good_idx = np.ones_like(powerspectrum)
+
+	#Make mu bins
+	if isinstance(mubins,int):
+		mubins = np.linspace(0., 1., mubins+1)
+	dmu = (mubins[1:]-mubins[:-1])/2.
+	n_mubins = len(mubins)-1
+
+	#Remove the zero component from the power spectrum. mu is undefined here
+	powerspectrum[tuple((np.array(powerspectrum.shape)/2).astype(int))] = 0.
+
+	#Bin the data
+	print_msg('Binning data...')
+	outdata = np.zeros((n_mubins,n_kbins))
+	n_modes = np.zeros((n_mubins,n_kbins))
+	for ki in range(n_kbins):
+		print_msg('Bin %d of %d' % (ki, n_kbins))
+		kmin = kbins[ki]
+		kmax = kbins[ki+1]
+		kidx = (k >= kmin) & (k < kmax)
+		kidx = kidx*good_idx
+		for i in range(n_mubins):
+			mu_min = mubins[i]
+			mu_max = mubins[i+1]
+			idx = (mu >= mu_min) & (mu < mu_max) & kidx.astype(bool)
+			outdata[i,ki] = np.mean(powerspectrum[idx])
+			n_modes[i,ki] = np.size(powerspectrum[idx])
+			if weights != None:
+				outdata[i,ki] /= weights[idx].mean()
+
+	return outdata, mubins[:-1]+dmu, kbins[:-1]+dk, n_modes
+
 
 #Some methods for internal use
 
@@ -391,6 +451,30 @@ def _get_mu(k_comp, k, los_axis):
 
 	#mu=cos(theta) = k_par/k
 	mu = los_dist/np.abs(k)
+	mu[np.where(k < 0.001)] = np.nan
+	
+	return mu
+
+
+def _get_positive_mu(k_comp, k, los_axis):
+	'''
+	Get the mu values for given k values and 
+	a line-of-sight axis.
+	For internal use
+	'''
+		
+	#Line-of-sight distance from center 
+	if los_axis == 0:
+		los_dist = k_comp[0]
+	elif los_axis == 1:
+		los_dist = k_comp[1]
+	elif los_axis == 2:
+		los_dist = k_comp[2]
+	else:
+		raise Exception('Your space is not %d-dimensional!' % los_axis)
+
+	#mu=cos(theta) = k_par/k
+	mu = np.abs(los_dist/k)
 	mu[np.where(k < 0.001)] = np.nan
 	
 	return mu
