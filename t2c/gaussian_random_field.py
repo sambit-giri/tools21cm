@@ -44,7 +44,10 @@ def make_gaussian_random_field(dims, box_dims, power_spectrum, random_seed=None)
     #k[np.abs(k) < 1.e-6] = 1.e-6
     
     #Scale factor
-    boxvol = np.product(map(float,box_dims))
+    # Updated for python3: map() no longer returns a list, but an iterable
+    # instead, which breaks the code. 200601/GM
+    #boxvol = np.product(map(float,box_dims))
+    boxvol = np.product([float(i) for i in box_dims])
     pixelsize = boxvol/(np.product(map_ft_real.shape))
     scale_factor = pixelsize**2/boxvol
     
