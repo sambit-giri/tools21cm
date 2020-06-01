@@ -232,7 +232,7 @@ def power_spectrum_mu(input_array, los_axis = 0, mubins=20, kbins=10, box_dims =
         #Calculate the power spectrum
         powerspectrum = power_spectrum_nd(input_array, box_dims=box_dims)       
 
-        ps, mu_bins, k_bins, n_modes = positive_mu_binning(powerspectrum, los_axis, mubins, kbins, box_dims, weights, exclude_zero_modes, absolute_mus)
+        ps, mu_bins, k_bins, n_modes = mu_binning(powerspectrum, los_axis, mubins, kbins, box_dims, weights, exclude_zero_modes, absolute_mus)
 
         if return_n_modes:
                 return ps, mu_bins, k_bins, n_modes
