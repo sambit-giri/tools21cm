@@ -106,10 +106,15 @@ class HaloList:
 			#Create a halo and add it to the list
 			if grid_mass > min_select_grid_mass and (max_select_mass == None or grid_mass < max_select_grid_mass):
 				halo = Halo()
-				halo.pos = np.array(map(float, vals[:3]))
-				halo.pos_cm = np.array(map(float, vals[3:6]))
-				halo.vel = np.array(map(float, vals[6:9]))
-				halo.l = np.array(map(float, vals[9:12]))
+                                # The following lines used the map() function to convert
+                                # parts of the vals list into floats before putting them
+                                # into an array. In Python 3 map() returns an iterable,
+                                # not a list, so changed this to a list operation.
+                                # GM/200601
+				halo.pos = np.array([float(i) for i in vals[:3]])
+				halo.pos_cm = np.array([(float(i) for i in vals[3:6]])
+				halo.vel = np.array([float(i) for i in vals[6:9]])
+				halo.l = np.array([float(i) for i in vals[9:12]])
 				halo.vel_disp = float(vals[12])
 				halo.r = float(vals[13])
 				halo.m = float(vals[14])
