@@ -232,7 +232,7 @@ def power_spectrum_mu(input_array, los_axis = 0, mubins=20, kbins=10, box_dims =
         #Calculate the power spectrum
         powerspectrum = power_spectrum_nd(input_array, box_dims=box_dims)       
 
-        ps, mu_bins, k_bins, n_modes = positive_mu_binning(powerspectrum, los_axis, mubins, kbins, box_dims, weights, exclude_zero_modes, absolute_mus)
+        ps, mu_bins, k_bins, n_modes = mu_binning(powerspectrum, los_axis, mubins, kbins, box_dims, weights, exclude_zero_modes, absolute_mus)
 
         if return_n_modes:
                 return ps, mu_bins, k_bins, n_modes
@@ -354,34 +354,42 @@ def get_kbins(kbins, box_dims, k=None, array=None, binning='log'):
 #Some methods for internal use
 
 def _get_k(input_array, box_dims):
-        '''
-        Get the k values for input array with given dimensions.
-        Return k components and magnitudes.
-        For internal use.
-        '''
-        dim = len(input_array.shape)
-        if dim == 1:
-                x = np.arange(len(input_array))
-                center = x.max()/2.
-                kx = 2.*np.pi*(x-center)/box_dims[0]
-                return [kx], kx
-        elif dim == 2:
-                x,y = np.indices(input_array.shape, dtype='int32')
-                center = np.array([(x.max()-x.min())/2, (y.max()-y.min())/2])
-                kx = 2.*np.pi * (x-center[0])/box_dims[0]
-                ky = 2.*np.pi * (y-center[1])/box_dims[1]
-                k = np.sqrt(kx**2 + ky**2)
-                return [kx, ky], k
-        elif dim == 3:
-                x,y,z = np.indices(input_array.shape, dtype='int32')
-                center = np.array([(x.max()-x.min())/2, (y.max()-y.min())/2, \
-                                                (z.max()-z.min())/2])
-                kx = 2.*np.pi * (x-center[0])/box_dims[0]
-                ky = 2.*np.pi * (y-center[1])/box_dims[1]
-                kz = 2.*np.pi * (z-center[2])/box_dims[2]
-
-                k = np.sqrt(kx**2 + ky**2 + kz**2 )             
-                return [kx,ky,kz], k
+	'''
+	Get the k values for input array with given dimensions.
+	Return k components and magnitudes.
+	For internal use.
+	'''
+	dim = len(input_array.shape)
+	if dim == 1:
+		nx = input_array.shape[0]
+		x  = np.hstack((np.arange(nx/2+1),np.arange(1-nx/2,0))) if nx%2==0 else np.hstack((np.arange((nx-1)/2+1),np.arange(-(nx-1)/2,0)))
+		kx = fftpack.fftshift(2.*np.pi*x/box_dims[0])
+		return [kx], kx
+	elif dim == 2:
+		nx = input_array.shape[0]
+		ny = input_array.shape[1]
+		x1 = np.hstack((np.arange(nx/2+1),np.arange(1-nx/2,0))) if nx%2==0 else np.hstack((np.arange((nx-1)/2+1),np.arange(-(nx-1)/2,0)))
+		y1 = np.hstack((np.arange(ny/2+1),np.arange(1-ny/2,0))) if ny%2==0 else np.hstack((np.arange((ny-1)/2+1),np.arange(-(ny-1)/2,0)))
+		x,y = np.meshgrid(x1,y1) #np.indices(input_array.shape, dtype='int32')
+		x,y = x.T, y.T
+		kx = fftpack.fftshift(2.*np.pi*x/box_dims[0])
+		ky = fftpack.fftshift(2.*np.pi*y/box_dims[1])
+		k = np.sqrt(kx**2 + ky**2)
+		return [kx, ky], k
+	elif dim == 3:
+		nx = input_array.shape[0]
+		ny = input_array.shape[1]
+		nz = input_array.shape[2]
+		x1 = np.hstack((np.arange(nx/2+1),np.arange(1-nx/2,0))) if nx%2==0 else np.hstack((np.arange((nx-1)/2+1),np.arange(-(nx-1)/2,0)))
+		y1 = np.hstack((np.arange(ny/2+1),np.arange(1-ny/2,0))) if ny%2==0 else np.hstack((np.arange((ny-1)/2+1),np.arange(-(ny-1)/2,0)))
+		z1 = np.hstack((np.arange(nz/2+1),np.arange(1-nz/2,0))) if nz%2==0 else np.hstack((np.arange((nz-1)/2+1),np.arange(-(nz-1)/2,0)))
+		x,y,z = np.meshgrid(x1,y1,z1) #np.indices(input_array.shape, dtype='int32')
+		x,y,z = x.T, y.T, z.T
+		kx = fftpack.fftshift(2.*np.pi*x/box_dims[0])
+		ky = fftpack.fftshift(2.*np.pi*y/box_dims[1])
+		kz = fftpack.fftshift(2.*np.pi*y/box_dims[2])
+		k = np.sqrt(kx**2 + ky**2 + kz**2 )		
+		return [kx,ky,kz], k
 
 
 def _get_mu(k_comp, k, los_axis, absolute_mus):
