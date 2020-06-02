@@ -112,7 +112,7 @@ class HaloList:
                                 # not a list, so changed this to a list operation.
                                 # GM/200601
 				halo.pos = np.array([float(i) for i in vals[:3]])
-				halo.pos_cm = np.array([(float(i) for i in vals[3:6]])
+				halo.pos_cm = np.array([float(i) for i in vals[3:6]])
 				halo.vel = np.array([float(i) for i in vals[6:9]])
 				halo.l = np.array([float(i) for i in vals[9:12]])
 				halo.vel_disp = float(vals[12])
