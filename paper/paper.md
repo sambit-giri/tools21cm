@@ -1,5 +1,5 @@
 ---
-title: 'Tools21cm: A python package to analyse the large-scale 21 cm signal from the Epoch of Reionization and Cosmic Dawn.'
+title: 'Tools21cm: A python package to analyse the large-scale 21 cm signal from the Epoch of Reionization and Cosmic Dawn'
 tags:
   - Python
   - astronomy
@@ -32,7 +32,7 @@ Much of the functionality of `Tools21cm` is focused on the construction and anal
 
 Radio telescopes typically observe the redshifted 21 cm signal over a range of frequencies and therefore produce 21 cm images at different redshifts. A sequence of such images from different redshifts is known as a tomographic data set and is three dimensional. `Tools21cm` can construct such tomographic data sets from simulation snapshots [@Datta2012Light-coneSpectrum; @Giri2018BubbleTomography]. When constructing these data sets, it can also add the impact of peculiar velocities, leading to an effect known as redshift space distortions [e.g. @Jensen2013ProbingDistortions; @Jensen2016TheMeasurements; @Giri2018BubbleTomography]. See @giri2019tomographic for a detailed description of tomographic 21 cm data sets.
 
-`Tools21cm` also includes tools to calculate a wide range of statistical quantities from simulated 21 cm data sets. These include one-point statistics, such as the global or sky-averaged signal as a function of frequency, as well the variance, skewness and kurtosis [e.g. @Ross2017SimulatingDawn]. It can also characterise the spatial fluctuations in the signal through spherically and cylindrically averaged power spectra [@Jensen2013ProbingDistortions; @Ross2017SimulatingDawn; @Giri2019NeutralTomography] and position dependent power spectra [@Giri2019Position-dependentReionization].
+`Tools21cm` also includes tools to calculate a wide range of statistical quantities from simulated 21 cm data sets. These include one-point statistics, such as the global or sky-averaged signal as a function of frequency, as well the variance, skewness and kurtosis [e.g. @Ross2017SimulatingDawn; @Ross2019EvaluatingDawn]. It can also characterise the spatial fluctuations in the signal through spherically and cylindrically averaged power spectra [@Jensen2013ProbingDistortions; @Ross2017SimulatingDawn; @Giri2019NeutralTomography] and position dependent power spectra [@Giri2019Position-dependentReionization].
 It also has the capability to find interesting features, such as ionized regions, in (tomographic) image data [@Giri2018OptimalObservations; @Giri2019NeutralTomography] and from these to derive statistical quantities, such as size distributions [@Giri2018BubbleTomography] and topological quantities such as the Euler characteristic [@Giri2019NeutralTomography]. Such statistical characterisations of the data are required when comparing observations with simulations using a Bayesian inference framework in order to derive constraints on model parameters [e.g. @Greig201521CMMC:Signal].
 
 
