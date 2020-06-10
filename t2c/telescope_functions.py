@@ -139,7 +139,7 @@ def get_uv_daily_observation(ncells, z, filename=None, total_int_time=4., int_ti
 	return uv_map, N_ant
 	
 
-def get_uv_coverage(Nbase, z, ncells, boxsize=None):
+def get_uv_coverage(Nbase, z, ncells, boxsize=None, include_mirror_baselines=False):
 	"""
 	It calculated the uv_map for the uv-coverage.
 
@@ -172,8 +172,9 @@ def get_uv_coverage(Nbase, z, ncells, boxsize=None):
 	xx,yy,zz = Nb[:,0], Nb[:,1], Nb[:,2]
 	for p in range(xx.shape[0]): 
 		uv_map[int(xx[p]),int(yy[p])] += 1
-		uv_map[-int(xx[p]),-int(yy[p])] += 1
-	return uv_map/2
+		if include_mirror_baselines: uv_map[-int(xx[p]),-int(yy[p])] += 1
+	if include_mirror_baselines: uv_map /= 2
+	return uv_map
 
 
 def kanan_noise_image_ska(z, uv_map, depth_mhz, obs_time, int_time, N_ant_ska=564., verbose=True):
