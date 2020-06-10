@@ -165,10 +165,10 @@ def get_uv_coverage(Nbase, z, ncells, boxsize=None):
 	Nb  = np.round(Nbase*theta_max)
 	Nb  = Nb[(Nb[:,0]<ncells/2)]
 	Nb  = Nb[(Nb[:,1]<ncells/2)]
-	Nb  = Nb[(Nb[:,2]<ncells/2)]
+	#Nb  = Nb[(Nb[:,2]<ncells/2)]
 	Nb  = Nb[(Nb[:,0]>=-ncells/2)]
 	Nb  = Nb[(Nb[:,1]>=-ncells/2)]
-	Nb  = Nb[(Nb[:,2]>=-ncells/2)]
+	#Nb  = Nb[(Nb[:,2]>=-ncells/2)]
 	xx,yy,zz = Nb[:,0], Nb[:,1], Nb[:,2]
 	for p in range(xx.shape[0]): 
 		uv_map[int(xx[p]),int(yy[p])] += 1
