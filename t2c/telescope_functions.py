@@ -4,7 +4,7 @@ import sys
 from .usefuls import *
 from . import cosmology as cm
 from . import conv
-from skimage.transform import rescale, resize, downscale_local_mean
+#from skimage.transform import rescale, resize, downscale_local_mean
 
 KB_SI   = 1.38e-23
 c_light = 2.99792458e+10  #in cm/s
@@ -91,7 +91,7 @@ def earth_rotation_effect(Nbase, slice_num, int_time, declination=-30.):
 	new_Nbase[:,2] = np.cos(delta)*np.cos(HA)*Nbase[:,0] - np.cos(delta)*np.sin(HA)*Nbase[:,1] + np.sin(delta)*Nbase[:,2]
 	return new_Nbase
 
-def get_uv_daily_observation(ncells, z, filename=None, total_int_time=4., int_time=10., boxsize=None, declination=-30., verbose=True):
+def get_uv_daily_observation(ncells, z, filename=None, total_int_time=4., int_time=10., boxsize=None, declination=-30., include_mirror_baselines=False, verbose=True):
 	"""
 	The radio telescopes observe the sky for 'total_int_time' hours each day. The signal is recorded 
 	every 'int_time' seconds. 
@@ -123,13 +123,13 @@ def get_uv_daily_observation(ncells, z, filename=None, total_int_time=4., int_ti
 	#	uv_map, N_ant = get_uv_daily_observation_numba(ncells, z, filename=filename, total_int_time=total_int_time, int_time=int_time, boxsize=boxsize, declination=declination, verbose=verbose)
 	#	return uv_map, N_ant
 	Nbase, N_ant = from_antenna_config(filename, z)
-	uv_map0      = get_uv_coverage(Nbase, z, ncells, boxsize=boxsize)
+	uv_map0      = get_uv_coverage(Nbase, z, ncells, boxsize=boxsize, include_mirror_baselines=include_mirror_baselines)
 	uv_map       = np.zeros(uv_map0.shape)
 	tot_num_obs  = int(3600.*total_int_time/int_time)
 	print("Making uv map from daily observations.")
 	for i in range(tot_num_obs-1):
 		new_Nbase = earth_rotation_effect(Nbase, i+1, int_time, declination=declination)
-		uv_map1   = get_uv_coverage(new_Nbase, z, ncells, boxsize=boxsize)
+		uv_map1   = get_uv_coverage(new_Nbase, z, ncells, boxsize=boxsize, include_mirror_baselines=include_mirror_baselines)
 		uv_map   += uv_map1
 		if verbose:
 			perc = int((i+2)*100/tot_num_obs)
