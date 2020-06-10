@@ -4,6 +4,7 @@ import sys
 from .usefuls import *
 from . import cosmology as cm
 from . import conv
+from skimage.transform import rescale, resize, downscale_local_mean
 
 KB_SI   = 1.38e-23
 c_light = 2.99792458e+10  #in cm/s
