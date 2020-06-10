@@ -158,12 +158,11 @@ def get_uv_coverage(Nbase, z, ncells, boxsize=None):
 	uv_map  : ndarray
 		ncells x ncells numpy array containing the number of baselines observing each pixel.
 	"""
-	ncells *= 2
 	z = float(z)
 	if not boxsize: boxsize = conv.LB
 	uv_map = np.zeros((ncells,ncells))
 	theta_max = boxsize/cm.z_to_cdist(z)
-	Nb  = np.round(Nbase*theta_max/2)
+	Nb  = np.round(Nbase*theta_max)
 	Nb  = Nb[(Nb[:,0]<ncells/2)]
 	Nb  = Nb[(Nb[:,1]<ncells/2)]
 	Nb  = Nb[(Nb[:,2]<ncells/2)]
@@ -174,7 +173,6 @@ def get_uv_coverage(Nbase, z, ncells, boxsize=None):
 	for p in range(xx.shape[0]): 
 		uv_map[int(xx[p]),int(yy[p])] += 1
 		uv_map[-int(xx[p]),-int(yy[p])] += 1
-	uv_map = downscale_local_mean(uv_map, (2,2))
 	return uv_map
 
 
