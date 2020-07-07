@@ -13,6 +13,8 @@ authors:
   - name: Garrelt Mellema
     orcid: 0000-0002-2512-6748
     affiliation: 1
+  - name: Hannes Jensen
+    affiliation: Self
 affiliations:
  - name: Department of Astronomy and Oskar Klein Centre, Stockholm University, AlbaNova, SE-106 91 Stockholm, Sweden
    index: 1
@@ -38,6 +40,6 @@ It also has the capability to find interesting features, such as ionized regions
 
 # Acknowledgements
 
-We acknowledge the contributions and feedback from Hannes Jensen, Keri Dixon, Hannah Ross, Raghunath Ghara, Ilian Iliev, Catherine Watkinson and Michele Bianco. We are also thankful for support by Swedish Research Council grant 2016-03581.
+We acknowledge the contributions and feedback from Keri Dixon, Hannah Ross, Raghunath Ghara, Ilian Iliev, Catherine Watkinson and Michele Bianco. We are also thankful for support by Swedish Research Council grant 2016-03581.
 
 # References
