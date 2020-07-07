@@ -14,12 +14,14 @@ authors:
     orcid: 0000-0002-2512-6748
     affiliation: 1
   - name: Hannes Jensen
-    affiliation: Self
+    affiliation: 3
 affiliations:
  - name: Department of Astronomy and Oskar Klein Centre, Stockholm University, AlbaNova, SE-106 91 Stockholm, Sweden
    index: 1
  - name: Institute for Computational Science, University of Zurich, Winterthurerstrasse 190, CH-8057 Zurich, Switzerland
    index: 2
+ - name: Self
+   index: 3
 date: 8 June 2020
 bibliography: paper.bib
 
