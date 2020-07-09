@@ -8,7 +8,7 @@ def spa_np(data, xth=0.95, nscales=30, binning='log'):
 	"""
 	Rmx = data.shape[0]
 	if binning=='linear': Rs_ = np.linspace(1,Rmx/2.,nscales)
-	else: Rs_ = np.exp(np.linspace(0,np.log(Rmx/2.),nscales))
+	else: Rs_ = np.exp(np.linspace(np.log(2.),np.log(Rmx/2.),nscales))
 	ins = np.zeros(nscales)
 	#nns = np.zeros(nscales)
 	rad = np.zeros(data.shape)
