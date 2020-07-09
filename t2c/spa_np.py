@@ -12,13 +12,13 @@ def spa_np(data, xth=0.95, nscales=30, binning='log'):
 	ins = np.zeros(nscales)
 	#nns = np.zeros(nscales)
 	rad = np.zeros(data.shape)
-	for i in xrange(nscales):
+	for i in range(nscales):
 		ra = Rs_[i]
 		kernel = put_sphere(np.zeros((Rmx,Rmx,Rmx)), [Rmx/2.,Rmx/2.,Rmx/2.], ra, label=1.)
 		smooth = fftconvolve(data, kernel/kernel.sum(), mode='same')
 		rad[smooth>=xth] = ra
 		print("Comepleted %d \%")	
-	for i in xrange(nscales): ins[i] = rad[rad==Rs_[i]].size
+	for i in range(nscales): ins[i] = rad[rad==Rs_[i]].size
 	return Rs_, ins
 
 
