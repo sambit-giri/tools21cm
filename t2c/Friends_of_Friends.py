@@ -1,5 +1,3 @@
-__author__ = 'Tim Lingard'
-
 """
 Implementing a basic searching algorithm to identify grouped areas of high
 values in an array
@@ -42,12 +40,13 @@ def FoF_search(array, threshold):
                 currentsize += 1
         return currentsize
     c = count()
-    c.next()
+    #c.next()
+    next(c)
     size_list = []
     q = Queue()             # initialise a queue
     for p in possibilities:     # start cycling through possible points
         if not out_map[p]:           # if the point has not already been searched,
-            group = c.next()        # start a new group number
+            group = next(c)        # start a new group number
             out_map[p] = group       # assign the corresponding point in the group map to this group
             q.put(p)                # put the point in the queue
             s = 1                   # s contains the new group size

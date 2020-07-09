@@ -11,7 +11,7 @@ import datetime, time
 from . import mfp_np, spa_np, conv
 from scipy.interpolate import interp1d
 
-def fof(data, xth=0.5, neighbors=4, use_skimage=False):
+def fof(data, xth=0.5, connectivity=1, use_skimage=False):
 	"""
 	Determines the sizes using the friends-of-friends approach.
 	It assumes the length of the grid as the linking length.
@@ -31,9 +31,10 @@ def fof(data, xth=0.5, neighbors=4, use_skimage=False):
 		all the sizes
 	"""
 	t1 = datetime.datetime.now()
+	data = (data>=xth)
 	if 'skimage' in sys.modules and use_skimage:
 		from skimage import morphology
-		out_map = morphology.label(data, neighbors=neighbors)
+		out_map = morphology.label(data, connectivity=connectivity)
 		elements, size_list = np.unique(out_map, return_counts=True)
 		size_list = size_list[1:]
 	else: out_map, size_list = FoF_search(data, xth)
