@@ -17,7 +17,7 @@ def spa_np(data, xth=0.95, nscales=30, binning='log'):
 		kernel = put_sphere(np.zeros((Rmx,Rmx,Rmx)), [Rmx/2.,Rmx/2.,Rmx/2.], ra, label=1.)
 		smooth = fftconvolve(data, kernel/kernel.sum(), mode='same')
 		rad[smooth>=xth] = ra
-		print("Comepleted %d \%")	
+		print("Comepleted {0:d} %".format(100*(i+1)/nscales))	
 	for i in range(nscales): ins[i] = rad[rad==Rs_[i]].size
 	return Rs_, ins
 
