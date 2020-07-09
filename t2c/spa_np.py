@@ -1,6 +1,7 @@
 import numpy as np
 from . import usefuls
 from scipy.signal import fftconvolve
+from skimage import morphology
 
 def spa_np(data, xth=0.95, nscales=30, binning='log'):
 	"""
@@ -14,7 +15,8 @@ def spa_np(data, xth=0.95, nscales=30, binning='log'):
 	rad = np.zeros(data.shape)
 	for i in range(nscales):
 		ra = Rs_[i]
-		kernel = put_sphere(np.zeros((Rmx,Rmx,Rmx)), [Rmx/2.,Rmx/2.,Rmx/2.], ra, label=1.)
+		#kernel = put_sphere(np.zeros((Rmx,Rmx,Rmx)), [Rmx/2.,Rmx/2.,Rmx/2.], ra, label=1.)
+		kernel = morphology.ball(ra)
 		smooth = fftconvolve(data, kernel/kernel.sum(), mode='same')
 		rad[smooth>=xth] = ra
 		print("Comepleted {0:.1f} %".format(100*(i+1)/nscales))	
