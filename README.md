@@ -12,6 +12,10 @@ Full documentation (with examples, installation instructions and complete module
 
 INSTALLATION
 ------------
+To install the package from source, one should clone this package running the following::
+
+    git clone https://github.com/sambit-giri/tools21cm.git
+
 To install the package in the standard location, run the following in the root directory::
 
     python setup.py install
