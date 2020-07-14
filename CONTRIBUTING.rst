@@ -16,11 +16,12 @@ If you feel that there are some features missing, we welcome you to open an issu
 
 Setting up your development environment
 ---------------------------------------
-In case you want to make substantial change to the code, you can fork the repository and clone it to your local machine.
+In case you want to make substantial change to the code, you can fork the repository and clone it to your local machine:
 
-```
+```bash
 git clone https://github.com/<YOURUSERNAME>/tools21cm.git
 cd tools21cm
 git checkout -b <BRANCHNAME>
 ```
+
 where `<YOURUSERNAME>` and `<BRANCHNAME>` are your Github username and the name of new branch for local development respectively.
