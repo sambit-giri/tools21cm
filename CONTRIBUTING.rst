@@ -2,7 +2,7 @@
 Contributing
 ============
 
-Thank you so much for using `tools21cm`. Contributions are welcome and are greatly appreciated! 
+Thank you so much for using ``tools21cm``. Contributions are welcome and are greatly appreciated. 
 
 Bug reports/Feedback/Questions
 ===============================================
