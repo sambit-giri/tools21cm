@@ -29,3 +29,8 @@ One can also install it using pip by running the following command::
     pip install git+https://github.com/sambit-giri/tools21cm.git
 
 The dependencies should be installed automatically during the installation process. If they fail for some reason, you can install them manually before installing tools21cm. The list of required packages can be found in the requirements.txt file present in the root directory.
+
+
+CONTRIBUTING
+------------
+If you find any bugs or unexpected behavior in the code, please feel free to open a [Github issue](https://github.com/sambit-giri/tools21cm/issues). The issue page is also good if you seek help or have suggestions for us. For more details, please see [here](https://tools21cm.readthedocs.io/).
