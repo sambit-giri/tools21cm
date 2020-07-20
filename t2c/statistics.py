@@ -131,8 +131,8 @@ def apply_func_along_los(signal, func, los_axis):
 		Calculate the variance of a lightcone along the 
 		line-of-sight:
 		
-		>>> lightcone = c2t.read_cbin('my_lightcone.cbin')
-		>>> dT_var = c2t.apply_func_along_los(lightcone, np.var, 2)
+		>>> lightcone = t2c.read_cbin('my_lightcone.cbin')
+		>>> dT_var = t2c.apply_func_along_los(lightcone, np.var, 2)
 		
 	'''
 	assert los_axis >= 0 and los_axis < len(signal.shape)
