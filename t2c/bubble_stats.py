@@ -352,7 +352,7 @@ def disk_structure(n):
 def granulometry_CDF(data, sizes=None, verbose=True):
 	s = max(data.shape)
 	if sizes is None: sizes = np.arange(1, s/2, 2)
-	size = sizes.astype(int)
+	sizes = sizes.astype(int)
 	granulo = np.zeros((len(sizes)))
 	for n in range(len(sizes)): granulo[n] = ndimage.binary_opening(data, structure=disk_structure(sizes[n])).sum()
 	#if verbose: print "Completed:", 100*(n+1)/len(sizes), "%"
