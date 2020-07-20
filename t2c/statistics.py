@@ -26,15 +26,14 @@ def skewness(x):
 
 def kurtosis(x):
         ''' 
-        Calculate the skewness of an array.
-        Note that IDL calculates the skewness in a slightly different way than Python. 
-        This routine uses the IDL definition. 
+        Calculate the kurtosis of an array.
+        It uses the definition given in Ross et al. (2017).
         
         Parameters:
                 x (ndarray): The array containing the input data
                 
         Returns:
-                The skewness.
+                The kurtosis.
 
         '''
         mx = np.mean(x)
