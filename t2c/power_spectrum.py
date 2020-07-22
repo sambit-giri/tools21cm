@@ -11,16 +11,13 @@ from scipy import fftpack
 
 def power_spectrum_nd(input_array, box_dims=None):
         ''' 
-        Calculate the power spectrum of input_array and return it as an n-dimensional array,
-        where n is the number of dimensions in input_array
-        box_side is the size of the box in comoving Mpc. If this is set to None (default),
-        the internal box size is used
+        Calculate the power spectrum of input_array and return it as an n-dimensional array.
         
         Parameters:
                 input_array (numpy array): the array to calculate the 
                         power spectrum of. Can be of any dimensions.
                 box_dims = None (float or array-like): the dimensions of the 
-                        box. If this is None, the current box volume is used along all
+                        box in Mpc. If this is None, the current box volume is used along all
                         dimensions. If it is a float, this is taken as the box length
                         along all dimensions. If it is an array-like, the elements are
                         taken as the box length along each axis.
@@ -46,10 +43,7 @@ def power_spectrum_nd(input_array, box_dims=None):
 
 def cross_power_spectrum_nd(input_array1, input_array2, box_dims):
         ''' 
-        Calculate the cross power spectrum two arrays and return it as an n-dimensional array,
-        where n is the number of dimensions in input_array
-        box_side is the size of the box in comoving Mpc. If this is set to None (default),
-        the internal box size is used
+        Calculate the cross power spectrum two arrays and return it as an n-dimensional array.
         
         Parameters:
                 input_array1 (numpy array): the first array to calculate the 
@@ -57,7 +51,7 @@ def cross_power_spectrum_nd(input_array1, input_array2, box_dims):
                 input_array2 (numpy array): the second array. Must have same 
                         dimensions as input_array1.
                 box_dims = None (float or array-like): the dimensions of the 
-                        box. If this is None, the current box volume is used along all
+                        box in Mpc. If this is None, the current box volume is used along all
                         dimensions. If it is a float, this is taken as the box length
                         along all dimensions. If it is an array-like, the elements are
                         taken as the box length along each axis.
@@ -94,7 +88,7 @@ def radial_average(input_array, box_dims, kbins=10, binning='log', breakpoint=0.
         Parameters: 
                 input_array (numpy array): the data array
                 box_dims = None (float or array-like): the dimensions of the 
-                        box. If this is None, the current box volume is used along all
+                        box in Mpc. If this is None, the current box volume is used along all
                         dimensions. If it is a float, this is taken as the box length
                         along all dimensions. If it is an array-like, the elements are
                         taken as the box length along each axis.
@@ -136,7 +130,7 @@ def power_spectrum_1d(input_array_nd, kbins=100, box_dims=None, return_n_modes=F
                         or a list containing the bin edges. If an integer is given, the bins
                         are logarithmically spaced.
                 box_dims = None (float or array-like): the dimensions of the 
-                        box. If this is None, the current box volume is used along all
+                        box in Mpc. If this is None, the current box volume is used along all
                         dimensions. If it is a float, this is taken as the box length
                         along all dimensions. If it is an array-like, the elements are
                         taken as the box length along each axis.
@@ -171,7 +165,7 @@ def cross_power_spectrum_1d(input_array1_nd, input_array2_nd, kbins=100, box_dim
                         or a list containing the bin edges. If an integer is given, the bins
                         are logarithmically spaced.
                 box_dims = None (float or array-like): the dimensions of the 
-                        box. If this is None, the current box volume is used along all
+                        box in Mpc. If this is None, the current box volume is used along all
                         dimensions. If it is a float, this is taken as the box length
                         along all dimensions. If it is an array-like, the elements are
                         taken as the box length along each axis.
@@ -208,7 +202,7 @@ def power_spectrum_mu(input_array, los_axis = 0, mubins=20, kbins=10, box_dims =
                         or a list containing the bin edges. If an integer is given, the bins
                         are logarithmically spaced.
                 box_dims = None (float or array-like): the dimensions of the 
-                        box. If this is None, the current box volume is used along all
+                        box in Mpc. If this is None, the current box volume is used along all
                         dimensions. If it is a float, this is taken as the box length
                         along all dimensions. If it is an array-like, the elements are
                         taken as the box length along each axis.
@@ -251,7 +245,7 @@ def cross_power_spectrum_mu(input_array1, input_array2, los_axis = 0, mubins=20,
                         or a list containing the bin edges. If an integer is given, the bins
                         are logarithmically spaced.
                 box_dims = None (float or array-like): the dimensions of the 
-                        box. If this is None, the current box volume is used along all
+                        box in Mpc. If this is None, the current box volume is used along all
                         dimensions. If it is a float, this is taken as the box length
                         along all dimensions. If it is an array-like, the elements are
                         taken as the box length along each axis.
