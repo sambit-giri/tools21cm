@@ -198,8 +198,7 @@ def cross_power_spectrum_1d(input_array1_nd, input_array2_nd, kbins=100, box_dim
 def power_spectrum_mu(input_array, los_axis = 0, mubins=20, kbins=10, box_dims = None, weights=None,exclude_zero_modes = True, return_n_modes=False, absolute_mus = True):
 
         '''
-        Calculate the power spectrum and bin it in mu=cos(theta) and k
-        input_array is the array to calculate the power spectrum from
+        Calculate the power spectrum and bin it in mu=cos(theta) and k.
         
         Parameters: 
                 input_array (numpy array): the data array
@@ -241,8 +240,7 @@ def power_spectrum_mu(input_array, los_axis = 0, mubins=20, kbins=10, box_dims =
 
 def cross_power_spectrum_mu(input_array1, input_array2, los_axis = 0, mubins=20, kbins=10, box_dims = None, weights=None, exclude_zero_modes = True, return_n_modes=False, absolute_mus=True):
         '''
-        Calculate the cross power spectrum and bin it in mu=cos(theta) and k
-        input_array is the array to calculate the power spectrum from
+        Calculate the cross power spectrum and bin it in mu=cos(theta) and k.
         
         Parameters: 
                 input_array1 (numpy array): the first data array

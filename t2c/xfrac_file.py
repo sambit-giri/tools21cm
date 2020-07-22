@@ -10,7 +10,7 @@ class XfracFile:
 	Use the read_from_file method to load an xfrac file, or 
 	pass the filename to the constructor.
 	
-	Some useful attributes of this class are:
+	Attributes:
 		xi (numpy array): the ionized fraction
 		z (float): the redshift of the file (-1 if it couldn't be determined from the file name)
 	
