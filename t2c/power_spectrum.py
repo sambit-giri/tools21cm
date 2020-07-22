@@ -460,7 +460,10 @@ def dimensionless_ps(data, kbins=100, box_dims=None, binning='log', factor=10):
         -------
         (\Delta^2, ks)
         '''
+        from scipy.interpolate import interp1d
         Pk, ks = power_spectrum_1d(data, kbins=kbins*factor, box_dims=box_dims, binning=binning)
+        f_Dlta = interp1d(ks, Pk*ks**3/2/np.pi**2)
+        knew   = 10**np.linspace(np.log10(ks[1]),np.log10(ks[-1]), kbins) if binning=='log' else np.linspace(ks[1],ks[-1], kbins)
         return Pk*ks**3/2/np.pi**2, ks
 
 def _get_nonzero_idx(ps_shape, los_axis):
