@@ -10,11 +10,10 @@ class DensityFile:
 	Use the read_from_file method to load a density file, or 
 	pass the filename to the constructor.
 	
-	Some useful attributes of this class are:
-	
-	raw_density (numpy array): the density in simulation units
-	cgs_density (numpy array): the baryonic density in g/cm^3
-	z (float): the redshift of the file (-1 if it couldn't be determined from the file name)
+	Attributes:
+		raw_density (numpy array): the density in simulation units
+		cgs_density (numpy array): the baryonic density in g/cm^3
+		z (float): the redshift of the file (-1 if it couldn't be determined from the file name)
 	
 	'''
 	
