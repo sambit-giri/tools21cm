@@ -307,7 +307,7 @@ def kelvin_2_jansky(array, z, boxsize=None, ncells=None):
 
 	Returns
 	-------
-	A numpy array with values in muJy.
+	A numpy array with values in Jy.
 	"""
 	z = float(z)
 	if not ncells: ncells  = array.shape[0]
