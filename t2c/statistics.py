@@ -59,13 +59,13 @@ def mass_weighted_mean_xi(xi, rho):
 	return np.mean(xi*rho)/np.mean(rho)
 
 
-def subtract_mean_signal(signal, los_axis):
+def subtract_mean_signal(signal, los_axis=2):
 	'''
 	Subtract the mean of the signal along the los axis. 
 	
 	Parameters:
 		signal (ndarray): the signal to subtract the mean from
-		los_axis (int): the line-of-sight axis
+		los_axis (int): the line-of-sight axis (Default: 2)
 			
 	Returns:
 		The signal with the mean subtracted
@@ -75,11 +75,11 @@ def subtract_mean_signal(signal, los_axis):
 	signal_out = signal.copy()
 	
 	for i in range(signal.shape[los_axis]):
-		if los_axis == 0:
+		if los_axis in [0,-3]:
 			signal_out[i,:,:] -= signal[i,:,:].mean()
-		if los_axis == 1:
+		if los_axis in [1,-2]:
 			signal_out[:,i,:] -= signal[:,i,:].mean()
-		if los_axis == 2:
+		if los_axis in [2,-1]:
 			signal_out[:,:,i] -= signal[:,:,i].mean()
 
 	return signal_out

@@ -216,3 +216,17 @@ def _dt_full(rho, xi, Ts, z, correct):
         dt = ((Ts_new-Tcmb)/Ts_new)*Cdt*(1.0-xi)*rho/rho_mean
         return dt
 
+# def subtract_mean_channelwise(dt, axis=-1):
+# 	"""
+# 	Parameters:
+# 		dt  (ndarray): Brightness temperature whose channel-wise should be subtracted.
+# 		axis (int): Frequency axis (Defualt:-1).
+
+# 	Returns:
+# 		numpy array
+# 	"""
+# 	assert dt.ndim == 3
+# 	if axis != -1 or axis != 2: dt = np.swapaxes(dt, axis, 2)
+# 	for i in range(dt.shape[2]): dt[:,:,i] -= dt[:,:,i].mean()
+# 	if axis != -1 or axis != 2: dt = np.swapaxes(dt, axis, 2)
+# 	return dt

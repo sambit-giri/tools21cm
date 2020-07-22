@@ -25,3 +25,4 @@ def test_calc_dt_lightcone():
 
 def test_mean_dt():
 	assert np.abs(t2c.mean_dt(z)-23.833022132850783)<0.1
+
