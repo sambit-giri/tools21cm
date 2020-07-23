@@ -18,3 +18,5 @@ def test_bubbles_from_slic():
 def test_bubbles_from_kmeans():
 	out = t2c.bubbles_from_kmeans(data_ball, n_clusters=2, upper_lim=False)
 	assert out[rad,rad,rad]==data_ball[rad,rad,rad]
+	out = t2c.bubbles_from_kmeans(data_ball, n_clusters=3, upper_lim=False)
+	assert out[rad,rad,rad]==data_ball[rad,rad,rad]

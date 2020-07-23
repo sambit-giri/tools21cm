@@ -60,6 +60,10 @@ def bubbles_from_kmeans(data, upper_lim=True, n_jobs=1, n_clusters=3):
 	-------
 	Binary cube where pixels identified as region of interest are the True.
 	"""
+	if np.unique(data).size<2:
+		print('The data array is single valued and thus the entire array is one region.')
+		return np.ones_like(data)
+	if np.unique(data).size==2: n_clusters=2
 	if n_clusters==2: array, t_th = threshold_kmeans(data, upper_lim=upper_lim, n_jobs=n_jobs)
 	else: array = threshold_kmeans_3cluster(data, upper_lim=upper_lim, n_jobs=n_jobs)
 	return array
