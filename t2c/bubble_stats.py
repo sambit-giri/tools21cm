@@ -11,7 +11,7 @@ import datetime, time
 from . import mfp_np, spa_np, conv
 from scipy.interpolate import interp1d
 
-def fof(data, xth=0.5, connectivity=1, use_skimage=False):
+def fof(data, xth=0.5, connectivity=1):
 	"""
 	Determines the sizes using the friends-of-friends approach.
 	It assumes the length of the grid as the linking length.
@@ -30,6 +30,7 @@ def fof(data, xth=0.5, connectivity=1, use_skimage=False):
 	sizes: list
 		all the sizes
 	"""
+	use_skimage=True
 	t1 = datetime.datetime.now()
 	data = (data>=xth)
 	if 'skimage' in sys.modules and use_skimage:
