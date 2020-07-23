@@ -1,16 +1,12 @@
-=========
-tools21cm
-=========
+# Tools21cm
 
 A python package for analysing 21-cm signals from the Epoch of Reionization (EoR) and Cosmic Dawn (CD). Full documentation (with examples, installation instructions and complete module description) can be found at [readthedocs](https://tools21cm.readthedocs.io/).
 
-Package details
-===============
+## Package details
 
 The package provides tools to analyse cosmological simulations of EoR and CD. It contains modules to create mock 21-cm observations for current and upcoming radio telescopes, such as LOFAR, MWA and SKA, and to construct statistical measures.
 
-Input
------
+### Input
 
 Currently, `Tools21cm` supports the following simulation codes:
 
@@ -21,8 +17,7 @@ Currently, `Tools21cm` supports the following simulation codes:
 * [Simfast21](https://github.com/mariogrs/Simfast21)
 * [sem_num](https://arxiv.org/abs/1403.0941)
 
-Outputs
--------
+### Outputs
 
 There are various manipulation and analysis moduled in `Tools21cm`. 
 
@@ -39,8 +34,7 @@ There are various manipulation and analysis moduled in `Tools21cm`.
 
 For detail documentation and how to use them, see [here](https://tools21cm.readthedocs.io/contents.html).
 
-Under Developement
-------------------
+### Under Developement
 
 * Foreground model: methods to simulate and analyse the foreground signal for 21 cm signal
 * Primary beam: methods to simulate the primary beam of radio telescope
@@ -51,8 +45,8 @@ Under Developement
 
 
 
-INSTALLATION
-------------
+## INSTALLATION
+
 To install the package from source, one should clone this package running the following::
 
     git clone https://github.com/sambit-giri/tools21cm.git
@@ -71,14 +65,14 @@ One can also install it using pip by running the following command::
 
 The dependencies should be installed automatically during the installation process. If they fail for some reason, you can install them manually before installing tools21cm. The list of required packages can be found in the requirements.txt file present in the root directory.
 
-Tests
------
+### Tests
+
 For testing, one can use [pytest](https://docs.pytest.org/en/stable/) or [nosetests](https://nose.readthedocs.io/en/latest/). Both packages can be installed using pip. To run all the test script, run the either of the following::
 
     pytest -v 
     
 	nosetests -v
 
-CONTRIBUTING
-------------
+## CONTRIBUTING
+
 If you find any bugs or unexpected behavior in the code, please feel free to open a [Github issue](https://github.com/sambit-giri/tools21cm/issues). The issue page is also good if you seek help or have suggestions for us. For more details, please see [here](https://tools21cm.readthedocs.io/contributing.html).
