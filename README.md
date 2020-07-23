@@ -15,8 +15,8 @@ Input
 Currently, `Tools21cm` supports the following simulation codes:
 
 * [CUBEP3M](https://github.com/jharno/cubep3m)
-* |C2RAY](https://github.com/garrelt/C2-Ray3Dm)
-* [GRIZZLY](https://arxiv.org/abs/1710.09397): an EoR and CD simulation code based on 1D radiative transfer 
+* [C2RAY](https://github.com/garrelt/C2-Ray3Dm)
+* [GRIZZLY](https://arxiv.org/abs/1710.09397)
 * [21cmFAST](https://21cmfast.readthedocs.io/en/latest/)
 * [Simfast21](https://github.com/mariogrs/Simfast21)
 * [sem_num](https://arxiv.org/abs/1403.0941)
@@ -27,23 +27,14 @@ Outputs
 There are various manipulation and analysis moduled in `Tools21cm`. 
 
 * Angular coordinates: methods to convert data between physical (cMpc) coordinates and observational (angular-frequency) coordinates
-
 * Bubble Statistics: methods to calcluate the sizes of the regions of interest and estimate the size distributions
-
 * Cosmological calculators: various functions for calculating some cosmological stuff
-
 * Identifying regions: methods to identify regions of interest in images
-
 * Lightcone: methods to construct lightcones
-
 * Power spectrum: contains functions to estimate various two point statistics
-
 * Reading simuation outputs: methods to read simulations outputs
-
 * Smoothing: methods to smooth or reduce resolution of the data to reduce noise
-
 * Point statistics: contains various useful statistical methods
-
 * Temperature: methods to estimate the brightness temperature
 
 For detail documentation and how to use them, see [here](https://tools21cm.readthedocs.io/contents.html).
