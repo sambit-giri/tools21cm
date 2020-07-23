@@ -22,7 +22,7 @@ Currently, `Tools21cm` supports the following simulation codes:
 * `GRIZZLY <https://arxiv.org/abs/1710.09397>`_: an EoR and CD simulation code based on 1D radiative transfer 
 * `21cmFAST <https://21cmfast.readthedocs.io/en/latest/>`_: a semi-numerical cosmological simulation code for the radio 21cm signal
 * `Simfast21 <https://github.com/mariogrs/Simfast21>`_: a semi-numerical cosmological simulation code for the radio 21cm signal
-* `sem_num <https://arxiv.org/abs/1403.0941>`_: a simple set of codes to simulate (semi-numerically) HI maps during reionization
+* `sem_num <https://arxiv.org/abs/1403.0941>`_: a simple set of codes to semi-numerically simulate HI maps during reionization
 
 
 .. |c2ray| replace:: C\ :sup:`2`\RAY
@@ -58,15 +58,13 @@ There are various manipulation and analysis moduled in `Tools21cm`.
 
 For detail documentation and how to use them, see `here <https://tools21cm.readthedocs.io/contents.html>`_.
 
-There are modules which are still under development:
+Under Developement
+------------------
 
 * Foreground model: methods to simulate and analyse the foreground signal for 21 cm signal
-
 * Primary beam: methods to simulate the primary beam of radio telescope
-
 * Telescope noise: 
 	* simulate the radio telescope observation strategy
 	* simulate telescope noise
-
 * Topology: methods to estimate the topology of the region of interest
 
