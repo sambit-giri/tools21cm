@@ -6,7 +6,7 @@ rad = 5
 data_ball = ball(rad)
 
 def test_fof():
-	out = t2c.fof(data_ball, use_skimage=True)
+	out = t2c.fof(data_ball)
 	assert out[1].squeeze()==data_ball.sum()
 
 def test_mfp():
