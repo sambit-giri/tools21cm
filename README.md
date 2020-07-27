@@ -69,7 +69,7 @@ The dependencies should be installed automatically during the installation proce
 
 For testing, one can use [pytest](https://docs.pytest.org/en/stable/) or [nosetests](https://nose.readthedocs.io/en/latest/). Both packages can be installed using pip. To run all the test script, run the either of the following::
 
-    pytest -v 
+    python -m pytest tests
     
 	nosetests -v
 
