@@ -6,7 +6,7 @@ import scipy
 from .bubble_stats import fof
 from skimage.measure import label
 
-def EulerCharacteristic(data, thres=0.5, neighbors=6):
+def EulerCharacteristic(data, thres=0.5, neighbors=6, use_numba=False):
 	"""
 	Parameters
 	----------
@@ -17,16 +17,23 @@ def EulerCharacteristic(data, thres=0.5, neighbors=6):
 		Ignore this parameter if data is already a binary field.
 	neighbors: int
 		Define the connectivity to the neighbors (Default: 6).
+	use_numba: bool
+		If True, numba package is used to speed up calculation.
 
 	Returns
 	-------
 	Euler characteristics value.
 	"""
 	A = 1*(data>thres)
-	if 'numba' in sys.modules: 
+	# if 'numba' in sys.modules: 
+	# 	print('Using numba to speed up.')
+	# 	from . import ViteBetti_numba as VB
+	# else: from . import ViteBetti as VB
+	if use_numba: 
 		print('Using numba to speed up.')
-		from . import ViteBetti_numba as VB
-	else: from . import ViteBetti as VB
+	 	from . import ViteBetti_numba as VB
+	else: 
+		from . import ViteBetti as VB
 	if neighbors==6 or neighbors==4: C = VB.CubeMap(A)
 	else: C = VB.CubeMap(1-A)
 	#D = VB.CubeMap(1-A)
@@ -80,7 +87,7 @@ def betti2(data, thres=0.5, neighbors=6):
 	else: b2 = label(1-A, return_num=1, neighbors=4)[1]
 	return b2
 
-def betti1(data, thres=0.5, neighbors=6, b0=None, b2=None, chi=None):
+def betti1(data, thres=0.5, neighbors=6, b0=None, b2=None, chi=None, use_numba=False):
 	"""
 	Parameters
 	----------
@@ -91,6 +98,8 @@ def betti1(data, thres=0.5, neighbors=6, b0=None, b2=None, chi=None):
 		Ignore this parameter if data is already a binary field.
 	neighbors: int
 		Define the connectivity to the neighbors (Default: 6).
+	use_numba: bool
+		If True, numba package is used to speed up calculation.
 
 	Returns
 	-------
