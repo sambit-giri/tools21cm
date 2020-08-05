@@ -23,8 +23,8 @@ def EulerCharacteristic(data, thres=0.5, neighbors=6):
 	Euler characteristics value.
 	"""
 	A = 1*(data>thres)
-	if 'numba' in sys.modules: import ViteBetti_numba as VB
-	else: import ViteBetti as VB
+	if 'numba' in sys.modules: from . import ViteBetti_numba as VB
+	else: from . import ViteBetti as VB
 	if neighbors==6 or neighbors==4: C = VB.CubeMap(A)
 	else: C = VB.CubeMap(1-A)
 	#D = VB.CubeMap(1-A)
