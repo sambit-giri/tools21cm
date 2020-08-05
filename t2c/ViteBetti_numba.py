@@ -1,8 +1,8 @@
 import numpy as np
 from scipy.ndimage import filters
-from numba import autojit, prange
+from numba import jit, prange
 
-@autojit
+@jit
 def CubeMap(arr, multi_marker=True):
 	nx, ny, nz = arr.shape
 	Nx, Ny, Nz = 2*nx,2*ny,2*nz#2*nx-1,2*ny-1,2*nz-1
@@ -45,7 +45,7 @@ def CubeMap(arr, multi_marker=True):
 	return cubemap	
 
 
-@autojit
+@jit
 def EulerCharacteristic_seq(A):
 	chi = 0;
 	nx,ny,nz = A.shape
