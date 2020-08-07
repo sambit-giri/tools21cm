@@ -30,7 +30,7 @@ def EulerCharacteristic(data, thres=0.5, neighbors=6, use_numba=False):
 	#	from . import ViteBetti_numba as VB
 	#else: from . import ViteBetti as VB
 	if use_numba: 
-		print('Using numba to speed up.')
+		# print('Using numba to speed up.')
 		from . import ViteBetti_numba as VB
 	else: 
 		from . import ViteBetti as VB
