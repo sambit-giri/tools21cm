@@ -55,7 +55,8 @@ class NbodyFile:
 		if self.filespath:
 			self.filespath += '/' if self.filespath[-1] != '/' else ''
 			self.npart = self.get_npart()
-			#self.read_from_file()
+			if node != None:
+				self.read_from_file(node=self.node)
 		else:
 			raise NameError('Files path not specified, please define.')
 
@@ -91,10 +92,14 @@ class NbodyFile:
 		return npart
 
 
-	def read_from_file(self):
+	def read_from_file(self, node=None):
 		'''
 		Read data from file.
 		'''
+		if node != None:
+			self.node = node
+		else:
+			self.node = None
 
 		# if else statement to read halo file for one redshift and one node or all togheter
 		if(self.node == None):
