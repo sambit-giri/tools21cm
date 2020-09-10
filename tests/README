@@ -1,0 +1,13 @@
+This folder contains scripts for unit testing.
+
+One can use pytest or nosetests to run the test. Both packages can be installed using pip:
+
+pip install pytest
+	or
+pip install nose
+
+To run all the test script, run the following in the tests folder:
+
+python -m pytest 
+    or
+nosetests -v

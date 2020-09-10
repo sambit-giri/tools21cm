@@ -9,9 +9,9 @@ class IonRateFile:
     Use the read_from_file method to load an IonRates3 file, or 
     pass the filename to the constructor.
     
-    Some useful attributes of this class are:
-    irate (numpy array): the ionization rate
-    z (float): the redshift of the file (-1 if it couldn't be determined from the file name)
+    Attributes:
+        irate (numpy array): the ionization rate
+        z (float): the redshift of the file (-1 if it couldn't be determined from the file name)
     
     '''
     def __init__(self, filename = None, old_format=False):

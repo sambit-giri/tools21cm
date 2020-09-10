@@ -18,7 +18,7 @@ def calc_dt(xfrac, dens, z = -1):
 		z = -1 (float): The redshift (if < 0 this will be figured out from the files)
 		
 	Returns:
-		The differential brightness temperature as a numpy array with
+		The differential brightness temperature (in mK) as a numpy array with
 		the same dimensions as xfrac.
 	'''
 
@@ -53,7 +53,7 @@ def calc_dt_full(xfrac, dens, temp, z = -1, correct=True):
 		correct = True (bool): if true include a correction for partially ionized cells.
 
 	Returns:
-		The differential brightness temperature as a numpy array with
+		The differential brightness temperature (in mK) as a numpy array with
 		the same dimensions as xfrac.
 	'''
 
@@ -89,7 +89,7 @@ def calc_dt_lightcone(xfrac, dens, lowest_z, los_axis = 2):
 		los_axis = 2 (int): the line-of-sight axis
 		
 	Returns:
-		The differential brightness temperature as a numpy array with
+		The differential brightness temperature (in mK) as a numpy array with
 		the same dimensions as xfrac.
 	'''
 	
@@ -128,7 +128,7 @@ def calc_dt_full_lightcone(xfrac, temp, dens, lowest_z, los_axis = 2, correct=Tr
                         partially ionized cells.
 
 	Returns:
-		The differential brightness temperature as a numpy array with
+		The differential brightness temperature (in mK) as a numpy array with
 		the same dimensions as xfrac.
 	'''
 	
@@ -218,3 +218,17 @@ def _dt_full(rho, xi, Ts, z, correct):
         dt = ((Ts_new-Tcmb)/Ts_new)*Cdt*(1.0-xi)*rho/rho_mean
         return dt
 
+# def subtract_mean_channelwise(dt, axis=-1):
+# 	"""
+# 	Parameters:
+# 		dt  (ndarray): Brightness temperature whose channel-wise should be subtracted.
+# 		axis (int): Frequency axis (Defualt:-1).
+
+# 	Returns:
+# 		numpy array
+# 	"""
+# 	assert dt.ndim == 3
+# 	if axis != -1 or axis != 2: dt = np.swapaxes(dt, axis, 2)
+# 	for i in range(dt.shape[2]): dt[:,:,i] -= dt[:,:,i].mean()
+# 	if axis != -1 or axis != 2: dt = np.swapaxes(dt, axis, 2)
+# 	return dt

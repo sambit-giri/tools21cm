@@ -11,16 +11,13 @@ from scipy import fftpack
 
 def power_spectrum_nd(input_array, box_dims=None):
         ''' 
-        Calculate the power spectrum of input_array and return it as an n-dimensional array,
-        where n is the number of dimensions in input_array
-        box_side is the size of the box in comoving Mpc. If this is set to None (default),
-        the internal box size is used
+        Calculate the power spectrum of input_array and return it as an n-dimensional array.
         
         Parameters:
                 input_array (numpy array): the array to calculate the 
                         power spectrum of. Can be of any dimensions.
                 box_dims = None (float or array-like): the dimensions of the 
-                        box. If this is None, the current box volume is used along all
+                        box in Mpc. If this is None, the current box volume is used along all
                         dimensions. If it is a float, this is taken as the box length
                         along all dimensions. If it is an array-like, the elements are
                         taken as the box length along each axis.
@@ -46,10 +43,7 @@ def power_spectrum_nd(input_array, box_dims=None):
 
 def cross_power_spectrum_nd(input_array1, input_array2, box_dims):
         ''' 
-        Calculate the cross power spectrum two arrays and return it as an n-dimensional array,
-        where n is the number of dimensions in input_array
-        box_side is the size of the box in comoving Mpc. If this is set to None (default),
-        the internal box size is used
+        Calculate the cross power spectrum two arrays and return it as an n-dimensional array.
         
         Parameters:
                 input_array1 (numpy array): the first array to calculate the 
@@ -57,7 +51,7 @@ def cross_power_spectrum_nd(input_array1, input_array2, box_dims):
                 input_array2 (numpy array): the second array. Must have same 
                         dimensions as input_array1.
                 box_dims = None (float or array-like): the dimensions of the 
-                        box. If this is None, the current box volume is used along all
+                        box in Mpc. If this is None, the current box volume is used along all
                         dimensions. If it is a float, this is taken as the box length
                         along all dimensions. If it is an array-like, the elements are
                         taken as the box length along each axis.
@@ -94,7 +88,7 @@ def radial_average(input_array, box_dims, kbins=10, binning='log', breakpoint=0.
         Parameters: 
                 input_array (numpy array): the data array
                 box_dims = None (float or array-like): the dimensions of the 
-                        box. If this is None, the current box volume is used along all
+                        box in Mpc. If this is None, the current box volume is used along all
                         dimensions. If it is a float, this is taken as the box length
                         along all dimensions. If it is an array-like, the elements are
                         taken as the box length along each axis.
@@ -136,7 +130,7 @@ def power_spectrum_1d(input_array_nd, kbins=100, box_dims=None, return_n_modes=F
                         or a list containing the bin edges. If an integer is given, the bins
                         are logarithmically spaced.
                 box_dims = None (float or array-like): the dimensions of the 
-                        box. If this is None, the current box volume is used along all
+                        box in Mpc. If this is None, the current box volume is used along all
                         dimensions. If it is a float, this is taken as the box length
                         along all dimensions. If it is an array-like, the elements are
                         taken as the box length along each axis.
@@ -171,7 +165,7 @@ def cross_power_spectrum_1d(input_array1_nd, input_array2_nd, kbins=100, box_dim
                         or a list containing the bin edges. If an integer is given, the bins
                         are logarithmically spaced.
                 box_dims = None (float or array-like): the dimensions of the 
-                        box. If this is None, the current box volume is used along all
+                        box in Mpc. If this is None, the current box volume is used along all
                         dimensions. If it is a float, this is taken as the box length
                         along all dimensions. If it is an array-like, the elements are
                         taken as the box length along each axis.
@@ -198,8 +192,7 @@ def cross_power_spectrum_1d(input_array1_nd, input_array2_nd, kbins=100, box_dim
 def power_spectrum_mu(input_array, los_axis = 0, mubins=20, kbins=10, box_dims = None, weights=None,exclude_zero_modes = True, return_n_modes=False, absolute_mus = True):
 
         '''
-        Calculate the power spectrum and bin it in mu=cos(theta) and k
-        input_array is the array to calculate the power spectrum from
+        Calculate the power spectrum and bin it in mu=cos(theta) and k.
         
         Parameters: 
                 input_array (numpy array): the data array
@@ -209,7 +202,7 @@ def power_spectrum_mu(input_array, los_axis = 0, mubins=20, kbins=10, box_dims =
                         or a list containing the bin edges. If an integer is given, the bins
                         are logarithmically spaced.
                 box_dims = None (float or array-like): the dimensions of the 
-                        box. If this is None, the current box volume is used along all
+                        box in Mpc. If this is None, the current box volume is used along all
                         dimensions. If it is a float, this is taken as the box length
                         along all dimensions. If it is an array-like, the elements are
                         taken as the box length along each axis.
@@ -241,8 +234,7 @@ def power_spectrum_mu(input_array, los_axis = 0, mubins=20, kbins=10, box_dims =
 
 def cross_power_spectrum_mu(input_array1, input_array2, los_axis = 0, mubins=20, kbins=10, box_dims = None, weights=None, exclude_zero_modes = True, return_n_modes=False, absolute_mus=True):
         '''
-        Calculate the cross power spectrum and bin it in mu=cos(theta) and k
-        input_array is the array to calculate the power spectrum from
+        Calculate the cross power spectrum and bin it in mu=cos(theta) and k.
         
         Parameters: 
                 input_array1 (numpy array): the first data array
@@ -253,7 +245,7 @@ def cross_power_spectrum_mu(input_array1, input_array2, los_axis = 0, mubins=20,
                         or a list containing the bin edges. If an integer is given, the bins
                         are logarithmically spaced.
                 box_dims = None (float or array-like): the dimensions of the 
-                        box. If this is None, the current box volume is used along all
+                        box in Mpc. If this is None, the current box volume is used along all
                         dimensions. If it is a float, this is taken as the box length
                         along all dimensions. If it is an array-like, the elements are
                         taken as the box length along each axis.
@@ -460,11 +452,11 @@ def dimensionless_ps(data, kbins=100, box_dims=None, binning='log', factor=10):
         -------
         (\Delta^2, ks)
         '''
+        from scipy.interpolate import interp1d
         Pk, ks = power_spectrum_1d(data, kbins=kbins*factor, box_dims=box_dims, binning=binning)
-        ks_new = np.array([ks[factor*(i+0.5)] for i in range(kbins)])
-        k3Pk   = ks**3*Pk
-        k3Pk_  = np.array([k3Pk[factor*i:factor*(i+1)].mean() for i in range(kbins)])
-        return k3Pk_/2/np.pi**2, ks_new
+        f_Dlta = interp1d(ks, Pk*ks**3/2/np.pi**2)
+        knew   = 10**np.linspace(np.log10(ks[1]),np.log10(ks[-1]), kbins) if binning=='log' else np.linspace(ks[1],ks[-1], kbins)
+        return f_Dlta(knew), knew
 
 def _get_nonzero_idx(ps_shape, los_axis):
         '''

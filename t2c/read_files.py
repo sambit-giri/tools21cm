@@ -160,18 +160,4 @@ def coeval_dens_c2ray(dens_dir, z):
 		print("The density has been scaled from the density at the previous time.")
 	return dens.astype(np.float64)
 
-def subtract_mean_channelwise(dt, axis=-1):
-	"""
-	Parameters:
-		dt  (ndarray): Brightness temperature whose channel-wise should be subtracted.
-		axis (int): Frequency axis (Defualt:-1).
-
-	Returns:
-		numpy array
-	"""
-	assert dt.ndim == 3
-	if axis != -1 or axis != 2: dt = np.swapaxes(dt, axis, 2)
-	for i in range(dt.shape[2]): dt[:,:,i] -= dt[:,:,i].mean()
-	if axis != -1 or axis != 2: dt = np.swapaxes(dt, axis, 2)
-	return dt
 	

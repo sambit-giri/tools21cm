@@ -26,15 +26,14 @@ def skewness(x):
 
 def kurtosis(x):
         ''' 
-        Calculate the skewness of an array.
-        Note that IDL calculates the skewness in a slightly different way than Python. 
-        This routine uses the IDL definition. 
+        Calculate the kurtosis of an array.
+        It uses the definition given in Ross et al. (2017).
         
         Parameters:
                 x (ndarray): The array containing the input data
                 
         Returns:
-                The skewness.
+                The kurtosis.
 
         '''
         mx = np.mean(x)
@@ -60,13 +59,13 @@ def mass_weighted_mean_xi(xi, rho):
 	return np.mean(xi*rho)/np.mean(rho)
 
 
-def subtract_mean_signal(signal, los_axis):
+def subtract_mean_signal(signal, los_axis=2):
 	'''
 	Subtract the mean of the signal along the los axis. 
 	
 	Parameters:
 		signal (ndarray): the signal to subtract the mean from
-		los_axis (int): the line-of-sight axis
+		los_axis (int): the line-of-sight axis (Default: 2)
 			
 	Returns:
 		The signal with the mean subtracted
@@ -76,11 +75,11 @@ def subtract_mean_signal(signal, los_axis):
 	signal_out = signal.copy()
 	
 	for i in range(signal.shape[los_axis]):
-		if los_axis == 0:
+		if los_axis in [0,-3]:
 			signal_out[i,:,:] -= signal[i,:,:].mean()
-		if los_axis == 1:
+		if los_axis in [1,-2]:
 			signal_out[:,i,:] -= signal[:,i,:].mean()
-		if los_axis == 2:
+		if los_axis in [2,-1]:
 			signal_out[:,:,i] -= signal[:,:,i].mean()
 
 	return signal_out
@@ -131,8 +130,8 @@ def apply_func_along_los(signal, func, los_axis):
 		Calculate the variance of a lightcone along the 
 		line-of-sight:
 		
-		>>> lightcone = c2t.read_cbin('my_lightcone.cbin')
-		>>> dT_var = c2t.apply_func_along_los(lightcone, np.var, 2)
+		>>> lightcone = t2c.read_cbin('my_lightcone.cbin')
+		>>> dT_var = t2c.apply_func_along_los(lightcone, np.var, 2)
 		
 	'''
 	assert los_axis >= 0 and los_axis < len(signal.shape)

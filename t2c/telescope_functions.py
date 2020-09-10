@@ -4,6 +4,7 @@ import sys
 from .usefuls import *
 from . import cosmology as cm
 from . import conv
+#from skimage.transform import rescale, resize, downscale_local_mean
 
 KB_SI   = 1.38e-23
 c_light = 2.99792458e+10  #in cm/s
@@ -90,7 +91,7 @@ def earth_rotation_effect(Nbase, slice_num, int_time, declination=-30.):
 	new_Nbase[:,2] = np.cos(delta)*np.cos(HA)*Nbase[:,0] - np.cos(delta)*np.sin(HA)*Nbase[:,1] + np.sin(delta)*Nbase[:,2]
 	return new_Nbase
 
-def get_uv_daily_observation(ncells, z, filename=None, total_int_time=4., int_time=10., boxsize=None, declination=-30., verbose=True):
+def get_uv_daily_observation(ncells, z, filename=None, total_int_time=4., int_time=10., boxsize=None, declination=-30., include_mirror_baselines=False, verbose=True):
 	"""
 	The radio telescopes observe the sky for 'total_int_time' hours each day. The signal is recorded 
 	every 'int_time' seconds. 
@@ -122,13 +123,13 @@ def get_uv_daily_observation(ncells, z, filename=None, total_int_time=4., int_ti
 	#	uv_map, N_ant = get_uv_daily_observation_numba(ncells, z, filename=filename, total_int_time=total_int_time, int_time=int_time, boxsize=boxsize, declination=declination, verbose=verbose)
 	#	return uv_map, N_ant
 	Nbase, N_ant = from_antenna_config(filename, z)
-	uv_map0      = get_uv_coverage(Nbase, z, ncells, boxsize=boxsize)
+	uv_map0      = get_uv_coverage(Nbase, z, ncells, boxsize=boxsize, include_mirror_baselines=include_mirror_baselines)
 	uv_map       = np.zeros(uv_map0.shape)
 	tot_num_obs  = int(3600.*total_int_time/int_time)
 	print("Making uv map from daily observations.")
 	for i in range(tot_num_obs-1):
 		new_Nbase = earth_rotation_effect(Nbase, i+1, int_time, declination=declination)
-		uv_map1   = get_uv_coverage(new_Nbase, z, ncells, boxsize=boxsize)
+		uv_map1   = get_uv_coverage(new_Nbase, z, ncells, boxsize=boxsize, include_mirror_baselines=include_mirror_baselines)
 		uv_map   += uv_map1
 		if verbose:
 			perc = int((i+2)*100/tot_num_obs)
@@ -138,7 +139,7 @@ def get_uv_daily_observation(ncells, z, filename=None, total_int_time=4., int_ti
 	return uv_map, N_ant
 	
 
-def get_uv_coverage(Nbase, z, ncells, boxsize=None):
+def get_uv_coverage(Nbase, z, ncells, boxsize=None, include_mirror_baselines=False):
 	"""
 	It calculated the uv_map for the uv-coverage.
 
@@ -161,15 +162,18 @@ def get_uv_coverage(Nbase, z, ncells, boxsize=None):
 	if not boxsize: boxsize = conv.LB
 	uv_map = np.zeros((ncells,ncells))
 	theta_max = boxsize/cm.z_to_cdist(z)
-	Nb  = np.round(Nbase*theta_max/2)
+	Nb  = np.round(Nbase*theta_max)
 	Nb  = Nb[(Nb[:,0]<ncells/2)]
 	Nb  = Nb[(Nb[:,1]<ncells/2)]
-	Nb  = Nb[(Nb[:,2]<ncells/2)]
+	#Nb  = Nb[(Nb[:,2]<ncells/2)]
 	Nb  = Nb[(Nb[:,0]>=-ncells/2)]
 	Nb  = Nb[(Nb[:,1]>=-ncells/2)]
-	Nb  = Nb[(Nb[:,2]>=-ncells/2)]
+	#Nb  = Nb[(Nb[:,2]>=-ncells/2)]
 	xx,yy,zz = Nb[:,0], Nb[:,1], Nb[:,2]
-	for p in range(xx.shape[0]): uv_map[int(xx[p]),int(yy[p])] += 1
+	for p in range(xx.shape[0]): 
+		uv_map[int(xx[p]),int(yy[p])] += 1
+		if include_mirror_baselines: uv_map[-int(xx[p]),-int(yy[p])] += 1
+	if include_mirror_baselines: uv_map /= 2
 	return uv_map
 
 
@@ -303,7 +307,7 @@ def kelvin_2_jansky(array, z, boxsize=None, ncells=None):
 
 	Returns
 	-------
-	A numpy array with values in muJy.
+	A numpy array with values in Jy.
 	"""
 	z = float(z)
 	if not ncells: ncells  = array.shape[0]

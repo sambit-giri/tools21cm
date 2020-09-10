@@ -60,8 +60,12 @@ def bubbles_from_kmeans(data, upper_lim=True, n_jobs=1, n_clusters=3):
 	-------
 	Binary cube where pixels identified as region of interest are the True.
 	"""
+	if np.unique(data).size<2:
+		print('The data array is single valued and thus the entire array is one region.')
+		return np.ones_like(data)
+	if np.unique(data).size==2: n_clusters=2
 	if n_clusters==2: array, t_th = threshold_kmeans(data, upper_lim=upper_lim, n_jobs=n_jobs)
-	else: array = threshold_kmeans_3cluster(cube, upper_lim=upper_lim, n_jobs=n_jobs)
+	else: array = threshold_kmeans_3cluster(data, upper_lim=upper_lim, n_jobs=n_jobs)
 	return array
 
 def bubbles_from_fixed_threshold(data, threshold=0, upper_lim=True):
@@ -94,14 +98,14 @@ def threshold_kmeans(cube, upper_lim=False, mean_remove=True, n_jobs=1):
 	
 	array = np.zeros(cube.shape)
 	#km = KMeans(n_clusters=2)
-	if mean_remove:
-		if upper_lim: X = cube[cube<=cube.mean()].reshape(-1,1)
-		else: X = cube[cube>=cube.mean()].reshape(-1,1)
-	else:
-	 	X  = cube.reshape(-1,1)
+	# if mean_remove:
+	# 	if upper_lim: X = cube[cube<=cube.mean()].reshape(-1,1)
+	# 	else: X = cube[cube>=cube.mean()].reshape(-1,1)
+	# else:
+	#  	X  = cube.reshape(-1,1)
+	X  = cube.reshape(-1,1)
 	y = KMeans(n_clusters=2, n_jobs=n_jobs).fit_predict(X)
-	if X[y==1].mean()>X[y==0].mean(): t_th = X[y==0].max()
-	else: t_th = X[y==1].max()
+	t_th = X[y==0].max()/2.+X[y==1].max()/2.
 	if upper_lim: array[cube<=t_th] = 1
 	else: array[cube>t_th] = 1
 	print("The output contains a tuple with binary-cube and determined-threshold.")

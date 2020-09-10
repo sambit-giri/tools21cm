@@ -33,4 +33,9 @@ To see more options, run::
 
 Or look `here <http://docs.python.org/2/install/>`_ for more details.
 
+Tests
+-----
+For testing, one can use `pytest <https://docs.pytest.org/en/stable/>`_ or `nosetests <https://nose.readthedocs.io/en/latest/>`_. Both packages can be installed using pip. To run all the test script, run the either of the following::
 
+    python -m pytest tests 
+    nosetests -v

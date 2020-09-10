@@ -9,6 +9,7 @@ Contents
    tutorials
    contents
    contents_other
+   contributing
    authors
    changelog
 
