@@ -209,7 +209,7 @@ def _dt_full(rho, xi, Ts, z, correct):
                 # assuming that the ionized part of the cell is fully ionized
                 # (so a fraction xi of the cell's volume is ionized) and that
                 # the temperature of the ionized part is T_HII
-                Ts_new = Ts-xi*T_HII/(1.-xi)
+                Ts_new = (Ts-xi*T_HII)/(1.-xi)
                 Ts_new[Ts_new < T_min] = T_min
                 if np.any(Ts_new < 0): print("WARNING: negative temperatures")
         else:
