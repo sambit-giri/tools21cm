@@ -93,7 +93,6 @@ class HaloRockstar:
 				else:
 					break
 		
-		self.nhalo = len(halo)		# Number or haloes
 		fileinput.close()
 
 		return True
