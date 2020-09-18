@@ -282,14 +282,72 @@ def noise_cube_lightcone(ncells, z, obs_time=1000, filename=None, boxsize=None, 
 	"""
 	@ Ghara et al. (2017), Giri et al. (2018b)
 
-	It creates a noise coeval cube by simulating the radio observation strategy.
+	It creates a noise cube by simulating the radio observation strategy. 
+	We assume the third axis to be along the line-of-sight and therefore 
+	each each will correspond to a different redshift.
 
 	Parameters
 	----------
 	ncells: int
 		The grid size.
 	z: float
-		Redshift.
+		Central redshift.
+	obs_time: float
+		The observation time in hours.
+	total_int_time: float
+		Total observation per day time in hours
+	int_time: float
+		Intergration time in seconds
+	declination: float
+		Declination angle in deg
+	N_ant: int
+		Number of antennae
+	filename: str
+		The path to the file containing the telescope configuration.
+
+			- As a default, it takes the SKA-Low configuration from Sept 2016
+			- It is not used if uv_map and N_ant is provided
+	boxsize: float
+		Boxsize in Mpc
+	verbose: bool
+		If True, verbose is shown
+	
+	Returns
+	-------
+	noise_lightcone: A 3D cubical lightcone of the interferometric noise with frequency varying 
+	along last axis(in mK).	
+	"""
+	if not filename: N_ant = SKA1_LowConfig_Sept2016().shape[0]
+	if not boxsize: boxsize = conv.LB
+	zs = cm.cdist_to_z(np.linspace(cm.z_to_cdist(z)-boxsize/2, cm.z_to_cdist(z)+boxsize/2, ncells))
+	if not N_ant: N_ant = np.loadtxt(filename, dtype=str).shape[0]
+	noise3d = np.zeros((ncells,ncells,ncells))
+	print("Creating the noise cube")
+	verbose = True
+	for k in range(ncells):
+		zi = zs[k]
+		if k+1<ncells: depth_mhz = cm.z_to_nu(zs[k+1])-cm.z_to_nu(zs[k])
+		else: depth_mhz = cm.z_to_nu(zs[k])-cm.z_to_nu(zs[k-1])
+		uv_map, N_ant  = get_uv_map(ncells, zi, filename=filename, total_int_time=total_int_time, int_time=int_time, boxsize=boxsize, declination=declination)
+		noise2d = noise_map(ncells, zi, depth_mhz, obs_time=obs_time, filename=filename, boxsize=boxsize, total_int_time=total_int_time, int_time=int_time, declination=declination, uv_map=uv_map, N_ant=N_ant, verbose=verbose, fft_wrap=fft_wrap)
+		noise3d[:,:,k] = noise2d
+		verbose = False
+		print('{:.2f} % completed'.format(100*(k+1)/zs.size))
+	return jansky_2_kelvin(noise3d, z, boxsize=boxsize)
+
+
+def noise_lightcone(ncells, zs, obs_time=1000, filename=None, boxsize=None, total_int_time=6., int_time=10., declination=-30., N_ant=None, fft_wrap=False):
+	"""
+	@ Ghara et al. (2017), Giri et al. (2018b)
+
+	It creates a noise lightcone by simulating the radio observation strategy.
+
+	Parameters
+	----------
+	ncells: int
+		The grid size.
+	zs: ndarray
+		List of redshifts.
 	obs_time: float
 		The observation time in hours.
 	total_int_time: float
@@ -317,20 +375,20 @@ def noise_cube_lightcone(ncells, z, obs_time=1000, filename=None, boxsize=None, 
 	"""
 	if not filename: N_ant = SKA1_LowConfig_Sept2016().shape[0]
 	if not boxsize: boxsize = conv.LB
-	zs = cm.cdist_to_z(np.linspace(cm.z_to_cdist(z)-boxsize/2, cm.z_to_cdist(z)+boxsize/2, ncells))
+	# zs = cm.cdist_to_z(np.linspace(cm.z_to_cdist(z)-boxsize/2, cm.z_to_cdist(z)+boxsize/2, ncells))
 	if not N_ant: N_ant = np.loadtxt(filename, dtype=str).shape[0]
 	noise3d = np.zeros((ncells,ncells,ncells))
 	print("Creating the noise cube")
 	verbose = True
-	for k in range(ncells):
-		zi = zs[k]
-		if k+1<ncells: depth_mhz = cm.z_to_nu(zi[k+1])-cm.z_to_nu(zi[k])
-		else: depth_mhz = cm.z_to_nu(zi[k])-cm.z_to_nu(zi[k-1])
+	for k,zi in enumerate(zs):
+		if k+1<zs.size: depth_mhz = cm.z_to_nu(zs[k+1])-cm.z_to_nu(zs[k])
+		else: depth_mhz = cm.z_to_nu(zs[k])-cm.z_to_nu(zs[k-1])
 		uv_map, N_ant  = get_uv_map(ncells, zi, filename=filename, total_int_time=total_int_time, int_time=int_time, boxsize=boxsize, declination=declination)
 		noise2d = noise_map(ncells, zi, depth_mhz, obs_time=obs_time, filename=filename, boxsize=boxsize, total_int_time=total_int_time, int_time=int_time, declination=declination, uv_map=uv_map, N_ant=N_ant, verbose=verbose, fft_wrap=fft_wrap)
-		noise3d[:,:,k] = noise2d
+		noise3d[:,:,k] = jansky_2_kelvin(noise2d, zi, boxsize=boxsize)
 		verbose = False
-	return jansky_2_kelvin(noise3d, z, boxsize=boxsize)
+		print('z = {} | {:.2f} % completed'.format(zi,100*(k+1)/zs.size))
+	return noise3d
 
 
 def gauss_kernel_3d(size, sigma=1.0, fwhm=None):
