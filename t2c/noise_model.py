@@ -332,7 +332,7 @@ def noise_cube_lightcone(ncells, z, obs_time=1000, filename=None, boxsize=None, 
 		noise2d = noise_map(ncells, zi, depth_mhz, obs_time=obs_time, filename=filename, boxsize=boxsize, total_int_time=total_int_time, int_time=int_time, declination=declination, uv_map=uv_map, N_ant=N_ant, verbose=verbose, fft_wrap=fft_wrap)
 		noise3d[:,:,k] = noise2d
 		verbose = False
-		print('{:.2f} % completed'.format(100*(k+1)/zs.size))
+		print('\n {:.2f} % completed'.format(100*(k+1)/zs.size))
 	return jansky_2_kelvin(noise3d, z, boxsize=boxsize)
 
 
@@ -387,7 +387,7 @@ def noise_lightcone(ncells, zs, obs_time=1000, filename=None, boxsize=None, tota
 		noise2d = noise_map(ncells, zi, depth_mhz, obs_time=obs_time, filename=filename, boxsize=boxsize, total_int_time=total_int_time, int_time=int_time, declination=declination, uv_map=uv_map, N_ant=N_ant, verbose=verbose, fft_wrap=fft_wrap)
 		noise3d[:,:,k] = jansky_2_kelvin(noise2d, zi, boxsize=boxsize)
 		verbose = False
-		print('z = {} | {:.2f} % completed'.format(zi,100*(k+1)/zs.size))
+		print('\nz = {} | {:.2f} % completed'.format(zi,100*(k+1)/zs.size))
 	return noise3d
 
 
