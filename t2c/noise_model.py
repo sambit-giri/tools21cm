@@ -377,11 +377,11 @@ def noise_lightcone(ncells, zs, obs_time=1000, filename=None, boxsize=None, tota
 	if not boxsize: boxsize = conv.LB
 	# zs = cm.cdist_to_z(np.linspace(cm.z_to_cdist(z)-boxsize/2, cm.z_to_cdist(z)+boxsize/2, ncells))
 	if not N_ant: N_ant = np.loadtxt(filename, dtype=str).shape[0]
-	noise3d = np.zeros((ncells,ncells,ncells))
+	noise3d = np.zeros((ncells,ncells,zs.size))
 	print("Creating the noise cube")
 	verbose = True
 	for k,zi in enumerate(zs):
-		if k+1<zs.size: depth_mhz = cm.z_to_nu(zs[k+1])-cm.z_to_nu(zs[k])
+		if k+1<zs.size: depth_mhz = np.abs(cm.z_to_nu(zs[k+1])-cm.z_to_nu(zs[k]))
 		else: depth_mhz = cm.z_to_nu(zs[k])-cm.z_to_nu(zs[k-1])
 		uv_map, N_ant  = get_uv_map(ncells, zi, filename=filename, total_int_time=total_int_time, int_time=int_time, boxsize=boxsize, declination=declination)
 		noise2d = noise_map(ncells, zi, depth_mhz, obs_time=obs_time, filename=filename, boxsize=boxsize, total_int_time=total_int_time, int_time=int_time, declination=declination, uv_map=uv_map, N_ant=N_ant, verbose=verbose, fft_wrap=fft_wrap)
