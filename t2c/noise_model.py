@@ -278,7 +278,7 @@ def noise_cube_coeval(ncells, z, depth_mhz=None, obs_time=1000, filename=None, b
 	print("\n...Noise cube created.")
 	return jansky_2_kelvin(noise3d, z, boxsize=boxsize)
 
-def noise_cube_lightcone(ncells, z, obs_time=1000, filename=None, boxsize=None, total_int_time=6., int_time=10., declination=-30., N_ant=None, fft_wrap=False):
+def noise_cube_lightcone(ncells, z, obs_time=1000, filename=None, boxsize=None, save_uvmap='uv_map', total_int_time=6., int_time=10., declination=-30., N_ant=None, fft_wrap=False):
 	"""
 	@ Ghara et al. (2017), Giri et al. (2018b)
 
@@ -311,6 +311,13 @@ def noise_cube_lightcone(ncells, z, obs_time=1000, filename=None, boxsize=None, 
 		Boxsize in Mpc
 	verbose: bool
 		If True, verbose is shown
+	save_uvmap: str
+		Give the filename of the npz file of uv maps. If
+			
+			- the file is absent, then uv maps are created and saved with the given filename.
+			- the file is present, then the uv map is read in.
+			- the file is present and the uv maps are incomplete, then it is completed.
+			- None is given, then the uv maps are not saved.
 	
 	Returns
 	-------
@@ -322,21 +329,41 @@ def noise_cube_lightcone(ncells, z, obs_time=1000, filename=None, boxsize=None, 
 	zs = cm.cdist_to_z(np.linspace(cm.z_to_cdist(z)-boxsize/2, cm.z_to_cdist(z)+boxsize/2, ncells))
 	if not N_ant: N_ant = np.loadtxt(filename, dtype=str).shape[0]
 	noise3d = np.zeros((ncells,ncells,ncells))
-	print("Creating the noise cube")
 	verbose = True
-	for k in range(ncells):
-		zi = zs[k]
+	
+	save_uvmap = save_uvmap.split('.')[0]+'.npz'
+	if len(glob(save_uvmap)):
+		uvs = np.load(save_uvmap)
+	else:
+		uvs = {}
+
+	# Create uv maps
+	print('Creating the uv maps.')
+	for k,zi in enumerate(zs):
+		if '{:.5f}'.format(zi) in uvs.keys():
+			uv_map, N_ant  = uvs['{:.5f}'.format(zi)], uvs['Nant']
+		else:
+			uv_map, N_ant  = get_uv_map(ncells, zi, filename=filename, total_int_time=total_int_time, int_time=int_time, boxsize=boxsize, declination=declination)
+			uvs['{:.5f}'.format(zi)] = uv_map
+			uvs['Nant'] = N_ant
+			np.savez(save_uvmap, uvs)
+		verbose = False
+		print('\nz = {} | {:.2f} % completed'.format(zi,100*(k+1)/zs.size))
+
+	# Calculate noise maps
+	print('Creating noise.')
+	for k,zi in enumerate(zs):
 		if k+1<zs.size: depth_mhz = np.abs(cm.z_to_nu(zs[k+1])-cm.z_to_nu(zs[k]))
 		else: depth_mhz = np.abs(cm.z_to_nu(zs[k])-cm.z_to_nu(zs[k-1]))
-		uv_map, N_ant  = get_uv_map(ncells, zi, filename=filename, total_int_time=total_int_time, int_time=int_time, boxsize=boxsize, declination=declination)
+		uv_map, N_ant  = uvs['{:.5f}'.format(zi)], uvs['Nant']
 		noise2d = noise_map(ncells, zi, depth_mhz, obs_time=obs_time, filename=filename, boxsize=boxsize, total_int_time=total_int_time, int_time=int_time, declination=declination, uv_map=uv_map, N_ant=N_ant, verbose=verbose, fft_wrap=fft_wrap)
-		noise3d[:,:,k] = noise2d
+		noise3d[:,:,k] = jansky_2_kelvin(noise2d, zi, boxsize=boxsize)
 		verbose = False
-		print('\n {:.2f} % completed'.format(100*(k+1)/zs.size))
+		print('\nz = {} | {:.2f} % completed'.format(zi,100*(k+1)/zs.size))
 	return jansky_2_kelvin(noise3d, z, boxsize=boxsize)
 
 
-def noise_lightcone(ncells, zs, obs_time=1000, filename=None, boxsize=None, total_int_time=6., int_time=10., declination=-30., N_ant=None, fft_wrap=False):
+def noise_lightcone(ncells, zs, obs_time=1000, filename=None, boxsize=None, save_uvmap='uv_map', total_int_time=6., int_time=10., declination=-30., N_ant=None, fft_wrap=False):
 	"""
 	@ Ghara et al. (2017), Giri et al. (2018b)
 
@@ -367,6 +394,13 @@ def noise_lightcone(ncells, zs, obs_time=1000, filename=None, boxsize=None, tota
 		Boxsize in Mpc
 	verbose: bool
 		If True, verbose is shown
+	save_uvmap: str
+		Give the filename of the npz file of uv maps. If
+			
+			- the file is absent, then uv maps are created and saved with the given filename.
+			- the file is present, then the uv map is read in.
+			- the file is present and the uv maps are incomplete, then it is completed.
+			- None is given, then the uv maps are not saved.
 	
 	Returns
 	-------
@@ -378,12 +412,33 @@ def noise_lightcone(ncells, zs, obs_time=1000, filename=None, boxsize=None, tota
 	# zs = cm.cdist_to_z(np.linspace(cm.z_to_cdist(z)-boxsize/2, cm.z_to_cdist(z)+boxsize/2, ncells))
 	if not N_ant: N_ant = np.loadtxt(filename, dtype=str).shape[0]
 	noise3d = np.zeros((ncells,ncells,zs.size))
-	print("Creating the noise cube")
 	verbose = True
+
+	save_uvmap = save_uvmap.split('.')[0]+'.npz'
+	if len(glob(save_uvmap)):
+		uvs = np.load(save_uvmap)
+	else:
+		uvs = {}
+
+	# Create uv maps
+	print('Creating the uv maps.')
+	for k,zi in enumerate(zs):
+		if '{:.5f}'.format(zi) in uvs.keys():
+			uv_map, N_ant  = uvs['{:.5f}'.format(zi)], uvs['Nant']
+		else:
+			uv_map, N_ant  = get_uv_map(ncells, zi, filename=filename, total_int_time=total_int_time, int_time=int_time, boxsize=boxsize, declination=declination)
+			uvs['{:.5f}'.format(zi)] = uv_map
+			uvs['Nant'] = N_ant
+			np.savez(save_uvmap, uvs)
+		verbose = False
+		print('\nz = {} | {:.2f} % completed'.format(zi,100*(k+1)/zs.size))
+
+	# Calculate noise maps
+	print('Creating noise.')
 	for k,zi in enumerate(zs):
 		if k+1<zs.size: depth_mhz = np.abs(cm.z_to_nu(zs[k+1])-cm.z_to_nu(zs[k]))
 		else: depth_mhz = np.abs(cm.z_to_nu(zs[k])-cm.z_to_nu(zs[k-1]))
-		uv_map, N_ant  = get_uv_map(ncells, zi, filename=filename, total_int_time=total_int_time, int_time=int_time, boxsize=boxsize, declination=declination)
+		uv_map, N_ant  = uvs['{:.5f}'.format(zi)], uvs['Nant']
 		noise2d = noise_map(ncells, zi, depth_mhz, obs_time=obs_time, filename=filename, boxsize=boxsize, total_int_time=total_int_time, int_time=int_time, declination=declination, uv_map=uv_map, N_ant=N_ant, verbose=verbose, fft_wrap=fft_wrap)
 		noise3d[:,:,k] = jansky_2_kelvin(noise2d, zi, boxsize=boxsize)
 		verbose = False
