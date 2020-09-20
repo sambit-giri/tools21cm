@@ -316,7 +316,7 @@ def noise_cube_lightcone(ncells, z, obs_time=1000, filename=None, boxsize=None, 
 	verbose: bool
 		If True, verbose is shown
 	save_uvmap: str
-		Give the filename of the npz file of uv maps. If
+		Give the filename of the pickle file of uv maps. If
 			
 			- the file is absent, then uv maps are created and saved with the given filename.
 			- the file is present, then the uv map is read in.
@@ -340,7 +340,7 @@ def noise_cube_lightcone(ncells, z, obs_time=1000, filename=None, boxsize=None, 
 	verbose = True
 	
 	if save_uvmap is not None:
-		save_uvmap = save_uvmap.split('.')[0]+'.npz'
+		save_uvmap = save_uvmap.split('.')[0]+'.pkl'
 		if len(glob(save_uvmap)):
 			uvs = pickle.load(open(save_uvmap, 'rb'))
 			print('All or some uv maps is read from the given file. Be sure that they were run with the same parameter values as provided now.')
@@ -438,7 +438,7 @@ def noise_lightcone(ncells, zs, obs_time=1000, filename=None, boxsize=None, save
 	verbose: bool
 		If True, verbose is shown
 	save_uvmap: str
-		Give the filename of the npz file of uv maps. If
+		Give the filename of the pickle file of uv maps. If
 			
 			- the file is absent, then uv maps are created and saved with the given filename.
 			- the file is present, then the uv map is read in.
@@ -462,7 +462,7 @@ def noise_lightcone(ncells, zs, obs_time=1000, filename=None, boxsize=None, save
 	verbose = True
 
 	if save_uvmap is not None:
-		save_uvmap = save_uvmap.split('.')[0]+'.npz'
+		save_uvmap = save_uvmap.split('.')[0]+'.pkl'
 		if len(glob(save_uvmap)):
 			uvs = pickle.load(open(save_uvmap, 'rb'))
 			print('All or some uv maps is read from the given file. Be sure that they were run with the same parameter values as provided now.')
