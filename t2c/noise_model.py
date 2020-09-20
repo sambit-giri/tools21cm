@@ -15,6 +15,7 @@ from . import smoothing as sm
 import scipy
 from glob import glob
 from time import time
+import pickle
 
 def noise_map(ncells, z, depth_mhz, obs_time=1000, filename=None, boxsize=None, total_int_time=6., int_time=10., declination=-30., uv_map=np.array([]), N_ant=None, verbose=True, fft_wrap=False):
 	"""
@@ -333,9 +334,9 @@ def noise_cube_lightcone(ncells, z, obs_time=1000, filename=None, boxsize=None, 
 	noise3d = np.zeros((ncells,ncells,ncells))
 	verbose = True
 	
-	save_uvmap = save_uvmap.split('.')[0]+'.npz'
+	save_uvmap = save_uvmap.split('.')[0]+'.pkl'
 	if len(glob(save_uvmap)):
-		uvs = np.load(save_uvmap)
+		uvs = pickle.load(open(save_uvmap, 'rb'))
 	else:
 		uvs = {}
 
@@ -350,7 +351,7 @@ def noise_cube_lightcone(ncells, z, obs_time=1000, filename=None, boxsize=None, 
 			uv_map, N_ant  = get_uv_map(ncells, zi, filename=filename, total_int_time=total_int_time, int_time=int_time, boxsize=boxsize, declination=declination)
 			uvs['{:.5f}'.format(zi)] = uv_map
 			uvs['Nant'] = N_ant
-			np.savez(save_uvmap, uvs)
+			pickle.dump(uvs, open(save_uvmap, 'wb'))
 		verbose = False
 		tend = time()
 		print('\nz = {} | {:.2f} % completed | Elapsed time: {:.2f} mins'.format(zi,100*(k+1)/zs.size,(tend-tstart)/60))
