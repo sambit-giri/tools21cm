@@ -322,6 +322,10 @@ def noise_cube_lightcone(ncells, z, obs_time=1000, filename=None, boxsize=None, 
 			- the file is present, then the uv map is read in.
 			- the file is present and the uv maps are incomplete, then it is completed.
 			- None is given, then the uv maps are not saved.
+	n_jobs: int
+		Number of CPUs to run in. The calculation is parallelised using joblib.
+	checkpoint: int
+		Number of iterations after which uv maps are saved if save_uvmap is not None.
 	
 	Returns
 	-------
@@ -440,6 +444,10 @@ def noise_lightcone(ncells, zs, obs_time=1000, filename=None, boxsize=None, save
 			- the file is present, then the uv map is read in.
 			- the file is present and the uv maps are incomplete, then it is completed.
 			- None is given, then the uv maps are not saved.
+	n_jobs: int
+		Number of CPUs to run in. The calculation is parallelised using joblib.
+	checkpoint: int
+		Number of iterations after which uv maps are saved if save_uvmap is not None.
 	
 	Returns
 	-------
