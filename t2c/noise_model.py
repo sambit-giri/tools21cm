@@ -16,6 +16,7 @@ import scipy
 from glob import glob
 from time import time
 import pickle
+from joblib import Parallel, delayed
 
 def noise_map(ncells, z, depth_mhz, obs_time=1000, filename=None, boxsize=None, total_int_time=6., int_time=10., declination=-30., uv_map=np.array([]), N_ant=None, verbose=True, fft_wrap=False):
 	"""
@@ -334,10 +335,13 @@ def noise_cube_lightcone(ncells, z, obs_time=1000, filename=None, boxsize=None, 
 	noise3d = np.zeros((ncells,ncells,ncells))
 	verbose = True
 	
-	save_uvmap = save_uvmap.split('.')[0]+'.pkl'
-	if len(glob(save_uvmap)):
-		uvs = pickle.load(open(save_uvmap, 'rb'))
-		print('All or some uv maps is reda from the given file. Be sure that they were run with the same parameter values as provided now.')
+	if save_uvmap is not None:
+		save_uvmap = save_uvmap.split('.')[0]+'.npz'
+		if len(glob(save_uvmap)):
+			uvs = pickle.load(open(save_uvmap, 'rb'))
+			print('All or some uv maps is read from the given file. Be sure that they were run with the same parameter values as provided now.')
+		else:
+			uvs = {}
 	else:
 		uvs = {}
 
@@ -359,7 +363,7 @@ def noise_cube_lightcone(ncells, z, obs_time=1000, filename=None, boxsize=None, 
 	else:
 		Nbase, N_ant = from_antenna_config(filename, zs[0])
 		uvs['Nant'] = N_ant
-		_uvmap = lambda zi: t2c.get_uv_map(ncells, zi, filename=filename, total_int_time=total_int_time, int_time=int_time, boxsize=boxsize, declination=declination, verbose=False)[0] 
+		_uvmap = lambda zi: get_uv_map(ncells, zi, filename=filename, total_int_time=total_int_time, int_time=int_time, boxsize=boxsize, declination=declination, verbose=False)[0] 
 		if checkpoint<2*n_jobs:
 			checkpoint = 4*n_jobs
 			print('checkpoint value should be more than 4*n_jobs. checkpoint set to 4*n_jobs.')
@@ -368,14 +372,22 @@ def noise_cube_lightcone(ncells, z, obs_time=1000, filename=None, boxsize=None, 
 			if '{:.5f}'.format(zi) not in uvs.keys():
 				z_run = np.append(z_run, zi)
 		n_iterations = int(z_run.size/checkpoint)
-		for ii in range(n_iterations):
-			istart, iend = ii*checkpoint, (ii+1)*checkpoint 
-			zrs = z_run[istart:iend] if ii+1<n_iterations else z_run[istart:]
-			fla = Parallel(n_jobs=n_jobs,verbose=20)(delayed(_uvmap)(i) for i in zrs)
-			for jj,zi in enumerate(zrs):
+		if n_iterations>1:
+			for ii in range(n_iterations):
+				istart, iend = ii*checkpoint, (ii+1)*checkpoint 
+				zrs = z_run[istart:iend] if ii+1<n_iterations else z_run[istart:]
+				fla = Parallel(n_jobs=n_jobs,verbose=20)(delayed(_uvmap)(i) for i in zrs)
+				for jj,zi in enumerate(zrs):
+					uvs['{:.5f}'.format(zi)] = fla[jj]
+				if save_uvmap is not None: pickle.dump(uvs, open(save_uvmap, 'wb'))
+				print('{:.2f} % completed'.format(100*(len(uvs.keys())-1)/zs.size))
+		else:
+			fla = Parallel(n_jobs=n_jobs,verbose=20)(delayed(_uvmap)(i) for i in z_run)
+			for jj,zi in enumerate(z_run):
 				uvs['{:.5f}'.format(zi)] = fla[jj]
-			pickle.dump(uvs, open(save_uvmap, 'wb'))
-			print('{:.2f} % completed'.format(100*(len(uvs.keys())-1)/zs.size))
+			if save_uvmap is not None: pickle.dump(uvs, open(save_uvmap, 'wb'))
+		print('...done')
+
 
 	# Calculate noise maps
 	print('Creating noise.')
@@ -441,9 +453,13 @@ def noise_lightcone(ncells, zs, obs_time=1000, filename=None, boxsize=None, save
 	noise3d = np.zeros((ncells,ncells,zs.size))
 	verbose = True
 
-	save_uvmap = save_uvmap.split('.')[0]+'.npz'
-	if len(glob(save_uvmap)):
-		uvs = pickle.load(open(save_uvmap, 'rb'))
+	if save_uvmap is not None:
+		save_uvmap = save_uvmap.split('.')[0]+'.npz'
+		if len(glob(save_uvmap)):
+			uvs = pickle.load(open(save_uvmap, 'rb'))
+			print('All or some uv maps is read from the given file. Be sure that they were run with the same parameter values as provided now.')
+		else:
+			uvs = {}
 	else:
 		uvs = {}
 
@@ -465,7 +481,7 @@ def noise_lightcone(ncells, zs, obs_time=1000, filename=None, boxsize=None, save
 	else:
 		Nbase, N_ant = from_antenna_config(filename, zs[0])
 		uvs['Nant'] = N_ant
-		_uvmap = lambda zi: t2c.get_uv_map(ncells, zi, filename=filename, total_int_time=total_int_time, int_time=int_time, boxsize=boxsize, declination=declination, verbose=False)[0] 
+		_uvmap = lambda zi: get_uv_map(ncells, zi, filename=filename, total_int_time=total_int_time, int_time=int_time, boxsize=boxsize, declination=declination, verbose=False)[0] 
 		if checkpoint<2*n_jobs:
 			checkpoint = 4*n_jobs
 			print('checkpoint value should be more than 4*n_jobs. checkpoint set to 4*n_jobs.')
@@ -474,14 +490,21 @@ def noise_lightcone(ncells, zs, obs_time=1000, filename=None, boxsize=None, save
 			if '{:.5f}'.format(zi) not in uvs.keys():
 				z_run = np.append(z_run, zi)
 		n_iterations = int(z_run.size/checkpoint)
-		for ii in range(n_iterations):
-			istart, iend = ii*checkpoint, (ii+1)*checkpoint 
-			zrs = z_run[istart:iend] if ii+1<n_iterations else z_run[istart:]
-			fla = Parallel(n_jobs=n_jobs,verbose=20)(delayed(_uvmap)(i) for i in zrs)
-			for jj,zi in enumerate(zrs):
+		if n_iterations>1:
+			for ii in range(n_iterations):
+				istart, iend = ii*checkpoint, (ii+1)*checkpoint 
+				zrs = z_run[istart:iend] if ii+1<n_iterations else z_run[istart:]
+				fla = Parallel(n_jobs=n_jobs,verbose=20)(delayed(_uvmap)(i) for i in zrs)
+				for jj,zi in enumerate(zrs):
+					uvs['{:.5f}'.format(zi)] = fla[jj]
+				if save_uvmap is not None: pickle.dump(uvs, open(save_uvmap, 'wb'))
+				print('{:.2f} % completed'.format(100*(len(uvs.keys())-1)/zs.size))
+		else:
+			fla = Parallel(n_jobs=n_jobs,verbose=20)(delayed(_uvmap)(i) for i in z_run)
+			for jj,zi in enumerate(z_run):
 				uvs['{:.5f}'.format(zi)] = fla[jj]
-			pickle.dump(uvs, open(save_uvmap, 'wb'))
-			print('{:.2f} % completed'.format(100*(len(uvs.keys())-1)/zs.size))
+			if save_uvmap is not None: pickle.dump(uvs, open(save_uvmap, 'wb'))
+		print('...done')
 
 	# Calculate noise maps
 	print('Creating noise.')
@@ -535,7 +558,4 @@ def smooth_gauss_3d(array, fwhm):
 	return out
 
 
-
-
-		
 
