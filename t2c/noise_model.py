@@ -353,7 +353,7 @@ def noise_cube_lightcone(ncells, z, obs_time=1000, filename=None, boxsize=None, 
 			np.savez(save_uvmap, uvs)
 		verbose = False
 		tend = time()
-		print('\nz = {} | {:.2f} % completed | Elapsed time: {.2f} mins'.format(zi,100*(k+1)/zs.size,(tend-tstart)/60))
+		print('\nz = {} | {:.2f} % completed | Elapsed time: {:.2f} mins'.format(zi,100*(k+1)/zs.size,(tend-tstart)/60))
 
 	# Calculate noise maps
 	print('Creating noise.')
@@ -438,7 +438,7 @@ def noise_lightcone(ncells, zs, obs_time=1000, filename=None, boxsize=None, save
 			np.savez(save_uvmap, uvs)
 		verbose = False
 		tend = time()
-		print('\nz = {} | {:.2f} % completed | Elapsed time: {.2f} mins'.format(zi,100*(k+1)/zs.size,(tend-tstart)/60))
+		print('\nz = {} | {:.2f} % completed | Elapsed time: {:.2f} mins'.format(zi,100*(k+1)/zs.size,(tend-tstart)/60))
 
 	# Calculate noise maps
 	print('Creating noise.')
