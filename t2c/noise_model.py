@@ -13,6 +13,8 @@ from . import conv
 from . import cosmology as cm
 from . import smoothing as sm
 import scipy
+from glob import glob
+from time import time
 
 def noise_map(ncells, z, depth_mhz, obs_time=1000, filename=None, boxsize=None, total_int_time=6., int_time=10., declination=-30., uv_map=np.array([]), N_ant=None, verbose=True, fft_wrap=False):
 	"""
@@ -338,17 +340,20 @@ def noise_cube_lightcone(ncells, z, obs_time=1000, filename=None, boxsize=None, 
 		uvs = {}
 
 	# Create uv maps
+	tstart = time()
 	print('Creating the uv maps.')
 	for k,zi in enumerate(zs):
 		if '{:.5f}'.format(zi) in uvs.keys():
 			uv_map, N_ant  = uvs['{:.5f}'.format(zi)], uvs['Nant']
+			print('uv map was read in.')
 		else:
 			uv_map, N_ant  = get_uv_map(ncells, zi, filename=filename, total_int_time=total_int_time, int_time=int_time, boxsize=boxsize, declination=declination)
 			uvs['{:.5f}'.format(zi)] = uv_map
 			uvs['Nant'] = N_ant
 			np.savez(save_uvmap, uvs)
 		verbose = False
-		print('\nz = {} | {:.2f} % completed'.format(zi,100*(k+1)/zs.size))
+		tend = time()
+		print('\nz = {} | {:.2f} % completed | Elapsed time: {.2f} mins'.format(zi,100*(k+1)/zs.size,(tend-tstart)/60))
 
 	# Calculate noise maps
 	print('Creating noise.')
@@ -422,6 +427,7 @@ def noise_lightcone(ncells, zs, obs_time=1000, filename=None, boxsize=None, save
 
 	# Create uv maps
 	print('Creating the uv maps.')
+	tstart = time()
 	for k,zi in enumerate(zs):
 		if '{:.5f}'.format(zi) in uvs.keys():
 			uv_map, N_ant  = uvs['{:.5f}'.format(zi)], uvs['Nant']
@@ -431,7 +437,8 @@ def noise_lightcone(ncells, zs, obs_time=1000, filename=None, boxsize=None, save
 			uvs['Nant'] = N_ant
 			np.savez(save_uvmap, uvs)
 		verbose = False
-		print('\nz = {} | {:.2f} % completed'.format(zi,100*(k+1)/zs.size))
+		tend = time()
+		print('\nz = {} | {:.2f} % completed | Elapsed time: {.2f} mins'.format(zi,100*(k+1)/zs.size,(tend-tstart)/60))
 
 	# Calculate noise maps
 	print('Creating noise.')
