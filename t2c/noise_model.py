@@ -281,7 +281,7 @@ def noise_cube_coeval(ncells, z, depth_mhz=None, obs_time=1000, filename=None, b
 	print("\n...Noise cube created.")
 	return jansky_2_kelvin(noise3d, z, boxsize=boxsize)
 
-def noise_cube_lightcone(ncells, z, obs_time=1000, filename=None, boxsize=None, save_uvmap=None, total_int_time=6., int_time=10., declination=-30., N_ant=None, fft_wrap=False):
+def noise_cube_lightcone(ncells, z, obs_time=1000, filename=None, boxsize=None, save_uvmap=None, total_int_time=6., int_time=10., declination=-30., N_ant=None, fft_wrap=False, n_jobs=4, checkpoint=64):
 	"""
 	@ Ghara et al. (2017), Giri et al. (2018b)
 
@@ -342,20 +342,40 @@ def noise_cube_lightcone(ncells, z, obs_time=1000, filename=None, boxsize=None, 
 		uvs = {}
 
 	# Create uv maps
-	tstart = time()
 	print('Creating the uv maps.')
-	for k,zi in enumerate(zs):
-		if '{:.5f}'.format(zi) in uvs.keys():
-			uv_map, N_ant  = uvs['{:.5f}'.format(zi)], uvs['Nant']
-			print('uv map was read in.')
-		else:
-			uv_map, N_ant  = get_uv_map(ncells, zi, filename=filename, total_int_time=total_int_time, int_time=int_time, boxsize=boxsize, declination=declination)
-			uvs['{:.5f}'.format(zi)] = uv_map
-			uvs['Nant'] = N_ant
+	if n_jobs<=1:
+		tstart = time()
+		for k,zi in enumerate(zs):
+			if '{:.5f}'.format(zi) not in uvs.keys():
+				# 	uv_map, N_ant  = uvs['{:.5f}'.format(zi)], uvs['Nant']
+				# else:
+				uv_map, N_ant  = get_uv_map(ncells, zi, filename=filename, total_int_time=total_int_time, int_time=int_time, boxsize=boxsize, declination=declination)
+				uvs['{:.5f}'.format(zi)] = uv_map
+				uvs['Nant'] = N_ant
+				pickle.dump(uvs, open(save_uvmap, 'wb'))
+			verbose = False
+			tend = time()
+			print('\nz = {:.5f} | {:.2f} % completed | Elapsed time: {:.2f} mins'.format(zi,100*(k+1)/zs.size,(tend-tstart)/60))
+	else:
+		Nbase, N_ant = from_antenna_config(filename, zs[0])
+		uvs['Nant'] = N_ant
+		_uvmap = lambda zi: t2c.get_uv_map(ncells, zi, filename=filename, total_int_time=total_int_time, int_time=int_time, boxsize=boxsize, declination=declination, verbose=False)[0] 
+		if checkpoint<2*n_jobs:
+			checkpoint = 4*n_jobs
+			print('checkpoint value should be more than 4*n_jobs. checkpoint set to 4*n_jobs.')
+		z_run = np.array([])
+		for k,zi in enumerate(zs):
+			if '{:.5f}'.format(zi) not in uvs.keys():
+				z_run = np.append(z_run, zi)
+		n_iterations = int(z_run.size/checkpoint)
+		for ii in range(n_iterations):
+			istart, iend = ii*checkpoint, (ii+1)*checkpoint 
+			zrs = z_run[istart:iend] if ii+1<n_iterations else z_run[istart:]
+			fla = Parallel(n_jobs=n_jobs,verbose=20)(delayed(_uvmap)(i) for i in zrs)
+			for jj,zi in enumerate(zrs):
+				uvs['{:.5f}'.format(zi)] = fla[jj]
 			pickle.dump(uvs, open(save_uvmap, 'wb'))
-		verbose = False
-		tend = time()
-		print('\nz = {:.5f} | {:.2f} % completed | Elapsed time: {:.2f} mins'.format(zi,100*(k+1)/zs.size,(tend-tstart)/60))
+			print('{:.2f} % completed'.format(100*(len(uvs.keys())-1)/zs.size))
 
 	# Calculate noise maps
 	print('Creating noise.')
@@ -370,7 +390,7 @@ def noise_cube_lightcone(ncells, z, obs_time=1000, filename=None, boxsize=None, 
 	return jansky_2_kelvin(noise3d, z, boxsize=boxsize)
 
 
-def noise_lightcone(ncells, zs, obs_time=1000, filename=None, boxsize=None, save_uvmap=None, total_int_time=6., int_time=10., declination=-30., N_ant=None, fft_wrap=False):
+def noise_lightcone(ncells, zs, obs_time=1000, filename=None, boxsize=None, save_uvmap=None, total_int_time=6., int_time=10., declination=-30., N_ant=None, fft_wrap=False, n_jobs=4, checkpoint=64):
 	"""
 	@ Ghara et al. (2017), Giri et al. (2018b)
 
@@ -429,18 +449,39 @@ def noise_lightcone(ncells, zs, obs_time=1000, filename=None, boxsize=None, save
 
 	# Create uv maps
 	print('Creating the uv maps.')
-	tstart = time()
-	for k,zi in enumerate(zs):
-		if '{:.5f}'.format(zi) in uvs.keys():
-			uv_map, N_ant  = uvs['{:.5f}'.format(zi)], uvs['Nant']
-		else:
-			uv_map, N_ant  = get_uv_map(ncells, zi, filename=filename, total_int_time=total_int_time, int_time=int_time, boxsize=boxsize, declination=declination)
-			uvs['{:.5f}'.format(zi)] = uv_map
-			uvs['Nant'] = N_ant
+	if n_jobs<=1:
+		tstart = time()
+		for k,zi in enumerate(zs):
+			if '{:.5f}'.format(zi) not in uvs.keys():
+				# 	uv_map, N_ant  = uvs['{:.5f}'.format(zi)], uvs['Nant']
+				# else:
+				uv_map, N_ant  = get_uv_map(ncells, zi, filename=filename, total_int_time=total_int_time, int_time=int_time, boxsize=boxsize, declination=declination)
+				uvs['{:.5f}'.format(zi)] = uv_map
+				uvs['Nant'] = N_ant
+				pickle.dump(uvs, open(save_uvmap, 'wb'))
+			verbose = False
+			tend = time()
+			print('\nz = {:.5f} | {:.2f} % completed | Elapsed time: {:.2f} mins'.format(zi,100*(k+1)/zs.size,(tend-tstart)/60))
+	else:
+		Nbase, N_ant = from_antenna_config(filename, zs[0])
+		uvs['Nant'] = N_ant
+		_uvmap = lambda zi: t2c.get_uv_map(ncells, zi, filename=filename, total_int_time=total_int_time, int_time=int_time, boxsize=boxsize, declination=declination, verbose=False)[0] 
+		if checkpoint<2*n_jobs:
+			checkpoint = 4*n_jobs
+			print('checkpoint value should be more than 4*n_jobs. checkpoint set to 4*n_jobs.')
+		z_run = np.array([])
+		for k,zi in enumerate(zs):
+			if '{:.5f}'.format(zi) not in uvs.keys():
+				z_run = np.append(z_run, zi)
+		n_iterations = int(z_run.size/checkpoint)
+		for ii in range(n_iterations):
+			istart, iend = ii*checkpoint, (ii+1)*checkpoint 
+			zrs = z_run[istart:iend] if ii+1<n_iterations else z_run[istart:]
+			fla = Parallel(n_jobs=n_jobs,verbose=20)(delayed(_uvmap)(i) for i in zrs)
+			for jj,zi in enumerate(zrs):
+				uvs['{:.5f}'.format(zi)] = fla[jj]
 			pickle.dump(uvs, open(save_uvmap, 'wb'))
-		verbose = False
-		tend = time()
-		print('\nz = {:.5f} | {:.2f} % completed | Elapsed time: {:.2f} mins'.format(zi,100*(k+1)/zs.size,(tend-tstart)/60))
+			print('{:.2f} % completed'.format(100*(len(uvs.keys())-1)/zs.size))
 
 	# Calculate noise maps
 	print('Creating noise.')
