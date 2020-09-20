@@ -6,3 +6,5 @@ pyfftw
 scikit-learn
 scikit-image
 pyfits
+tqdm
+joblib

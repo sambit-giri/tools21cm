@@ -126,7 +126,7 @@ def get_uv_daily_observation(ncells, z, filename=None, total_int_time=4., int_ti
 	uv_map0      = get_uv_coverage(Nbase, z, ncells, boxsize=boxsize, include_mirror_baselines=include_mirror_baselines)
 	uv_map       = np.zeros(uv_map0.shape)
 	tot_num_obs  = int(3600.*total_int_time/int_time)
-	print("Making uv map from daily observations.")
+	if verbose: print("Making uv map from daily observations.")
 	for i in range(tot_num_obs-1):
 		new_Nbase = earth_rotation_effect(Nbase, i+1, int_time, declination=declination)
 		uv_map1   = get_uv_coverage(new_Nbase, z, ncells, boxsize=boxsize, include_mirror_baselines=include_mirror_baselines)
