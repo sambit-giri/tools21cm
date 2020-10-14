@@ -60,7 +60,7 @@ def under_segmentation_error(labels, truths, b=0.25, verbose=True):
 	U = (uu-labels.size)/labels.size
 	return U
 
-def stitch_using_histogram(data, mns, labels, bins='knuth', binary=True, on_superpixel_map=True):
+def stitch_using_histogram(data, mns, labels, bins='knuth', binary=True, on_superpixel_map=True, verbose=True):
 	if bins in ['knuth', 'scotts', 'freedman', 'blocks']:
 		if 'astroML' in sys.modules: from astroML.density_estimation import histogram
 		else: 
@@ -83,7 +83,7 @@ def stitch_using_histogram(data, mns, labels, bins='knuth', binary=True, on_supe
 			#y = np.zeros(Ls.shape)
 			#for i in np.unique(Ls): y[Ls==i] = mns[i]
 			if on_superpixel_map: 
-				out = superpixel_map(data, labels, mns=mns)
+				out = superpixel_map(data, labels, mns=mns, verbose=verbose)
 				out = out<thres
 			else: out = data<thres
 			return out
@@ -92,7 +92,7 @@ def stitch_using_histogram(data, mns, labels, bins='knuth', binary=True, on_supe
 		thres = threshold_otsu(mns)
 		if binary: 
 			if on_superpixel_map: 
-				out = superpixel_map(data, labels, mns=mns)
+				out = superpixel_map(data, labels, mns=mns, verbose=verbose)
 				out = out<thres
 			else: out = data<thres
 			return out
