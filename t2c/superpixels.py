@@ -14,7 +14,7 @@ def slic_cube(cube, n_segments=5000, compactness=0.1, max_iter=20, sigma=0, min_
 		cube = np.delete(cube, 3, -1)
 	else:
 		multichannel = False
-	if verbose: print('Estimating superpixel labels using SLIC.')
+	if verbose: print('Estimating superpixel labels using SLIC...')
 	labels = slic(cube, n_segments=n_segments, compactness=compactness, max_iter=max_iter, sigma=sigma, max_size_factor=max_size_factor, slic_zero=True, multichannel=multichannel)
 	if verbose: print("The output contains the labels with %d segments"%(labels.max()+1))
 	return labels
@@ -132,7 +132,7 @@ def get_superpixel_means(data, labels=None, slic_segments=3000, verbose=True):
 		print('Superpixel labels not provided.')
 		labels = slic_cube(data, n_segments=slic_segments, verbose=verbose)
 	if verbose:
-		print('Estimating the superpixel mean map.')
+		print('Estimating the superpixel mean map...')
 	mns = apply_operator_labelled_data(data, labels, operator=np.mean, verbose=verbose)
 	if verbose: print('...done')
 	return np.array(mns)
@@ -142,7 +142,7 @@ def get_superpixel_sigmas(data, labels=None, slic_segments=5000, verbose=True):
 		print('Superpixel labels not provided.')
 		labels = slic_cube(data, n_segments=slic_segments, verbose=verbose)
 	if verbose:
-		print('Estimating the superpixel sigma map.')
+		print('Estimating the superpixel sigma map...')
 	sigs = apply_operator_labelled_data(data, labels, operator=np.std, verbose=verbose)
 	if verbose: print('...done')
 	return np.array(sigs)
@@ -214,7 +214,7 @@ def superpixel_map(data, labels, mns=None, verbose=True):
 	if mns is None: mns = get_superpixel_means(data, labels=labels, verbose=verbose)
 	sp_map = np.zeros(data.shape)
 	if verbose:
-		print('Constructing the superpixel map.')
+		print('Constructing the superpixel map...')
 		time.sleep(1)
 		for i in tqdm(range(mns.size)): sp_map[labels==i] = mns[i]
 	else:
