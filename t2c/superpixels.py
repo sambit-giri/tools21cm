@@ -115,7 +115,7 @@ def apply_operator_labelled_data(data, labels, operator=np.mean, verbose=True):
 	out = []
 	idx_low = 0
 	if verbose:
-		time.sleep(3)
+		time.sleep(1)
 		for i in tqdm(elems):
 			idx_high = idx_low + num[i]
 			out.append(operator(X1[idx_low:idx_high]))
@@ -215,7 +215,7 @@ def superpixel_map(data, labels, mns=None, verbose=True):
 	sp_map = np.zeros(data.shape)
 	if verbose:
 		print('Constructing the superpixel map.')
-		time.sleep(3)
+		time.sleep(1)
 		for i in tqdm(range(mns.size)): sp_map[labels==i] = mns[i]
 	else:
 		for i in range(mns.size): sp_map[labels==i] = mns[i]
