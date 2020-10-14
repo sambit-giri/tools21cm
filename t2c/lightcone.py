@@ -90,9 +90,11 @@ def make_lightcone(filenames, z_low = None, z_high = None, file_redshifts = None
     z_bracket_low = None; z_bracket_high = None
     data_low = None; data_high = None
     
-    #Make the lightcone, one slice at a time
-    print_msg('Making lightcone between %f < z < %f' % (output_z.min(), output_z.max()))
-    for ii,z in tqdm(enumerate(output_z)):
+    # Make the lightcone, one slice at a time
+    # print_msg('Making lightcone between %f < z < %f' % (output_z.min(), output_z.max()))
+    print('Making lightcone between %f < z < %f' % (output_z.min(), output_z.max()))
+    for ii in tqdm(range(len(output_z))):
+        z = output_z[ii]
         z_bracket_low_new = file_redshifts[file_redshifts <= z].max()
         z_bracket_high_new = file_redshifts[file_redshifts > z].min()
         
@@ -119,7 +121,7 @@ def make_lightcone(filenames, z_low = None, z_high = None, file_redshifts = None
         lightcone[:,:,comoving_pos_idx] = data_interp
         # print('%.2f %% completed.'%(100*(ii+1)/output_z.size))
         comoving_pos_idx += 1
-        
+    print('...done')
     return lightcone, output_z
 
 
@@ -178,7 +180,9 @@ def make_velocity_lightcone(vel_filenames, dens_filenames, z_low = None, \
     comoving_pos_idx = 0
     z_bracket_low = None; z_bracket_high = None
     
-    for z in tqdm(output_z):
+    print('Making velocity lightcone between %f < z < %f' % (output_z.min(), output_z.max()))
+    for ii in tqdm(range(len(output_z))):
+        z = output_z[ii]
         z_bracket_low_new = file_redshifts[file_redshifts <= z].max()
         z_bracket_high_new = file_redshifts[file_redshifts > z].min()
         
@@ -205,7 +209,7 @@ def make_velocity_lightcone(vel_filenames, dens_filenames, z_low = None, \
         lightcone[:,:,:,comoving_pos_idx] = data_interp
         
         comoving_pos_idx += 1
-        
+    print('...done')
     return lightcone, output_z
 
 
