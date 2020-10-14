@@ -4,7 +4,7 @@ Methods to construct lightcones.
 
 from . import const, conv
 import numpy as np
-import os, glob
+import os, glob, time
 from .helper_functions import get_mesh_size, \
     determine_redshift_from_filename, get_data_and_type, print_msg, find_idx
 from .density_file import DensityFile
@@ -93,6 +93,7 @@ def make_lightcone(filenames, z_low = None, z_high = None, file_redshifts = None
     # Make the lightcone, one slice at a time
     # print_msg('Making lightcone between %f < z < %f' % (output_z.min(), output_z.max()))
     print('Making lightcone between %f < z < %f' % (output_z.min(), output_z.max()))
+    time.sleep(1)
     for ii in tqdm(range(len(output_z))):
         z = output_z[ii]
         z_bracket_low_new = file_redshifts[file_redshifts <= z].max()
@@ -181,6 +182,7 @@ def make_velocity_lightcone(vel_filenames, dens_filenames, z_low = None, \
     z_bracket_low = None; z_bracket_high = None
     
     print('Making velocity lightcone between %f < z < %f' % (output_z.min(), output_z.max()))
+    time.sleep(1)
     for ii in tqdm(range(len(output_z))):
         z = output_z[ii]
         z_bracket_low_new = file_redshifts[file_redshifts <= z].max()
