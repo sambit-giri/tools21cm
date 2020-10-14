@@ -13,6 +13,7 @@ from . import cosmology as cm
 from . import statistics as st
 from . import smoothing
 import scipy.interpolate
+from tqdm import tqdm
 
 def make_lightcone(filenames, z_low = None, z_high = None, file_redshifts = None, cbin_bits = 32, cbin_order = 'c', los_axis = 0, raw_density = False, interpolation='linear', reading_function=None, box_length_mpc=None):
     '''
@@ -91,7 +92,7 @@ def make_lightcone(filenames, z_low = None, z_high = None, file_redshifts = None
     
     #Make the lightcone, one slice at a time
     print_msg('Making lightcone between %f < z < %f' % (output_z.min(), output_z.max()))
-    for ii,z in enumerate(output_z):
+    for ii,z in tqdm(enumerate(output_z)):
         z_bracket_low_new = file_redshifts[file_redshifts <= z].max()
         z_bracket_high_new = file_redshifts[file_redshifts > z].min()
         
@@ -116,7 +117,7 @@ def make_lightcone(filenames, z_low = None, z_high = None, file_redshifts = None
         data_interp = _get_interp_slice(data_high, data_low, z_bracket_high, \
                                     z_bracket_low, z, comoving_pos_idx, los_axis, interpolation)
         lightcone[:,:,comoving_pos_idx] = data_interp
-        print('%.2f %% completed.'%(100*(ii+1)/output_z.size))
+        # print('%.2f %% completed.'%(100*(ii+1)/output_z.size))
         comoving_pos_idx += 1
         
     return lightcone, output_z
@@ -177,7 +178,7 @@ def make_velocity_lightcone(vel_filenames, dens_filenames, z_low = None, \
     comoving_pos_idx = 0
     z_bracket_low = None; z_bracket_high = None
     
-    for z in output_z:
+    for z in tqdm(output_z):
         z_bracket_low_new = file_redshifts[file_redshifts <= z].max()
         z_bracket_high_new = file_redshifts[file_redshifts > z].min()
         
