@@ -56,6 +56,7 @@ from .read_files import *
 from .primary_beam import *
 from .topology import *
 from .box_counting import *
+from .fitting_methods import *
 
 #Suppress warnings from zero-divisions and nans
 import numpy
