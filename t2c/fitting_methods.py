@@ -1,5 +1,6 @@
 import numpy as np 
 from tqdm import tqdm
+from time import time, sleep
 
 from scipy.optimize import curve_fit, least_squares, minimize
 from scipy import optimize
