@@ -52,20 +52,22 @@ class FitFunction:
                 y_train, y_test = y[train_index], y[test_index]
                 sol = self._optimize(X_train, y_train)
                 best_theta = sol.x
-                for bt,kk in zip(best_theta,self.fit_params.keys()):
-                    fitted_params0[kk].append(bt)
-                    self.fitted_params_[kk] = bt
-                scr = self.score(X_test, y_test)
-                # print(self.fitted_params_, scr)
-                sols.append(sol)
-                scrs.append(scr)
+                if np.all(np.isfinite(best_theta)):
+                    for bt,kk in zip(best_theta,self.fit_params.keys()):
+                        fitted_params0[kk].append(bt)
+                        self.fitted_params_[kk] = bt
+                    scr = self.score(X_test, y_test)
+                    # print(self.fitted_params_, scr)
+                    sols.append(sol)
+                    scrs.append(scr)
             sleep(1)
 
             self.fitted_params_std = {}
             for kk in self.fit_params.keys():
                 self.fitted_params_[kk] = np.array(fitted_params0[kk])[np.array(scrs)>0].mean()
                 self.fitted_params_std[kk] = np.array(fitted_params0[kk])[np.array(scrs)>0].std()
-    
+            self.cv_scores_ = np.array(scrs)
+            
     def predict(self, X):
         best_theta = np.array([self.fitted_params_[kk] for kk in self.fitted_params_.keys()])
         y_model = self.func(X, best_theta)
