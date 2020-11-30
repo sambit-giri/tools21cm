@@ -27,6 +27,9 @@ def find_percolation_cluster(data, xth=0.5, connectivity=1):
 
 	out_map, size_list = bubble_stats.fof(data, xth=xth, connectivity=connectivity)
 	out_uniq  = np.unique(out_map, return_counts=1)
+	if out_uniq[0].size<2:
+		print('There is no percolation cluster in the data.') 
+		return 0
 	out_label = np.zeros_like(out_map)
 	out_label[out_map==out_uniq[0][1]] = 1
 	isPerc = False
@@ -36,7 +39,7 @@ def find_percolation_cluster(data, xth=0.5, connectivity=1):
 	if isPerc:
 		return out_label.sum()
 	print('There is no percolation cluster in the data.')
-	return -1
+	return 0
 
 
 
