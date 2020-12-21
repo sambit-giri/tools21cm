@@ -13,6 +13,11 @@ from . import conv
 from . import cosmology as cm
 from . import smoothing as sm
 import scipy
+from glob import glob
+from time import time, sleep
+import pickle
+from joblib import Parallel, delayed
+from tqdm import tqdm
 
 def noise_map(ncells, z, depth_mhz, obs_time=1000, filename=None, boxsize=None, total_int_time=6., int_time=10., declination=-30., uv_map=np.array([]), N_ant=None, verbose=True, fft_wrap=False):
 	"""
@@ -268,28 +273,31 @@ def noise_cube_coeval(ncells, z, depth_mhz=None, obs_time=1000, filename=None, b
 	if not uv_map.size: uv_map, N_ant  = get_uv_map(ncells, z, filename=filename, total_int_time=total_int_time, int_time=int_time, boxsize=boxsize, declination=declination)
 	if not N_ant: N_ant = np.loadtxt(filename, dtype=str).shape[0]
 	noise3d = np.zeros((ncells,ncells,ncells))
-	print("\nCreating the noise cube...")
-	for k in range(ncells):
+	print("Creating the noise cube...")
+	sleep(1)
+	for k in tqdm(range(ncells)):
 		noise2d = noise_map(ncells, z, depth_mhz, obs_time=obs_time, filename=filename, boxsize=boxsize, total_int_time=total_int_time, int_time=int_time, declination=declination, uv_map=uv_map, N_ant=N_ant, verbose=verbose, fft_wrap=fft_wrap)
 		noise3d[:,:,k] = noise2d
 		verbose = False
-		perc = np.round((k+1)*100/ncells, decimals=1) 
-		loading_verbose(str(perc)+'%')
-	print("\n...Noise cube created.")
+		# perc = np.round((k+1)*100/ncells, decimals=1) 
+		# loading_verbose(str(perc)+'%')
+	print("...noise cube created.")
 	return jansky_2_kelvin(noise3d, z, boxsize=boxsize)
 
-def noise_cube_lightcone(ncells, z, obs_time=1000, filename=None, boxsize=None, total_int_time=6., int_time=10., declination=-30., N_ant=None, fft_wrap=False):
+def noise_cube_lightcone(ncells, z, obs_time=1000, filename=None, boxsize=None, save_uvmap=None, total_int_time=6., int_time=10., declination=-30., N_ant=None, fft_wrap=False, n_jobs=4, checkpoint=64):
 	"""
 	@ Ghara et al. (2017), Giri et al. (2018b)
 
-	It creates a noise coeval cube by simulating the radio observation strategy.
+	It creates a noise cube by simulating the radio observation strategy. 
+	We assume the third axis to be along the line-of-sight and therefore 
+	each each will correspond to a different redshift.
 
 	Parameters
 	----------
 	ncells: int
 		The grid size.
 	z: float
-		Redshift.
+		Central redshift.
 	obs_time: float
 		The observation time in hours.
 	total_int_time: float
@@ -309,6 +317,139 @@ def noise_cube_lightcone(ncells, z, obs_time=1000, filename=None, boxsize=None, 
 		Boxsize in Mpc
 	verbose: bool
 		If True, verbose is shown
+	save_uvmap: str
+		Give the filename of the pickle file of uv maps. If
+			
+			- the file is absent, then uv maps are created and saved with the given filename.
+			- the file is present, then the uv map is read in.
+			- the file is present and the uv maps are incomplete, then it is completed.
+			- None is given, then the uv maps are not saved.
+	n_jobs: int
+		Number of CPUs to run in. The calculation is parallelised using joblib.
+	checkpoint: int
+		Number of iterations after which uv maps are saved if save_uvmap is not None.
+	
+	Returns
+	-------
+	noise_lightcone: A 3D cubical lightcone of the interferometric noise with frequency varying 
+	along last axis(in mK).	
+	"""
+	if not filename: N_ant = SKA1_LowConfig_Sept2016().shape[0]
+	if not boxsize: boxsize = conv.LB
+	zs = cm.cdist_to_z(np.linspace(cm.z_to_cdist(z)-boxsize/2, cm.z_to_cdist(z)+boxsize/2, ncells))
+	if not N_ant: N_ant = np.loadtxt(filename, dtype=str).shape[0]
+	noise3d = np.zeros((ncells,ncells,ncells))
+	verbose = True
+	
+	if save_uvmap is not None:
+		save_uvmap = save_uvmap.split('.')[0]+'.pkl'
+		if len(glob(save_uvmap)):
+			uvs = pickle.load(open(save_uvmap, 'rb'))
+			print('All or some uv maps is read from the given file. Be sure that they were run with the same parameter values as provided now.')
+		else:
+			uvs = {}
+	else:
+		uvs = {}
+
+	# Create uv maps
+	print('Creating the uv maps.')
+	if n_jobs<=1:
+		tstart = time()
+		for k,zi in enumerate(zs):
+			if '{:.5f}'.format(zi) not in uvs.keys():
+				# 	uv_map, N_ant  = uvs['{:.5f}'.format(zi)], uvs['Nant']
+				# else:
+				uv_map, N_ant  = get_uv_map(ncells, zi, filename=filename, total_int_time=total_int_time, int_time=int_time, boxsize=boxsize, declination=declination)
+				uvs['{:.5f}'.format(zi)] = uv_map
+				uvs['Nant'] = N_ant
+				pickle.dump(uvs, open(save_uvmap, 'wb'))
+			verbose = False
+			tend = time()
+			print('\nz = {:.5f} | {:.2f} % completed | Elapsed time: {:.2f} mins'.format(zi,100*(k+1)/zs.size,(tend-tstart)/60))
+	else:
+		Nbase, N_ant = from_antenna_config(filename, zs[0])
+		uvs['Nant'] = N_ant
+		_uvmap = lambda zi: get_uv_map(ncells, zi, filename=filename, total_int_time=total_int_time, int_time=int_time, boxsize=boxsize, declination=declination, verbose=False)[0] 
+		if checkpoint<2*n_jobs:
+			checkpoint = 4*n_jobs
+			print('checkpoint value should be more than 4*n_jobs. checkpoint set to 4*n_jobs.')
+		z_run = np.array([])
+		for k,zi in enumerate(zs):
+			if '{:.5f}'.format(zi) not in uvs.keys():
+				z_run = np.append(z_run, zi)
+		n_iterations = int(z_run.size/checkpoint)
+		if n_iterations>1:
+			for ii in range(n_iterations):
+				istart, iend = ii*checkpoint, (ii+1)*checkpoint 
+				zrs = z_run[istart:iend] if ii+1<n_iterations else z_run[istart:]
+				fla = Parallel(n_jobs=n_jobs,verbose=20)(delayed(_uvmap)(i) for i in zrs)
+				for jj,zi in enumerate(zrs):
+					uvs['{:.5f}'.format(zi)] = fla[jj]
+				if save_uvmap is not None: pickle.dump(uvs, open(save_uvmap, 'wb'))
+				print('{:.2f} % completed'.format(100*(len(uvs.keys())-1)/zs.size))
+		else:
+			fla = Parallel(n_jobs=n_jobs,verbose=20)(delayed(_uvmap)(i) for i in z_run)
+			for jj,zi in enumerate(z_run):
+				uvs['{:.5f}'.format(zi)] = fla[jj]
+			if save_uvmap is not None: pickle.dump(uvs, open(save_uvmap, 'wb'))
+		print('...done')
+
+
+	# Calculate noise maps
+	print('Creating noise.')
+	for k,zi in enumerate(zs):
+		if k+1<zs.size: depth_mhz = np.abs(cm.z_to_nu(zs[k+1])-cm.z_to_nu(zs[k]))
+		else: depth_mhz = np.abs(cm.z_to_nu(zs[k])-cm.z_to_nu(zs[k-1]))
+		uv_map, N_ant  = uvs['{:.5f}'.format(zi)], uvs['Nant']
+		noise2d = noise_map(ncells, zi, depth_mhz, obs_time=obs_time, filename=filename, boxsize=boxsize, total_int_time=total_int_time, int_time=int_time, declination=declination, uv_map=uv_map, N_ant=N_ant, verbose=verbose, fft_wrap=fft_wrap)
+		noise3d[:,:,k] = jansky_2_kelvin(noise2d, zi, boxsize=boxsize)
+		verbose = False
+		print('z = {:.5f} | {:.2f} % completed'.format(zi,100*(k+1)/zs.size))
+	return jansky_2_kelvin(noise3d, z, boxsize=boxsize)
+
+
+def noise_lightcone(ncells, zs, obs_time=1000, filename=None, boxsize=None, save_uvmap=None, total_int_time=6., int_time=10., declination=-30., N_ant=None, fft_wrap=False, n_jobs=4, checkpoint=64):
+	"""
+	@ Ghara et al. (2017), Giri et al. (2018b)
+
+	It creates a noise lightcone by simulating the radio observation strategy.
+
+	Parameters
+	----------
+	ncells: int
+		The grid size.
+	zs: ndarray
+		List of redshifts.
+	obs_time: float
+		The observation time in hours.
+	total_int_time: float
+		Total observation per day time in hours
+	int_time: float
+		Intergration time in seconds
+	declination: float
+		Declination angle in deg
+	N_ant: int
+		Number of antennae
+	filename: str
+		The path to the file containing the telescope configuration.
+
+			- As a default, it takes the SKA-Low configuration from Sept 2016
+			- It is not used if uv_map and N_ant is provided
+	boxsize: float
+		Boxsize in Mpc
+	verbose: bool
+		If True, verbose is shown
+	save_uvmap: str
+		Give the filename of the pickle file of uv maps. If
+			
+			- the file is absent, then uv maps are created and saved with the given filename.
+			- the file is present, then the uv map is read in.
+			- the file is present and the uv maps are incomplete, then it is completed.
+			- None is given, then the uv maps are not saved.
+	n_jobs: int
+		Number of CPUs to run in. The calculation is parallelised using joblib.
+	checkpoint: int
+		Number of iterations after which uv maps are saved if save_uvmap is not None.
 	
 	Returns
 	-------
@@ -317,20 +458,75 @@ def noise_cube_lightcone(ncells, z, obs_time=1000, filename=None, boxsize=None, 
 	"""
 	if not filename: N_ant = SKA1_LowConfig_Sept2016().shape[0]
 	if not boxsize: boxsize = conv.LB
-	zs = cm.cdist_to_z(np.linspace(cm.z_to_cdist(z)-boxsize/2, cm.z_to_cdist(z)+boxsize/2, ncells))
+	# zs = cm.cdist_to_z(np.linspace(cm.z_to_cdist(z)-boxsize/2, cm.z_to_cdist(z)+boxsize/2, ncells))
 	if not N_ant: N_ant = np.loadtxt(filename, dtype=str).shape[0]
-	noise3d = np.zeros((ncells,ncells,ncells))
-	print("Creating the noise cube")
+	noise3d = np.zeros((ncells,ncells,zs.size))
 	verbose = True
-	for k in range(ncells):
-		zi = zs[k]
-		if k+1<ncells: depth_mhz = cm.z_to_nu(zi[k+1])-cm.z_to_nu(zi[k])
-		else: depth_mhz = cm.z_to_nu(zi[k])-cm.z_to_nu(zi[k-1])
-		uv_map, N_ant  = get_uv_map(ncells, zi, filename=filename, total_int_time=total_int_time, int_time=int_time, boxsize=boxsize, declination=declination)
+
+	if save_uvmap is not None:
+		save_uvmap = save_uvmap.split('.')[0]+'.pkl'
+		if len(glob(save_uvmap)):
+			uvs = pickle.load(open(save_uvmap, 'rb'))
+			print('All or some uv maps is read from the given file. Be sure that they were run with the same parameter values as provided now.')
+		else:
+			uvs = {}
+	else:
+		uvs = {}
+
+	# Create uv maps
+	print('Creating the uv maps.')
+	if n_jobs<=1:
+		tstart = time()
+		for k,zi in enumerate(zs):
+			if '{:.5f}'.format(zi) not in uvs.keys():
+				# 	uv_map, N_ant  = uvs['{:.5f}'.format(zi)], uvs['Nant']
+				# else:
+				uv_map, N_ant  = get_uv_map(ncells, zi, filename=filename, total_int_time=total_int_time, int_time=int_time, boxsize=boxsize, declination=declination)
+				uvs['{:.5f}'.format(zi)] = uv_map
+				uvs['Nant'] = N_ant
+				pickle.dump(uvs, open(save_uvmap, 'wb'))
+			verbose = False
+			tend = time()
+			print('\nz = {:.5f} | {:.2f} % completed | Elapsed time: {:.2f} mins'.format(zi,100*(k+1)/zs.size,(tend-tstart)/60))
+	else:
+		Nbase, N_ant = from_antenna_config(filename, zs[0])
+		uvs['Nant'] = N_ant
+		_uvmap = lambda zi: get_uv_map(ncells, zi, filename=filename, total_int_time=total_int_time, int_time=int_time, boxsize=boxsize, declination=declination, verbose=False)[0] 
+		if checkpoint<2*n_jobs:
+			checkpoint = 4*n_jobs
+			print('checkpoint value should be more than 4*n_jobs. checkpoint set to 4*n_jobs.')
+		z_run = np.array([])
+		for k,zi in enumerate(zs):
+			if '{:.5f}'.format(zi) not in uvs.keys():
+				z_run = np.append(z_run, zi)
+		n_iterations = int(z_run.size/checkpoint)
+		if n_iterations>1:
+			for ii in range(n_iterations):
+				istart, iend = ii*checkpoint, (ii+1)*checkpoint 
+				zrs = z_run[istart:iend] if ii+1<n_iterations else z_run[istart:]
+				fla = Parallel(n_jobs=n_jobs,verbose=20)(delayed(_uvmap)(i) for i in zrs)
+				for jj,zi in enumerate(zrs):
+					uvs['{:.5f}'.format(zi)] = fla[jj]
+				if save_uvmap is not None: pickle.dump(uvs, open(save_uvmap, 'wb'))
+				print('{:.2f} % completed'.format(100*(len(uvs.keys())-1)/zs.size))
+		else:
+			fla = Parallel(n_jobs=n_jobs,verbose=20)(delayed(_uvmap)(i) for i in z_run)
+			for jj,zi in enumerate(z_run):
+				uvs['{:.5f}'.format(zi)] = fla[jj]
+			if save_uvmap is not None: pickle.dump(uvs, open(save_uvmap, 'wb'))
+		print('...done')
+
+	# Calculate noise maps
+	print('Creating noise.')
+	for k,zi in enumerate(zs):
+		if k+1<zs.size: depth_mhz = np.abs(cm.z_to_nu(zs[k+1])-cm.z_to_nu(zs[k]))
+		else: depth_mhz = np.abs(cm.z_to_nu(zs[k])-cm.z_to_nu(zs[k-1]))
+		uv_map, N_ant  = uvs['{:.5f}'.format(zi)], uvs['Nant']
 		noise2d = noise_map(ncells, zi, depth_mhz, obs_time=obs_time, filename=filename, boxsize=boxsize, total_int_time=total_int_time, int_time=int_time, declination=declination, uv_map=uv_map, N_ant=N_ant, verbose=verbose, fft_wrap=fft_wrap)
-		noise3d[:,:,k] = noise2d
+		noise3d[:,:,k] = jansky_2_kelvin(noise2d, zi, boxsize=boxsize)
 		verbose = False
-	return jansky_2_kelvin(noise3d, z, boxsize=boxsize)
+		print('\nz = {:.5f} | {:.2f} % completed'.format(zi,100*(k+1)/zs.size))
+	return noise3d
 
 
 def gauss_kernel_3d(size, sigma=1.0, fwhm=None):
@@ -372,7 +568,4 @@ def smooth_gauss_3d(array, fwhm):
 	return out
 
 
-
-
-		
 

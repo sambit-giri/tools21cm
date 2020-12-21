@@ -1,6 +1,7 @@
 import numpy as np
 from scipy.interpolate import RegularGridInterpolator
 import sys
+from tqdm import tqdm
 
 def mfp3d(arr, xth=0.5, iterations=10000000, verbose=True):
 	#3D interpolation is required
@@ -24,21 +25,32 @@ def mfp3d(arr, xth=0.5, iterations=10000000, verbose=True):
 	
 	interp_func = RegularGridInterpolator((np.arange(info[0]), np.arange(info[1]), np.arange(info[2])), ar, bounds_error=False, fill_value=0)
 
-	for rr in range(longest):
-		xs,ys,zs = xs+ls,ys+ms,zs+ns
-		pts    = np.vstack((xs,ys,zs)).T
-		vals   = interp_func(pts)
-		check  = np.argwhere(vals<=0.5)
-		num_sz[rr] = check.shape[0]
-		xs,ys,zs = np.delete(xs, check),np.delete(ys, check),np.delete(zs, check)
-		ls,ms,ns = np.delete(ls, check),np.delete(ms, check),np.delete(ns, check)
-		if verbose:
-			perc = (rr+1)*100/longest
-			msg  = '%.1f'%perc + '%'
-			loading_verbose(msg)
-		if not xs.size: break
-	msg  = '100.0' + '%'
-	loading_verbose(msg)
+	if verbose:
+		for rr in tqdm(range(longest)):
+			xs,ys,zs = xs+ls,ys+ms,zs+ns
+			pts    = np.vstack((xs,ys,zs)).T
+			vals   = interp_func(pts)
+			check  = np.argwhere(vals<=0.5)
+			num_sz[rr] = check.shape[0]
+			xs,ys,zs = np.delete(xs, check),np.delete(ys, check),np.delete(zs, check)
+			ls,ms,ns = np.delete(ls, check),np.delete(ms, check),np.delete(ns, check)
+			# if verbose:
+			# 	perc = (rr+1)*100/longest
+			# 	msg  = '%.1f'%perc + '%'
+			# 	loading_verbose(msg)
+			if not xs.size: break
+		# msg  = '100.0' + '%'
+		# loading_verbose(msg)
+	else:
+		for rr in tqdm(range(longest)):
+			xs,ys,zs = xs+ls,ys+ms,zs+ns
+			pts    = np.vstack((xs,ys,zs)).T
+			vals   = interp_func(pts)
+			check  = np.argwhere(vals<=0.5)
+			num_sz[rr] = check.shape[0]
+			xs,ys,zs = np.delete(xs, check),np.delete(ys, check),np.delete(zs, check)
+			ls,ms,ns = np.delete(ls, check),np.delete(ms, check),np.delete(ns, check)
+			if not xs.size: break
 	size_px = np.arange(longest)
 	return num_sz, size_px
 
@@ -64,21 +76,32 @@ def mfp2d(arr, xth=0.5, iterations=1000000, verbose=True):
 	
 	interp_func = RegularGridInterpolator((np.arange(info[0]), np.arange(info[1])), ar, bounds_error=False, fill_value=0)
 
-	for rr in range(longest):
-		xs,ys  = xs+ls,ys+ms
-		pts    = np.vstack((xs,ys)).T
-		vals   = interp_func(pts)
-		check  = np.argwhere(vals<=0.5)
-		num_sz[rr] = check.shape[0]
-		xs,ys  = np.delete(xs, check),np.delete(ys, check)
-		ls,ms  = np.delete(ls, check),np.delete(ms, check)
-		if verbose:
-			perc = (rr+1)*100/longest
-			msg  = '%.1f'%perc + '%'
-			loading_verbose(msg)
-		if not xs.size: break
-	msg  = '100.0' + '%'
-	loading_verbose(msg)
+	if verbose:
+		for rr in tqdm(range(longest)):
+			xs,ys  = xs+ls,ys+ms
+			pts    = np.vstack((xs,ys)).T
+			vals   = interp_func(pts)
+			check  = np.argwhere(vals<=0.5)
+			num_sz[rr] = check.shape[0]
+			xs,ys  = np.delete(xs, check),np.delete(ys, check)
+			ls,ms  = np.delete(ls, check),np.delete(ms, check)
+			# if verbose:
+			# 	perc = (rr+1)*100/longest
+			# 	msg  = '%.1f'%perc + '%'
+			# 	loading_verbose(msg)
+			if not xs.size: break
+		# msg  = '100.0' + '%'
+		# loading_verbose(msg)
+	else:
+		for rr in range(longest):
+			xs,ys  = xs+ls,ys+ms
+			pts    = np.vstack((xs,ys)).T
+			vals   = interp_func(pts)
+			check  = np.argwhere(vals<=0.5)
+			num_sz[rr] = check.shape[0]
+			xs,ys  = np.delete(xs, check),np.delete(ys, check)
+			ls,ms  = np.delete(ls, check),np.delete(ms, check)
+			if not xs.size: break
 	size_px = np.arange(longest)
 	return num_sz, size_px
 

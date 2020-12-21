@@ -13,6 +13,7 @@ from numpy.fft import rfftn, irfftn
 from math import ceil, floor
 from numpy import array, asarray, roll
 from .helper_functions import fftconvolve, find_idx
+from tqdm import tqdm
 
 def gauss_kernel(size, sigma=1.0, fwhm=None):
 	''' 
@@ -313,7 +314,7 @@ def smooth_lightcone(lightcone, z_array, box_size_mpc=False, max_baseline=2., ra
 	output_lightcone = smooth_lightcone_gauss(output_lightcone, output_ang_res*lightcone.shape[0]/box_size_mpc)
 	return output_lightcone, input_redshifts
 
-def smooth_coeval(cube, z, box_size_mpc=False, max_baseline=2., ratio=1., nu_axis=2):
+def smooth_coeval(cube, z, box_size_mpc=False, max_baseline=2., ratio=1., nu_axis=2, verbose=True):
 	"""
 	This smooths the coeval cube by Gaussian in angular direction and by tophat along the third axis.
 
@@ -334,11 +335,11 @@ def smooth_coeval(cube, z, box_size_mpc=False, max_baseline=2., ratio=1., nu_axi
 	if (not box_size_mpc): box_size_mpc=conv.LB	
 	output_dtheta  = (1+z)*21e-5/max_baseline
 	output_ang_res = output_dtheta*cm.z_to_cdist(z) * cube.shape[0]/box_size_mpc
-	output_cube = smooth_coeval_tophat(cube, output_ang_res*ratio, nu_axis=nu_axis)
+	output_cube = smooth_coeval_tophat(cube, output_ang_res*ratio, nu_axis=nu_axis, verbose=verbose)
 	output_cube = smooth_coeval_gauss(output_cube, output_ang_res, nu_axis=nu_axis)
 	return output_cube
 
-def smooth_coeval_tophat(cube, width, nu_axis):
+def smooth_coeval_tophat(cube, width, nu_axis, verbose=True):
 	"""
 	This smooths the slices perpendicular to the given axis of the cube by tophat filter.
 
@@ -353,10 +354,10 @@ def smooth_coeval_tophat(cube, width, nu_axis):
 	kernel = tophat_kernel(cube.shape[nu_axis], width)
 	output_cube = np.zeros(cube.shape)
 	if nu_axis==0:
-		for i in range(cube.shape[1]):
+		for i in tqdm(range(cube.shape[1])):
 			output_cube[:,i,:] = smooth_with_kernel(cube[:,i,:], kernel)
 	else:
-		for i in range(cube.shape[0]):
+		for i in tqdm(range(cube.shape[0])):
 			output_cube[i,:,:] = smooth_with_kernel(cube[i,:,:], kernel)
 	return output_cube
 
@@ -389,7 +390,7 @@ def smooth_lightcone_tophat(lightcone, redshifts, dz):
 		Smoothed_lightcone
 	"""
 	output_lightcone = np.zeros(lightcone.shape)
-	for i in range(output_lightcone.shape[2]):
+	for i in tqdm(range(output_lightcone.shape[2])):
 		z_out_low  = redshifts[i]-dz[i]/2
 		z_out_high = redshifts[i]+dz[i]/2
 		idx_low  = int(np.ceil(find_idx(redshifts, z_out_low)))

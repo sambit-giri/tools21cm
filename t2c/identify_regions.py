@@ -9,7 +9,7 @@ from . import superpixels
 from sklearn.cluster import KMeans
 import numpy as np
 
-def bubbles_from_slic(data, n_segments=5000, bins='knuth'):
+def bubbles_from_slic(data, n_segments=5000, bins='knuth', verbose=True):
 	"""
 	@ Giri at al. (2018b)
 	It is a method to identify regions of interest in noisy images.
@@ -31,8 +31,8 @@ def bubbles_from_slic(data, n_segments=5000, bins='knuth'):
 	-------
 	Binary cube where pixels identified as region of interest are the True.
 	"""
-	labels  = superpixels.slic_cube(data, n_segments=n_segments)
-	bin_sl  = superpixels.stitch_superpixels(data, labels, bins=bins, binary=True)
+	labels  = superpixels.slic_cube(data, n_segments=n_segments, verbose=verbose)
+	bin_sl  = superpixels.stitch_superpixels(data, labels, bins=bins, binary=True, verbose=verbose)
 	return bin_sl
 
 def bubbles_from_kmeans(data, upper_lim=True, n_jobs=1, n_clusters=3):

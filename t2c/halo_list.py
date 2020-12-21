@@ -57,24 +57,40 @@ class HaloRockstar:
 			if(linenumber == 0):
 				# Store the variable from the file header
 				header = line.split()
-				idx_pos = header.index('X')
-				idx_vel = header.index('VX')
-				idx_l = header.index('JX')
-				idx_vrms = header.index('Vrms')
-				idx_r = header.index('R'+self.mass_def)
-				idx_m = header.index('M'+self.mass_def)
+				if(self.filename[self.filename.rfind('.')+1:] == 'list'):
+					idx_pos = header.index('X')
+					idx_vel = header.index('VX')
+					idx_l = header.index('JX')
+					idx_vrms = header.index('Vrms')
+					idx_r = header.index('R'+self.mass_def)
+					idx_m = header.index('M'+self.mass_def)
+					lnr_cosm = 2
+					lnr_part = 5
+					lnr_vals = 15
+				elif(self.filename[self.filename.rfind('.')+1:] == 'ascii'):
+					idx_pos = header.index('x')
+					idx_vel = header.index('vx')
+					idx_l = header.index('Jx')
+					idx_vrms = header.index('vrms')
+					idx_r = header.index('r'+self.mass_def)
+					idx_m = header.index('m'+self.mass_def)
+					lnr_cosm = 3
+					lnr_part = 6
+					lnr_vals = 19
+				else:
+					ValueError('ERROR: wrong file format (must be .list or .ascii).')
 			elif(linenumber == 1):
 				# Store the redshift from the file header
 				a = float(line.split()[-1])
 				self.z = 1./a - 1.
-			elif(linenumber == 2):
+			elif(linenumber == lnr_cosm):
 				# Store cosmology quanity from the file header
 				cosm = line.split()
 				self.Om, self.Ol, self.h = float(cosm[2][:-1]), float(cosm[5][:-1]), float(cosm[-1])
-			elif(linenumber == 5):
+			elif(linenumber == lnr_part):
 				# Store particle mass from the file header
 				self.part_mass = float(line.split()[2]) #* U.Msun/self.h
-			elif(linenumber > 15):
+			elif(linenumber > lnr_vals):
 				vals = line.split()
 				
 				#Create a halo and add it to the list
@@ -93,7 +109,6 @@ class HaloRockstar:
 				else:
 					break
 		
-		self.nhalo = len(halo)		# Number or haloes
 		fileinput.close()
 
 		return True

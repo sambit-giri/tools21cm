@@ -3,9 +3,10 @@ from scipy.stats import spearmanr
 from skimage.segmentation import slic, mark_boundaries
 from skimage.filters import threshold_otsu
 from scipy.signal import argrelextrema
-import sys
+import sys, time
+from tqdm import tqdm
 
-def slic_cube(cube, n_segments=5000, compactness=0.1, max_iter=20, sigma=0, min_size_factor=0.5, max_size_factor=3, cmap=None):
+def slic_cube(cube, n_segments=5000, compactness=0.1, max_iter=20, sigma=0, min_size_factor=0.5, max_size_factor=3, cmap=None, verbose=True):
 	if cmap is not None: 
 		color   = plt.get_cmap(cmap)
 		multichannel = True
@@ -13,8 +14,9 @@ def slic_cube(cube, n_segments=5000, compactness=0.1, max_iter=20, sigma=0, min_
 		cube = np.delete(cube, 3, -1)
 	else:
 		multichannel = False
+	if verbose: print('Estimating superpixel labels using SLIC...')
 	labels = slic(cube, n_segments=n_segments, compactness=compactness, max_iter=max_iter, sigma=sigma, max_size_factor=max_size_factor, slic_zero=True, multichannel=multichannel)
-	print("The output contains the labels created by SLIC with %d segments"%(labels.max()+1))
+	if verbose: print("The output contains the labels with %d segments"%(labels.max()+1))
 	return labels
 
 def see_label(out_map, label):
@@ -58,7 +60,7 @@ def under_segmentation_error(labels, truths, b=0.25, verbose=True):
 	U = (uu-labels.size)/labels.size
 	return U
 
-def stitch_using_histogram(data, mns, labels, bins='knuth', binary=True, on_superpixel_map=True):
+def stitch_using_histogram(data, mns, labels, bins='knuth', binary=True, on_superpixel_map=True, verbose=True):
 	if bins in ['knuth', 'scotts', 'freedman', 'blocks']:
 		if 'astroML' in sys.modules: from astroML.density_estimation import histogram
 		else: 
@@ -81,7 +83,7 @@ def stitch_using_histogram(data, mns, labels, bins='knuth', binary=True, on_supe
 			#y = np.zeros(Ls.shape)
 			#for i in np.unique(Ls): y[Ls==i] = mns[i]
 			if on_superpixel_map: 
-				out = superpixel_map(data, labels, mns=mns)
+				out = superpixel_map(data, labels, mns=mns, verbose=verbose)
 				out = out<thres
 			else: out = data<thres
 			return out
@@ -90,18 +92,18 @@ def stitch_using_histogram(data, mns, labels, bins='knuth', binary=True, on_supe
 		thres = threshold_otsu(mns)
 		if binary: 
 			if on_superpixel_map: 
-				out = superpixel_map(data, labels, mns=mns)
+				out = superpixel_map(data, labels, mns=mns, verbose=verbose)
 				out = out<thres
 			else: out = data<thres
 			return out
 		else: return thres
 
-def stitch_superpixels(data, labels, bins='knuth', binary=True, on_superpixel_map=True):
-	mns = get_superpixel_means(data, labels=labels)
-	stitched = stitch_using_histogram(data, mns, labels, bins=bins, binary=binary, on_superpixel_map=on_superpixel_map)
+def stitch_superpixels(data, labels, bins='knuth', binary=True, on_superpixel_map=True, verbose=True):
+	mns = get_superpixel_means(data, labels=labels, verbose=verbose)
+	stitched = stitch_using_histogram(data, mns, labels, bins=bins, binary=binary, on_superpixel_map=on_superpixel_map, verbose=verbose)
 	return stitched
 
-def apply_operator_labelled_data(data, labels, operator=np.mean):
+def apply_operator_labelled_data(data, labels, operator=np.mean, verbose=True):
 	#if 'numba' in sys.modules: 
 	#	from .numba_functions import apply_operator_labelled_data_numba
 	#	out = apply_operator_labelled_data_numba(data, labels, operator=np.mean)
@@ -112,24 +114,43 @@ def apply_operator_labelled_data(data, labels, operator=np.mean):
 	X1  = X[y.argsort()]
 	out = []
 	idx_low = 0
-	for i in elems:
-		idx_high = idx_low + num[i]
-		out.append(operator(X1[idx_low:idx_high]))
-		idx_low  = idx_high
+	if verbose:
+		time.sleep(1)
+		for i in tqdm(elems):
+			idx_high = idx_low + num[i]
+			out.append(operator(X1[idx_low:idx_high]))
+			idx_low  = idx_high
+	else:
+		for i in elems:
+			idx_high = idx_low + num[i]
+			out.append(operator(X1[idx_low:idx_high]))
+			idx_low  = idx_high
 	return out
 
-def get_superpixel_means(data, labels=None, slic_segments=3000):
-	if labels is None: labels = slic_cube(data, n_segments=slic_segments)
-	mns = apply_operator_labelled_data(data, labels, operator=np.mean)
+def get_superpixel_means(data, labels=None, slic_segments=3000, verbose=True):
+	if labels is None: 
+		print('Superpixel labels not provided.')
+		labels = slic_cube(data, n_segments=slic_segments, verbose=verbose)
+	if verbose:
+		print('Estimating the superpixel mean map...')
+	mns = apply_operator_labelled_data(data, labels, operator=np.mean, verbose=verbose)
+	if verbose: print('...done')
 	return np.array(mns)
 
-def get_superpixel_sigmas(data, labels=None, slic_segments=5000):
-	if labels is None: labels = slic_cube(data, n_segments=slic_segments)
-	sigs = apply_operator_labelled_data(data, labels, operator=np.std)
+def get_superpixel_sigmas(data, labels=None, slic_segments=5000, verbose=True):
+	if labels is None: 
+		print('Superpixel labels not provided.')
+		labels = slic_cube(data, n_segments=slic_segments, verbose=verbose)
+	if verbose:
+		print('Estimating the superpixel sigma map...')
+	sigs = apply_operator_labelled_data(data, labels, operator=np.std, verbose=verbose)
+	if verbose: print('...done')
 	return np.array(sigs)
 
-def get_superpixel_n_pixels(data, labels=None, slic_segments=5000):
-	if labels is None: labels = slic_cube(data, n_segments=slic_segments)
+def get_superpixel_n_pixels(data, labels=None, slic_segments=5000, verbose=True):
+	if labels is None: 
+		print('Superpixel labels not provided.')
+		labels = slic_cube(data, n_segments=slic_segments, verbose=verbose)
 	X    = data.flatten()
 	y    = labels.flatten()
 	elems, n_pixels = np.unique(y, return_counts=1)
@@ -149,9 +170,13 @@ def get_superpixel_SNRs(means=None, sigmas=None, n_pix=None, data=None, labels=N
 		return means/sigmas, means, sigmas, n_pix, pxls
 	return means/sigmas, means, sigmas, n_pix
 
-def get_superpixel_pixels(data=None, labels=None, slic_segments=5000):
-	if labels is None: labels = slic_cube(data, n_segments=slic_segments)
-	pxl = apply_operator_labelled_data(data, labels, operator=np.array)
+def get_superpixel_pixels(data=None, labels=None, slic_segments=5000, verbose=True):
+	if labels is None: 
+		print('Superpixel labels not provided.')
+		labels = slic_cube(data, n_segments=slic_segments, verbose=verbose)
+	if verbose: print('Constructing a list of pixels in each superpixel.')
+	pxl = apply_operator_labelled_data(data, labels, operator=np.array, verbose=verbose)
+	if verbose: print('...done')
 	return pxl
 
 def mean_estimate(data, means=None, sigmas=None, n_pix=None, labels=None, slic_segments=5000, SNR_thres=5):
@@ -181,14 +206,19 @@ def xfrac_mass_estimate(dT, z):
 def xfrac_volume_estimate(binary):
 	return binary.mean()
 
-def superpixel_map(data, labels, mns=None):
+def superpixel_map(data, labels, mns=None, verbose=True):
 	#if 'numba' in sys.modules: 
 	#	from .numba_functions import superpixel_map_numba
 	#	sp_map = superpixel_map_numba(data, labels, mns=mns)
 	#	return sp_map
-	if mns is None: mns = get_superpixel_means(data, labels=labels)
+	if mns is None: mns = get_superpixel_means(data, labels=labels, verbose=verbose)
 	sp_map = np.zeros(data.shape)
-	for i in range(mns.size): sp_map[labels==i] = mns[i]
+	if verbose:
+		print('Constructing the superpixel map...')
+		time.sleep(1)
+		for i in tqdm(range(mns.size)): sp_map[labels==i] = mns[i]
+	else:
+		for i in range(mns.size): sp_map[labels==i] = mns[i]
 	return sp_map
 
 

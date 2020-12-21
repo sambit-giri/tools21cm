@@ -10,6 +10,7 @@ import os,sys
 import datetime, time
 from . import mfp_np, spa_np, conv
 from scipy.interpolate import interp1d
+from tqdm import tqdm
 
 def fof(data, xth=0.5, connectivity=1):
 	"""
@@ -355,9 +356,9 @@ def granulometry_CDF(data, sizes=None, verbose=True):
 	if sizes is None: sizes = np.arange(1, s/2, 2)
 	sizes = sizes.astype(int)
 	granulo = np.zeros((len(sizes)))
-	for n in range(len(sizes)): granulo[n] = ndimage.binary_opening(data, structure=disk_structure(sizes[n])).sum()
-	#if verbose: print "Completed:", 100*(n+1)/len(sizes), "%"
-	print("Completed.")
+	if verbose:
+		for n in tqdm(range(len(sizes))): granulo[n] = ndimage.binary_opening(data, structure=disk_structure(sizes[n])).sum()
+		print("Completed.")
 	return granulo
 
 def granulometry_bsd(data, xth=0.5, boxsize=None, verbose=True, upper_lim=False, sampling=2):
@@ -402,7 +403,7 @@ def granulometry_bsd(data, xth=0.5, boxsize=None, verbose=True, upper_lim=False,
 	t2 = datetime.datetime.now()
 	runtime = (t2-t1).total_seconds()/60
 
-	print("\nProgram runtime: %f minutes." %runtime)
+	# print("\nProgram runtime: %f minutes." %runtime)
 	print("The output contains a tuple with three values: r, rdP/dr")
 	print("The curve has been normalized.")
 	return rr, nn/nn.sum()

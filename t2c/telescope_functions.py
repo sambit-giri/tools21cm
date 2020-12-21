@@ -4,6 +4,8 @@ import sys
 from .usefuls import *
 from . import cosmology as cm
 from . import conv
+from tqdm import tqdm
+import time
 #from skimage.transform import rescale, resize, downscale_local_mean
 
 KB_SI   = 1.38e-23
@@ -126,16 +128,19 @@ def get_uv_daily_observation(ncells, z, filename=None, total_int_time=4., int_ti
 	uv_map0      = get_uv_coverage(Nbase, z, ncells, boxsize=boxsize, include_mirror_baselines=include_mirror_baselines)
 	uv_map       = np.zeros(uv_map0.shape)
 	tot_num_obs  = int(3600.*total_int_time/int_time)
-	print("Making uv map from daily observations.")
-	for i in range(tot_num_obs-1):
+	if verbose: 
+		print("Making uv map from daily observations.")
+		time.sleep(5)
+	for i in tqdm(range(tot_num_obs-1)):
 		new_Nbase = earth_rotation_effect(Nbase, i+1, int_time, declination=declination)
 		uv_map1   = get_uv_coverage(new_Nbase, z, ncells, boxsize=boxsize, include_mirror_baselines=include_mirror_baselines)
 		uv_map   += uv_map1
-		if verbose:
-			perc = int((i+2)*100/tot_num_obs)
-			msg = '%.1f %%'%(perc)
-			loading_verbose(msg)
+		# if verbose:
+		# 	perc = int((i+2)*100/tot_num_obs)
+		# 	msg = '%.1f %%'%(perc)
+		# 	loading_verbose(msg)
 	uv_map = (uv_map+uv_map0)/tot_num_obs
+	print('...done')
 	return uv_map, N_ant
 	
 
