@@ -29,6 +29,9 @@ def mfp3d(arr, xth=0.5, iterations=10000000, verbose=True, point='random'):
 		xs,ys,zs = loc[rand_loc,0],loc[rand_loc,1],loc[rand_loc,2]
 	else:
 		xs,ys,zs = point
+		if ar[xs,ys,zs]==0:
+			print('Given point is outside the structure.')
+			exit()
 		xs,ys,zs = xs*np.ones(iterations), ys*np.ones(iterations), zs*np.ones(iterations)
 	
 	interp_func = RegularGridInterpolator((np.arange(info[0]), np.arange(info[1]), np.arange(info[2])), ar, bounds_error=False, fill_value=0)
@@ -91,6 +94,9 @@ def mfp2d(arr, xth=0.5, iterations=1000000, verbose=True, point='random'):
 		xs,ys    = loc[rand_loc,0],loc[rand_loc,1]
 	else:
 		xs,ys = point
+		if ar[xs,ys]==0:
+			print('Given point is outside the structure.')
+			exit()
 		xs,ys = xs*np.ones(iterations), ys*np.ones(iterations)
 	
 	interp_func = RegularGridInterpolator((np.arange(info[0]), np.arange(info[1])), ar, bounds_error=False, fill_value=0)
