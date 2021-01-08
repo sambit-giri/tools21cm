@@ -17,7 +17,6 @@ class Halo:
 		self.r = 0.0					# Virial radius in grid units
 		self.m = 0.0					# Grid mass
 		self.mp = 0						# Number of particles
-		self.solar_masses = 0.0			# Mass in solar masses
 
 
 class HaloRockstar:
@@ -104,14 +103,30 @@ class HaloRockstar:
 					halo.r = float(vals[idx_r]) #* U.kpc/self.h
 					halo.m = float(vals[idx_m]) #* U.Msun/self.h
 					halo.mp = int(round(halo.m / self.part_mass, 0))
-					halo.solar_masses = halo.m
 					self.halos.append(halo)
 				else:
 					break
 		
 		fileinput.close()
-
 		return True
+	
+	def get(self, var=None):
+		if(var == 'm'):
+			data = np.array([halo.m for halo in self.halos])
+		elif(var == 'r'):
+			data = np.array([halo.r for halo in self.halos])
+		elif(var == 'pos'):
+			data = np.array([halo.pos for halo in self.halos])
+		elif(var == 'vel'):
+			data = np.array([halo.vel for halo in self.halos])
+		elif(var == 'vel_disp'):
+			data = np.array([halo.vel_disp for halo in self.halos])
+		elif(var == 'l'):
+			data = np.array([halo.l for halo in self.halos])
+		elif(var == 'pos_cm'):
+			data = np.array([halo.pos_cm for halo in self.halos])
+		return data
+
 
 
 class HaloCube3PM:
@@ -130,13 +145,15 @@ class HaloCube3PM:
 	
 	Some useful attributes of this class are:
 
-		nhalo (int): total number of haloes
-		z (float): the redshift of the file
-		a (float): the scale factor of the file
-
+		nhalo (int)	: total number of haloes
+		z (float)	: the redshift of the file
+		a (float)	: the scale factor of the file
+		mass_def (string): either 'vir' or 'odc' for viral or overdensity shperical cutoff
+		pid_flag (bool): to indicate if particle IDs are stored in xv files (50 8-byte int + 50*6 4-byte float)
+		cosm_unit (bool): condition to convert from grid units to cosmological (comoving) units (i.e: Mpc/h, Msun/h, etc)
 	'''
 	
-	def __init__(self, filespath=None, z=None, node=None, mass_def='vir', pid_flag=True):
+	def __init__(self, filespath=None, z=None, node=None, mass_def='vir', pid_flag=True, cosm_unit=True):
 		'''
 		Initialize the file. If filespath is given, read data. Otherwise, do nothing.
 		'''
@@ -147,10 +164,9 @@ class HaloCube3PM:
 
 		if filespath:
 			filespath += '/' if filespath[-1] != '/' else ''
-			self.read_from_file(filespath, z, node, mass_def, pid_flag)
+			self.read_from_file(filespath, z, node, mass_def, pid_flag, cosm_unit)
 		else:
 			raise NameError('Files path not specified, please define.')
-
 
 	def _get_header(self, file):
 		# Internal use. Read header for xv.dat and PID.dat
@@ -159,7 +175,20 @@ class HaloCube3PM:
 		return nhalo, halo_vir, halo_odc
 
 
-	def read_from_file(self, filespath, z, node, mass_def, pid_flag):
+	def _reposition(self, pos):
+		Lbox = conv.boxsize
+		new_pos = pos.copy()
+
+		for i, val in enumerate(pos):
+			if(val < 0):
+				new_pos[i] = Lbox + val
+			elif(val > Lbox):
+				new_pos[i] = val - Lbox
+		
+		return new_pos
+	
+
+	def read_from_file(self, filespath, z, node, mass_def, pid_flag, cosm_unit):
 		'''
 		Read Cube3PM halo catalog from file.
 		
@@ -194,32 +223,55 @@ class HaloCube3PM:
 			
 			for i in range(nhalo_node):
 				halo = Halo()
-				halo.pos = np.fromfile(f, count=3, dtype='float32') #* U.Mpc/self.h
+				halo.pos = np.fromfile(f, count=3, dtype='float32')		# grid length
+				mass_vir, mass_odc, r_vir, r_odc = np.fromfile(f, count=4, dtype='float32')
 				
-				mass_vir, mass_odc, r_vir, r_odc = np.fromfile(f, count=4, dtype='float32') 
 				if(mass_def == 'vir'):
-					halo.m = mass_vir #* U.Msun/self.h
-					halo.r = r_vir #* U.kpc/self.h
-					halo.mp = 0		# TODO: DOUBLE CHEKC THIS QUANITTY
+					halo.m = mass_vir # Msun/h
+					halo.r = r_vir # Mpc/h
 				else:
-					halo.m = mass_odc #* U.Msun/self.h
-					halo.r = r_odc #* U.kpc/self.h
-					halo.mp = 0		# TODO: DOUBLE CHEKC THIS QUANITTY
-
-				halo.pos_cm = np.fromfile(f, count=3, dtype='float32') #* U.Mpc/self.h
-				halo.vel = np.fromfile(f, count=3, dtype='float32') #* U.km/U.s
-				halo.l = np.fromfile(f, count=3, dtype='float32') #* U.Msun/self.h*U.Mpc/self.h*U.km/U.s
-				halo.vel_disp = np.linalg.norm(np.fromfile(f, count=3, dtype='float32'))  #* U.km/U.s
-				var_x = np.fromfile(f, count=3, dtype='float32')	#shape-related quantity(?)
+					halo.m = mass_odc # Msun/h
+					halo.r = r_odc # Mpc/h
+				
+				halo.mp = 0		# TODO: DOUBLE CHEKC THIS QUANITTY
+				halo.pos_cm = np.fromfile(f, count=3, dtype='float32')
+				halo.vel = np.fromfile(f, count=3, dtype='float32')
+				halo.l = np.fromfile(f, count=3, dtype='float32')
+				halo.vel_disp = np.linalg.norm(np.fromfile(f, count=3, dtype='float32'))
+				var_x = np.fromfile(f, count=3, dtype='float32')	# shape-related quantity(?)
 				
 				if(pid_flag):
 					pid_halo_node = np.fromfile(f, count=50, dtype='int64')
 					xv_halo_node = np.fromfile(f, count=50*6, dtype='float32').reshape((50,6), order='C')
 				
-				halo.solar_masses = halo.m*conv.M_grid*const.solar_masses_per_gram
+				if(cosm_unit):
+					halo.pos = self._reposition(pos=conv.gridpos_to_mpc(halo.pos) * const.h)	# Mpc/h
+					halo.m = 10**(conv.gridmass_to_msol(halo.m)) * const.h 		# Msun/h
+					halo.r = conv.gridpos_to_mpc(halo.r) * const.h 				# Mpc/h
+					halo.pos_cm = self._reposition(pos=conv.gridpos_to_mpc(halo.pos_cm) * const.h)	# Mpc/h
+					halo.vel = conv.gridvel_to_kms(gridvel=halo.vel, z=self.z)	# km/s
+					halo.l = 10**(conv.gridmass_to_msol(conv.gridpos_to_mpc(conv.gridvel_to_kms(gridvel=halo.l, z=self.z)))) * const.h * const.h # Msun/h * Mpc/h * km/s
+					halo.vel_disp = conv.gridvel_to_kms(gridvel=halo.vel_disp, z=self.z)	# km/s
+
 				self.halos.append(halo)
-		
 		return True
+
+	def get(self, var=None):
+		if(var == 'm'):
+			data = np.array([halo.m for halo in self.halos])
+		elif(var == 'r'):
+			data = np.array([halo.r for halo in self.halos])
+		elif(var == 'pos'):
+			data = np.array([halo.pos for halo in self.halos])
+		elif(var == 'vel'):
+			data = np.array([halo.vel for halo in self.halos])
+		elif(var == 'vel_disp'):
+			data = np.array([halo.vel_disp for halo in self.halos])
+		elif(var == 'l'):
+			data = np.array([halo.l for halo in self.halos])
+		elif(var == 'pos_cm'):
+			data = np.array([halo.pos_cm for halo in self.halos])
+		return data
 
 
 
