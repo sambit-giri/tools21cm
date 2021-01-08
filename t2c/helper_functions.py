@@ -543,9 +543,10 @@ def fftconvolve(in1, in2):
     in1 = asarray(in1)
     in2 = asarray(in2)
 
-    if matrix_rank(in1) == matrix_rank(in2) == 0:  # scalar inputs
-        return in1 * in2
-    elif not in1.ndim == in2.ndim:
+    #if matrix_rank(in1) == matrix_rank(in2) == 0:  # scalar inputs
+    #    return in1 * in2
+    #elif not in1.ndim == in2.ndim:
+    if not in1.ndim == in2.ndim:
         raise ValueError("in1 and in2 should have the same rank")
     elif in1.size == 0 or in2.size == 0:  # empty arrays
         return array([])
@@ -565,7 +566,9 @@ def fftconvolve(in1, in2):
     else:
         ret = ifftn(fftn(in1, fsize) * fftn(in2, fsize))[fslice].copy()
 
-    shift = array([int(floor(fsize[0]/2.0)), int(floor(fsize[1]/2.0))])
-    ret   = roll(roll(ret, -shift[0], axis=0), -shift[1], axis=1)
+    # Shift the axes back 
+    shift = np.floor(fsize*0.5).astype(int)
+    list_of_axes = tuple(np.arange(0, shift.size))
+    ret = roll(ret, -shift, axis=list_of_axes)
     return ret
 
