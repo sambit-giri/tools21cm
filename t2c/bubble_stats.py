@@ -321,7 +321,7 @@ def mfp_from_point(data, point, xth=0.5, boxsize=None, iterations = 10000000, ve
 	t2 = datetime.datetime.now()
 	runtime = (t2-t1).total_seconds()/60
 
-	print("\nProgram runtime: %f minutes." %runtime)
+	print("Program runtime: %f minutes." %runtime)
 	if check_box==0:
 		print("There is no ROI in the data. Therefore, the BSD is zero everywhere.")
 		return rr*boxsize/data.shape[0], np.zeros(rr.shape)
