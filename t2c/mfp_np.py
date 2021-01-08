@@ -35,7 +35,7 @@ def mfp3d(arr, xth=0.5, iterations=10000000, verbose=True, point='random'):
 
 	if verbose:
 		print('...done')
-		print('Estimating rays lengths...')
+		print('Estimating ray lengths...')
 
 	if verbose:
 		sleep(0.1)
