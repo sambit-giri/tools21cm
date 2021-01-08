@@ -307,15 +307,15 @@ def mfp_from_point(data, point, xth=0.5, boxsize=None, iterations = 10000000, ve
 		iterations = 3
 	if dim == 2:
 		print("MFP method applied on 2D data (ver 1.0)")
-		#out = mfp2d(data, xth, iterations=iterations, verbose=verbose)
 		out = mfp_np.mfp2d(data, xth, iterations=iterations, verbose=verbose, point=point)
 	elif dim == 3:
 		print("MFP method applied on 3D data (ver 1.0)")
-		#out = mfp3d(data, xth, iterations=iterations, verbose=verbose)
 		out = mfp_np.mfp3d(data, xth, iterations=iterations, verbose=verbose, point=point)
 	else:
 		print("The data doesn't have the correct dimension")
 		return 0
+	if out is None: return None
+
 	nn = out[0]/iterations
 	rr = out[1]
 	t2 = datetime.datetime.now()
