@@ -259,6 +259,81 @@ def mfp(data, xth=0.5, boxsize=None, iterations = 10000000, verbose=True, upper_
 	return r0, p0
 
 
+def mfp_from_point(data, point, xth=0.5, boxsize=None, iterations = 10000000, verbose=True, upper_lim=False, bins=None, r_min=None, r_max=None):
+	"""
+	Determines the sizes using the Mean-Free-Path (MFP) approach.
+	
+	Parameters
+	----------
+	input     : ndarray
+		2D/3D array of ionization fraction/brightness temperature.
+	point     : ndarray or list
+		[x, y, z] of the point.
+	xth       : float
+		The threshold value (Default: 0.5).
+	boxsize   : float
+		The boxsize in cMpc can be given (Default: conv.LB).
+	iterations: float
+		Number of iterations (Default: 1e7).
+	verbose   : bool
+		It prints the progress of the program (Default: True).
+	upper_lim : bool
+		It decides if the threshold is the upper limit or the lower limit (Default: False).
+	bins      : int
+		Give number of bins or an array of sizes to re-bin into (Default: None).
+	r_min     : float
+		Minimum size after rebinning (Default: None).
+	r_max     : float
+		Maximum size after rebinning (Default: None).
+
+	Returns
+	-------
+	r  : ndarray
+		sizes of the regions
+	dn : ndarray
+		probability of finding the corresponding size 
+	"""
+	if boxsize is None:
+		boxsize = conv.LB
+		print('Boxsize is set to %.2f Mpc.'%boxsize) 
+	dim = len(data.shape)
+	t1 = datetime.datetime.now()
+	if (upper_lim): 
+		data = -1.*data
+		xth  = -1.*xth
+	check_box = (data>=xth).sum()
+	if check_box==0:
+		data = np.ones(data.shape)
+		iterations = 3
+	if dim == 2:
+		print("MFP method applied on 2D data (ver 1.0)")
+		#out = mfp2d(data, xth, iterations=iterations, verbose=verbose)
+		out = mfp_np.mfp2d(data, xth, iterations=iterations, verbose=verbose, point=point)
+	elif dim == 3:
+		print("MFP method applied on 3D data (ver 1.0)")
+		#out = mfp3d(data, xth, iterations=iterations, verbose=verbose)
+		out = mfp_np.mfp3d(data, xth, iterations=iterations, verbose=verbose, point=point)
+	else:
+		print("The data doesn't have the correct dimension")
+		return 0
+	nn = out[0]/iterations
+	rr = out[1]
+	t2 = datetime.datetime.now()
+	runtime = (t2-t1).total_seconds()/60
+
+	print("\nProgram runtime: %f minutes." %runtime)
+	if check_box==0:
+		print("There is no ROI in the data. Therefore, the BSD is zero everywhere.")
+		return rr*boxsize/data.shape[0], np.zeros(rr.shape)
+	print("The output contains a tuple with three values: r, rdP/dr")
+	print("The curve has been normalized.")
+
+	r0,p0 = rr*boxsize/data.shape[0], rr*nn #rr[nn.argmax()]*boxsize/data.shape[0]
+	if bins is not None: r0,p0 = rebin_bsd(r0, p0, bins=bins, r_min=r_min, r_max=r_max)
+	return r0, p0
+
+
+
 def rebin_bsd(rr, pp, bins=10, r_min=None, r_max=None):
 	fp = interp1d(rr, pp, kind='cubic')
 	if np.array(bins).size == 1:
