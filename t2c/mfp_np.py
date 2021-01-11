@@ -1,11 +1,15 @@
 import numpy as np
 from scipy.interpolate import RegularGridInterpolator
 import sys
+from time import time, sleep
 from tqdm import tqdm
 
-def mfp3d(arr, xth=0.5, iterations=10000000, verbose=True):
+def mfp3d(arr, xth=0.5, iterations=10000000, verbose=True, point='random'):
 	#3D interpolation is required
 	#RegularGridInterpolator in scipy(>0.14) is used to do the interpolation
+
+	if verbose:
+		print('Initialising random rays...')
 	
 	info = arr.shape
 	longest = max(arr.shape)
@@ -14,18 +18,30 @@ def mfp3d(arr, xth=0.5, iterations=10000000, verbose=True):
 	ar  = np.zeros(arr.shape)
 	ar[arr >= xth] = 1
 
-	loc = np.argwhere(ar == 1)
-	rand_loc = np.random.randint(0, high=loc.shape[0], size=iterations)
 	thetas   = np.random.randint(0, 360, size=iterations)
 	phis     = np.random.randint(0, 360, size=iterations)
 	ls       = np.sin(thetas*np.pi/180)*np.cos(phis*np.pi/180)
 	ms       = np.sin(thetas*np.pi/180)*np.sin(phis*np.pi/180)
 	ns       = np.cos(thetas*np.pi/180)
-	xs,ys,zs = loc[rand_loc,0],loc[rand_loc,1],loc[rand_loc,2]
+	if point=='random':
+		loc = np.argwhere(ar == 1)
+		rand_loc = np.random.randint(0, high=loc.shape[0], size=iterations)
+		xs,ys,zs = loc[rand_loc,0],loc[rand_loc,1],loc[rand_loc,2]
+	else:
+		xs,ys,zs = point
+		if ar[xs,ys,zs]==0:
+			print('Given point is outside the structure.')
+			return None
+		xs,ys,zs = xs*np.ones(iterations), ys*np.ones(iterations), zs*np.ones(iterations)
 	
 	interp_func = RegularGridInterpolator((np.arange(info[0]), np.arange(info[1]), np.arange(info[2])), ar, bounds_error=False, fill_value=0)
 
 	if verbose:
+		print('...done')
+		print('Estimating ray lengths...')
+
+	if verbose:
+		sleep(0.1)
 		for rr in tqdm(range(longest)):
 			xs,ys,zs = xs+ls,ys+ms,zs+ns
 			pts    = np.vstack((xs,ys,zs)).T
@@ -41,8 +57,10 @@ def mfp3d(arr, xth=0.5, iterations=10000000, verbose=True):
 			if not xs.size: break
 		# msg  = '100.0' + '%'
 		# loading_verbose(msg)
+		sleep(0.1)
+		print('...done')
 	else:
-		for rr in tqdm(range(longest)):
+		for rr in range(longest):
 			xs,ys,zs = xs+ls,ys+ms,zs+ns
 			pts    = np.vstack((xs,ys,zs)).T
 			vals   = interp_func(pts)
@@ -54,7 +72,7 @@ def mfp3d(arr, xth=0.5, iterations=10000000, verbose=True):
 	size_px = np.arange(longest)
 	return num_sz, size_px
 
-def mfp2d(arr, xth=0.5, iterations=1000000, verbose=True):
+def mfp2d(arr, xth=0.5, iterations=1000000, verbose=True, point='random'):
 	#2D interpolation is required
 	#RegularGridInterpolator in scipy(>0.14) is used to do the interpolation
 	
@@ -66,13 +84,20 @@ def mfp2d(arr, xth=0.5, iterations=1000000, verbose=True):
 	ar  = np.zeros(arr.shape)
 	ar[arr >= xth] = 1
 
-	loc = np.argwhere(ar == 1)
-	rand_loc = np.random.randint(0, high=loc.shape[0], size=iterations)
 	thetas   = np.random.randint(0, 360, size=iterations)
 	ls       = np.sin(thetas*np.pi/180)
 	ms       = np.cos(thetas*np.pi/180)
 
-	xs,ys    = loc[rand_loc,0],loc[rand_loc,1]
+	if point=='random':
+		loc = np.argwhere(ar == 1)
+		rand_loc = np.random.randint(0, high=loc.shape[0], size=iterations)
+		xs,ys    = loc[rand_loc,0],loc[rand_loc,1]
+	else:
+		xs,ys = point
+		if ar[xs,ys]==0:
+			print('Given point is outside the structure.')
+			return None
+		xs,ys = xs*np.ones(iterations), ys*np.ones(iterations)
 	
 	interp_func = RegularGridInterpolator((np.arange(info[0]), np.arange(info[1])), ar, bounds_error=False, fill_value=0)
 
