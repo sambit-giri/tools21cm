@@ -328,7 +328,9 @@ def mfp_from_point(data, point, xth=0.5, boxsize=None, iterations = 10000000, ve
 	print("The output contains a tuple with three values: r, rdP/dr")
 	print("The curve has been normalized.")
 
-	r0,p0 = rr*boxsize/data.shape[0], rr*nn #rr[nn.argmax()]*boxsize/data.shape[0]
+        # Return radii (in physical units) and fraction of side lines which
+        # have this side line. This is different from a bubble size distribution!
+	r0,p0 = rr*boxsize/data.shape[0], nn #rr[nn.argmax()]*boxsize/data.shape[0]
 	if bins is not None: r0,p0 = rebin_bsd(r0, p0, bins=bins, r_min=r_min, r_max=r_max)
 	return r0, p0
 
