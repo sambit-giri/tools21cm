@@ -212,15 +212,15 @@ def kanan_noise_image_ska(z, uv_map, depth_mhz, obs_time, int_time, N_ant_ska=56
 	nuso  = 1420.0/(1.0 + z)
 	delnu = depth_mhz*1e3	                                            # in kHz
 	effective_baseline = np.sum(uv_map)
-        # Standard definition of sky temperature
+	# Standard definition of sky temperature
 	T_sky_atnu300MHz= 60.0                                              #K
-        # Koopmans et al. (2015) definition of sky temperature
-	#T_sky_atnu300MHz= 68.3  					    #K
+	# Koopmans et al. (2015) definition of sky temperature
+	# T_sky_atnu300MHz= 68.3  					    #K
 	T_sky = T_sys_atnu300MHz*(300.0/nuso)**2.55
-        # Koopmans et al. 
-        # Receiver temperature
-        T_rcvr= 100                                                         #K
-        T_sys = T_sky + T_rcvr
+	# Koopmans et al. 
+	# Receiver temperature
+	T_rcvr = 100                                                         #K
+	T_sys  = T_sky + T_rcvr
 	ant_radius_ska  = 35./2. 	                                    #in m
 	nu_crit = 1.1e5 						    # in kHz
 	if nuso>nu_crit: ep = (nu_crit/nuso)**2
