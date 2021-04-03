@@ -216,7 +216,7 @@ def kanan_noise_image_ska(z, uv_map, depth_mhz, obs_time, int_time, N_ant_ska=56
 	T_sky_atnu300MHz= 60.0                                              #K
 	# Koopmans et al. (2015) definition of sky temperature
 	# T_sky_atnu300MHz= 68.3  					    #K
-	T_sky = T_sys_atnu300MHz*(300.0/nuso)**2.55
+	T_sky = T_sky_atnu300MHz*(300.0/nuso)**2.55
 	# Koopmans et al. 
 	# Receiver temperature
 	T_rcvr = 100                                                         #K
