@@ -487,7 +487,7 @@ def granulometry_bsd(data, xth=0.5, boxsize=None, verbose=True, upper_lim=False,
 	# rr = (sz*boxsize/data.shape[0])[:-1]
 	# nn = np.array([(granulo[i]-granulo[i+1])/np.abs(sz[i]-sz[i+1]) for i in range(len(granulo)-1)])
 	if n_jobs>1: print('Parallelization not implemented yet.')
-	area, dFdR, R =granulometry(mask)
+	area, dFdR, R = _granulometry(mask)
 	Rs = (R*boxsize/data.shape[0])
 	dFdlnR = R*dFdR
 	t2 = datetime.datetime.now()
