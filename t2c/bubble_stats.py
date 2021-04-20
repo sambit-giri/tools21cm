@@ -8,7 +8,7 @@ from .Friends_of_Friends import FoF_search
 from scipy import ndimage
 import os,sys
 import datetime, time
-from . import mfp_np, spa_np, conv
+from . import mfp_np, spa_np, conv, morph 
 from scipy.interpolate import interp1d
 from tqdm import tqdm
 from joblib import Parallel, delayed
@@ -437,7 +437,8 @@ def granulometry_CDF(data, sizes=None, verbose=True, n_jobs=1):
 	np.random.shuffle(sizes)
 	verbose = True
 	if verbose:
-		func = lambda n: ndimage.binary_opening(data, structure=disk_structure(sizes[n])).sum()
+		# func = lambda n: ndimage.binary_opening(data, structure=disk_structure(sizes[n])).sum()
+		func = lambda n: morph.binary_opening(data, structure=disk_structure(sizes[n])).sum()
 		granulo = np.array(Parallel(n_jobs=n_jobs)(delayed(func)(i) for i in tqdm(range(len(sizes))) ))
 		# for n in tqdm(range(len(sizes))): granulo[n] = ndimage.binary_opening(data, structure=disk_structure(sizes[n])).sum()
 		print("Completed.")
