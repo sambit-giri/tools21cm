@@ -543,5 +543,5 @@ def _granulometry(data, n_jobs=1):
     pattern_spectrum = np.append((area[:-1]-area[1:]).astype(float)/area[0], 0)
     # print(pattern_spectrum)
 
-    return area, pattern_spectrum, np.float(pixel)
+    return area, pattern_spectrum, np.array(pixel)
 
