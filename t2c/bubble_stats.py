@@ -11,6 +11,7 @@ import datetime, time
 from . import mfp_np, spa_np, conv
 from scipy.interpolate import interp1d
 from tqdm import tqdm
+from joblib import Parallel, delayed
 
 def fof(data, xth=0.5, connectivity=1):
 	"""
@@ -428,17 +429,22 @@ def disk_structure(n):
     return struct.astype(np.bool)
 
 
-def granulometry_CDF(data, sizes=None, verbose=True):
+def granulometry_CDF(data, sizes=None, verbose=True, n_jobs=1):
 	s = max(data.shape)
 	if sizes is None: sizes = np.arange(1, s/2, 2)
 	sizes = sizes.astype(int)
-	granulo = np.zeros((len(sizes)))
+	# granulo = np.zeros((len(sizes)))
+	np.random.shuffle(sizes)
+	verbose = True
 	if verbose:
-		for n in tqdm(range(len(sizes))): granulo[n] = ndimage.binary_opening(data, structure=disk_structure(sizes[n])).sum()
+		func = lambda n: ndimage.binary_opening(data, structure=disk_structure(sizes[n])).sum()
+		granulo = np.array(Parallel(n_jobs=n_jobs)(delayed(func)(i) for i in tqdm(range(len(sizes))) ))
+		# for n in tqdm(range(len(sizes))): granulo[n] = ndimage.binary_opening(data, structure=disk_structure(sizes[n])).sum()
 		print("Completed.")
-	return granulo
+	arg_sort = np.argsort(sizes)
+	return granulo[arg_sort]
 
-def granulometry_bsd(data, xth=0.5, boxsize=None, verbose=True, upper_lim=False, sampling=2):
+def granulometry_bsd(data, xth=0.5, boxsize=None, verbose=True, upper_lim=False, sampling=2, log_bins=None, n_jobs=1):
 	"""
 	Determined the sizes using the Granulometry (Gran) approach.
 	It is based on Kakiichi et al. (2017)
@@ -471,11 +477,12 @@ def granulometry_bsd(data, xth=0.5, boxsize=None, verbose=True, upper_lim=False,
 		data = -1.*data
 		xth  = -1.*xth
 	mask = data > xth
-	sz   = np.arange(1, data.shape[0]/4, sampling)
-	granulo = granulometry_CDF(mask, sizes=sz, verbose=verbose)
+	if log_bins is not None: sz = np.unique((10**np.linspace(0, np.log10(data.shape[0]/4), log_bins)).astype(int))
+	else: sz   = np.arange(1, data.shape[0]/4, sampling)
+	granulo = granulometry_CDF(mask, sizes=sz, verbose=verbose, n_jobs=n_jobs)
 
 	rr = (sz*boxsize/data.shape[0])[:-1]
-	nn = np.array([granulo[i]-granulo[i+1] for i in range(len(granulo)-1)])
+	nn = np.array([(granulo[i]-granulo[i+1])/np.abs(sz[i]-sz[i+1]) for i in range(len(granulo)-1)])
 
 	t2 = datetime.datetime.now()
 	runtime = (t2-t1).total_seconds()/60
