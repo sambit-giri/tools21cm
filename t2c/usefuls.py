@@ -10,6 +10,10 @@ def loading_verbose(string):
 	sys.stdout.write('\r'+msg)
 	sys.stdout.flush()
 
+def loading_msg(msg):
+	sys.stdout.write('\r'+msg)
+	sys.stdout.flush()
+
 def Mgrid_2_Msolar(M):
 	return M*(conv.M_grid*const.solar_masses_per_gram)
 

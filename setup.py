@@ -15,6 +15,6 @@ setup(name='tools21cm',
       package_dir = {'tools21cm' : 't2c'},
       packages=['tools21cm'],
       package_data={'share':['*'],},
-      install_requires=['numpy','scipy','scikit-learn','scikit-image'],
+      install_requires=['numpy','scipy','scikit-learn','scikit-image', 'tqdm', 'joblib'],
       #include_package_data=True,
 )

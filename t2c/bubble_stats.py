@@ -8,9 +8,11 @@ from .Friends_of_Friends import FoF_search
 from scipy import ndimage
 import os,sys
 import datetime, time
-from . import mfp_np, spa_np, conv
+from . import mfp_np, spa_np, conv, morph 
 from scipy.interpolate import interp1d
 from tqdm import tqdm
+from joblib import Parallel, delayed
+from .usefuls import loading_msg
 
 def fof(data, xth=0.5, connectivity=1):
 	"""
@@ -428,17 +430,23 @@ def disk_structure(n):
     return struct.astype(np.bool)
 
 
-def granulometry_CDF(data, sizes=None, verbose=True):
+def granulometry_CDF(data, sizes=None, verbose=True, n_jobs=1):
 	s = max(data.shape)
 	if sizes is None: sizes = np.arange(1, s/2, 2)
 	sizes = sizes.astype(int)
-	granulo = np.zeros((len(sizes)))
+	# granulo = np.zeros((len(sizes)))
+	np.random.shuffle(sizes)
+	verbose = True
 	if verbose:
-		for n in tqdm(range(len(sizes))): granulo[n] = ndimage.binary_opening(data, structure=disk_structure(sizes[n])).sum()
+		# func = lambda n: ndimage.binary_opening(data, structure=disk_structure(sizes[n])).sum()
+		func = lambda n: morph.binary_opening(data, structure=disk_structure(sizes[n])).sum()
+		granulo = np.array(Parallel(n_jobs=n_jobs)(delayed(func)(i) for i in tqdm(range(len(sizes))) ))
+		# for n in tqdm(range(len(sizes))): granulo[n] = ndimage.binary_opening(data, structure=disk_structure(sizes[n])).sum()
 		print("Completed.")
-	return granulo
+	arg_sort = np.argsort(sizes)
+	return granulo[arg_sort]
 
-def granulometry_bsd(data, xth=0.5, boxsize=None, verbose=True, upper_lim=False, sampling=2):
+def granulometry_bsd(data, xth=0.5, boxsize=None, verbose=True, upper_lim=False, sampling=2, log_bins=None, n_jobs=1):
 	"""
 	Determined the sizes using the Granulometry (Gran) approach.
 	It is based on Kakiichi et al. (2017)
@@ -457,6 +465,8 @@ def granulometry_bsd(data, xth=0.5, boxsize=None, verbose=True, upper_lim=False,
 		It decides if the threshold is the upper limit or the lower limit (Default: False).
 	sampling  : int
 		Give the resolution of the radii in the pixel units (Default: 2).
+	n_jobs    : int
+	    Give the number of CPUs.
 
 	Returns
 	-------
@@ -471,19 +481,67 @@ def granulometry_bsd(data, xth=0.5, boxsize=None, verbose=True, upper_lim=False,
 		data = -1.*data
 		xth  = -1.*xth
 	mask = data > xth
-	sz   = np.arange(1, data.shape[0]/4, sampling)
-	granulo = granulometry_CDF(mask, sizes=sz, verbose=verbose)
-
-	rr = (sz*boxsize/data.shape[0])[:-1]
-	nn = np.array([granulo[i]-granulo[i+1] for i in range(len(granulo)-1)])
-
+	# if log_bins is not None: sz = np.unique((10**np.linspace(0, np.log10(data.shape[0]/4), log_bins)).astype(int))
+	# else: sz   = np.arange(1, data.shape[0]/4, sampling)
+	# granulo = granulometry_CDF(mask, sizes=sz, verbose=verbose, n_jobs=n_jobs)
+	# rr = (sz*boxsize/data.shape[0])[:-1]
+	# nn = np.array([(granulo[i]-granulo[i+1])/np.abs(sz[i]-sz[i+1]) for i in range(len(granulo)-1)])
+	if n_jobs>1: print('Parallelization not implemented yet.')
+	area, dFdR, R = _granulometry(mask)
+	Rs = (R*boxsize/data.shape[0])
+	dFdlnR = R*dFdR
 	t2 = datetime.datetime.now()
 	runtime = (t2-t1).total_seconds()/60
 
 	# print("\nProgram runtime: %f minutes." %runtime)
-	print("The output contains a tuple with three values: r, rdP/dr")
+	print("The output contains a tuple with three values: r, rdP/dr, dP/dr")
 	print("The curve has been normalized.")
-	return rr, nn/nn.sum()
+	return Rs, dFdlnR, dFdR
 
 
+def _granulometry(data, n_jobs=1):  
+
+    def disk(n):
+        struct = np.zeros((2 * n + 1, 2 * n + 1))
+        x, y = np.indices((2 * n + 1, 2 * n + 1))
+        mask = (x - n)**2 + (y - n)**2 <= n**2
+        struct[mask] = 1
+        return struct.astype(np.bool)
+    def ball(n):
+        struct = np.zeros((2*n+1, 2*n+1, 2*n+1))
+        x, y, z = np.indices((2*n+1, 2*n+1, 2*n+1))
+        mask = (x - n)**2 + (y - n)**2 + (z - n)**2 <= n**2
+        struct[mask] = 1
+        return struct.astype(np.bool)
+
+    s = max(data.shape)
+    dim   = data.ndim
+    pixel = range(np.int(s/2))
+    area0 = np.float(data.sum())
+    area  = np.zeros_like(pixel)
+
+    def func(n):
+        if dim == 2:
+            opened_data = morph.binary_opening(data,structure=disk(n))
+        if dim == 3:
+            opened_data = morph.binary_opening(data,structure=ball(n))
+        return float(opened_data.sum())
+
+    if n_jobs>1:
+        area = np.array(Parallel(n_jobs=n_jobs)(delayed(func)(i) for i in tqdm(pixel) ))
+    else:
+        t1 = time.time()
+        for n in pixel:
+            # print 'binary opening the data with radius =',n,' [pixels]'
+            loading_msg('R = {} pixels | time elapsed {:.1f} s'.format(n, (time.time()-t1)))
+            area[n] = func(n)
+            if area[n] == 0:
+                break
+
+    area = area.astype(float)
+    # print(area)
+    pattern_spectrum = np.append((area[:-1]-area[1:]).astype(float)/area[0], 0)
+    # print(pattern_spectrum)
+
+    return area, pattern_spectrum, np.array(pixel)
 
