@@ -545,3 +545,92 @@ def _granulometry(data, n_jobs=1):
 
     return area, pattern_spectrum, np.array(pixel)
 
+from skimage.segmentation import watershed
+from skimage.feature import peak_local_max
+from skimage.morphology import reconstruction
+
+def h_transform(image, h, verbose=True):
+	if verbose: print('Applying h-transform...')
+	seed = np.copy(image)
+	if image.ndim==3: seed[1:-1, 1:-1, 1:-1] = image.min()
+	else: seed[1:-1, 1:-1] = image.min()
+	mask = image
+	seed = image - h
+	dilated = reconstruction(seed, mask, method='dilation')
+	image = image - dilated
+	if verbose: print('...done')
+	return image
+
+def _watershed(image, h=None, threshold_rel=None, footprint=None, verbose=True):
+	distance = ndimage.distance_transform_edt(image)
+	if h is not None: distance1 = h_transform(distance, h, verbose=verbose)
+	if footprint is None: footprint = np.ones((3, 3)) if image.ndim==2 else np.ones((3,3,3))
+	if verbose: print('Finding watersheds...')
+	coords = peak_local_max(distance if h is None else distance1, footprint=footprint, labels=image, threshold_rel=threshold_rel)
+	mask = np.zeros(distance.shape, dtype=bool)
+	mask[tuple(coords.T)] = True
+	markers, _ = ndimage.label(mask)
+	labels = watershed(-distance if h is None else -distance1, markers, mask=image)
+	if verbose: print('...done')
+	return labels
+
+def watershed_bsd(data, xth=0.5, boxsize=None, verbose=True, upper_lim=False, h=None, n_jobs=1):
+	"""
+	Still needs testing.
+
+	Determined the sizes using the Watershed approach.
+	It is based on Lin et al. (2016)
+
+	Parameters
+	----------
+	input     : ndarray
+		2D/3D array of ionization fraction/brightness temperature.
+	xth       : float
+		The threshold value (Default: 0.5).
+	boxsize   : float
+		The boxsize in cMpc can be given (Default: conv.LB).
+	verbose   : bool
+		It prints the progress of the program (Default: True).
+	upper_lim : bool
+		It decides if the threshold is the upper limit or the lower limit (Default: False).
+	h         : float
+	    Parameter for performing h-transform to smooth out local peaks.
+	n_jobs    : int
+	    Give the number of CPUs.
+
+	Returns
+	-------
+	r  : ndarray
+		sizes of the regions
+	dn : ndarray
+		probability of finding the corresponding size 
+	"""
+	t1 = datetime.datetime.now()
+	if boxsize is None: boxsize = conv.LB
+	if (upper_lim): 
+		data = -1.*data
+		xth  = -1.*xth
+	mask = data > xth
+	# if log_bins is not None: sz = np.unique((10**np.linspace(0, np.log10(data.shape[0]/4), log_bins)).astype(int))
+	# else: sz   = np.arange(1, data.shape[0]/4, sampling)
+	# granulo = granulometry_CDF(mask, sizes=sz, verbose=verbose, n_jobs=n_jobs)
+	# rr = (sz*boxsize/data.shape[0])[:-1]
+	# nn = np.array([(granulo[i]-granulo[i+1])/np.abs(sz[i]-sz[i+1]) for i in range(len(granulo)-1)])
+	if n_jobs>1: print('Parallelization not implemented yet.')
+	labels = _watershed(mask, h=h)
+	uniq   = np.unique(labels[labels>0], return_counts=1)
+	r_list = np.cbrt(3*uniq[1]/4/np.pi)
+	r_pixl = np.arange(0, np.int(r_list.max()+2), 1)-0.5 
+	ht = np.histogram(r_list, bins=r_pixl)
+	dFdR, R = ht[0]/mask.sum(), ht[1][1:]/2+ht[1][:-1]/2
+
+	Rs = (R*boxsize/data.shape[0])
+	dFdlnR = R*dFdR
+	t2 = datetime.datetime.now()
+	runtime = (t2-t1).total_seconds()/60
+
+	# print("\nProgram runtime: %f minutes." %runtime)
+	print("The output contains a tuple with three values: r, rdP/dr, dP/dr")
+	print("The curve has been normalized.")
+	return Rs, dFdlnR, dFdR
+
