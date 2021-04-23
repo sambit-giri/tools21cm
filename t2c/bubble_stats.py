@@ -619,10 +619,11 @@ def watershed_bsd(data, xth=0.5, boxsize=None, verbose=True, upper_lim=False, h=
 	if n_jobs>1: print('Parallelization not implemented yet.')
 	labels = _watershed(mask, h=h)
 	uniq   = np.unique(labels[labels>0], return_counts=1)
-	r_list = np.cbrt(3*uniq[1]/4/np.pi)
+	r_list = np.cbrt(3*uniq[0]/4/np.pi)
 	r_pixl = np.arange(0, np.int(r_list.max()+2), 1)-0.5 
+	
 	ht = np.histogram(r_list, bins=r_pixl)
-	dFdR, R = ht[0]/mask.sum(), ht[1][1:]/2+ht[1][:-1]/2
+	dFdR, R = ht[0]/ht[0].sum(), ht[1][1:]/2+ht[1][:-1]/2
 
 	Rs = (R*boxsize/data.shape[0])
 	dFdlnR = R*dFdR
