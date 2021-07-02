@@ -116,7 +116,7 @@ def apply_operator_labelled_data(data, labels, operator=np.mean, verbose=True):
 	idx_low = 0
 	if verbose:
 		time.sleep(1)
-		for i in tqdm(elems):
+		for i in tqdm(elems, disable=False if verbose else True):
 			idx_high = idx_low + num[i]
 			out.append(operator(X1[idx_low:idx_high]))
 			idx_low  = idx_high

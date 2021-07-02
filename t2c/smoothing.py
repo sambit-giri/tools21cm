@@ -401,10 +401,10 @@ def smooth_coeval_tophat(cube, width, nu_axis, verbose=True):
         kernel = tophat_kernel(cube.shape[nu_axis], width)
         output_cube = np.zeros(cube.shape)
         if nu_axis==0:
-                for i in tqdm(range(cube.shape[1])):
+                for i in tqdm(range(cube.shape[1]), disable=False if verbose else True):
                         output_cube[:,i,:] = smooth_with_kernel(cube[:,i,:], kernel)
         else:
-                for i in tqdm(range(cube.shape[0])):
+                for i in tqdm(range(cube.shape[0]), disable=False if verbose else True):
                         output_cube[i,:,:] = smooth_with_kernel(cube[i,:,:], kernel)
         return output_cube
 
@@ -437,7 +437,7 @@ def smooth_lightcone_tophat(lightcone, redshifts, dz):
                 Smoothed_lightcone
         """
         output_lightcone = np.zeros(lightcone.shape)
-        for i in tqdm(range(output_lightcone.shape[2])):
+        for i in tqdm(range(output_lightcone.shape[2]), disable=False if verbose else True):
                 z_out_low  = redshifts[i]-dz[i]/2
                 z_out_high = redshifts[i]+dz[i]/2
                 idx_low  = int(np.ceil(find_idx(redshifts, z_out_low)))
