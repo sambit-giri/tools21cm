@@ -234,27 +234,27 @@ def mfp(data, xth=0.5, boxsize=None, iterations = 10000000, verbose=True, upper_
 		data = np.ones(data.shape)
 		iterations = 3
 	if dim == 2:
-		print("MFP method applied on 2D data (ver 1.0)")
+		if verbose: print("MFP method applied on 2D data (ver 1.0)")
 		#out = mfp2d(data, xth, iterations=iterations, verbose=verbose)
 		out = mfp_np.mfp2d(data, xth, iterations=iterations, verbose=verbose)
 	elif dim == 3:
-		print("MFP method applied on 3D data (ver 1.0)")
+		if verbose: print("MFP method applied on 3D data (ver 1.0)")
 		#out = mfp3d(data, xth, iterations=iterations, verbose=verbose)
 		out = mfp_np.mfp3d(data, xth, iterations=iterations, verbose=verbose)
 	else:
-		print("The data doesn't have the correct dimension")
+		if verbose: print("The data doesn't have the correct dimension")
 		return 0
 	nn = out[0]/iterations
 	rr = out[1]
 	t2 = datetime.datetime.now()
 	runtime = (t2-t1).total_seconds()/60
 
-	print("\nProgram runtime: %f minutes." %runtime)
+	if verbose: print("\nProgram runtime: %f minutes." %runtime)
 	if check_box==0:
-		print("There is no ROI in the data. Therefore, the BSD is zero everywhere.")
+		if verbose: print("There is no ROI in the data. Therefore, the BSD is zero everywhere.")
 		return rr*boxsize/data.shape[0], np.zeros(rr.shape)
-	print("The output contains a tuple with three values: r, rdP/dr")
-	print("The curve has been normalized.")
+	if verbose: print("The output contains a tuple with three values: r, rdP/dr")
+	if verbose: print("The curve has been normalized.")
 
 	r0,p0 = rr*boxsize/data.shape[0], rr*nn #rr[nn.argmax()]*boxsize/data.shape[0]
 	if bins is not None: r0,p0 = rebin_bsd(r0, p0, bins=bins, r_min=r_min, r_max=r_max)
