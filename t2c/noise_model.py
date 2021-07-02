@@ -275,7 +275,7 @@ def noise_cube_coeval(ncells, z, depth_mhz=None, obs_time=1000, filename=None, b
 	noise3d = np.zeros((ncells,ncells,ncells))
 	print("Creating the noise cube...")
 	sleep(1)
-	for k in tqdm(range(ncells)):
+	for k in tqdm(range(ncells), disable=~verbose):
 		noise2d = noise_map(ncells, z, depth_mhz, obs_time=obs_time, filename=filename, boxsize=boxsize, total_int_time=total_int_time, int_time=int_time, declination=declination, uv_map=uv_map, N_ant=N_ant, verbose=verbose, fft_wrap=fft_wrap)
 		noise3d[:,:,k] = noise2d
 		verbose = False
