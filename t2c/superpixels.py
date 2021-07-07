@@ -15,7 +15,7 @@ def slic_cube(cube, n_segments=5000, compactness=0.1, max_iter=20, sigma=0, min_
 	else:
 		multichannel = False
 	if verbose: print('Estimating superpixel labels using SLIC...')
-	labels = slic(cube, n_segments=n_segments, compactness=compactness, max_iter=max_iter, sigma=sigma, max_size_factor=max_size_factor, slic_zero=True, multichannel=multichannel)
+	labels = slic(cube, n_segments=n_segments, compactness=compactness, max_iter=max_iter, sigma=sigma, max_size_factor=max_size_factor, slic_zero=True, multichannel=multichannel, start_label=0)
 	if verbose: print("The output contains the labels with %d segments"%(labels.max()+1))
 	return labels
 
@@ -89,6 +89,7 @@ def stitch_using_histogram(data, mns, labels, bins='knuth', binary=True, on_supe
 			return out
 		else: return thres
 	else:
+		if len(np.unique(mns))==1: return np.zeros_like(data)
 		thres = threshold_otsu(mns)
 		if binary: 
 			if on_superpixel_map: 
