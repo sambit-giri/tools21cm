@@ -51,6 +51,7 @@ from .telescope_functions import *
 from .usefuls import *
 from .noise_model import *
 from .superpixels import *
+from .segmentation import *
 from .identify_regions import *
 from .read_files import *
 from .primary_beam import *
