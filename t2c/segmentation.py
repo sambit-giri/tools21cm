@@ -129,7 +129,7 @@ class segunet21cm:
         self.NR_MANIP = len(self.MANIP)
 
         # load model
-        MODEL_NAME = pkg_resources.resource_filename('t2c', 'input_data/segunet_02-10T23-52-36_128slice_ep56.h5')
+        MODEL_NAME = pkg_resources.resource_filename('tools21cm', 'input_data/segunet_02-10T23-52-36_128slice_ep56.h5')
         MODEL_EPOCH = 56
         METRICS = {'balanced_cross_entropy':balanced_cross_entropy, 'iou':iou, 'dice_coef':dice_coef} 
         self.MODEL_LOADED = load_model(MODEL_NAME, custom_objects=METRICS)
