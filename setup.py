@@ -15,7 +15,7 @@ setup(name='tools21cm',
       package_dir = {'tools21cm' : 't2c'},
       packages=['tools21cm'],
       # package_data={'share':['*'],},
-      package_data={'BCMemu': ['input_data/*']},
+      package_data={'tools21cm': ['input_data/*']},
       install_requires=['numpy','scipy','scikit-learn','scikit-image', 'tqdm', 'joblib'],
       #include_package_data=True,
 )
