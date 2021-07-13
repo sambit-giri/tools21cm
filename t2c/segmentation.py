@@ -6,8 +6,12 @@ import numpy as np, pkg_resources
 from tqdm import tqdm
 
 import tensorflow as tf
-from tensorflow.keras.models import load_model
-from tensorflow.keras import backend as K
+try:
+    from tensorflow.keras.models import load_model
+    from tensorflow.keras import backend as K
+except:
+    from tensorflow.python.keras.models import load_model
+    from tensorflow.python.keras import backend as K
 from tensorflow.python.ops import nn_ops
 from tensorflow.python.framework import ops 
 from tensorflow.python.ops import array_ops 
