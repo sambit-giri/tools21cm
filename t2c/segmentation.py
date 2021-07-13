@@ -5,6 +5,9 @@ Created by Michele Bianco, 9 July 2021
 import numpy as np, pkg_resources
 from tqdm import tqdm
 
+import warnings
+warnings.filterwarnings("ignore")
+
 import tensorflow as tf
 try:
     from tensorflow.keras.models import load_model
