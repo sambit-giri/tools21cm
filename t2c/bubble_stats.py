@@ -487,19 +487,20 @@ def granulometry_bsd(data, xth=0.5, boxsize=None, verbose=True, upper_lim=False,
 	# rr = (sz*boxsize/data.shape[0])[:-1]
 	# nn = np.array([(granulo[i]-granulo[i+1])/np.abs(sz[i]-sz[i+1]) for i in range(len(granulo)-1)])
 	if n_jobs>1: print('Parallelization not implemented yet.')
-	area, dFdR, R = _granulometry(mask)
+	area, dFdR, R = _granulometry(mask, verbose=verbose)
 	Rs = (R*boxsize/data.shape[0])
 	dFdlnR = R*dFdR
 	t2 = datetime.datetime.now()
 	runtime = (t2-t1).total_seconds()/60
 
-	# print("\nProgram runtime: %f minutes." %runtime)
-	print("The output contains a tuple with three values: r, rdP/dr, dP/dr")
-	print("The curve has been normalized.")
+	if verbose:
+		# print("\nProgram runtime: %f minutes." %runtime)
+		print("The output contains a tuple with three values: r, rdP/dr, dP/dr")
+		print("The curve has been normalized.")
 	return Rs, dFdlnR, dFdR
 
 
-def _granulometry(data, n_jobs=1):  
+def _granulometry(data, n_jobs=1, verbose=True):  
 
     def disk(n):
         struct = np.zeros((2 * n + 1, 2 * n + 1))
@@ -533,7 +534,7 @@ def _granulometry(data, n_jobs=1):
         t1 = time.time()
         for n in pixel:
             # print 'binary opening the data with radius =',n,' [pixels]'
-            loading_msg('R = {} pixels | time elapsed {:.1f} s'.format(n, (time.time()-t1)))
+            if verbose: loading_msg('R = {} pixels | time elapsed {:.1f} s'.format(n, (time.time()-t1)))
             area[n] = func(n)
             if area[n] == 0:
                 break
