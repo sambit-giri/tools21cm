@@ -27,6 +27,6 @@ def test_interpolate3d():
 
 
 def test_tophat_kernel_3d():
-	kernel = t2c.tophat_kernel_3d(5)
+	kernel = t2c.tophat_kernel_3d(5,5)
 	assert np.all((kernel-1/5**3)<0.001)
 
