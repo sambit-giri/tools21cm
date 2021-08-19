@@ -234,27 +234,27 @@ def mfp(data, xth=0.5, boxsize=None, iterations = 10000000, verbose=True, upper_
 		data = np.ones(data.shape)
 		iterations = 3
 	if dim == 2:
-		print("MFP method applied on 2D data (ver 1.0)")
+		if verbose: print("MFP method applied on 2D data (ver 1.0)")
 		#out = mfp2d(data, xth, iterations=iterations, verbose=verbose)
 		out = mfp_np.mfp2d(data, xth, iterations=iterations, verbose=verbose)
 	elif dim == 3:
-		print("MFP method applied on 3D data (ver 1.0)")
+		if verbose: print("MFP method applied on 3D data (ver 1.0)")
 		#out = mfp3d(data, xth, iterations=iterations, verbose=verbose)
 		out = mfp_np.mfp3d(data, xth, iterations=iterations, verbose=verbose)
 	else:
-		print("The data doesn't have the correct dimension")
+		if verbose: print("The data doesn't have the correct dimension")
 		return 0
 	nn = out[0]/iterations
 	rr = out[1]
 	t2 = datetime.datetime.now()
 	runtime = (t2-t1).total_seconds()/60
 
-	print("\nProgram runtime: %f minutes." %runtime)
+	if verbose: print("\nProgram runtime: %f minutes." %runtime)
 	if check_box==0:
-		print("There is no ROI in the data. Therefore, the BSD is zero everywhere.")
+		if verbose: print("There is no ROI in the data. Therefore, the BSD is zero everywhere.")
 		return rr*boxsize/data.shape[0], np.zeros(rr.shape)
-	print("The output contains a tuple with three values: r, rdP/dr")
-	print("The curve has been normalized.")
+	if verbose: print("The output contains a tuple with three values: r, rdP/dr")
+	if verbose: print("The curve has been normalized.")
 
 	r0,p0 = rr*boxsize/data.shape[0], rr*nn #rr[nn.argmax()]*boxsize/data.shape[0]
 	if bins is not None: r0,p0 = rebin_bsd(r0, p0, bins=bins, r_min=r_min, r_max=r_max)
@@ -487,19 +487,20 @@ def granulometry_bsd(data, xth=0.5, boxsize=None, verbose=True, upper_lim=False,
 	# rr = (sz*boxsize/data.shape[0])[:-1]
 	# nn = np.array([(granulo[i]-granulo[i+1])/np.abs(sz[i]-sz[i+1]) for i in range(len(granulo)-1)])
 	if n_jobs>1: print('Parallelization not implemented yet.')
-	area, dFdR, R = _granulometry(mask)
+	area, dFdR, R = _granulometry(mask, verbose=verbose)
 	Rs = (R*boxsize/data.shape[0])
 	dFdlnR = R*dFdR
 	t2 = datetime.datetime.now()
 	runtime = (t2-t1).total_seconds()/60
 
-	# print("\nProgram runtime: %f minutes." %runtime)
-	print("The output contains a tuple with three values: r, rdP/dr, dP/dr")
-	print("The curve has been normalized.")
+	if verbose:
+		# print("\nProgram runtime: %f minutes." %runtime)
+		print("The output contains a tuple with three values: r, rdP/dr, dP/dr")
+		print("The curve has been normalized.")
 	return Rs, dFdlnR, dFdR
 
 
-def _granulometry(data, n_jobs=1):  
+def _granulometry(data, n_jobs=1, verbose=True):  
 
     def disk(n):
         struct = np.zeros((2 * n + 1, 2 * n + 1))
@@ -533,7 +534,7 @@ def _granulometry(data, n_jobs=1):
         t1 = time.time()
         for n in pixel:
             # print 'binary opening the data with radius =',n,' [pixels]'
-            loading_msg('R = {} pixels | time elapsed {:.1f} s'.format(n, (time.time()-t1)))
+            if verbose: loading_msg('R = {} pixels | time elapsed {:.1f} s'.format(n, (time.time()-t1)))
             area[n] = func(n)
             if area[n] == 0:
                 break
@@ -544,4 +545,94 @@ def _granulometry(data, n_jobs=1):
     # print(pattern_spectrum)
 
     return area, pattern_spectrum, np.array(pixel)
+
+from skimage.segmentation import watershed
+from skimage.feature import peak_local_max
+from skimage.morphology import reconstruction
+
+def h_transform(image, h, verbose=True):
+	if verbose: print('Applying h-transform...')
+	seed = np.copy(image)
+	if image.ndim==3: seed[1:-1, 1:-1, 1:-1] = image.min()
+	else: seed[1:-1, 1:-1] = image.min()
+	mask = image
+	seed = image - h
+	dilated = reconstruction(seed, mask, method='dilation')
+	image = image - dilated
+	if verbose: print('...done')
+	return image
+
+def _watershed(image, h=None, threshold_rel=None, footprint=None, verbose=True):
+	distance = ndimage.distance_transform_edt(image)
+	if h is not None: distance1 = h_transform(distance, h, verbose=verbose)
+	if footprint is None: footprint = np.ones((3, 3)) if image.ndim==2 else np.ones((3,3,3))
+	if verbose: print('Finding watersheds...')
+	coords = peak_local_max(distance if h is None else distance1, footprint=footprint, labels=image, threshold_rel=threshold_rel)
+	mask = np.zeros(distance.shape, dtype=bool)
+	mask[tuple(coords.T)] = True
+	markers, _ = ndimage.label(mask)
+	labels = watershed(-distance if h is None else -distance1, markers, mask=image)
+	if verbose: print('...done')
+	return labels
+
+def watershed_bsd(data, xth=0.5, boxsize=None, verbose=True, upper_lim=False, h=None, n_jobs=1):
+	"""
+	Still needs testing.
+
+	Determined the sizes using the Watershed approach.
+	It is based on Lin et al. (2016)
+
+	Parameters
+	----------
+	input     : ndarray
+		2D/3D array of ionization fraction/brightness temperature.
+	xth       : float
+		The threshold value (Default: 0.5).
+	boxsize   : float
+		The boxsize in cMpc can be given (Default: conv.LB).
+	verbose   : bool
+		It prints the progress of the program (Default: True).
+	upper_lim : bool
+		It decides if the threshold is the upper limit or the lower limit (Default: False).
+	h         : float
+	    Parameter for performing h-transform to smooth out local peaks.
+	n_jobs    : int
+	    Give the number of CPUs.
+
+	Returns
+	-------
+	r  : ndarray
+		sizes of the regions
+	dn : ndarray
+		probability of finding the corresponding size 
+	"""
+	t1 = datetime.datetime.now()
+	if boxsize is None: boxsize = conv.LB
+	if (upper_lim): 
+		data = -1.*data
+		xth  = -1.*xth
+	mask = data > xth
+	# if log_bins is not None: sz = np.unique((10**np.linspace(0, np.log10(data.shape[0]/4), log_bins)).astype(int))
+	# else: sz   = np.arange(1, data.shape[0]/4, sampling)
+	# granulo = granulometry_CDF(mask, sizes=sz, verbose=verbose, n_jobs=n_jobs)
+	# rr = (sz*boxsize/data.shape[0])[:-1]
+	# nn = np.array([(granulo[i]-granulo[i+1])/np.abs(sz[i]-sz[i+1]) for i in range(len(granulo)-1)])
+	if n_jobs>1: print('Parallelization not implemented yet.')
+	labels = _watershed(mask, h=h)
+	uniq   = np.unique(labels[labels>0], return_counts=1)
+	r_list = np.cbrt(3*uniq[0]/4/np.pi)
+	r_pixl = np.arange(0, np.int(r_list.max()+2), 1)-0.5 
+	
+	ht = np.histogram(r_list, bins=r_pixl)
+	dFdR, R = ht[0]/ht[0].sum(), ht[1][1:]/2+ht[1][:-1]/2
+
+	Rs = (R*boxsize/data.shape[0])
+	dFdlnR = R*dFdR
+	t2 = datetime.datetime.now()
+	runtime = (t2-t1).total_seconds()/60
+
+	# print("\nProgram runtime: %f minutes." %runtime)
+	print("The output contains a tuple with three values: r, rdP/dr, dP/dr")
+	print("The curve has been normalized.")
+	return Rs, dFdlnR, dFdR
 

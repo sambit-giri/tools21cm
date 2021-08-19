@@ -2,12 +2,12 @@
 Methods to identify regions of interest in images.
 '''
 
-from skimage.filters import threshold_otsu
+import numpy as np
+from skimage.filters import threshold_otsu, threshold_triangle
 from scipy.signal import argrelextrema
 import matplotlib.pyplot as plt
 from . import superpixels
 from sklearn.cluster import KMeans
-import numpy as np
 
 def bubbles_from_slic(data, n_segments=5000, bins='knuth', verbose=True):
 	"""
@@ -93,18 +93,74 @@ def bubbles_from_fixed_threshold(data, threshold=0, upper_lim=True):
 	if upper_lim: return (data<=threshold)
 	else: return  (data>=threshold)
 
+def bubbles_from_triangle3D(data, upper_lim=True, nbins=256):
+	"""
+	Gazagnes et al. (2021) https://arxiv.org/abs/2011.08260
+	Giri at al. (2018b)    https://arxiv.org/abs/1801.06550
+	Zack et al. (1977)     https://journals.sagepub.com/doi/10.1177/25.7.70454
+
+	It is a method to identify regions of interest in noisy images.
+	The method uses a triangle threshold proposed in Zack et al. (1977) for 2D images.
+	Here we use the same method for 3D data as proposed in Giri at al. (2018b) and Gazagnes et al. (2021).
+
+	Parameters
+	----------
+	data      : ndarray
+		The brightness temperature or ionization fraction cube. 
+	upper_lim : bool
+		This decides which mode in the PDF is to be identified.
+		'True' identifies ionized regions in brightness temperature, while
+		'False' identifies in the xfrac data (Default: True).
+	nbins : int
+		The number of bins used for histogram (Default: 256).
+
+	Returns
+	-------
+	Binary cube where pixels identified as region of interest are the True.
+	"""
+	threshold = threshold_triangle(data, nbins=nbins)
+	if upper_lim: return (data<=threshold)
+	else: return  (data>=threshold)
+
+def bubbles_from_triangle2D(data, upper_lim=True, nbins=256, loc_axis=2):
+	"""
+	Gazagnes et al. (2021) https://arxiv.org/abs/2011.08260
+	Giri at al. (2018b)    https://arxiv.org/abs/1801.06550
+	Zack et al. (1977)     https://journals.sagepub.com/doi/10.1177/25.7.70454
+
+	It is a method to identify regions of interest in noisy images.
+	The method uses a triangle threshold proposed in Zack et al. (1977) for 2D images.
+	Here we use the technique proposed in Gazagnes et al. (2021) and determine threshold from 2D slices and determine take the median value.
+
+	Parameters
+	----------
+	data      : ndarray
+		The brightness temperature or ionization fraction cube. 
+	upper_lim : bool
+		This decides which mode in the PDF is to be identified.
+		'True' identifies ionized regions in brightness temperature, while
+		'False' identifies in the xfrac data (Default: True).
+	nbins : int
+		The number of bins used for histogram (Default: 256).
+
+	Returns
+	-------
+	Binary cube where pixels identified as region of interest are the True.
+	"""
+	if loc_axis in [0,-3]: threshold_s = np.array([threshold_triangle(data[i,:,:], nbins=nbins) for i in range(data.shape[0])])
+	elif loc_axis in [1,-2]: threshold_s = np.array([threshold_triangle(data[:,i,:], nbins=nbins) for i in range(data.shape[1])])
+	else: threshold_s = np.array([threshold_triangle(data[:,:,i], nbins=nbins) for i in range(data.shape[2])])
+	threshold = np.median(threshold_s) 
+	if upper_lim: return (data<=threshold)
+	else: return  (data>=threshold)
+
+
 def threshold_kmeans(cube, upper_lim=False, mean_remove=True, n_jobs=1):
 	#The input is the brightness temperature cube.
 	
 	array = np.zeros(cube.shape)
-	#km = KMeans(n_clusters=2)
-	# if mean_remove:
-	# 	if upper_lim: X = cube[cube<=cube.mean()].reshape(-1,1)
-	# 	else: X = cube[cube>=cube.mean()].reshape(-1,1)
-	# else:
-	#  	X  = cube.reshape(-1,1)
 	X  = cube.reshape(-1,1)
-	y = KMeans(n_clusters=2, n_jobs=n_jobs).fit_predict(X)
+	y = KMeans(n_clusters=2).fit_predict(X)
 	t_th = X[y==0].max()/2.+X[y==1].max()/2.
 	if upper_lim: array[cube<=t_th] = 1
 	else: array[cube>t_th] = 1
@@ -114,7 +170,7 @@ def threshold_kmeans(cube, upper_lim=False, mean_remove=True, n_jobs=1):
 def threshold_kmeans_3cluster(cube, upper_lim=False, n_jobs=1):
 	#The input is the brightness temperature cube.
 	
-	km = KMeans(n_clusters=3, n_jobs=n_jobs)
+	km = KMeans(n_clusters=3)
 	X  = cube.reshape(-1,1)
 	array = np.zeros(X.shape)
 	km.fit(X)
