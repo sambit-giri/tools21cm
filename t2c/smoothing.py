@@ -424,7 +424,7 @@ def smooth_coeval_gauss(cube, fwhm, nu_axis):
         output_cube = smooth_lightcone_gauss(cube, fwhm*one, nu_axis=nu_axis)
         return output_cube
 
-def smooth_lightcone_tophat(lightcone, redshifts, dz, verbose=Trueß):
+def smooth_lightcone_tophat(lightcone, redshifts, dz, verbose=True):
         """
         This smooths the slices perpendicular to the third axis of the lightcone by tophat filter.
 
