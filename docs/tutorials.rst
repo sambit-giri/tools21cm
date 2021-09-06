@@ -10,3 +10,4 @@ The following examples will help you get started with ``tools21cm``:
    :caption: Examples:
 
    examples/tutorials
+   examples/lightcone
