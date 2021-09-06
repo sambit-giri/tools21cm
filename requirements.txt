@@ -8,3 +8,5 @@ scikit-image
 pyfits
 tqdm
 joblib
+
+git+https://github.com/sambit-giri/cosmospectra.git
