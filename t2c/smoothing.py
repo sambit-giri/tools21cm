@@ -424,7 +424,7 @@ def smooth_coeval_gauss(cube, fwhm, nu_axis):
         output_cube = smooth_lightcone_gauss(cube, fwhm*one, nu_axis=nu_axis)
         return output_cube
 
-def smooth_lightcone_tophat(lightcone, redshifts, dz):
+def smooth_lightcone_tophat(lightcone, redshifts, dz, verbose=True):
         """
         This smooths the slices perpendicular to the third axis of the lightcone by tophat filter.
 
@@ -472,5 +472,88 @@ def hubble_parameter(z):
         part = np.sqrt(const.Omega0*(1.+z)**3+const.lam)
         return const.H0 * part
 
+
+
+
+def remove_baselines_from_uvmap(uv_map, z, max_baseline=2, box_size_mpc=False):
+    if (not box_size_mpc): box_size_mpc=conv.LB  
+    output_dtheta = (1+z)*21e-5/max_baseline
+    output_dx_Mpc = output_dtheta*cm.z_to_cdist(z)
+    output_dx_res = output_dx_Mpc * uv_map.shape[0]/box_size_mpc
+    fft_dk_res_invMpc = box_size_mpc/output_dx_Mpc
+    filt = np.zeros_like(uv_map)
+    xx, yy = np.meshgrid(np.arange(uv_map.shape[0]), np.arange(uv_map.shape[1]), sparse=True)
+    rr1 = (xx**2 + yy**2)
+    rr2 = ((uv_map.shape[0]-xx)**2 + yy**2)
+    rr3 = (xx**2 + (uv_map.shape[1]-yy)**2)
+    rr4 = ((uv_map.shape[0]-xx)**2 + (uv_map.shape[1]-yy)**2)
+    filt[rr1<=fft_dk_res_invMpc**2] = 1
+    filt[rr2<=fft_dk_res_invMpc**2] = 1
+    filt[rr3<=fft_dk_res_invMpc**2] = 1
+    filt[rr4<=fft_dk_res_invMpc**2] = 1
+    filt[0,0] = 0
+    return filt*uv_map
+
+def convolve_uvmap(array, z=None, uv_map=None, max_baseline=None, box_size_mpc=False, 
+        filename=None, total_int_time=6.0, int_time=10.0, declination=-30.0, verbose=True):
+    if (not box_size_mpc): box_size_mpc=conv.LB  
+    if uv_map is None: 
+        uv_map, N_ant  = get_uv_map(array.shape[0],
+                                    z,
+                                    filename=filename,
+                                    total_int_time=total_int_time,
+                                    int_time=int_time,
+                                    boxsize=box_size_mpc,
+                                    declination=declination,
+                                    verbose=verbose,
+                                )
+    if max_baseline is not None: uv_map = remove_baselines_from_uvmap(uv_map, z, max_baseline=max_baseline, box_size_mpc=box_size_mpc)
+    img_arr  = np.fft.fft2(array)
+    kernel2d = uv_map #np.ones_like(uv_map); kernel2d[uv_map==0] = 0
+    img_arr *= kernel2d/kernel2d.max()
+    img_map  = np.fft.ifft2(img_arr)
+    return np.real(img_map)
+
+
+
+def convolve_uvmap_coeval(cube, z, box_size_mpc=False, max_baseline=2., ratio=1., nu_axis=2, verbose=True,
+                filename=None, total_int_time=6.0, int_time=10.0, declination=-30.0, uv_map=None):
+        """
+        This smooths the coeval cube by Gaussian in angular direction and by tophat along the third axis.
+
+        Parameters:
+                coeval_cube (numpy array): The data cube that is to be smoothed.
+                z (float)                : The redshift of the coeval cube.
+                box_size_mpc (float)     : The box size in Mpc. Default value is determined from 
+                                             the box size set for the simulation (set_sim_constants)
+                max_baseline (float)     : The maximun baseline of the telescope in km. Default value 
+                                             is set as 2 km (SKA core).
+                ratio (int)              : It is the ratio of smoothing scale in frequency direction and 
+                                             the angular direction (Default value: 1).
+                nu_axis (int)            : Frequency axis
+
+        Returns:
+                Smoothed_coeval_cube
+        """
+        if (not box_size_mpc): box_size_mpc=conv.LB  
+        if uv_map is None: 
+                uv_map, N_ant  = get_uv_map(array.shape[0],
+                                            z,
+                                            filename=filename,
+                                            total_int_time=total_int_time,
+                                            int_time=int_time,
+                                            boxsize=box_size_mpc,
+                                            declination=declination,
+                                            verbose=verbose,
+                                        )
+        if max_baseline is not None: uv_map = remove_baselines_from_uvmap(uv_map, z, max_baseline=max_baseline, box_size_mpc=box_size_mpc)
+    
+        output_dtheta  = (1+z)*21e-5/max_baseline
+        output_ang_res = output_dtheta*cm.z_to_cdist(z) * cube.shape[0]/box_size_mpc
+        output_cube = smooth_coeval_tophat(cube, output_ang_res*ratio, nu_axis=nu_axis, verbose=verbose)
+        if nu_axis not in [2,-1]: output_cube = np.swapaxes(output_cube,nu_axis,2)
+        output_cube = np.array([convolve_uvmap(output_cube[:,:,i], uv_map=uv_map, verbose=verbose, box_size_mpc=box_size_mpc) for i in tqdm(range(output_cube.shape[2]),disable=not verbose)])
+        if nu_axis not in [2,-1]: output_cube = np.swapaxes(output_cube,nu_axis,2)
+        return output_cube
 
 

@@ -1,4 +1,7 @@
 site/
-site/
-site/
-site/
+build
+dist
+*.egg-info
+
+
+
