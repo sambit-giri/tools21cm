@@ -2,7 +2,8 @@
 Created by Michele Bianco, 9 July 2021
 """
 
-import numpy as np, pkg_resources
+import numpy as np
+import pkg_resources
 from tqdm import tqdm
 
 import warnings
