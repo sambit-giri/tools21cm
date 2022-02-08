@@ -5,7 +5,7 @@ astropy
 pyfftw
 scikit-learn
 scikit-image
-pyfits
+## pyfits
 tqdm
 joblib
 

@@ -18,7 +18,7 @@ setup(name='tools21cm',
       package_data={'tools21cm': ['input_data/*']},
       install_requires=['numpy', 'scipy', 'matplotlib', 'numba',
                         'scikit-learn', 'scikit-image', 'astropy',
-                        'tqdm', 'joblib', 'pyfftw', 'pyfits',
+                        'tqdm', 'joblib', 'pyfftw', #'pyfits',
                         'cosmospectra@git+https://github.com/sambit-giri/cosmospectra.git'],
       # include_package_data=True,
 )

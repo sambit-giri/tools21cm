@@ -245,11 +245,18 @@ def read_fits(filename, header=True):
         Returns:
                 numpy array containing the data
         '''
+        try:
+                import pyfits as pf
+                hdulist = pf.open(filename)
+                header = hdulist[0].header
+                data = hdulist[0].data.astype('float64')
+        except:
+                from astropy.io import fits
+                fits_image_filename = fits.util.get_testdata_filepath(filename)
+                hdul = fits.open(fits_image_filename)
+                header = hdul[0].header
+                data = hdul[1].data.astype('float64')
 
-        import pyfits as pf
-        hdulist = pf.open(filename)
-        header = hdulist[0].header
-        data = hdulist[0].data.astype('float64')
         if header: return data, header
         else: return data
 
@@ -268,16 +275,19 @@ def save_fits(data, filename, header=None):
                 Nothing
         
         '''
-        import pyfits as pf
         
         save_data, datatype = get_data_and_type(data)
-        
-        #hdu = pf.PrimaryHDU(save_data.astype('float64'))
-        #hdulist = pf.HDUList([hdu])
-        #hdulist.writeto(filename, clobber=True)
 
-        if type(header)==pf.header.Header: pf.writeto(filename, save_data, header)
-        else: pf.writeto(filename, save_data)
+        try:
+                import pyfits as pf
+                if type(header)==pf.header.Header: pf.writeto(filename, save_data, header)
+                else: pf.writeto(filename, save_data)
+        except:
+                from astropy.io import fits
+                hdu = pf.PrimaryHDU(save_data.astype('float64'))
+                hdulist = pf.HDUList([hdu])
+                hdulist.writeto(filename, clobber=True)
+
         
 
 def determine_filetype(filename):
