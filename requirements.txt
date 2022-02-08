@@ -9,4 +9,4 @@ pyfits
 tqdm
 joblib
 
-git+https://github.com/sambit-giri/cosmospectra.git
+cosmospectra@git+https://github.com/sambit-giri/cosmospectra.git
