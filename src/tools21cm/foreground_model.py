@@ -90,7 +90,7 @@ def diabolo_filter(z, ncells=None, array=None, boxsize=None, mu=0.5, funct='step
 	for i in xrange(ncells):
 		kpp = k0[i]
 		kpr = np.abs(kpp)*(1-mu**2)/mu
-		if funct is 'sigmoid': 
+		if funct == 'sigmoid': 
 			ss = 1-1./(1+np.exp(10*(k2-kpr)))
 			#ss = 1./(1+np.exp(10*(-kpr+kmin)))*1./(1+np.exp(10*(k2-kpr)))
 		else: 

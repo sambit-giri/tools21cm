@@ -5,8 +5,9 @@ astropy
 pyfftw
 scikit-learn
 scikit-image
-pyfits
+## pyfits
 tqdm
 joblib
 
 cosmospectra@git+https://github.com/sambit-giri/cosmospectra.git
+pytest
