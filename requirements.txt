@@ -10,3 +10,4 @@ tqdm
 joblib
 
 cosmospectra@git+https://github.com/sambit-giri/cosmospectra.git
+pytest
