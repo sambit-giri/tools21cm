@@ -4,7 +4,7 @@ Main modules
 
 Angular coordinates
 -------------------
-.. automodule:: src.tools21cm.angular_coordinates
+.. automodule:: t2c.angular_coordinates
     :members:
 
 Bubble Statistics
