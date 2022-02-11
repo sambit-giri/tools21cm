@@ -11,9 +11,10 @@ from . import helper_functions as hf
 from . import smoothing
 from . import const
 from scipy.signal import fftconvolve
+from tqdm import tqdm
 
 
-def physical_lightcone_to_observational(physical_lightcone, input_z_low, output_dnu, output_dtheta, input_box_size_mpc=None):
+def physical_lightcone_to_observational(physical_lightcone, input_z_low, output_dnu, output_dtheta, input_box_size_mpc=None, verbose=True):
     '''
     Interpolate a lightcone volume from physical (length) units
     to observational (angle/frequency) units.
@@ -46,7 +47,7 @@ def physical_lightcone_to_observational(physical_lightcone, input_z_low, output_
     #Go through each slice and make angular slices for each one
     hf.print_msg('Binning in angle...')
     output_volume = np.zeros((n_cells_theta, n_cells_theta, n_cells_nu))
-    for i in range(n_cells_nu):
+    for i in tqdm(range(n_cells_nu), disable=not verbose):
         if i%10 == 0:
             hf.print_msg('Slice %d of %d' % (i, n_cells_nu))
         z = cm.nu_to_z(output_freqs[i])
@@ -57,7 +58,7 @@ def physical_lightcone_to_observational(physical_lightcone, input_z_low, output_
     return output_volume, output_freqs
 
 
-def observational_lightcone_to_physical(observational_lightcone, input_freqs, input_dtheta):
+def observational_lightcone_to_physical(observational_lightcone, input_freqs, input_dtheta, verbose=True):
     '''
     Interpolate a lightcone volume measured in observational (angle/frequency)
     units into  physical (length) units. The output resolution will be set
@@ -93,7 +94,7 @@ def observational_lightcone_to_physical(observational_lightcone, input_freqs, in
     #interpolate down to correct resolution
     n_cells_perp = int(fov_mpc/output_cell_size)
     output_volume_par = np.zeros((n_cells_perp, n_cells_perp, observational_lightcone.shape[2]))
-    for i in range(output_volume_par.shape[2]):
+    for i in tqdm(range(output_volume_par.shape[2]), disable=not verbose):
         z = cm.nu_to_z(input_freqs[i])
         output_volume_par[:,:,i] = angular_slice_to_physical(observational_lightcone[:,:,i],\
                                                     z, slice_size_deg=fov_deg, output_cell_size=output_cell_size,\
