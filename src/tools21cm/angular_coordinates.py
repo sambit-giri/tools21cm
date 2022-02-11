@@ -26,6 +26,7 @@ def physical_lightcone_to_observational(physical_lightcone, input_z_low, output_
         output_dtheta (float): the angular resolution of the output in arcmin
         input_box_size_mpc (float): the size of the input FoV in Mpc.
             If None (default), this will be set to conv.LB
+        verbose (bool): show progress bar
             
     Returns:
         * The output volume as a numpy array
@@ -71,6 +72,7 @@ def observational_lightcone_to_physical(observational_lightcone, input_freqs, in
         input_freqs (numpy array): the frequency in MHz of each slice along the 
             line of sight of the input
         input_dheta (float): the angular size of a cell in arcmin
+        verbose (bool): show progress bar
         
     Returns:
         * The output volume
@@ -277,6 +279,26 @@ def _get_padded_slice(input_slice, padded_n):
     padded_slice[:slice_n, slice_n:] = input_slice[:,:(padded_n-slice_n)]
     padded_slice[slice_n:, slice_n:] = input_slice[:(padded_n-slice_n), :(padded_n-slice_n)]
     return padded_slice
+
+def padding_lightcone(lc, padded_n=None, mode='wrap', verbose=True):
+    '''
+    Pad lightcone in the field of view direction.
+    
+    Parameters:
+        lc (numpy array): the light-cone in physical coordinates with third axis as the light-of-sight.
+        padded_n (int): number of cells to pad. The default value is half of the number of cells.
+        mode (str): mode used for padding (see the documentation of numpy.pad). 
+        verbose (bool): show progress bar.
+
+    Returns:
+        padded lightcone
+    '''
+    if padded_n is None: padded_n = int(lc.shape[1]/2)
+    out_lc = np.zeros((lc.shape[0]+2*padded_n,lc.shape[1]+2*padded_n,lc.shape[2]))
+    for i in tqdm(range(lc.shape[2]), disable=not verbose):
+        out_lc[:,:,i] = np.pad(lc[:,:,i], padded_n, mode=mode)
+    return out_lc
+
 
 
 
