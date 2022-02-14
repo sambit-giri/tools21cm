@@ -11,3 +11,4 @@ The following examples will help you get started with ``tools21cm``:
 
    examples/tutorials
    examples/lightcone
+   examples/lightcone_coordinate_conversion
