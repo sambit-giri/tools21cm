@@ -49,6 +49,12 @@ For detail documentation and how to use them, see [here](https://tools21cm.readt
 
 ## INSTALLATION
 
+One can install a stable version of this package using pip by running the following command::
+
+    pip install tools21cm
+
+This package is being actively under-development, which involves addition of new modules and bug fixes. In order to use the latest version, one can clone this package.
+
 To install the package from source, one should clone this package running the following::
 
     git clone https://github.com/sambit-giri/tools21cm.git
@@ -61,7 +67,7 @@ In order to install it in a separate directory::
 
     python setup.py install --home=directory
 
-One can also install it using pip by running the following command::
+One can also install the latest version using pip by running the following command::
 
     pip install git+https://github.com/sambit-giri/tools21cm.git
 
