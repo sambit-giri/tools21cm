@@ -155,10 +155,11 @@ def power_spect_2d(input_array, kbins=10, binning='log', box_dims=244/.7, return
 				    'linear' or 'mixed'.
 			
 	Returns: 
-		A tuple with (Pk, kper_bins, kpar_bins), where Pk is an array with the 
-		power spectrum of dimensions (n_kper x n_kpar), 
-		mubins is an array with the mu bin centers and
-		kbins is an array with the k bin centers.
+		A tuple with (Pk, kper_bins, kpar_bins) if return_modes is False else (Pk, kper_bins, kpar_bins, n_modes), 
+		where Pk is an array with the power spectrum of dimensions (n_kper x n_kpar), 
+		mubins is an array with the mu bin centers,
+		kbins is an array with the k bin centers and 
+		n_modes is the number of modes.
 	
 	'''
 	if np.array(kbins).size==1: kbins = [kbins, kbins]
@@ -169,6 +170,8 @@ def power_spect_2d(input_array, kbins=10, binning='log', box_dims=244/.7, return
 	del kx, ky, kz
 	kz = kdict[str(nu_axis)]
 	kp = np.sqrt(kdict[str(np.setdiff1d([0,1,2],nu_axis)[0])]**2+kdict[str(np.setdiff1d([0,1,2],nu_axis)[1])]**2)
+	kz = np.abs(kz)
+	# print(np.abs(kp[kp!=0]).min(),np.abs(kz[kz!=0]).min())
 	if binning=='log': 
 		kper = np.linspace(np.log10(np.abs(kp[kp!=0]).min()), np.log10(kp.max()), kbins[0]+1)
 		kpar = np.linspace(np.log10(np.abs(kz[kz!=0]).min()), np.log10(kz.max()), kbins[1]+1)
@@ -177,8 +180,10 @@ def power_spect_2d(input_array, kbins=10, binning='log', box_dims=244/.7, return
 		kper = np.linspace(np.abs(kp[kp!=0]).min(), kp.max(), kbins[0]+1)
 		kpar = np.linspace(np.abs(kz[kz!=0]).min(), kz.max(), kbins[1]+1)
 	k_width = kper[1]-kper[0], kpar[1]-kpar[0]
+	# print(10**kper,10**kpar)
 	kper = (kper[:-1]+kper[1:])/2.
 	kpar = (kpar[:-1]+kpar[1:])/2.
+	# print(10**kper,10**kpar)
 	ps = np.zeros((kbins[0],kbins[1]))
 	n_modes = np.zeros((kbins[0],kbins[1]))
 	kp, kz, power = kp.flatten(), kz.flatten(), power.flatten()
@@ -191,6 +196,7 @@ def power_spect_2d(input_array, kbins=10, binning='log', box_dims=244/.7, return
 	ps = ps/n_modes
 	if binning=='log': kper, kpar = 10**kper, 10**kpar
 	if return_modes: return ps, kper, kpar, n_modes
+	# print(kper,kpar)
 	return ps, kper, kpar
 
 

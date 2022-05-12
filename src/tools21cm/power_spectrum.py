@@ -6,7 +6,7 @@ import numpy as np
 from . import const
 from . import conv
 from .helper_functions import print_msg, get_eval
-from .power_spectrum import power_spect_2d as power_spectrum_2d
+# from .power_spect_fast import power_spect_2d as power_spectrum_2d
 from scipy import fftpack
 
 
