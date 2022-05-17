@@ -465,6 +465,28 @@ def smooth_lightcone_gauss(lightcone,fwhm,nu_axis=2):
                 else: output_lightcone[:,:,i] = smooth_gauss(lightcone[:,:,i], fwhm=fwhm[i])
         return output_lightcone
 
+def smooth_lightcone_uv_threshold(lightcone, uv_box, threshold=0.0):
+        """Smoothing (de-noising) the lightcone by removing noisy UV cells below `threshold`.
+
+        Beware, if maximal baseline is to be set, one should clean the `uv_box` beforehand.
+
+        Parameters:
+                lightcone (numpy array) : The lightcone to be smoothed.
+                uv_box (numpy array)    : The UV box.
+                threshold (float)       : The threshold below which UV cells are removed.
+
+        Returns:
+                Smoothed lightcone.
+        """
+        if not isinstance(threshold, float) or threshold < 0.0:
+                return ValueError("Threshold value should be a positive float.")
+        
+        lightcone = np.fft.fft2(lightcone, axes = (0, 1))
+        uv_bool = uv_box < threshold
+        lightcone[uv_bool] = 0.0
+
+        return np.real(np.fft.ifft2(lightcone, axes = (0, 1)))
+
 def hubble_parameter(z):
         """
         It calculates the Hubble parameter at any redshift.
