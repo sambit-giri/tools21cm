@@ -3,8 +3,10 @@ Methods to simulate and analyse the foreground signal for 21 cm signal.
 '''
 
 import numpy as np
+from scipy.integrate import quadrature
 from .telescope_functions import jansky_2_kelvin, from_antenna_config
 from . import cosmology as cm
+from . import const
 from . import conv
 
 def galactic_synch_fg(z, ncells, boxsize, max_baseline=2.):
@@ -127,8 +129,66 @@ def remove_wedge_image(dt, z, mu=0.5, funct='step', boxsize=None, filt=None):
 	apply_filt = np.fft.fftshift(np.fft.fftshift(fft_dt)*filt)
 	dt_new = np.real(np.fft.ifftn(apply_filt))
 	return dt_new
-	
-	
-	
-	 
-	
+
+
+def rolling_wedge_removal_lightcone(
+	lightcone,
+    redshifts,
+    cell_size,
+    chunk_length=None, 
+    OMm=None,
+	buffer_threshold = 1e-10,
+    ):
+	"""Rolling over the lightcone and removing the wedge for every frequency channel.
+
+	Parameters:
+		lightcone (array): The lightcone, of shape `(n_cells, n_cells, n_redshfts)`.
+		redshifts (array): The redshifts of every frequency channel.
+		cell_size (float): Resolution of the lightcone voxels.
+			It is assumed that the lightcone is made of cubical voxels of volume `cell_size^3`.
+		chunk_length (int): Length of the box in z-direction used for wedge removal.
+			Defaults to `n_cells`.
+		OMm (float): Omega matter.
+		buffer_threshold (float): Threshold which defines a wedge buffer.
+			Buffer is then calculated as k-value for which Blackman taper power is below threshold.
+	Returns:
+		Cleaned lightcone.
+	"""
+	def one_over_E(z, OMm):
+		return 1 / np.sqrt(OMm*(1.+z)**3 + (1 - OMm))
+	def multiplicative_factor(z, OMm):
+		return 1 / one_over_E(z, OMm) / (1+z) * quadrature(lambda x: one_over_E(x, OMm), 0, z)[0]
+
+	if chunk_length is None:
+		chunk_length = len(lightcone)
+	if OMm is None:
+		OMm = const.Omega0
+
+	Box_uv = np.fft.fft2(lightcone.astype(np.float32), axes = (0, 1))
+	redshifts = redshifts.astype(np.float32)
+	MF = np.array([multiplicative_factor(z, OMm) for z in redshifts], dtype = np.float32)
+
+	k = np.fft.fftfreq(len(lightcone), d = cell_size)
+	k_parallel = np.fft.fftfreq(chunk_length, d = cell_size)
+	delta_k = k_parallel[1] - k_parallel[0]
+	k_cube = np.meshgrid(k, k, k_parallel)
+	k_perp, k_par = np.sqrt(k_cube[0]**2 + k_cube[1]**2).astype(np.float32), k_cube[2].astype(np.float32)
+
+	bm = np.abs(np.fft.fft(np.blackman(chunk_length)))**2
+	buffer = delta_k * (np.where(bm / np.amax(bm) <= buffer_threshold)[0][0] - 1)
+	buffer = buffer.astype(np.float32)
+	BM = np.blackman(chunk_length).astype(np.float32)[np.newaxis, np.newaxis, :]
+
+	box_shape = Box_uv.shape
+	Box_final = np.empty(box_shape, dtype = np.float32)
+	empty_box = np.zeros(k_cube[0].shape, dtype = np.float32)
+	Box_uv = np.concatenate((empty_box, Box_uv, empty_box), axis = 2)
+    
+	for i in range(chunk_length, box_shape[-1] + chunk_length):
+		t_box = np.copy(Box_uv[..., i - chunk_length // 2:i + chunk_length // 2 + 1])
+		t_box *= BM
+		W = k_par / (k_perp * MF[min(i - chunk_length // 2 - 1, box_shape[-1] - 1)] + buffer)
+		w = np.logical_or(W < -1., W > 1.)
+		Box_final[..., i - chunk_length] = np.real(np.fft.ifftn(np.fft.fft(t_box, axis = -1) * w))[..., chunk_length // 2]
+        
+	return Box_final.astype(np.float32)
