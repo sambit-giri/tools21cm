@@ -9,5 +9,5 @@ scikit-image
 tqdm
 joblib
 
-'cosmospectra'  # cosmospectra@git+https://github.com/sambit-giri/cosmospectra.git
+cosmospectra  # cosmospectra@git+https://github.com/sambit-giri/cosmospectra.git
 pytest
