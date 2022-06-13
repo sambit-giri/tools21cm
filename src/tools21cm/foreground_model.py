@@ -72,7 +72,7 @@ def extragalactic_pointsource_fg(z, ncells, boxsize, S_max=100):
 	S_s  = np.random.choice(Ss, N)
 	nu_s = 150
 	S_nu = S_s*(nu/nu_s)**(-alpha_ps)
-	for p in xrange(S_nu.size): fg[x[p],y[p]] = S_nu[p]
+	for p in range(S_nu.size): fg[x[p],y[p]] = S_nu[p]
 	return jansky_2_kelvin(fg, z, boxsize=boxsize, ncells=ncells)
 
 def diabolo_filter(z, ncells=None, array=None, boxsize=None, mu=0.5, funct='step', small_base=40):
@@ -83,13 +83,13 @@ def diabolo_filter(z, ncells=None, array=None, boxsize=None, mu=0.5, funct='step
 	filt = np.zeros((ncells, ncells, ncells))
 	k0   = np.linspace(-ncells*np.pi/boxsize, ncells*np.pi/boxsize, ncells)
 	a = k0.reshape(-1,1)
-	for i in xrange(k0.size-1): a = np.hstack((a,k0.reshape(-1,1)))
+	for i in range(k0.size-1): a = np.hstack((a,k0.reshape(-1,1)))
 	b = k0.reshape(1,-1)
-	for i in xrange(k0.size-1): b = np.vstack((b,k0.reshape(1,-1)))
+	for i in range(k0.size-1): b = np.vstack((b,k0.reshape(1,-1)))
 	k2 = np.sqrt(a**2+b**2)
 	#mu1 = np.sqrt(1 - mu**2) 
 	kmin = np.pi/(cm.z_to_cdist(z)*(21./small_base/1e2))
-	for i in xrange(ncells):
+	for i in range(ncells):
 		kpp = k0[i]
 		kpr = np.abs(kpp)*(1-mu**2)/mu
 		if funct == 'sigmoid': 
@@ -110,15 +110,15 @@ def barrel_filter(z, ncells=None, array=None, boxsize=None, k_par_min=None, smal
 	if array is not None: ncells = max(array.shape)
 	k0   = np.linspace(-ncells*np.pi/boxsize, ncells*np.pi/boxsize, ncells)
 	a = k0.reshape(-1,1)
-	for i in xrange(k0.size-1): a = np.hstack((a,k0.reshape(-1,1)))
+	for i in range(k0.size-1): a = np.hstack((a,k0.reshape(-1,1)))
 	b = k0.reshape(1,-1)
-	for i in xrange(k0.size-1): b = np.vstack((b,k0.reshape(1,-1)))
+	for i in range(k0.size-1): b = np.vstack((b,k0.reshape(1,-1)))
 	k2 = np.sqrt(a**2+b**2)
 	if k_par_min is None: k_par_min = np.pi/(cm.z_to_cdist(z)*(21./small_base/1e2))
 	ss = np.ones(k2.shape)
 	ss[k2<=k_par_min] = 0
 	filt = np.zeros((ncells,ncells,ncells))
-	for i in xrange(ncells): filt[:,:,i] = filt
+	for i in range(ncells): filt[:,:,i] = filt
 	if array.shape[2]<ncells: filt = filt[:,:,ncells/2-array.shape[2]/2:ncells/2+array.shape[2]/2]
 	print("A barrel filter made with step function.")
 	return filt	
@@ -131,14 +131,7 @@ def remove_wedge_image(dt, z, mu=0.5, funct='step', boxsize=None, filt=None):
 	return dt_new
 
 
-def rolling_wedge_removal_lightcone(
-	lightcone,
-    redshifts,
-    cell_size,
-    chunk_length=None, 
-    OMm=None,
-	buffer_threshold = 1e-10,
-    ):
+def rolling_wedge_removal_lightcone(lightcone, redshifts, cell_size=None, chunk_length=None, OMm=None, buffer_threshold = 1e-10):
 	"""Rolling over the lightcone and removing the wedge for every frequency channel.
 
 	Parameters:
@@ -159,17 +152,19 @@ def rolling_wedge_removal_lightcone(
 	def multiplicative_factor(z, OMm):
 		return 1 / one_over_E(z, OMm) / (1+z) * quadrature(lambda x: one_over_E(x, OMm), 0, z)[0]
 
+	if cell_size is None:
+		cell_size = np.min(lightcone.shape)
 	if chunk_length is None:
-		chunk_length = len(lightcone)
+		chunk_length = np.min(lightcone.shape)
 	if OMm is None:
 		OMm = const.Omega0
 
-	Box_uv = np.fft.fft2(lightcone.astype(np.float32), axes = (0, 1))
+	Box_uv = np.fft.fft2(lightcone.astype(np.float32), axes=(0, 1))
 	redshifts = redshifts.astype(np.float32)
 	MF = np.array([multiplicative_factor(z, OMm) for z in redshifts], dtype = np.float32)
 
-	k = np.fft.fftfreq(len(lightcone), d = cell_size)
-	k_parallel = np.fft.fftfreq(chunk_length, d = cell_size)
+	k = np.fft.fftfreq(len(lightcone), d=cell_size)
+	k_parallel = np.fft.fftfreq(chunk_length, d=cell_size)
 	delta_k = k_parallel[1] - k_parallel[0]
 	k_cube = np.meshgrid(k, k, k_parallel)
 	k_perp, k_par = np.sqrt(k_cube[0]**2 + k_cube[1]**2).astype(np.float32), k_cube[2].astype(np.float32)
@@ -185,7 +180,7 @@ def rolling_wedge_removal_lightcone(
 	Box_uv = np.concatenate((empty_box, Box_uv, empty_box), axis = 2)
     
 	for i in range(chunk_length, box_shape[-1] + chunk_length):
-		t_box = np.copy(Box_uv[..., i - chunk_length // 2:i + chunk_length // 2 + 1])
+		t_box = np.copy(Box_uv[..., i-chunk_length//2: i+chunk_length//2])
 		t_box *= BM
 		W = k_par / (k_perp * MF[min(i - chunk_length // 2 - 1, box_shape[-1] - 1)] + buffer)
 		w = np.logical_or(W < -1., W > 1.)
