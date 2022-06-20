@@ -356,16 +356,16 @@ def noise_cube_lightcone(ncells, z, obs_time=1000, filename=None, boxsize=None, 
 	if n_jobs<=1:
 		tstart = time()
 		for k,zi in enumerate(zs):
-			if '{:.5f}'.format(zi) not in uvs.keys():
-				# 	uv_map, N_ant  = uvs['{:.5f}'.format(zi)], uvs['Nant']
+			if '{:.3f}'.format(zi) not in uvs.keys():
+				# 	uv_map, N_ant  = uvs['{:.3f}'.format(zi)], uvs['Nant']
 				# else:
 				uv_map, N_ant  = get_uv_map(ncells, zi, filename=filename, total_int_time=total_int_time, int_time=int_time, boxsize=boxsize, declination=declination)
-				uvs['{:.5f}'.format(zi)] = uv_map
+				uvs['{:.3f}'.format(zi)] = uv_map
 				uvs['Nant'] = N_ant
 				pickle.dump(uvs, open(save_uvmap, 'wb'))
 			verbose = False
 			tend = time()
-			print('\nz = {:.5f} | {:.2f} % completed | Elapsed time: {:.2f} mins'.format(zi,100*(k+1)/zs.size,(tend-tstart)/60))
+			print('\nz = {:.3f} | {:.2f} % completed | Elapsed time: {:.2f} mins'.format(zi,100*(k+1)/zs.size,(tend-tstart)/60))
 	else:
 		Nbase, N_ant = from_antenna_config(filename, zs[0])
 		uvs['Nant'] = N_ant
@@ -375,7 +375,7 @@ def noise_cube_lightcone(ncells, z, obs_time=1000, filename=None, boxsize=None, 
 			print('checkpoint value should be more than 4*n_jobs. checkpoint set to 4*n_jobs.')
 		z_run = np.array([])
 		for k,zi in enumerate(zs):
-			if '{:.5f}'.format(zi) not in uvs.keys():
+			if '{:.3f}'.format(zi) not in uvs.keys():
 				z_run = np.append(z_run, zi)
 		n_iterations = int(z_run.size/checkpoint)
 		if n_iterations>1:
@@ -384,13 +384,13 @@ def noise_cube_lightcone(ncells, z, obs_time=1000, filename=None, boxsize=None, 
 				zrs = z_run[istart:iend] if ii+1<n_iterations else z_run[istart:]
 				fla = Parallel(n_jobs=n_jobs,verbose=20)(delayed(_uvmap)(i) for i in zrs)
 				for jj,zi in enumerate(zrs):
-					uvs['{:.5f}'.format(zi)] = fla[jj]
+					uvs['{:.3f}'.format(zi)] = fla[jj]
 				if save_uvmap is not None: pickle.dump(uvs, open(save_uvmap, 'wb'))
 				print('{:.2f} % completed'.format(100*(len(uvs.keys())-1)/zs.size))
 		else:
 			fla = Parallel(n_jobs=n_jobs,verbose=20)(delayed(_uvmap)(i) for i in z_run)
 			for jj,zi in enumerate(z_run):
-				uvs['{:.5f}'.format(zi)] = fla[jj]
+				uvs['{:.3f}'.format(zi)] = fla[jj]
 			if save_uvmap is not None: pickle.dump(uvs, open(save_uvmap, 'wb'))
 		print('...done')
 
@@ -400,11 +400,11 @@ def noise_cube_lightcone(ncells, z, obs_time=1000, filename=None, boxsize=None, 
 	for k,zi in enumerate(zs):
 		if k+1<zs.size: depth_mhz = np.abs(cm.z_to_nu(zs[k+1])-cm.z_to_nu(zs[k]))
 		else: depth_mhz = np.abs(cm.z_to_nu(zs[k])-cm.z_to_nu(zs[k-1]))
-		uv_map, N_ant  = uvs['{:.5f}'.format(zi)], uvs['Nant']
+		uv_map, N_ant  = uvs['{:.3f}'.format(zi)], uvs['Nant']
 		noise2d = noise_map(ncells, zi, depth_mhz, obs_time=obs_time, filename=filename, boxsize=boxsize, total_int_time=total_int_time, int_time=int_time, declination=declination, uv_map=uv_map, N_ant=N_ant, verbose=verbose, fft_wrap=fft_wrap)
 		noise3d[:,:,k] = jansky_2_kelvin(noise2d, zi, boxsize=boxsize)
 		verbose = False
-		print('z = {:.5f} | {:.2f} % completed'.format(zi,100*(k+1)/zs.size))
+		print('z = {:.3f} | {:.2f} % completed'.format(zi,100*(k+1)/zs.size))
 	return jansky_2_kelvin(noise3d, z, boxsize=boxsize)
 
 
@@ -478,16 +478,16 @@ def noise_lightcone(ncells, zs, obs_time=1000, filename=None, boxsize=None, save
 	if n_jobs<=1:
 		tstart = time()
 		for k,zi in enumerate(zs):
-			if '{:.5f}'.format(zi) not in uvs.keys():
-				# 	uv_map, N_ant  = uvs['{:.5f}'.format(zi)], uvs['Nant']
+			if '{:.3f}'.format(zi) not in uvs.keys():
+				# 	uv_map, N_ant  = uvs['{:.3f}'.format(zi)], uvs['Nant']
 				# else:
 				uv_map, N_ant  = get_uv_map(ncells, zi, filename=filename, total_int_time=total_int_time, int_time=int_time, boxsize=boxsize, declination=declination)
-				uvs['{:.5f}'.format(zi)] = uv_map
+				uvs['{:.3f}'.format(zi)] = uv_map
 				uvs['Nant'] = N_ant
 				pickle.dump(uvs, open(save_uvmap, 'wb'))
 			verbose = False
 			tend = time()
-			print('\nz = {:.5f} | {:.2f} % completed | Elapsed time: {:.2f} mins'.format(zi,100*(k+1)/zs.size,(tend-tstart)/60))
+			print('\nz = {:.3f} | {:.2f} % completed | Elapsed time: {:.2f} mins'.format(zi,100*(k+1)/zs.size,(tend-tstart)/60))
 	else:
 		Nbase, N_ant = from_antenna_config(filename, zs[0])
 		uvs['Nant'] = N_ant
@@ -497,7 +497,7 @@ def noise_lightcone(ncells, zs, obs_time=1000, filename=None, boxsize=None, save
 			print('checkpoint value should be more than 4*n_jobs. checkpoint set to 4*n_jobs.')
 		z_run = np.array([])
 		for k,zi in enumerate(zs):
-			if '{:.5f}'.format(zi) not in uvs.keys():
+			if '{:.3f}'.format(zi) not in uvs.keys():
 				z_run = np.append(z_run, zi)
 		n_iterations = int(z_run.size/checkpoint)
 		if n_iterations>1:
@@ -506,13 +506,13 @@ def noise_lightcone(ncells, zs, obs_time=1000, filename=None, boxsize=None, save
 				zrs = z_run[istart:iend] if ii+1<n_iterations else z_run[istart:]
 				fla = Parallel(n_jobs=n_jobs,verbose=20)(delayed(_uvmap)(i) for i in zrs)
 				for jj,zi in enumerate(zrs):
-					uvs['{:.5f}'.format(zi)] = fla[jj]
+					uvs['{:.3f}'.format(zi)] = fla[jj]
 				if save_uvmap is not None: pickle.dump(uvs, open(save_uvmap, 'wb'))
 				print('{:.2f} % completed'.format(100*(len(uvs.keys())-1)/zs.size))
 		else:
 			fla = Parallel(n_jobs=n_jobs,verbose=20)(delayed(_uvmap)(i) for i in z_run)
 			for jj,zi in enumerate(z_run):
-				uvs['{:.5f}'.format(zi)] = fla[jj]
+				uvs['{:.3f}'.format(zi)] = fla[jj]
 			if save_uvmap is not None: pickle.dump(uvs, open(save_uvmap, 'wb'))
 		print('...done')
 
@@ -521,11 +521,11 @@ def noise_lightcone(ncells, zs, obs_time=1000, filename=None, boxsize=None, save
 	for k,zi in enumerate(zs):
 		if k+1<zs.size: depth_mhz = np.abs(cm.z_to_nu(zs[k+1])-cm.z_to_nu(zs[k]))
 		else: depth_mhz = np.abs(cm.z_to_nu(zs[k])-cm.z_to_nu(zs[k-1]))
-		uv_map, N_ant  = uvs['{:.5f}'.format(zi)], uvs['Nant']
+		uv_map, N_ant  = uvs['{:.3f}'.format(zi)], uvs['Nant']
 		noise2d = noise_map(ncells, zi, depth_mhz, obs_time=obs_time, filename=filename, boxsize=boxsize, total_int_time=total_int_time, int_time=int_time, declination=declination, uv_map=uv_map, N_ant=N_ant, verbose=verbose, fft_wrap=fft_wrap)
 		noise3d[:,:,k] = jansky_2_kelvin(noise2d, zi, boxsize=boxsize)
 		verbose = False
-		print('\nz = {:.5f} | {:.2f} % completed'.format(zi,100*(k+1)/zs.size))
+		print('\nz = {:.3f} | {:.2f} % completed'.format(zi,100*(k+1)/zs.size))
 	return noise3d
 
 

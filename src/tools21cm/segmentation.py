@@ -75,6 +75,27 @@ def dice_coef(y_true, y_pred, smooth=1):
     return (2. * intersection + smooth) / (K.sum(K.square(y_true),-1) + K.sum(K.square(y_pred),-1) + smooth)
 
 
+def precision(y_true, y_pred):
+    # custom Precision metrics
+    y_true, y_pred = K.clip(y_true, K.epsilon(), 1-K.epsilon()), K.clip(y_pred, K.epsilon(), 1-K.epsilon())
+    TP = K.sum(y_pred * y_true)
+    FP = K.sum(y_pred * (1 - y_true))
+    return TP/(TP + FP + K.epsilon())
+
+
+def recall(y_true, y_pred):
+    # custom recall metrics
+    y_true, y_pred = K.clip(y_true, K.epsilon(), 1-K.epsilon()), K.clip(y_pred, K.epsilon(), 1-K.epsilon())
+    TP = K.sum(y_pred * y_true)
+    FN = K.sum((1 - y_pred) * y_true)
+    return TP/(TP + FN + K.epsilon())
+
+
+def r2score(y_true, y_pred):
+    # custom R2-score metrics
+    SS_res =  K.sum(K.square(y_true - y_pred)) 
+    SS_tot = K.sum(K.square(y_true - K.mean(y_true))) 
+    return 1 - SS_res/(SS_tot + K.epsilon())
 
 ################################################################
 
@@ -137,9 +158,12 @@ class segunet21cm:
         self.NR_MANIP = len(self.MANIP)
 
         # load model
-        MODEL_NAME = pkg_resources.resource_filename('tools21cm', 'input_data/segunet_02-10T23-52-36_128slice_ep56.h5')
-        MODEL_EPOCH = 56
-        METRICS = {'balanced_cross_entropy':balanced_cross_entropy, 'iou':iou, 'dice_coef':dice_coef} 
+        #MODEL_NAME = pkg_resources.resource_filename('tools21cm', 'input_data/segunet_02-10T23-52-36_128slice_ep56.h5')
+        #MODEL_EPOCH = 56
+        #METRICS = {'balanced_cross_entropy':balanced_cross_entropy, 'iou':iou, 'dice_coef':dice_coef} 
+        MODEL_NAME = pkg_resources.resource_filename('tools21cm', 'input_data/segunet_03-11T12-02-05_128slice_ep35.h5')
+        MODEL_EPOCH = 35
+        METRICS = {'balanced_cross_entropy':balanced_cross_entropy, 'r2score':r2score, 'iou':iou, 'precision':precision, 'recall':recall} 
         self.MODEL_LOADED = load_model(MODEL_NAME, custom_objects=METRICS)
         print(' Loaded model: %s' %MODEL_NAME)
 
