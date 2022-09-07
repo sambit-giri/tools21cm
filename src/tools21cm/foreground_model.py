@@ -50,7 +50,7 @@ def galactic_synch_fg(z, ncells, boxsize, rseed=False):
 		gf_data[..., i] = jansky_2_kelvin(T_real*1e6, z[i], boxsize=boxsize, ncells=ncells)
 	return gf_data.squeeze()
 
-def extragalactic_pointsource_fg(z, ncells, boxsize, S_max=100):
+def extragalactic_pointsource_fg(z, ncells, boxsize, rseed=False, S_max=100):
 	"""
 	@ Ghara et al. (2017)
 
@@ -75,22 +75,21 @@ def extragalactic_pointsource_fg(z, ncells, boxsize, S_max=100):
 		z = np.array(z, copy=False)
 	exgf_data = np.zeros((ncells, ncells, z.size))
 
-	dS = 0.01
-	Ss = np.arange(0.1, S_max, dS)
-	nu_s = 150
+	dS, nu_s = 0.01, 150
+	solid_angle = boxsize**2/cm.z_to_cdist(z.min())**2
 	
+	Ss = np.arange(0.1, S_max, dS)
+	N  = int(10**3.75*np.trapz(Ss**(-1.6), x=Ss, dx=dS)*solid_angle)
+	if(rseed): np.random.seed(rseed)
+	x, y = np.random.random_integers(0, high=ncells-1, size=(2,N))
+	alpha_ps = 0.7+0.1*np.random.random(size=N)
+	S_s  = np.random.choice(Ss, N)
+
 	for i in range(0, z.size):
 		nu = cm.z_to_nu(z[i])
-		fg = np.zeros((ncells, ncells))
-		solid_angle = boxsize**2/cm.z_to_cdist(z[i])**2
-		N  = int(10**3.75*np.trapz(Ss**(-1.6), x=Ss, dx=dS)*solid_angle)
-		x, y = np.random.random_integers(0, high=ncells-1, size=(2,N))
-		alpha_ps = 0.7+0.1*np.random.random(size=N)
-		S_s  = np.random.choice(Ss, N)
 		S_nu = S_s*(nu/nu_s)**(-alpha_ps)
 		for p in range(S_nu.size):
-			fg[x[p],y[p]] = S_nu[p]
-		exgf_data[...,i] = jansky_2_kelvin(fg, z[i], boxsize=boxsize, ncells=ncells)
+			exgf_data[x[p], y[p], i] = jansky_2_kelvin(S_nu[p], z[i], boxsize=boxsize, ncells=ncells)
 	return exgf_data.squeeze()
 
 
