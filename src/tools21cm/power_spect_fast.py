@@ -134,7 +134,7 @@ def power_spect_1d(input_array, kbins=10, binning='log', box_dims=244/.7, return
 	if return_modes: return ps, ks, n_modes
 	return ps, ks
 
-def power_spect_2d(input_array, kbins=10, binning='log', box_dims=244/.7, return_modes=False, nu_axis=2):
+def power_spect_2d(input_array, kbins=10, binning='log', box_dims=244/.7, return_modes=False, nu_axis=2, window=None):
 	'''
 	Calculate the power spectrum and bin it in kper and kpar
 	input_array is the array to calculate the power spectrum from
@@ -151,8 +151,11 @@ def power_spect_2d(input_array, kbins=10, binning='log', box_dims=244/.7, return
 			taken as the box length along each axis.
 		return_n_modes = False (bool): if true, also return the
 			number of modes in each bin
-		binning = 'log' : It defines the type of binning in k-space. The other option is 
+		binning = 'log' : It defines the type of binning in k-space. The other options are
 				    'linear' or 'mixed'.
+		window = None : It tappers the data in the frequency direction to control shape change at the boundary slices. 
+					The other options are 'blackmanharris' and 'tukey'. If the data has sharp change in the angular/spatial 
+					direction, please provide a 3D window as a numpy array.
 			
 	Returns: 
 		A tuple with (Pk, kper_bins, kpar_bins) if return_modes is False else (Pk, kper_bins, kpar_bins, n_modes), 
@@ -162,6 +165,15 @@ def power_spect_2d(input_array, kbins=10, binning='log', box_dims=244/.7, return
 		n_modes is the number of modes.
 	
 	'''
+	if window is not None:
+                from scipy.signal import windows
+                if window.lower()=='blackmanharris':
+                        input_array *= windows.blackmanharris(input_array.shape[-1])[None,None,:]
+                elif window.lower()=='tukey':
+                        input_array *= windows.tukey(input_array.shape[-1])[None,None,:]
+                else:
+                        input_array *= window
+
 	if np.array(kbins).size==1: kbins = [kbins, kbins]
 	power = power_spect_nd(input_array, box_dims, verbose=0)
 	[kx,ky,kz], k = _get_k(input_array, box_dims)

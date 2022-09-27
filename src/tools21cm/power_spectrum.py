@@ -121,7 +121,7 @@ def radial_average(input_array, box_dims, kbins=10, binning='log', breakpoint=0.
         return outdata, kbins[:-1]+dk, n_modes
         
 
-def power_spectrum_1d(input_array_nd, kbins=100, box_dims=None, return_n_modes=False, binning='log', breakpoint=0.1):
+def power_spectrum_1d(input_array_nd, kbins=100, box_dims=None, return_n_modes=False, binning='log', breakpoint=0.1, window=None):
         ''' Calculate the spherically averaged power spectrum of an array 
         and return it as a one-dimensional array.
         
@@ -137,13 +137,25 @@ def power_spectrum_1d(input_array_nd, kbins=100, box_dims=None, return_n_modes=F
                         taken as the box length along each axis.
                 return_n_modes = False (bool): if true, also return the
                         number of modes in each bin
-                binning = 'log' : It defines the type of binning in k-space. The other option is 
+                binning = 'log' : It defines the type of binning in k-space. The other options are 
                                     'linear' or 'mixed'.
+                window = None : It tappers the data in the frequency direction to control shape change at the boundary slices. 
+                                        The other options are 'blackmanharris' and 'tukey'. If the data has sharp change in the angular/spatial 
+                                        direction, please provide a 3D window as a numpy array.
                         
         Returns: 
                 A tuple with (Pk, bins), where Pk is an array with the 
                 power spectrum and bins is an array with the k bin centers.
         '''
+
+        if window is not None:
+                from scipy.signal import windows
+                if window.lower()=='blackmanharris':
+                        input_array_nd *= windows.blackmanharris(input_array_nd.shape[-1])[None,None,:]
+                elif window.lower()=='tukey':
+                        input_array_nd *= windows.tukey(input_array_nd.shape[-1])[None,None,:]
+                else:
+                        input_array_nd *= window
 
         box_dims = _get_dims(box_dims, input_array_nd.shape)
 
