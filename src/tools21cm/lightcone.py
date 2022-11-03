@@ -15,7 +15,7 @@ from . import smoothing
 import scipy.interpolate
 from tqdm import tqdm
 
-def make_lightcone(filenames, z_low = None, z_high = None, file_redshifts = None, cbin_bits = 32, cbin_order = 'c', los_axis = 0, raw_density = False, interpolation='linear', reading_function=None, box_length_mpc=None):
+def make_lightcone(filenames, z_low = None, z_high = None, depth_mhz = None, file_redshifts = None, cbin_bits = 32, cbin_order = 'c', los_axis = 0, raw_density = False, interpolation='linear', reading_function=None, box_length_mpc=None):
     '''
     Make a lightcone from xfrac, density or dT data. Replaces freq_box.
     
@@ -81,7 +81,7 @@ def make_lightcone(filenames, z_low = None, z_high = None, file_redshifts = None
 
     assert len(file_redshifts) == len(filenames)
     
-    output_z = _get_output_z(file_redshifts, z_low, z_high, mesh_size[0], box_length_mpc=box_length_mpc)
+    output_z = _get_output_z(file_redshifts, z_low, z_high, mesh_size[0], box_length_mpc=box_length_mpc, dnu=depth_mhz)
 
     #Make the output 32-bit to save memory 
     lightcone = np.zeros((mesh_size[0], mesh_size[1], len(output_z)), dtype='float32')
@@ -215,7 +215,7 @@ def make_velocity_lightcone(vel_filenames, dens_filenames, z_low = None, \
     return lightcone, output_z
 
 
-def _get_output_z(file_redshifts, z_low, z_high, box_grid_n, box_length_mpc=None):
+def _get_output_z(file_redshifts, z_low, z_high, box_grid_n, box_length_mpc=None, dnu=None):
     '''
     Determine the output redshifts. For internal use.
     '''
@@ -223,8 +223,11 @@ def _get_output_z(file_redshifts, z_low, z_high, box_grid_n, box_length_mpc=None
         z_low = file_redshifts.min()
     if z_high is None:
         z_high = file_redshifts.max()
-        
-    output_z = redshifts_at_equal_comoving_distance(z_low, z_high, box_grid_n, box_length_mpc=box_length_mpc)
+    
+    if(dnu):
+        output_z = redshifts_at_equal_frequncy_width(z_low, z_high, dnu)
+    else:
+        output_z = redshifts_at_equal_comoving_distance(z_low, z_high, box_grid_n, box_length_mpc=box_length_mpc)
 
     if min(output_z) < min(file_redshifts) or max(output_z) > max(file_redshifts):
         print('Warning! You have specified a redshift range of %.3f < z < %.3f' % (min(output_z), max(output_z)))
@@ -238,8 +241,7 @@ def _get_output_z(file_redshifts, z_low, z_high, box_grid_n, box_length_mpc=None
     return output_z
 
 
-def redshifts_at_equal_comoving_distance(z_low, z_high, box_grid_n=256, \
-            box_length_mpc=None):
+def redshifts_at_equal_comoving_distance(z_low, z_high, box_grid_n=256, box_length_mpc=None):
     ''' 
     Make a frequency axis vector with equal spacing in co-moving LOS coordinates. 
     The comoving distance between each frequency will be the same as the cell
@@ -270,6 +272,31 @@ def redshifts_at_equal_comoving_distance(z_low, z_high, box_grid_n=256, \
         z = const.nu0/(nu - dnu) - 1.0
 
     return np.array(z_array)
+
+
+def redshifts_at_equal_frequncy_width(z_low, z_high, dnu):
+    ''' 
+    Make a redshift vector with equally space in the frequency domain. 
+    
+    Parameters:
+        z_low (float): The lower redshift
+        z_high (float): The upper redhisft 
+        dnu (float): The frequency channel width in MHz
+             
+    Returns:
+        numpy array containing the redshifts
+        
+    '''
+    assert(z_high > z_low)
+
+    z = z_high
+    z_array = []
+
+    while z > z_low:
+        z_array.append(z)
+        z = (z - dnu/const.nu0 * (1+z))/(1 + dnu/const.nu0 * (1+z))
+
+    return np.array(z_array)[::-1]
 
 
 def get_lightcone_subvolume(lightcone, redshifts, central_z, \
