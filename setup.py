@@ -9,7 +9,7 @@ from setuptools import setup, find_packages
 
 
 setup(name='tools21cm',
-      version='2.0.1',
+      version='2.0.2',
       author='Sambit Giri',
       author_email='sambit.giri@astro.su.se',
       packages=find_packages("src"),
