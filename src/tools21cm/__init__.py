@@ -62,8 +62,9 @@ from .box_counting import *
 from .fitting_methods import *
 from .percolation import *
 
+from .power_spect_fast import *
 ### Cosmospectra
-from cosmospectra import * 
+# from cosmospectra import * 
 
 #Suppress warnings from zero-divisions and nans
 import numpy

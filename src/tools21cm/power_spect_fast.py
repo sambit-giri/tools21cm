@@ -178,6 +178,7 @@ def power_spect_2d(input_array, kbins=10, binning='log', box_dims=244/.7, return
 		kbins = [kbins, kbins]
 	if not isinstance(kbins[0], int): 
 		binning = None
+
 	power = power_spect_nd(input_array, box_dims, verbose=0)
 	[kx,ky,kz], k = _get_k(input_array, box_dims)
 	kdict = {}
