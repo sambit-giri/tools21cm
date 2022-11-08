@@ -189,8 +189,8 @@ def power_spect_2d(input_array, kbins=10, binning='log', box_dims=244/.7, return
 	kz = np.abs(kz)
 	# print(np.abs(kp[kp!=0]).min(),np.abs(kz[kz!=0]).min())
 	if binning is None:
-		kper = kbins[0]
-		kpar = kbins[1]
+		kper = np.array(kbins[0])
+		kpar = np.array(kbins[1])
 		kbins = [len(kper),len(kpar)]
 	elif binning=='log':
 		kper = np.linspace(np.log10(np.abs(kp[kp!=0]).min()), np.log10(kp.max()), kbins[0]+1)
