@@ -175,7 +175,7 @@ def power_spect_2d(input_array, kbins=10, binning='log', box_dims=244/.7, return
                         input_array *= window
 
 	if np.array(kbins).size==1: kbins = [kbins, kbins]
-    if isinstance(kbins[0], int): binning = None
+     	if not isinstance(kbins[0], int): binning = None
 	power = power_spect_nd(input_array, box_dims, verbose=0)
 	[kx,ky,kz], k = _get_k(input_array, box_dims)
 	kdict = {}
@@ -185,10 +185,10 @@ def power_spect_2d(input_array, kbins=10, binning='log', box_dims=244/.7, return
 	kp = np.sqrt(kdict[str(np.setdiff1d([0,1,2],nu_axis)[0])]**2+kdict[str(np.setdiff1d([0,1,2],nu_axis)[1])]**2)
 	kz = np.abs(kz)
 	# print(np.abs(kp[kp!=0]).min(),np.abs(kz[kz!=0]).min())
-    if binning is None:
-        kper = kbins[0]
-        kpar = kbins[1]
-        kbins = [len(kper),len(kpar)]
+	if binning is None:
+		kper = kbins[0]
+		kpar = kbins[1]
+		kbins = [len(kper),len(kpar)]
 	elif binning=='log':
 		kper = np.linspace(np.log10(np.abs(kp[kp!=0]).min()), np.log10(kp.max()), kbins[0]+1)
 		kpar = np.linspace(np.log10(np.abs(kz[kz!=0]).min()), np.log10(kz.max()), kbins[1]+1)
