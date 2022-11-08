@@ -1,6 +1,7 @@
 import numpy as np
 #from numba import jit, prange
 #from astropy.stats import histogram 
+from tqdm import tqdm
 
 def power_spect_nd(input_array, box_dims, verbose=True):
 	''' 
@@ -207,7 +208,7 @@ def power_spect_2d(input_array, kbins=10, binning='log', box_dims=244/.7, return
 	ps = np.zeros((kbins[0],kbins[1]))
 	n_modes = np.zeros((kbins[0],kbins[1]))
 	kp, kz, power = kp.flatten(), kz.flatten(), power.flatten()
-	for i,a in enumerate(kper):
+	for i,a in tqdm(enumerate(kper)):
 		for j,b in enumerate(kpar):
 			arg = np.intersect1d(np.argwhere(np.abs(kp-a)<=k_width[0]/2.), np.argwhere(np.abs(kz-b)<=k_width[1]/2.))
 			ps[i,j] = power[arg].sum()
