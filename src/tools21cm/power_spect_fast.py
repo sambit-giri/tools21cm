@@ -166,16 +166,19 @@ def power_spect_2d(input_array, kbins=10, binning='log', box_dims=244/.7, return
 	
 	'''
 	if window is not None:
-                from scipy.signal import windows
-                if window.lower()=='blackmanharris':
-                        input_array *= windows.blackmanharris(input_array.shape[-1])[None,None,:]
-                elif window.lower()=='tukey':
-                        input_array *= windows.tukey(input_array.shape[-1])[None,None,:]
-                else:
-                        input_array *= window
+		from scipy.signal import windows
+		if window.lower()=='blackmanharris':
+				input_array *= windows.blackmanharris(input_array.shape[-1])[None,None,:]
+		elif window.lower()=='tukey':
+				input_array *= windows.tukey(input_array.shape[-1])[None,None,:]
+		else:
+				input_array *= window
 
-	if np.array(kbins).size==1: kbins = [kbins, kbins]
-     	if not isinstance(kbins[0], int): binning = None
+	if np.array(kbins).size==1: 
+		kbins = [kbins, kbins]
+	if not isinstance(kbins[0], int): 
+		binning = None
+
 	power = power_spect_nd(input_array, box_dims, verbose=0)
 	[kx,ky,kz], k = _get_k(input_array, box_dims)
 	kdict = {}
@@ -210,6 +213,11 @@ def power_spect_2d(input_array, kbins=10, binning='log', box_dims=244/.7, return
 			ps[i,j] = power[arg].sum()
 			n_modes[i,j] = arg.size
 
+	ps = ps/n_modes
+	if binning=='log': kper, kpar = 10**kper, 10**kpar
+	if return_modes: return ps, kper, kpar, n_modes
+	# print(kper,kpar)
+	return ps, kper, kpar
 	ps = ps/n_modes
 	if binning=='log': kper, kpar = 10**kper, 10**kpar
 	if return_modes: return ps, kper, kpar, n_modes
