@@ -4,6 +4,8 @@ from scipy import interpolate
 #from astropy.stats import histogram 
 from tqdm import tqdm
 
+from . import smoothing, cosmology, const 
+
 def power_spect_nd(input_array, box_dims, verbose=True):
 	''' 
 	Calculate the power spectrum of input_array and return it as an n-dimensional array,
@@ -330,7 +332,7 @@ def horizon_wedge_equation(z, fov_deg=90.0):
 		A lambda function k_parallel(k_perpendicular).
 	'''
 	f_kpar = lambda kper: kper*np.sin(fov_deg*np.pi/180)/(1+z)*\
-							t2c.hubble_parameter(z)/t2c.c*t2c.z_to_cdist(z)
+							smoothing.hubble_parameter(z)/const.c*cosmology.z_to_cdist(z)
 	return f_kpar
 
 # def plot_2d_power(ps, xticks, yticks, xlabel, ylabel):
