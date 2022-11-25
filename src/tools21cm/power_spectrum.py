@@ -7,7 +7,7 @@ from . import const
 from . import conv
 from .helper_functions import print_msg, get_eval
 # from .power_spect_fast import power_spect_2d as power_spectrum_2d
-from scipy import fftpack
+from scipy import fftpack, stats
 
 
 def power_spectrum_nd(input_array, box_dims=None):
@@ -166,6 +166,88 @@ def power_spectrum_1d(input_array_nd, kbins=100, box_dims=None, return_n_modes=F
                 return ps, bins, n_modes
         return ps, bins
 
+
+def power_spectrum_2d(input_array, kbins=10, binning='log', box_dims=244/.7, return_modes=False, nu_axis=2, window=None):
+	'''
+	Calculate the power spectrum and bin it in kper and kpar
+	input_array is the array to calculate the power spectrum from
+	
+	Parameters: 
+		input_array (numpy array): the data array
+		nu_axis = 2 (integer): the line-of-sight axis
+		kbins = 10 (integer or array-like): The number of bins,
+			If you want different bins for kper and kpar, then provide a list [n_kper, n_par]
+		box_dims = 244/.7 (float or array-like): the dimensions of the 
+			box. If this is None, the current box volume is used along all
+			dimensions. If it is a float, this is taken as the box length
+			along all dimensions. If it is an array-like, the elements are
+			taken as the box length along each axis.
+		return_n_modes = False (bool): if true, also return the
+			number of modes in each bin
+		binning = 'log' : It defines the type of binning in k-space. The other options are
+				    'linear' or 'mixed'.
+		window = None : It tappers the data in the frequency direction to control shape change at the boundary slices. 
+					The other options are 'blackmanharris' and 'tukey'. If the data has sharp change in the angular/spatial 
+					direction, please provide a 3D window as a numpy array.
+			
+	Returns: 
+		A tuple with (Pk, kper_bins, kpar_bins) if return_modes is False else (Pk, kper_bins, kpar_bins, n_modes), 
+		where Pk is an array with the power spectrum of dimensions (n_kper x n_kpar), 
+		mubins is an array with the mu bin centers,
+		kbins is an array with the k bin centers and 
+		n_modes is the number of modes.
+	
+	'''
+	if window is not None:
+		from scipy.signal import windows
+		if window.lower()=='blackmanharris':
+			input_array *= windows.blackmanharris(input_array.shape[-1])[None,None,:]
+		elif window.lower()=='tukey':
+			input_array *= windows.tukey(input_array.shape[-1])[None,None,:]
+		else:
+			input_array *= window
+
+	if np.array(kbins).size==1: 
+		kbins = [kbins, kbins]
+	if not isinstance(kbins[0], int): 
+		binning = None
+
+	power = power_spect_nd(input_array, box_dims, verbose=0)
+	k_xyz, k = _get_k(input_array, box_dims)
+	xy_axis = [0, 1, 2]
+	xy_axis.remove(nu_axis)
+	kz = np.abs(k_xyz[nu_axis])
+	kp = np.sqrt(k_xyz[xy_axis[0]]**2 + k_xyz[xy_axis[1]]**2)
+	del k_xyz, k, xy_axis
+	gc.collect()
+
+	if binning is None:
+		kper = np.array(kbins[0])
+		kpar = np.array(kbins[1])
+	else:
+		if binning=='log':
+			kper = np.linspace(np.log10(kp[kp!=0].min()), np.log10(kp.max()), kbins[0]+1)
+			kpar = np.linspace(np.log10(kz[kz!=0].min()), np.log10(kz.max()), kbins[1]+1)
+			kp, kz  = np.log10(kp), np.log10(kz)
+		elif binning=='linear':
+			kper = np.linspace(kp[kp!=0].min(), kp.max(), kbins[0]+1)
+			kpar = np.linspace(kz[kz!=0].min(), kz.max(), kbins[1]+1)
+	
+	kp, kz, power = kp.flatten(), kz.flatten(), power.flatten()
+	ps = stats.binned_statistic_2d(x=kp, y=kz, values=power, statistic='mean', bins=[kper, kpar])
+
+	if binning=='log':
+		kper_mid = np.power(10, 0.5*(kper[:-1]+kper[1:]))
+		kpar_mid = np.power(10, 0.5*(kpar[:-1]+kpar[1:]))
+	else:
+		kper_mid = (kper[:-1]+kper[1:])/2.
+		kpar_mid = (kpar[:-1]+kpar[1:])/2.
+
+	if return_modes: 
+		n_modes = stats.binned_statistic_2d(x=kp, y=kz, values=None, statistic='count', bins=[kper, kpar])
+		return ps.statistic, kper_mid, kpar_mid, n_modes.statistic
+	else:
+		return ps.statistic, kper_mid, kpar_mid
 
 def cross_power_spectrum_1d(input_array1_nd, input_array2_nd, kbins=100, box_dims=None, return_n_modes=False, binning='log',breakpoint=0.1):
         ''' Calculate the spherically averaged cross power spectrum of two arrays 
