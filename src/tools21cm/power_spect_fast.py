@@ -1,5 +1,6 @@
-import numpy as np
-from scipy import interpolate
+import numpy as np, gc
+from scipy import interpolate, stats
+
 #from numba import jit, prange
 #from astropy.stats import histogram 
 from tqdm import tqdm
@@ -279,7 +280,7 @@ def power_spect_mu(input_array, kbins=10, box_dims=244/.7, return_modes=False, m
 	return ps, ks, mu
 
 def plot_2d_power(ps, xlabel='$k_\perp$', ylabel='$k_\parallel$', ps_label='$P(k_\perp,k_\parallel)$',
-				  fig=None, plotting_scale={'x': 'log', 'y': 'log', 'z': 'log'}, 
+				  fig=None, ax=None, plotting_scale={'x': 'log', 'y': 'log', 'z': 'log'}, 
 				  draw_wedge={'z': 9.0, 'fov_deg': 90.0, 'ls':'--', 'color': 'k'}, **kwargs):
 	'''
 	Plotting the 2D or cylindrical power spectrum.
@@ -303,9 +304,16 @@ def plot_2d_power(ps, xlabel='$k_\perp$', ylabel='$k_\parallel$', ps_label='$P(k
 	except: pp, kper, kpar = ps
 	fp = interpolate.interp2d(kper, kpar, pp.T, kind='linear')
 
-	if fig is None: fig, ax = plt.subplots(1,1,figsize=(7,5))
-	else: ax = fig.axes[0] 
-	X, Y = kper[:-1]/2+kper[1:]/2, kpar[:-1]/2+kpar[1:]/2
+	if (fig == None) and (ax == None): 
+		fig, ax = plt.subplots(1,1,figsize=(7,5))
+	elif (fig == None) and (ax != None):
+		pass
+	else: 
+		ax = fig.axes[0] 
+	
+	#X, Y = kper[:-1]/2+kper[1:]/2, kpar[:-1]/2+kpar[1:]/2
+	X, Y = kper, kpar
+
 	C = fp(X,Y)
 	norm = colors.LogNorm(vmin=C[np.isfinite(C)].min(), vmax=C[np.isfinite(C)].max()) if plotting_scale['z']=='log' else None 
 	pcm = ax.pcolormesh(X, Y, C, norm=norm, **kwargs)
@@ -313,13 +321,15 @@ def plot_2d_power(ps, xlabel='$k_\perp$', ylabel='$k_\parallel$', ps_label='$P(k
 		f_kpar = horizon_wedge_equation(draw_wedge['z'], fov_deg=draw_wedge['fov_deg'])
 		ax.plot(X, f_kpar(X), ls=draw_wedge['ls'], color=draw_wedge['color'])
 		ax.axis([X.min(),X.max(),Y.min(),Y.max()])
-	fig.colorbar(pcm, label=ps_label)
+
+  plt.colorbar(pcm, ax=ax, label=ps_label, pad=0.01)
+
 	ax.set_xlabel(xlabel)
 	ax.set_ylabel(ylabel)
 	ax.set_xscale(plotting_scale['x'])
 	ax.set_yscale(plotting_scale['y'])
-	plt.show()
-	return fig
+	#plt.show()
+	return 1
 
 def horizon_wedge_equation(z, fov_deg=90.0):
 	'''
