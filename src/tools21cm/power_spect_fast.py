@@ -1,5 +1,6 @@
 import numpy as np, gc
 from scipy import interpolate, stats
+
 #from numba import jit, prange
 #from astropy.stats import histogram 
 from tqdm import tqdm
@@ -193,8 +194,8 @@ def power_spect_2d(input_array, kbins=10, binning='log', box_dims=244/.7, return
 	kz = np.abs(kz)
 	# print(np.abs(kp[kp!=0]).min(),np.abs(kz[kz!=0]).min())
 	if binning is None:
-		kper = kbins[0]
-		kpar = kbins[1]
+		kper = np.array(kbins[0])
+		kpar = np.array(kbins[1])
 		kbins = [len(kper),len(kpar)]
 	elif binning=='log':
 		kper = np.linspace(np.log10(np.abs(kp[kp!=0]).min()), np.log10(kp.max()), kbins[0]+1)
@@ -211,7 +212,7 @@ def power_spect_2d(input_array, kbins=10, binning='log', box_dims=244/.7, return
 	ps = np.zeros((kbins[0],kbins[1]))
 	n_modes = np.zeros((kbins[0],kbins[1]))
 	kp, kz, power = kp.flatten(), kz.flatten(), power.flatten()
-	for i,a in enumerate(kper):
+	for i,a in tqdm(enumerate(kper)):
 		for j,b in enumerate(kpar):
 			arg = np.intersect1d(np.argwhere(np.abs(kp-a)<=k_width[0]/2.), np.argwhere(np.abs(kz-b)<=k_width[1]/2.))
 			ps[i,j] = power[arg].sum()
@@ -312,6 +313,7 @@ def plot_2d_power(ps, xlabel='$k_\perp$', ylabel='$k_\parallel$', ps_label='$P(k
 	
 	#X, Y = kper[:-1]/2+kper[1:]/2, kpar[:-1]/2+kpar[1:]/2
 	X, Y = kper, kpar
+
 	C = fp(X,Y)
 	norm = colors.LogNorm(vmin=C[np.isfinite(C)].min(), vmax=C[np.isfinite(C)].max()) if plotting_scale['z']=='log' else None 
 	pcm = ax.pcolormesh(X, Y, C, norm=norm, **kwargs)
@@ -319,7 +321,9 @@ def plot_2d_power(ps, xlabel='$k_\perp$', ylabel='$k_\parallel$', ps_label='$P(k
 		f_kpar = horizon_wedge_equation(draw_wedge['z'], fov_deg=draw_wedge['fov_deg'])
 		ax.plot(X, f_kpar(X), ls=draw_wedge['ls'], color=draw_wedge['color'])
 		ax.axis([X.min(),X.max(),Y.min(),Y.max()])
-	plt.colorbar(pcm, ax=ax, label=ps_label, pad=0.01)
+
+  plt.colorbar(pcm, ax=ax, label=ps_label, pad=0.01)
+
 	ax.set_xlabel(xlabel)
 	ax.set_ylabel(ylabel)
 	ax.set_xscale(plotting_scale['x'])
