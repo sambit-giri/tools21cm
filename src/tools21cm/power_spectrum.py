@@ -212,7 +212,7 @@ def power_spectrum_2d(input_array, kbins=10, binning='log', box_dims=244/.7, ret
 	if not isinstance(kbins[0], int): 
 		binning = None
 
-	power = power_spect_nd(input_array, box_dims, verbose=0)
+	power = power_spectrum_nd(input_array, box_dims, verbose=0)
 	k_xyz, k = _get_k(input_array, box_dims)
 	xy_axis = [0, 1, 2]
 	xy_axis.remove(nu_axis)
