@@ -10,7 +10,7 @@ from .helper_functions import print_msg, get_eval
 from scipy import fftpack, stats
 
 
-def power_spectrum_nd(input_array, box_dims=None):
+def power_spectrum_nd(input_array, box_dims=None, verbose=True):
         ''' 
         Calculate the power spectrum of input_array and return it as an n-dimensional array.
         
@@ -28,11 +28,12 @@ def power_spectrum_nd(input_array, box_dims=None):
         '''
 
         box_dims = _get_dims(box_dims, input_array.shape)
-
-        print_msg( 'Calculating power spectrum...')
+        if verbose: print( 'Calculating power spectrum...')
+        else: print_msg( 'Calculating power spectrum...')
         ft = fftpack.fftshift(fftpack.fftn(input_array.astype('float64')))
         power_spectrum = np.abs(ft)**2
-        print_msg( '...done')
+        if verbose: print( '...done')
+        else: print_msg( '...done')
 
         # scale
         boxvol = np.product(box_dims)
@@ -219,7 +220,7 @@ def power_spectrum_2d(input_array, kbins=10, binning='log', box_dims=244/.7, ret
 	kz = np.abs(k_xyz[nu_axis])
 	kp = np.sqrt(k_xyz[xy_axis[0]]**2 + k_xyz[xy_axis[1]]**2)
 	del k_xyz, k, xy_axis
-	gc.collect()
+	# gc.collect()
 
 	if binning is None:
 		kper = np.array(kbins[0])
