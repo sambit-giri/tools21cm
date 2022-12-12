@@ -196,7 +196,7 @@ def resample_slice(input_slice, n_output_cells, order=0, prefilter=True):
         tophat_width = 1
     slice_smoothed = smoothing.smooth_tophat(input_slice, tophat_width)
 
-    idx = np.linspace(0, slice_smoothed.shape[0], n_output_cells)
+    idx = np.linspace(0, slice_smoothed.shape[0]-1, n_output_cells)
     output_slice = smoothing.interpolate2d(slice_smoothed, idx, idx, order=order)
 
     return output_slice
