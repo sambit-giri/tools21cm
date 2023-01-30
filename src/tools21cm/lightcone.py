@@ -301,7 +301,7 @@ def redshifts_at_equal_frequncy_width(z_low, z_high, dnu):
 
 def get_lightcone_subvolume(lightcone, redshifts, central_z, \
                             depth_mhz=None, depth_mpc=None, odd_num_cells=True, \
-                            subtract_mean=True, fov_Mpc=None):
+                            subtract_mean=True, fov_Mpc=None, verbose=True):
     '''
     Extract a subvolume from a lightcone, at a given central redshift,
     and with a given depth. The depth can be specified in Mpc or MHz.
@@ -332,30 +332,43 @@ def get_lightcone_subvolume(lightcone, redshifts, central_z, \
     central_nu = cm.z_to_nu(central_z)
     if depth_mpc != None: #Depth is given in Mpc
         central_dist = cm.nu_to_cdist(central_nu)
-        low_z = cm.cdist_to_z(central_dist-depth_mpc/2.)
-        high_z = cm.cdist_to_z(central_dist+depth_mpc/2.)
+        min_cdist, max_cdist = central_dist-depth_mpc/2., central_dist+depth_mpc/2.
+        low_z = cm.cdist_to_z(min_cdist)
+        high_z = cm.cdist_to_z(max_cdist)
+        min_freq, max_freq = cm.z_to_nu(high_z), cm.z_to_nu(low_z)
     else: #Depth is given in MHz
-        low_z = cm.nu_to_z(central_nu+depth_mhz/2.)
-        high_z = cm.nu_to_z(central_nu-depth_mhz/2.)
+        min_freq, max_freq = central_nu-depth_mhz/2., central_nu+depth_mhz/2.
+        min_cdist, max_cdist = cm.z_to_cdist(cm.nu_to_z(max_freq)), cm.z_to_cdist(cm.nu_to_z(min_freq))
+        low_z = cm.nu_to_z(max_freq)
+        high_z = cm.nu_to_z(min_freq)
         
     if low_z < redshifts.min():
         raise Exception('Lowest z is outside range')
     if high_z > redshifts.max():
         raise Exception('Highest z is outside range')
         
-    low_n = int(find_idx(redshifts, low_z))
-    high_n = int(find_idx(redshifts, high_z))
-    
+    #low_n = int(find_idx(redshifts, low_z))
+    #high_n = int(find_idx(redshifts, high_z))
+    low_n = np.argmin(np.abs(redshifts - low_z))
+    high_n = np.argmin(np.abs(redshifts - high_z))
+
     if (high_n-low_n) % 2 == 0 and odd_num_cells:
         high_n += 1
     
     subbox = lightcone[:,:,low_n:high_n]
     if subtract_mean:
         subbox = st.subtract_mean_signal(subbox, los_axis=2)
-    box_depth = float(subbox.shape[2])/lightcone.shape[1]*fov_Mpc
+    #box_depth = float(subbox.shape[2])/lightcone.shape[1]*fov_Mpc
+    box_depth = max_cdist-min_cdist
     box_dims = (fov_Mpc, fov_Mpc, box_depth)
+    if(verbose): 
+        print('Slice redshift: %.3f %.3f' %(redshifts[low_n], redshifts[high_n]))
+        print('Slice frequencies (MHz): %.1f %.1f' %(min_freq, max_freq))
+        print('Slice comoving distances (cMpc): %.2f %.2f' %(min_cdist, max_cdist))
+        print('Slice indices:', low_n, high_n)
+        print('Lightcone Subvolume : %s, [%.2f, %.2f, %.2f] cMpc' %(subbox.shape, fov_Mpc, fov_Mpc, box_depth))
     
-    return subbox, box_dims
+    return subbox, box_dims, redshifts[low_n:high_n]
 
 
 def _get_interp_slice(data_high, data_low, z_bracket_high, z_bracket_low, z, \
