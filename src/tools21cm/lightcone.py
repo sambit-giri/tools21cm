@@ -318,9 +318,10 @@ def get_lightcone_subvolume(lightcone, redshifts, central_z, \
                 power spectrum calculations.
         subtract_mean (bool): if true, subtract the mean of the signal (Default: True)
         fov_Mpc (float): the FoV size in Mpc
+        verbose (bool) : turning the verbosity. 
         
     Returns:
-        Tuple with (subvolume, dims) where dims is a tuple
+        Tuple with (subvolume, dims, sub_redshifts) where dims is a tuple
         with the dimensions of the subvolume in Mpc
     '''
     
