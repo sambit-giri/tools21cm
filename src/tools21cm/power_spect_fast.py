@@ -280,11 +280,11 @@ def power_spect_mu(input_array, kbins=10, box_dims=244/.7, return_modes=False, m
 	return ps, ks, mu
 
 def plot_2d_power(ps, xlabel='$k_\perp$', ylabel='$k_\parallel$', ps_label='$P(k_\perp,k_\parallel)$',
-					fig=None, ax=None, plotting_scale={'x': 'log', 'y': 'log', 'z': 'log'}, 
-					draw_wedge={'z': 9.0, 'fov_deg': 90.0, 'ls':'--', 'color': 'k'}, **kwargs):
+				  fig=None, ax=None, plotting_scale={'x': 'log', 'y': 'log', 'z': 'log'}, 
+				  draw_wedge={'z': 9.0, 'fov_deg': 90.0, 'ls':'--', 'color': 'k'}, **kwargs):
 	'''
 	Plotting the 2D or cylindrical power spectrum.
-
+	
 	Parameters: 
 		ps (tuple or dict): The data in the form of tuple (Pk, kper_bins, kpar_bins) or
 							dictionary {'Pk': Pk, 'kper': kper_bins, 'kpar': kpar_bins}
@@ -310,7 +310,7 @@ def plot_2d_power(ps, xlabel='$k_\perp$', ylabel='$k_\parallel$', ps_label='$P(k
 		pass
 	else: 
 		ax = fig.axes[0] 
-
+	
 	#X, Y = kper[:-1]/2+kper[1:]/2, kpar[:-1]/2+kpar[1:]/2
 	X, Y = kper, kpar
 
@@ -329,7 +329,7 @@ def plot_2d_power(ps, xlabel='$k_\perp$', ylabel='$k_\parallel$', ps_label='$P(k
 	ax.set_xscale(plotting_scale['x'])
 	ax.set_yscale(plotting_scale['y'])
 	#plt.show()
-	return fig
+	return 1
 
 def horizon_wedge_equation(z, fov_deg=90.0):
 	'''
