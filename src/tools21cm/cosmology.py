@@ -2,7 +2,7 @@
 Various functions for calculating some cosmological stuff
 '''
 
-from .import const
+from . import const
 import numpy as np
 from scipy.integrate import quadrature
 from scipy.interpolate import interp1d
@@ -187,7 +187,7 @@ def z_to_age(z):
     for i in range(len(a)):
         Ea_func = lambda x: 1./x/np.sqrt(const.Omega0*x**-3+const.lam)
         tage[i] = 1/const.H0 * quadrature(Ea_func, 0, a[i])[0]
-    return outputify(tage)
+    return outputify(tage) * (const.kms/const.Mpc)**-1/const.yr_in_sec/1e9
 
 def angular_size(dl, z):
     ''' Calculate the angular size of an object at a given
