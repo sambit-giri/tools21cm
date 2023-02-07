@@ -25,6 +25,7 @@ def set_abundance_helium(value):
 mean_molecular = 1.0/(1.0-abu_he_mass)
 solar_masses_per_gram = 5.02785431e-34
 kms = 1.e5 #1 km/s in cm/s
+yr_in_sec = 3.154e7 #seconds
 
 # Cosmology
 h = 0.7
