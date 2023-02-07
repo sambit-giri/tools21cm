@@ -172,6 +172,22 @@ def cdist_to_z(dist):
         z[i] = func(dist[i])
     return outputify(z)
 
+def z_to_age(z):
+    ''' Calculate the age of the universe
+
+    Parameters:
+        z (float or array): redshift
+
+    Returns:
+        Comoving distance in Gyr
+    '''
+    z = np.atleast_1d(z)
+    a = 1/(1+z)
+    tage = np.zeros_like(z)
+    for i in range(len(a)):
+        Ea_func = lambda x: 1./x/np.sqrt(const.Omega0*x**-3+const.lam)
+        tage[i] = 1/const.H0 * quadrature(Ea_func, 0, a[i])[0]
+    return outputify(tage)
 
 def angular_size(dl, z):
     ''' Calculate the angular size of an object at a given
