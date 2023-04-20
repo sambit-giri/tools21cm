@@ -62,8 +62,8 @@ def betti0(data, thres=0.5, neighbors=6):
 	Betti 0
 	"""
 	A = (data>thres)*1
-	if neighbors==6 or neighbors==4: b0 = label(A, return_num=1, neighbors=4)[1]#np.unique(fof(B, use_skimage=1)[0]).size-1
-	else: b0 = label(A, return_num=1, neighbors=8)[1]
+	if neighbors==6 or neighbors==4: b0 = label(A, return_num=1, connectivity=1)[1]#np.unique(fof(B, use_skimage=1)[0]).size-1
+	else: b0 = label(A, return_num=1, connectivity=2)[1]
 	return b0
 
 def betti2(data, thres=0.5, neighbors=6):
@@ -83,8 +83,8 @@ def betti2(data, thres=0.5, neighbors=6):
 	Betti 2
 	"""
 	A = (data>thres)*1
-	if neighbors==6 or neighbors==4: b2 = label(1-A, return_num=1, neighbors=8)[1]#b2 = np.unique(fof(1-B, use_skimage=1)[0]).size-1
-	else: b2 = label(1-A, return_num=1, neighbors=4)[1]
+	if neighbors==6 or neighbors==4: b2 = label(1-A, return_num=1, connectivity=1)[1]#b2 = np.unique(fof(1-B, use_skimage=1)[0]).size-1
+	else: b2 = label(1-A, return_num=1, connectivity=2)[1]
 	return b2
 
 def betti1(data, thres=0.5, neighbors=6, b0=None, b2=None, chi=None, use_numba=False):

@@ -243,7 +243,9 @@ class HaloCube3PM:
 				if(pid_flag):
 					pid_halo_node = np.fromfile(f, count=50, dtype='int64')
 					xv_halo_node = np.fromfile(f, count=50*6, dtype='float32').reshape((50,6), order='C')
-				
+				else:
+					_ = np.fromfile(f, count=6, dtype='float32')
+
 				if(cosm_unit):
 					halo.pos = self._reposition(pos=conv.gridpos_to_mpc(halo.pos) * const.h)	# Mpc/h
 					halo.m = 10**(conv.gridmass_to_msol(halo.m)) * const.h 		# Msun/h
@@ -371,10 +373,11 @@ class HaloList:
 				halo.pos_cm = np.array([float(i) for i in vals[3:6]])
 				halo.vel = np.array([float(i) for i in vals[6:9]])
 				halo.l = np.array([float(i) for i in vals[9:12]])
-				halo.vel_disp = float(vals[12])
-				halo.r = float(vals[13])
-				halo.m = float(vals[14])
-				halo.mp = float(vals[15])
+				halo.vel_disp = np.array([float(i) for i in vals[12:15]])
+				halo.m = float(vals[16])
+				halo.mp = float(vals[17])
+				halo_mass_1 = float(vals[18])
+				var_x = np.array([float(i) for i in vals[19:22]])
 				halo.solar_masses = grid_mass*conv.M_grid*const.solar_masses_per_gram
 				self.halos.append(halo)
 
