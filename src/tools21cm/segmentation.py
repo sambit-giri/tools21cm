@@ -164,7 +164,7 @@ class segunet21cm:
         MODEL_NAME = pkg_resources.resource_filename('tools21cm', 'input_data/segunet_03-11T12-02-05_128slice_ep35.h5')
         MODEL_EPOCH = 35
         METRICS = {'balanced_cross_entropy':balanced_cross_entropy, 'r2score':r2score, 'iou':iou, 'precision':precision, 'recall':recall} 
-        self.MODEL_LOADED = load_model(MODEL_NAME, custom_objects=METRICS)
+        self.MODEL_LOADED = tf.keras.models.load_model(MODEL_NAME, custom_objects=METRICS)
         print(' Loaded model: %s' %MODEL_NAME)
 
     def UniqueRows(self, arr):
@@ -177,7 +177,7 @@ class segunet21cm:
             
             array([[0, 0, 0],
                     [0, 0, 2],
-                    [0, 1, 2]])
+                    0, 1, 2]])
         """
         arr = np.array(arr)
 
