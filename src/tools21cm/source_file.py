@@ -11,9 +11,9 @@ class SourceFile:
     pass the filename to the constructor.
     
     Attributes:
-        sources (numpy array): the ionization rate
+        sources_list (numpy array): the list of sources
+        sources_coeval (numpy array): the sources gridded into a ceoval cube
         z (float): the redshift of the file (-1 if it couldn't be determined from the file name)
-    
     '''
     def __init__(self, filename, mass='hm', old_format=False):
         '''
@@ -22,7 +22,7 @@ class SourceFile:
         
         Parameters:
           filename (string): the file to read from.
-          mesh = None (int) : mesh size of the coeval cube.
+          mass = 'hm' (string) : which mass-range sources from C2Ray. Either 'hm' or 'lm', correspoding to high-mass or low-mass atomically cooling halos
           old_format = False (bool): whether to use the old-style 
         file format.
         Returns:
