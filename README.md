@@ -2,7 +2,7 @@
 
 [![DOI](https://joss.theoj.org/papers/10.21105/joss.02363/status.svg)](https://doi.org/10.21105/joss.02363)
 
-A python package for analysing 21-cm signals from the Epoch of Reionization (EoR) and Cosmic Dawn (CD). Full documentation (with examples, installation instructions and complete module description) can be found at [readthedocs](https://tools21cm.readthedocs.io/).
+A python package for analysing simulated 21-cm signals from the Epoch of Reionization (EoR) and Cosmic Dawn (CD). Full documentation (with examples, installation instructions and complete module description) can be found at [readthedocs](https://tools21cm.readthedocs.io/).
 
 ## Package details
 
