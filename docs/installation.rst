@@ -6,11 +6,11 @@ We highly recommend the use of a virtual environement. It helps to keep dependen
 
 The dependencies should be installed automatically during the installation process. If they fail for some reason, you can install them manually before installing `tools21cm <https://github.com/sambit-giri/tools21cm>`_. The list of required packages can be found in the *requirements.txt* file present in the root directory.
 
-To install tools21cm from the official Python Package Index (PyPI) simply do: 
+To install tools21cm from the official Python Package Index (PyPI) simply do::
 
     pip install tools21cm
 
-For a standard non-editable installation use of the latest version in github do:
+For a standard non-editable installation use of the latest version in github do::
 
     pip install git+https://github.com/sambit-giri/tools21cm.git [--user]
 
