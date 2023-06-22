@@ -15,7 +15,7 @@ class XfracFile:
 		z (float): the redshift of the file (-1 if it couldn't be determined from the file name)
 	
 	'''
-	def __init__(self, filename = None, old_format=False):
+	def __init__(self, filename = None, old_format=False, neutral=False, binary_format=False):
 		'''
 		Initialize the file. If filename is given, read data. Otherwise,
 		do nothing.
@@ -28,10 +28,9 @@ class XfracFile:
 			Nothing
 		'''
 		if filename:
-			self.read_from_file(filename, old_format)
+			self.read_from_file(filename, old_format, neutral=neutral, binary_format=binary_format)
 
-	def read_from_file(self, filename, old_format=False, neutral=False,
-                           binary_format=False):
+	def read_from_file(self, filename, old_format=False, neutral=False, binary_format=False):
 		'''
 		Read data from file.
 		
