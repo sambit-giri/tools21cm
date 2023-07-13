@@ -20,6 +20,7 @@ from .beam_convolve import *
 from .density_file import *
 from .irate_file import *
 from .nbody_file import *
+from .nbody_tools import *
 from .xfrac_file import *
 from .temper_file import *
 from .vel_file import *
@@ -43,7 +44,6 @@ from .gaussian_random_field import *
 from .corr_function import *
 from . import power_spect_fast
 
-### Tools21cm
 from .bubble_stats import *
 #from zahnbubble import zahn
 #from c2raytools import *
