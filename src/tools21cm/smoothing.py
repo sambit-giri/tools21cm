@@ -4,7 +4,7 @@ Methods to smooth or reduce resolution of the data to reduce noise.
 
 import numpy as np
 from . import const, conv
-from . import cosmology as cm
+from . import cosmo as cm
 import scipy.ndimage as ndimage
 import scipy.interpolate
 from scipy import signal

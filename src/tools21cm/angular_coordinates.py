@@ -5,7 +5,7 @@ and observational (angular-frequency) coordinates.
 
 import numpy as np
 from .lightcone import redshifts_at_equal_comoving_distance
-from . import cosmology as cm
+from . import cosmo as cm
 from . import conv
 from . import helper_functions as hf
 from . import smoothing

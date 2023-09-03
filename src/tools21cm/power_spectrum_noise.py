@@ -5,7 +5,7 @@ Created on Feb 27, 2015
 '''
 from . import const
 import numpy as np
-from . import cosmology as cm
+from . import cosmo as cm
 
 def noise_error_ps(nu_c, k, t, **kwargs):
     '''

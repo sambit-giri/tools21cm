@@ -33,7 +33,7 @@ from .lightcone import *
 from .pv_mpm import *
 from .temperature import *
 from .helper_functions import *
-from .cosmology import *
+from .cosmo import *
 from .plotting import *
 from .power_legendre import *
 from .deprecated import *

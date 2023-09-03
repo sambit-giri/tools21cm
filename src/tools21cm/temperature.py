@@ -4,7 +4,7 @@ Methods to estimate the brightness temperature.
 
 import numpy as np
 from . import const, conv
-from . import cosmology
+from . import cosmo
 from .helper_functions import print_msg, read_cbin, \
 	get_data_and_type, determine_redshift_from_filename
 
@@ -104,9 +104,9 @@ def calc_dt_lightcone(xfrac, dens, lowest_z, los_axis = 2):
 	dens = dens.astype('float64')
 		
 	cell_size = conv.LB/xfrac.shape[(los_axis+1)%3]
-	cdist_low = cosmology.z_to_cdist(lowest_z)
+	cdist_low = cosmo.z_to_cdist(lowest_z)
 	cdist = np.arange(xfrac.shape[los_axis])*cell_size + cdist_low
-	z = cosmology.cdist_to_z(cdist)
+	z = cosmo.cdist_to_z(cdist)
 	return _dt(dens, xfrac, z)
 
 def calc_dt_full_lightcone(xfrac, temp, dens, lowest_z, los_axis = 2, correct=True):
@@ -147,9 +147,9 @@ def calc_dt_full_lightcone(xfrac, temp, dens, lowest_z, los_axis = 2, correct=Tr
 	dens = dens.astype('float64')
 		
 	cell_size = conv.LB/xfrac.shape[(los_axis+1)%3]
-	cdist_low = cosmology.z_to_cdist(lowest_z)
+	cdist_low = cosmo.z_to_cdist(lowest_z)
 	cdist = np.arange(xfrac.shape[los_axis])*cell_size + cdist_low
-	z = cosmology.cdist_to_z(cdist)
+	z = cosmo.cdist_to_z(cdist)
 	print("Redshift: ", str(z))
 	return _dt_full(dens, xfrac,temp, z, correct)
 

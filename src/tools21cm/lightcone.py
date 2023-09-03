@@ -9,7 +9,7 @@ from .helper_functions import get_mesh_size, \
     determine_redshift_from_filename, get_data_and_type, print_msg, find_idx
 from .density_file import DensityFile
 from .vel_file import VelocityFile
-from . import cosmology as cm
+from . import cosmo as cm
 from . import statistics as st
 from . import smoothing
 import scipy.interpolate

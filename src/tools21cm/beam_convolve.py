@@ -1,5 +1,5 @@
 import numpy as np
-from .cosmology import angular_size
+from .cosmo import angular_size
 from scipy import signal
 from .helper_functions import print_msg
 from .smoothing import gauss_kernel, get_beam_w

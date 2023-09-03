@@ -2,7 +2,7 @@ import numpy as np
 import itertools
 import sys
 from .usefuls import *
-from . import cosmology as cm
+from . import cosmo as cm
 from . import conv
 from tqdm import tqdm
 import time
@@ -165,7 +165,7 @@ def get_uv_coverage(Nbase, z, ncells, boxsize=None, include_mirror_baselines=Fal
 	"""
 	z = float(z)
 	if not boxsize: boxsize = conv.LB
-	uv_map = np.zeros((ncells,ncells))
+	uv_map = np.zeros((int(ncells),int(ncells)))
 	theta_max = boxsize/cm.z_to_cdist(z)
 	Nb  = np.round(Nbase*theta_max)
 	Nb  = Nb[(Nb[:,0]<ncells/2)]

@@ -5,7 +5,7 @@ Methods to simulate and analyse the foreground signal for 21 cm signal.
 import numpy as np
 from scipy.integrate import quadrature
 from .telescope_functions import jansky_2_kelvin, from_antenna_config
-from . import cosmology as cm
+from . import cosmo as cm
 from . import const
 from . import conv
 

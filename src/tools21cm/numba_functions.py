@@ -1,7 +1,7 @@
 import numpy as np
 from numba import jit, prange
 from .usefuls import *
-from . import cosmology as cm
+from . import cosmo as cm
 from . import conv
 import itertools
 

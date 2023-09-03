@@ -10,7 +10,7 @@ import sys
 from .telescope_functions import *
 from .usefuls import *
 from . import conv
-from . import cosmology as cm
+from . import cosmo as cm
 from . import smoothing as sm
 import scipy
 from glob import glob
@@ -272,6 +272,7 @@ def noise_cube_coeval(ncells, z, depth_mhz=None, obs_time=1000, filename=None, b
 	if not depth_mhz: depth_mhz = (cm.z_to_nu(cm.cdist_to_z(cm.z_to_cdist(z)-boxsize/2))-cm.z_to_nu(cm.cdist_to_z(cm.z_to_cdist(z)+boxsize/2)))/ncells
 	if not uv_map.size: uv_map, N_ant  = get_uv_map(ncells, z, filename=filename, total_int_time=total_int_time, int_time=int_time, boxsize=boxsize, declination=declination)
 	if not N_ant: N_ant = np.loadtxt(filename, dtype=str).shape[0]
+	# ncells = int(ncells); print(ncells)
 	noise3d = np.zeros((ncells,ncells,ncells))
 	if verbose: print("Creating the noise cube...")
 	sleep(1)
