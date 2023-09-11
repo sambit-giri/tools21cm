@@ -29,6 +29,7 @@ def physical_lightcone_to_observational(physical_lightcone, input_z_low, output_
         verbose (bool): show progress bar
         order (int): The order of the spline interpolation, default is 2. 
             The order has to be in the range 0-5.
+            Use order=0 for ionization fraction data.
             
     Returns:
         * The output volume as a numpy array
@@ -61,7 +62,7 @@ def physical_lightcone_to_observational(physical_lightcone, input_z_low, output_
     return output_volume, output_freqs
 
 
-def observational_lightcone_to_physical(observational_lightcone, input_freqs, input_dtheta, verbose=True):
+def observational_lightcone_to_physical(observational_lightcone, input_freqs, input_dtheta, verbose=True, order=2):
     '''
     Interpolate a lightcone volume measured in observational (angle/frequency)
     units into  physical (length) units. The output resolution will be set
@@ -75,6 +76,9 @@ def observational_lightcone_to_physical(observational_lightcone, input_freqs, in
             line of sight of the input
         input_dheta (float): the angular size of a cell in arcmin
         verbose (bool): show progress bar
+        order (int): The order of the spline interpolation, default is 2. 
+            The order has to be in the range 0-5.
+            Use order=0 for ionization fraction data.
         
     Returns:
         * The output volume
@@ -102,7 +106,7 @@ def observational_lightcone_to_physical(observational_lightcone, input_freqs, in
         z = cm.nu_to_z(input_freqs[i])
         output_volume_par[:,:,i] = angular_slice_to_physical(observational_lightcone[:,:,i],\
                                                     z, slice_size_deg=fov_deg, output_cell_size=output_cell_size,\
-                                                    output_size_mpc=fov_mpc, order=2)
+                                                    output_size_mpc=fov_mpc, order=order)
     #Bin along frequency axis
     output_volume, output_redshifts = bin_lightcone_in_mpc(output_volume_par, \
                                                 input_freqs, output_cell_size)
