@@ -14,7 +14,7 @@ from scipy.signal import fftconvolve
 from tqdm import tqdm
 
 
-def physical_lightcone_to_observational(physical_lightcone, input_z_low, output_dnu, output_dtheta, input_box_size_mpc=None, verbose=True):
+def physical_lightcone_to_observational(physical_lightcone, input_z_low, output_dnu, output_dtheta, input_box_size_mpc=None, verbose=True, order=2):
     '''
     Interpolate a lightcone volume from physical (length) units
     to observational (angle/frequency) units.
@@ -27,6 +27,8 @@ def physical_lightcone_to_observational(physical_lightcone, input_z_low, output_
         input_box_size_mpc (float): the size of the input FoV in Mpc.
             If None (default), this will be set to conv.LB
         verbose (bool): show progress bar
+        order (int): The order of the spline interpolation, default is 2. 
+            The order has to be in the range 0-5.
             
     Returns:
         * The output volume as a numpy array
@@ -54,7 +56,7 @@ def physical_lightcone_to_observational(physical_lightcone, input_z_low, output_
         z = cm.nu_to_z(output_freqs[i])
         output_volume[:,:,i] = physical_slice_to_angular(lightcone_freq[:,:,i], z, \
                                         slice_size_mpc=input_box_size_mpc, fov_deg=fov_deg,\
-                                        dtheta=output_dtheta, order=2)
+                                        dtheta=output_dtheta, order=order)
         
     return output_volume, output_freqs
 
