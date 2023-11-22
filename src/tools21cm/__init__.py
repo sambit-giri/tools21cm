@@ -28,6 +28,7 @@ from .source_file import *
 from .halo_list import *
 from .statistics import *
 from .power_spectrum import *
+from .bispectrum import *
 from .tau import *
 from .lightcone import *
 from .pv_mpm import *

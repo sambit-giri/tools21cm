@@ -1,0 +1,200 @@
+'''
+Contains functions to estimate various three point statistics.
+'''
+
+import numpy as np, gc
+from time import time, sleep
+from tqdm import tqdm
+from scipy import fftpack, stats
+from joblib import Parallel, delayed
+
+from . import const
+from . import conv
+from .helper_functions import print_msg, get_eval
+# from .power_spect_fast import power_spect_2d as power_spectrum_2d
+from .power_spectrum import _get_dims, _get_k, _get_kbins
+
+def fft_nd(input_array, box_dims=None, verbose=False):
+        ''' 
+        Calculate the power spectrum of input_array and return it as an n-dimensional array.
+        
+        Parameters:
+                input_array (numpy array): the array to calculate the 
+                        power spectrum of. Can be of any dimensions.
+                box_dims = None (float or array-like): the dimensions of the 
+                        box in Mpc. If this is None, the current box volume is used along all
+                        dimensions. If it is a float, this is taken as the box length
+                        along all dimensions. If it is an array-like, the elements are
+                        taken as the box length along each axis.
+        
+        Returns:
+                The Fourier transform in the same dimensions as the input array.           
+        '''
+        box_dims  = _get_dims(box_dims, input_array.shape)
+        k_comp, k = _get_k(input_array, box_dims)
+        ft = fftpack.fftshift(fftpack.fftn(input_array.astype('float64')))
+        #ft = np.abs(ft)
+        return ft, k_comp, k
+    
+def spherical_shell_mask(array_shape, k_center, k_width, k_comp=None, k_mag=None):
+    assert k_comp is not None or k_mag is not None
+    if k_mag is None: k_mag = np.sum(np.array(k_comp)**2, axis=0)
+    try: out = np.zeros(array_shape)
+    except: out = np.zeros((array_shape[0],array_shape[1],array_shape[2]))
+    out[np.abs(k_mag-k_center)<k_width/2] = 1
+    return out
+
+def bispectrum_fast(input_array_fft,
+                    k1, k2, k3,
+                    dk1, dk2, dk3,
+                    box_dims=None,
+                    k_mag=None,
+                    return_n_modes=False,
+                    binning='log',
+                ):
+    box_vol = np.product(box_dims)
+    n_pixel = np.product(input_array_fft.shape)
+    
+    shell1 = spherical_shell_mask(input_array_fft.shape, k1, dk1, k_mag=k_mag)
+    dfft1  = input_array_fft*shell1
+    s1     = np.fft.ifftn(np.fft.fftshift(shell1))
+    d1     = np.fft.ifftn(np.fft.fftshift(dfft1))
+    
+    if k2==k1: 
+        s2, d2 = s1, d1
+    else: 
+        shell2 = spherical_shell_mask(input_array_fft.shape, k2, dk2, k_mag=k_mag)
+        dfft2  = input_array_fft*shell2
+        s2     = np.fft.ifftn(np.fft.fftshift(shell2))
+        d2     = np.fft.ifftn(np.fft.fftshift(dfft2))
+        
+    if k3==k1: 
+        s3, d3 = s1, d1
+    elif k3==k2: 
+        s3, d3 = s2, d2
+    else: 
+        shell3 = spherical_shell_mask(input_array_fft.shape, k3, dk3, k_mag=k_mag)
+        dfft3  = input_array_fft*shell3
+        s3     = np.fft.ifftn(np.fft.fftshift(shell3))
+        d3     = np.fft.ifftn(np.fft.fftshift(dfft3))
+        
+    d123 = np.real(d1*d2*d3)
+    s123 = np.real(s1*s2*s3)
+    b123 = np.sum(d123)/np.sum(s123) * box_vol**2/n_pixel**3
+    
+    return b123
+
+def bispectrum_k1k2(input_array_nd,
+                    k1, k2,
+                    dk=0.2,
+                    n_bins=10, #kbins=10,
+                    box_dims=None,
+                    return_n_modes=False,
+                    binning='linear',
+                    verbose=True,
+                    window=None,
+                    n_jobs=1,
+                ):
+    tstart = time()
+    if window is not None:
+        from scipy.signal import windows
+        if window.lower()=='blackmanharris':
+                input_array_nd *= windows.blackmanharris(input_array_nd.shape[-1])[None,None,:]
+        elif window.lower()=='tukey':
+                input_array_nd *= windows.tukey(input_array_nd.shape[-1])[None,None,:]
+        else:
+                input_array_nd *= window
+    box_dims, box_dims_input  = _get_dims(box_dims, input_array_nd.shape), box_dims
+    if verbose and box_dims_input is None: print(f'box_dims set to {box_dims}')
+    
+    if verbose: print(f'Computing bispectrum with k1,k2={k1:.2f},{k2:.2f} /Mpc...')
+    input_array_fft, k_comp, k_mag = fft_nd(input_array_nd, box_dims=box_dims, verbose=verbose)
+    if verbose: print('FFT of data done')
+         
+    if binning=='linear': alphas  = np.linspace(0, np.pi, n_bins)
+    else: alphas  = 10**np.linspace(-2, np.log10(np.pi), n_bins)
+    k3_list = np.sqrt(k1**2 + k2**2 + 2*k1*k2*np.cos(alphas))
+    
+    def run_loop(i):
+        k3 = k3_list[i]
+        b123 = bispectrum_fast(input_array_fft,
+                        k1, k2, k3,
+                        dk, dk, dk,
+                        k_mag=k_mag,
+                        box_dims=box_dims,
+                        return_n_modes=return_n_modes,
+                        binning=binning,
+                    )
+        # if verbose: print(f'{i+1}/{theta_bins} | k3, dk3 = {k3:.5f}, {dk3:.5f}')
+        return b123
+    
+    if n_jobs in [0,1]: 
+        B_list = np.array([run_loop(i) for i in tqdm(range(n_bins))])   
+    else:
+        B_list = np.array(Parallel(n_jobs=n_jobs)(delayed(run_loop)(i) for i in tqdm(range(n_bins))))
+    
+    out_dict = {
+        'B': B_list,
+        'alpha': alphas, 
+        'theta': np.pi - alphas,
+        }
+    
+    if verbose: print(f'...done | Runtime: {time()-tstart:.3f} s')
+        
+    return out_dict
+
+
+def bispectrum_k(input_array_nd,
+                    dk=0.2,
+                    n_bins=10, #kbins=10,
+                    box_dims=None,
+                    return_n_modes=False,
+                    binning='log',
+                    verbose=True,
+                    window=None,
+                    n_jobs=1,
+                ):
+    tstart = time()
+    if window is not None:
+        from scipy.signal import windows
+        if window.lower()=='blackmanharris':
+                input_array_nd *= windows.blackmanharris(input_array_nd.shape[-1])[None,None,:]
+        elif window.lower()=='tukey':
+                input_array_nd *= windows.tukey(input_array_nd.shape[-1])[None,None,:]
+        else:
+                input_array_nd *= window
+    box_dims, box_dims_input  = _get_dims(box_dims, input_array_nd.shape), box_dims
+    if verbose and box_dims_input is None: print(f'box_dims set to {box_dims}')
+    
+    if verbose: print(f'Computing bispectrum with k1=k2=k3...')
+    input_array_fft, k_comp, k_mag = fft_nd(input_array_nd, box_dims=box_dims, verbose=verbose)
+    if verbose: print('FFT of data done')
+
+    kbins = _get_kbins(n_bins, box_dims, k_mag, binning=binning)
+    
+    def run_loop(i):
+        k = kbins[i]
+        b123 = bispectrum_fast(input_array_fft,
+                        k, k, k,
+                        dk, dk, dk,
+                        k_mag=k_mag,
+                        box_dims=box_dims,
+                        return_n_modes=return_n_modes,
+                        binning=binning,
+                    )
+        # if verbose: print(f'{i+1}/{theta_bins} | k3, dk3 = {k3:.5f}, {dk3:.5f}')
+        return b123
+    
+    if n_jobs in [0,1]:
+        B_list = np.array([run_loop(i) for i in tqdm(range(n_bins))])       
+    else:
+        B_list = np.array(Parallel(n_jobs=n_jobs)(delayed(run_loop)(i) for i in tqdm(range(n_bins))))
+    
+    out_dict = {
+        'B': B_list,
+        'k': kbins[1:]/2+kbins[:-1]/2, 
+        }
+    
+    if verbose: print(f'...done | Runtime: {time()-tstart:.3f} s')
+        
+    return out_dict
