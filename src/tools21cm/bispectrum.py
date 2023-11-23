@@ -44,6 +44,10 @@ def spherical_shell_mask(array_shape, k_center, k_width, k_comp=None, k_mag=None
     out[np.abs(k_mag-k_center)<k_width/2] = 1
     return out
 
+def cosine_rule(k1, k2, alpha):
+     k3 = np.sqrt(k1**2 + k2**2 + 2*k1*k2*np.cos(alpha))
+     return k3
+
 def bispectrum_fast(input_array_fft,
                     k1, k2, k3,
                     dk1, dk2, dk3,
@@ -113,7 +117,7 @@ def bispectrum_k1k2(input_array_nd,
          
     if binning=='linear': alphas  = np.linspace(0, np.pi, n_bins)
     else: alphas  = 10**np.linspace(-2, np.log10(np.pi), n_bins)
-    k3_list = np.sqrt(k1**2 + k2**2 + 2*k1*k2*np.cos(alphas))
+    k3_list = cosine_rule(k1, k2, alphas) #np.sqrt(k1**2 + k2**2 + 2*k1*k2*np.cos(alphas))
     
     def run_loop(i):
         k3 = k3_list[i]

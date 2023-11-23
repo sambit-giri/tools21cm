@@ -28,7 +28,6 @@ from .source_file import *
 from .halo_list import *
 from .statistics import *
 from .power_spectrum import *
-from .bispectrum import *
 from .tau import *
 from .lightcone import *
 from .pv_mpm import *
@@ -65,9 +64,12 @@ from .box_counting import *
 from .fitting_methods import *
 from .percolation import *
 
-from .power_spect_fast import *
+# from .power_spect_fast import *
 ### Cosmospectra
 # from cosmospectra import * 
+
+from .bispectrum import *
+from .test_case import *
 
 #Suppress warnings from zero-divisions and nans
 import numpy
