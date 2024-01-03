@@ -4,6 +4,8 @@ from . import const
 from . import conv
 from .helper_functions import print_msg
 
+from .nbody_pkdgrav import *
+
 class NbodyParticle:
 	'''
 	A simple struct to hold info about a single halo
