@@ -373,6 +373,23 @@ def get_data_and_type(indata, cbin_bits=32, cbin_order='c', raw_density=False):
                 return indata, 'unknown'
         raise Exception('Could not determine type of data')
 
+def save_data(savefile, data, filetype=None, **kwargs):
+        if '.npy' in savefile[-5:] or filetype.lower() in ['npy', 'python_pickle']:
+                np.save(savefile, data)
+        elif '.pkl' in savefile[-5:] or filetype.lower() in ['pkl','pickle']:
+                import pickle
+                pickle.dump(data, open(savefile, 'wb'))
+        elif '.cbin' in savefile[-5:] or filetype.lower()=='cbin':
+                save_cbin(savefile, data, bits=kwargs.get('bits',32), order=kwargs.get('order','C'))
+        elif '.fits' in savefile[-5:] or filetype in ['fits']:
+                save_fits(data, savefile, header=kwargs.get('header'))
+        elif '.bin' in savefile[-5:] or filetype in ['bin', 'binary']:
+                save_raw_binary(savefile, data, bits=kwargs.get('bits',64), order=kwargs.get('order','C'))
+        else:
+                print('Unknown filetype.')
+                return False 
+        return True
+        
 
 def get_mesh_size(filename):
         '''

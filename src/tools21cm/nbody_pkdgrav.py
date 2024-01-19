@@ -6,6 +6,8 @@ import numpy as np
 from scipy.interpolate import splev, splrep
 import pandas as pd
 
+from .helper_functions import save_data
+
 class ReaderPkdgrav3:
     def __init__(self, box_len, nGrid, 
             Omega_m=0.31, rho_c=2.77536627e11, verbose=True):
@@ -86,6 +88,33 @@ class HaloCataloguePkdgrav3(ReaderPkdgrav3):
         Read the FOF data.
 
         Parameters:
+        - filenames (str): The name of the data file or a list of files.
+        - z (float, optional): Redshift of the data. Defaults to None, which goes to 0.
+
+        Returns:
+        - numpy.ndarray: A structured array.
+        '''
+        if isinstance(filename, list):
+            for ii,ff in enumerate(filename):
+                hl0 = self._read_fof_data(ff, z=z, dtype=dtype)
+                if self.verbose: 
+                    print(f'{ff} contains {hl0.shape[0]} haloes')
+                data = hl0 if ii==0 else np.concatenate((data,hl0), axis=0)
+        else:
+            data = self._read_fof_data(filename, z=z, dtype=dtype)
+
+        self.fof_data_dtype = dtype
+        self.fof_data = data
+        if self.verbose:
+            print(f'Total haloes: {data.shape[0]}')
+        return data
+
+
+    def _read_fof_data(self, filename, z=None, dtype=None):
+        '''
+        Read the FOF data.
+
+        Parameters:
         - filename (str): The name of the data file.
         - z (float, optional): Redshift of the data. Defaults to None, which goes to 0.
 
@@ -129,12 +158,7 @@ class HaloCataloguePkdgrav3(ReaderPkdgrav3):
                 # ('nDM', '<i4'),
                 # ('iGlobalGid', '<u8')
             ])
-
         data = np.fromfile(filename, dtype=dtype)
-        self.fof_data_dtype = dtype
-        self.fof_data = data
-        if self.verbose: 
-            print('The data FoF halo data read.')
         return data
 
     def array_fof_data(self, dtype=float):
@@ -176,10 +200,22 @@ class HaloCataloguePkdgrav3(ReaderPkdgrav3):
             return None
 
     def save_fof_data(self, savefile):
-        str_data = self.array_fof_data(dtype='str')            
-        np.savetxt(savefile, str_data)
-        if self.verbose:
+        if '.txt' in savefile[-5:]:
+            str_data = self.array_fof_data(dtype='str')            
+            np.savetxt(savefile, str_data)
+        else:
+            data_arr = self.array_fof_data()
+            is_saved = save_data(savefile, data_arr)
+        if self.verbose and is_saved:
             print(f'The FoF halo data saved as {savefile}')
+        else:
+            print('The extension used in the filename provided is unknown.')
+
+    def get_hmf_data(self, hl_mass, bins=25):
+        box_len = self.box_len
+        ht = np.histogram(np.log(hl_mass), bins=bins)
+        mm, mdndm = np.exp(ht[1][1:]/2+ht[1][:-1]/2), ht[0]/box_len**3 
+        return mm, mdndm
 
 class PowerSpectrumPkdgrav3(ReaderPkdgrav3):
 
@@ -214,3 +250,35 @@ class PowerSpectrumPkdgrav3(ReaderPkdgrav3):
             data['y_smoothed'] = data['y'].rolling(window=window_size, min_periods=1).mean()
             pp = 10**data['y_smoothed']
         return kk, pp
+
+
+class Pkdgrav3data(HaloCataloguePkdgrav3,PowerSpectrumPkdgrav3):
+    def __init__(self, box_len, nGrid, 
+            Omega_m=0.31, rho_c=2.77536627e11, verbose=True):
+        super().__init__(box_len, nGrid, Omega_m, rho_c, verbose)
+        
+    def load_density_field(self,file):
+        """
+        Parameters
+        ----------
+        file : String. Path to the pkdgrav density field
+        LBox : Float, box size in Mpc/h
+        nGrid : Float, number of grid pixels
+
+        Returns
+        ----------
+        delta = rho_m/rho_mean-1
+        3-D mesh grid. Size (nGrid,nGrid,nGrid)
+        """
+        rhoc0 = self.rho_c
+        LBox  = self.box_len
+        dens  = np.fromfile(file, dtype=np.float32)
+        nGrid = round(dens.shape[0]**(1/3))
+        pkd = dens.reshape(nGrid, nGrid, nGrid)
+        pkd = pkd.T  ### take the transpose to match X_ion map coordinates
+        V_total = LBox ** 3
+        V_cell  = (LBox / nGrid) ** 3
+        mass  = (pkd * rhoc0 * V_total).astype(np.float64)
+        rho_m = mass / V_cell
+        delta_b = (rho_m) / np.mean(rho_m, dtype=np.float64) - 1
+        return delta_b
