@@ -374,6 +374,7 @@ def get_data_and_type(indata, cbin_bits=32, cbin_order='c', raw_density=False):
         raise Exception('Could not determine type of data')
 
 def save_data(savefile, data, filetype=None, **kwargs):
+        if filetype is None: filetype = ''
         if '.npy' in savefile[-5:] or filetype.lower() in ['npy', 'python_pickle']:
                 np.save(savefile, data)
         elif '.pkl' in savefile[-5:] or filetype.lower() in ['pkl','pickle']:
