@@ -201,15 +201,19 @@ class HaloCataloguePkdgrav3(ReaderPkdgrav3):
 
     def save_fof_data(self, savefile):
         if '.txt' in savefile[-5:]:
-            str_data = self.array_fof_data(dtype='str')            
-            np.savetxt(savefile, str_data)
-        else:
+            data_arr = self.array_fof_data() #(dtype='str')            
+            np.savetxt(savefile, data_arr)
+            is_saved = True
+        elif '.npy' in savefile[-5:]:
             data_arr = self.array_fof_data()
-            is_saved = save_data(savefile, data_arr)
+            np.save(savefile, data_arr)
+            is_saved = True #save_data(savefile, data_arr)
+        else:
+            is_saved = False
         if self.verbose and is_saved:
             print(f'The FoF halo data saved as {savefile}')
         else:
-            print('The extension used in the filename provided is unknown.')
+            print(f'The extension used in the filename ({savefile}) provided is unknown.')
 
     def get_hmf_data(self, hl_mass, bins=25):
         box_len = self.box_len
