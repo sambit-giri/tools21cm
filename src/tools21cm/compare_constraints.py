@@ -181,6 +181,67 @@ class ReionizationHistory:
             pass
         return ax
 
+def plot_with_error(ax, data_dict, **kwargs):
+    ax = kwargs.get('ax')
+    if ax is None: fig, ax = plt.subplots(1,1,figsize=(7,6))
+    
+    label = kwargs.get('label')
+    ls = kwargs.get('ls', ' ')
+    marker = kwargs.get('marker')
+    markersize = kwargs.get('markersize')
+    color = kwargs.get('color', 'Grey')
+    yerr  = kwargs.get('yerr', 0.06) 
+    xerr  = kwargs.get('xerr', 0.0) 
+    key_def = kwargs.get('key_def')
+    if key_def is None: 
+        key_def = {
+            'xmean': 'xmean', 'xlow': 'xlow', 'xupp': 'xupp',
+            'ymean': 'ymean', 'ylow': 'ylow', 'yupp': 'yupp',
+            'xmean_upp_limit': 'xmean_upp_limit', 'y_upp_limit': 'y_upp_limit', 
+            'xlow_upp_limit': 'xlow_upp_limit', 'xupp_upp_limit': 'xupp_upp_limit',
+            'xmean_low_limit': 'xmean_low_limit', 'y_low_limit': 'y_low_limit', 
+            'xlow_low_limit': 'xlow_low_limit', 'xupp_low_limit': 'xupp_low_limit',
+        }
+    try:
+        # Constraint measurements
+        xx = data_dict[key_def['xmean']] 
+        xl = xx-data_dict[key_def['xlow']]
+        xh = data_dict[key_def['xupp']]-xx
+        yy = data_dict[key_def['ymean']] 
+        yl = yy-data_dict[key_def['ylow']] 
+        yu = data_dict[key_def['yupp']]-yy
+        ax.errorbar(xx, yy, xerr=[xl,xh], yerr=[yl,yu],
+            ls=ls, marker=marker, markersize=markersize, 
+            color=color, label=label)
+        label = None
+    except:
+        pass
+    try:
+        # Upper limit
+        xx = data_dict[key_def['xmean_upp_limit']] 
+        xl = xx-data_dict[key_def['xlow_upp_limit']]
+        xh = data_dict[key_def['xupp_upp_limit']]-xx
+        yy = data_dict[key_def['ymean_upp_limit']] 
+        ax.errorbar(xx, yy, xerr=[xl,xh], yerr=yerr, uplims=True,
+            ls=ls, marker=marker, markersize=markersize, 
+            color=color, label=label)
+        label = None
+    except:
+        pass
+    try:
+        # Lower limit
+        xx = data_dict[key_def['xmean_low_limit']] 
+        xl = xx-data_dict[key_def['xlow_low_limit']]
+        xh = data_dict[key_def['xupp_low_limit']]-xx
+        yy = data_dict[key_def['ymean_low_limit']] 
+        ax.errorbar(xx, yy, xerr=[xl,xh], yerr=0.06, lolims=True,
+            ls=ls, marker=marker, markersize=markersize, 
+            color=color, label=label)
+        label = None
+    except:
+        pass
+    return ax
+    
 def compare_reion_hist(file_dict, saveplot=False):
     '''
     Compare simulation reionization history with available data.

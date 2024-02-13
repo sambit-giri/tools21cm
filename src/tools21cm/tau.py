@@ -40,6 +40,8 @@ def tau(ionfractions, redshifts, num_points = 50):
 	if len(ionfractions) != len(redshifts):
 		print('Incorrect length of ionfractions')
 		raise Exception()
+	
+	ionfractions, redshifts = ionfractions[np.argsort(redshifts)], redshifts[np.argsort(redshifts)]
 
 	sigma_T = 6.65e-25
 	chi1 = 1.0+const.abu_he
