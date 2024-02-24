@@ -174,7 +174,7 @@ def bispectrum_k(input_array_nd,
     input_array_fft, k_comp, k_mag = fft_nd(input_array_nd, box_dims=box_dims, verbose=verbose)
     if verbose: print('FFT of data done')
 
-    kbins = _get_kbins(n_bins, box_dims, k_mag, binning=binning)
+    kbins = _get_kbins(n_bins, box_dims, k_mag, binning=binning, kmax=k_mag.max()/2, kmin=None)
     dk = dk*np.ones_like(kbins) if isinstance(dk,float) else dk
     
     def run_loop(i):

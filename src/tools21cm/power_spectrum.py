@@ -500,18 +500,19 @@ def _get_mu(k_comp, k, los_axis, absolute_mus):
         return mu
 
 
-def _get_kbins(kbins, box_dims, k, binning='log', breakpoint=0.1):
+def _get_kbins(kbins, box_dims, k, binning='log', breakpoint=0.1, kmin=None, kmax=None):
         '''
         Make a list of bin edges if kbins is an integer,
         otherwise return it as it is.
         '''
         if isinstance(kbins,int):
-                kmin = 2.*np.pi/min(box_dims)
-                if binning=='linear': kbins = np.linspace(kmin, k.max(), kbins+1)
-                elif binning=='log': kbins = 10**np.linspace(np.log10(kmin), np.log10(k.max()), kbins+1)
+                kmin = 2.*np.pi/min(box_dims) if kmin is None else kmin
+                kmax = k.max() if kmax is None else kmax
+                if binning=='linear': kbins = np.linspace(kmin, kmax, kbins+1)
+                elif binning=='log': kbins = 10**np.linspace(np.log10(kmin), np.log10(kmax), kbins+1)
                 else:
-                        kbins_low  = np.linspace(kmin, k.max(), kbins+1)
-                        kbins_high = 10**np.linspace(np.log10(kmin), np.log10(k.max()), kbins+1)
+                        kbins_low  = np.linspace(kmin, kmax, kbins+1)
+                        kbins_high = 10**np.linspace(np.log10(kmin), np.log10(kmax), kbins+1)
                         kbins = np.hstack((kbins_low[kbins_low<breakpoint],kbins_high[kbins_high>breakpoint]))          
         return kbins
 
