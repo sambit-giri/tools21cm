@@ -175,12 +175,14 @@ def bispectrum_k(input_array_nd,
     if verbose: print('FFT of data done')
 
     kbins = _get_kbins(n_bins, box_dims, k_mag, binning=binning)
+    dk = dk*np.ones_like(kbins) if isinstance(dk,float) else dk
     
     def run_loop(i):
-        k = kbins[i]
+        k1 = kbins[i]
+        dk1 = dk[i]
         b123 = bispectrum_fast(input_array_fft,
-                        k, k, k,
-                        dk, dk, dk,
+                        k1, k1, k1,
+                        dk1, dk1, dk1,
                         k_mag=k_mag,
                         box_dims=box_dims,
                         return_n_modes=return_n_modes,
