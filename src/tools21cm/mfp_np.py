@@ -8,8 +8,7 @@ def mfp3d(arr, xth=0.5, iterations=10000000, verbose=True, point='random'):
 	#3D interpolation is required
 	#RegularGridInterpolator in scipy(>0.14) is used to do the interpolation
 
-	if verbose:
-		print('Initialising random rays...')
+	if verbose: print('Initialising random rays...', end=' ')
 	
 	info = arr.shape
 	longest = max(arr.shape)
@@ -37,7 +36,7 @@ def mfp3d(arr, xth=0.5, iterations=10000000, verbose=True, point='random'):
 	interp_func = RegularGridInterpolator((np.arange(info[0]), np.arange(info[1]), np.arange(info[2])), ar, bounds_error=False, fill_value=0)
 
 	if verbose:
-		print('...done')
+		print('done')
 		print('Estimating ray lengths...')
 
 	if verbose:

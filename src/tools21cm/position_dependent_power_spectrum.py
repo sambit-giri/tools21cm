@@ -4,62 +4,62 @@ from .power_spectrum import *
 
 def power_spectrum_response(cube, cube2=None, Ncuts=4, kbins=15, box_dims=244/.7, binning='log', verbose=True):
 	"""
-    Calculate the response of a field to large-scale fluctuations (Giri et al. 2019, arXiv:1811.09633).
+	Calculate the response of a field to large-scale fluctuations (Giri et al. 2019, arXiv:1811.09633).
 
-    Parameters:
-    - cube1 (numpy.ndarray): The first input 3D data cube.
-    - cube2 (numpy.ndarray): The second input 3D data cube. Default: None, which is replaced with the first cube.
-    - Ncuts (int): Number of cuts along each dimension for the box division. Default: 4.
-    - kbins (int): Number of bins for the power spectrum calculation. Default: 15.
-    - box_dims (float): Size of the box in comoving Mpc. Default: 244/h.
-    - binning (str): Binning method for the power spectrum ('log' or 'linear'). Default: 'log'.
-    - verbose (bool): If True, display progress. Default: True.
+	Parameters:
+	- cube1 (numpy.ndarray): The first input 3D data cube.
+	- cube2 (numpy.ndarray): The second input 3D data cube. Default: None, which is replaced with the first cube.
+	- Ncuts (int): Number of cuts along each dimension for the box division. Default: 4.
+	- kbins (int): Number of bins for the power spectrum calculation. Default: 15.
+	- box_dims (float): Size of the box in comoving Mpc. Default: 244/h.
+	- binning (str): Binning method for the power spectrum ('log' or 'linear'). Default: 'log'.
+	- verbose (bool): If True, display progress. Default: True.
 
-    Returns:
-    - numpy.ndarray: Integrated bispectrum cross-power spectrum.
-    - numpy.ndarray: Wavenumbers corresponding to the power spectrum.
-    """
+	Returns:
+	- numpy.ndarray: Integrated bispectrum cross-power spectrum.
+	- numpy.ndarray: Wavenumbers corresponding to the power spectrum.
+	"""
 	return integrated_bispectrum_cross(cube, cube if cube2 is None else cube2, Ncuts=Ncuts, kbins=kbins, box_dims=box_dims, binning=binning, normalize=True, verbose=verbose)
 
 
 def integrated_bispectrum(cube, Ncuts=4, kbins=15, box_dims=244/.7, binning='log', normalize=False, verbose=True):
 	"""
-    Calculate the integrated bispectrum auto-power spectrum (Giri et al. 2019, arXiv:1811.09633).
+	Calculate the integrated bispectrum auto-power spectrum (Giri et al. 2019, arXiv:1811.09633).
 
-    Parameters:
-    - cube1 (numpy.ndarray): The first input 3D data cube.
-    - cube2 (numpy.ndarray): The second input 3D data cube. Default: None, which is replaced with the first cube.
-    - Ncuts (int): Number of cuts along each dimension for the box division. Default: 4.
-    - kbins (int): Number of bins for the power spectrum calculation. Default: 15.
-    - box_dims (float): Size of the box in comoving Mpc. Default: 244/h.
-    - binning (str): Binning method for the power spectrum ('log' or 'linear'). Default: 'log'.
+	Parameters:
+	- cube1 (numpy.ndarray): The first input 3D data cube.
+	- cube2 (numpy.ndarray): The second input 3D data cube. Default: None, which is replaced with the first cube.
+	- Ncuts (int): Number of cuts along each dimension for the box division. Default: 4.
+	- kbins (int): Number of bins for the power spectrum calculation. Default: 15.
+	- box_dims (float): Size of the box in comoving Mpc. Default: 244/h.
+	- binning (str): Binning method for the power spectrum ('log' or 'linear'). Default: 'log'.
 	- normalize (bool): If True, normalize the result. Default: False.
-    - verbose (bool): If True, display progress. Default: True.
+	- verbose (bool): If True, display progress. Default: True.
 
-    Returns:
-    - numpy.ndarray: Integrated bispectrum cross-power spectrum.
-    - numpy.ndarray: Wavenumbers corresponding to the power spectrum.
-    """
+	Returns:
+	- numpy.ndarray: Integrated bispectrum cross-power spectrum.
+	- numpy.ndarray: Wavenumbers corresponding to the power spectrum.
+	"""
 	return integrated_bispectrum_cross(cube, cube, Ncuts=Ncuts, kbins=kbins, box_dims=box_dims, binning=binning, normalize=normalize, verbose=verbose)
 
 def integrated_bispectrum_cross(cube1, cube2, Ncuts=4, kbins=15, box_dims=244/.7, binning='log', normalize=False, verbose=True):
 	"""
-    Calculate the integrated bispectrum cross-power spectrum (Giri et al. 2019, arXiv:1811.09633).
+	Calculate the integrated bispectrum cross-power spectrum (Giri et al. 2019, arXiv:1811.09633).
 
-    Parameters:
-    - cube1 (numpy.ndarray): The first input 3D data cube.
-    - cube2 (numpy.ndarray): The second input 3D data cube.
-    - Ncuts (int): Number of cuts along each dimension for the box division.
-    - kbins (int): Number of bins for the power spectrum calculation.
-    - box_dims (float): Size of the box in comoving Mpc.
-    - binning (str): Binning method for the power spectrum ('log' or 'linear').
-    - normalize (bool): If True, normalize the result.
-    - verbose (bool): If True, display progress.
+	Parameters:
+	- cube1 (numpy.ndarray): The first input 3D data cube.
+	- cube2 (numpy.ndarray): The second input 3D data cube.
+	- Ncuts (int): Number of cuts along each dimension for the box division.
+	- kbins (int): Number of bins for the power spectrum calculation.
+	- box_dims (float): Size of the box in comoving Mpc.
+	- binning (str): Binning method for the power spectrum ('log' or 'linear').
+	- normalize (bool): If True, normalize the result.
+	- verbose (bool): If True, display progress.
 
-    Returns:
-    - numpy.ndarray: Integrated bispectrum cross-power spectrum.
-    - numpy.ndarray: Wavenumbers corresponding to the power spectrum.
-    """
+	Returns:
+	- numpy.ndarray: Integrated bispectrum cross-power spectrum.
+	- numpy.ndarray: Wavenumbers corresponding to the power spectrum.
+	"""
 	assert cube1.shape == cube2.shape
 	assert cube1.shape[0]%Ncuts==0 and cube1.shape[1]%Ncuts==0 and cube1.shape[2]%Ncuts==0
 	Lx,Ly,Lz = cube1.shape[0]/Ncuts,cube1.shape[1]/Ncuts,cube1.shape[2]/Ncuts
@@ -102,22 +102,22 @@ def _W_L(array, rL, L):
 
 def integrated_bispectrum_cross_slide(cube1, cube2, L_subbox=400, kbins=15, box_dims=244/.7, binning='log', normalize=False, verbose=True, slide_overlap=0.5):
 	"""
-    Calculate the integrated bispectrum cross-power spectrum (Giri et al. 2019, arXiv:1811.09633).
+	Calculate the integrated bispectrum cross-power spectrum (Giri et al. 2019, arXiv:1811.09633).
 
-    Parameters:
-    - cube1 (numpy.ndarray): The first input 3D data cube.
-    - cube2 (numpy.ndarray): The second input 3D data cube.
-    - L_subbox (float): Box length of the sub-boxes (in number of cells/grids).
-    - kbins (int): Number of bins for the power spectrum calculation.
-    - box_dims (float): Size of the box in comoving Mpc.
-    - binning (str): Binning method for the power spectrum ('log' or 'linear').
-    - normalize (bool): If True, normalize the result.
-    - verbose (bool): If True, display progress.
+	Parameters:
+	- cube1 (numpy.ndarray): The first input 3D data cube.
+	- cube2 (numpy.ndarray): The second input 3D data cube.
+	- L_subbox (float): Box length of the sub-boxes (in number of cells/grids).
+	- kbins (int): Number of bins for the power spectrum calculation.
+	- box_dims (float): Size of the box in comoving Mpc.
+	- binning (str): Binning method for the power spectrum ('log' or 'linear').
+	- normalize (bool): If True, normalize the result.
+	- verbose (bool): If True, display progress.
 
-    Returns:
-    - numpy.ndarray: Integrated bispectrum cross-power spectrum.
-    - numpy.ndarray: Wavenumbers corresponding to the power spectrum.
-    """
+	Returns:
+	- numpy.ndarray: Integrated bispectrum cross-power spectrum.
+	- numpy.ndarray: Wavenumbers corresponding to the power spectrum.
+	"""
 	print('IMPLEMENTATION NOT OVER.')
 	assert cube1.shape == cube2.shape
 	L = cube1.shape[0]
@@ -145,6 +145,6 @@ def integrated_bispectrum_cross_slide(cube1, cube2, L_subbox=400, kbins=15, box_
 	B_k  = B_k/n_box
 	P_k  = P_k/n_box
 	sig2 = sig2/n_box
-	if verbose: print('The long wavelength mode is %.3f/cMpc'%(2*np.pi/(box_dims*L_long/Lx)))
+	if verbose: print('The long wavelength mode is %.3f/cMpc'%(2*np.pi/(box_dims*L_subbox/Lx)))
 	if normalize: return B_k/P_k/sig2, ks
 	return B_k, ks

@@ -234,11 +234,11 @@ def mfp(data, xth=0.5, boxsize=None, iterations = 10000000, verbose=True, upper_
 		data = np.ones(data.shape)
 		iterations = 3
 	if dim == 2:
-		if verbose: print("MFP method applied on 2D data (ver 1.0)")
+		# if verbose: print("MFP method applied on 2D data (ver 1.0)")
 		#out = mfp2d(data, xth, iterations=iterations, verbose=verbose)
 		out = mfp_np.mfp2d(data, xth, iterations=iterations, verbose=verbose)
 	elif dim == 3:
-		if verbose: print("MFP method applied on 3D data (ver 1.0)")
+		# if verbose: print("MFP method applied on 3D data (ver 1.0)")
 		#out = mfp3d(data, xth, iterations=iterations, verbose=verbose)
 		out = mfp_np.mfp3d(data, xth, iterations=iterations, verbose=verbose)
 	else:
@@ -249,7 +249,7 @@ def mfp(data, xth=0.5, boxsize=None, iterations = 10000000, verbose=True, upper_
 	t2 = datetime.datetime.now()
 	runtime = (t2-t1).total_seconds()/60
 
-	if verbose: print("\nProgram runtime: %f minutes." %runtime)
+	if verbose: print("\nProgram runtime: %.2f minutes." %runtime)
 	if check_box==0:
 		if verbose: print("There is no ROI in the data. Therefore, the BSD is zero everywhere.")
 		return rr*boxsize/data.shape[0], np.zeros(rr.shape)
