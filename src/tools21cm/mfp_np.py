@@ -38,36 +38,23 @@ def mfp3d(arr, xth=0.5, iterations=10000000, verbose=True, point='random'):
 	if verbose:
 		print('done')
 		print('Estimating ray lengths...')
-
-	if verbose:
-		sleep(0.1)
-		for rr in tqdm(range(longest)):
-			xs,ys,zs = xs+ls,ys+ms,zs+ns
-			pts    = np.vstack((xs,ys,zs)).T
-			vals   = interp_func(pts)
-			check  = np.argwhere(vals<=0.5)
-			num_sz[rr] = check.shape[0]
-			xs,ys,zs = np.delete(xs, check),np.delete(ys, check),np.delete(zs, check)
-			ls,ms,ns = np.delete(ls, check),np.delete(ms, check),np.delete(ns, check)
-			# if verbose:
-			# 	perc = (rr+1)*100/longest
-			# 	msg  = '%.1f'%perc + '%'
-			# 	loading_verbose(msg)
-			if not xs.size: break
-		# msg  = '100.0' + '%'
-		# loading_verbose(msg)
-		sleep(0.1)
-		print('...done')
-	else:
+	
+	sleep(0.01)
+	total_iterations = longest
+	with tqdm(total=total_iterations, dynamic_ncols=False, disable=not verbose) as pbar:
 		for rr in range(longest):
-			xs,ys,zs = xs+ls,ys+ms,zs+ns
-			pts    = np.vstack((xs,ys,zs)).T
-			vals   = interp_func(pts)
-			check  = np.argwhere(vals<=0.5)
+			xs, ys, zs = xs + ls, ys + ms, zs + ns
+			pts = np.vstack((xs, ys, zs)).T
+			vals = interp_func(pts)
+			check = np.argwhere(vals <= 0.5)
 			num_sz[rr] = check.shape[0]
-			xs,ys,zs = np.delete(xs, check),np.delete(ys, check),np.delete(zs, check)
-			ls,ms,ns = np.delete(ls, check),np.delete(ms, check),np.delete(ns, check)
-			if not xs.size: break
+			xs, ys, zs = np.delete(xs, check), np.delete(ys, check), np.delete(zs, check)
+			ls, ms, ns = np.delete(ls, check), np.delete(ms, check), np.delete(ns, check)
+			pbar.update(1)  # Increment the progress bar
+			if not xs.size:
+				break
+		pbar.set_postfix({'Completion': '100%'})
+
 	size_px = np.arange(longest)
 	return num_sz, size_px
 
