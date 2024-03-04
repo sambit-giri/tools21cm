@@ -37,9 +37,7 @@ def EulerCharacteristic(data, thres=0.5, neighbors=6, use_cython=True, verbose=T
 	if verbose: print(f'Creating CubeMap...')
 	if neighbors==6 or neighbors==4: C = VB.CubeMap(A)
 	else: C = VB.CubeMap(1-A)
-	print(f'...done in {(time()-tstart)/60:.2f} mins')
-	#D = VB.CubeMap(1-A)
-        #E = VB.EulerCharacteristic_seq(C)/2. + VB.EulerCharacteristic_seq(D)/2.
+	if verbose: print(f'...done in {(time()-tstart)/60:.2f} mins')
 	elem, count = np.unique(C, return_counts=1)
 	V = count[elem==1] if len(count[elem==1])!=0 else 0
 	E = count[elem==2] if len(count[elem==2])!=0 else 0
