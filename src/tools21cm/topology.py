@@ -1,12 +1,12 @@
 import numpy as np
-import sys
+import sys, scipy
+from time import time
 from sklearn.neighbors import BallTree, KDTree
 from sklearn.neighbors import NearestNeighbors
-import scipy
 from .bubble_stats import fof
 from skimage.measure import label
 
-def EulerCharacteristic(data, thres=0.5, neighbors=6, use_numba=False):
+def EulerCharacteristic(data, thres=0.5, neighbors=6, use_cython=True, verbose=True):
 	"""
 	Parameters
 	----------
@@ -17,25 +17,27 @@ def EulerCharacteristic(data, thres=0.5, neighbors=6, use_numba=False):
 		Ignore this parameter if data is already a binary field.
 	neighbors: int
 		Define the connectivity to the neighbors (Default: 6).
-	use_numba: bool
-		If True, numba package is used to speed up calculation.
+	use_cython: bool
+		If True, cythonized module is used to speed up calculation.
+	verbose: bool
+		If True, verbose is printed.
 
 	Returns
 	-------
 	Euler characteristics value.
 	"""
-	A = 1*(data>thres)
-	#if 'numba' in sys.modules: 
-	#	print('Using numba to speed up.')
-	#	from . import ViteBetti_numba as VB
-	#else: from . import ViteBetti as VB
-	if use_numba: 
-		# print('Using numba to speed up.')
-		from . import ViteBetti_numba as VB
+	tstart = time()
+	A = (data>thres).astype(int)
+	if use_cython: 
+		try: from . import ViteBetti_cython as VB
+		except: import ViteBetti_cython as VB
 	else: 
-		from . import ViteBetti as VB
+		try: from . import ViteBetti as VB
+		except: import ViteBetti as VB
+	if verbose: print(f'Creating CubeMap...')
 	if neighbors==6 or neighbors==4: C = VB.CubeMap(A)
 	else: C = VB.CubeMap(1-A)
+	print(f'...done in {(time()-tstart)/60:.2f} mins')
 	#D = VB.CubeMap(1-A)
         #E = VB.EulerCharacteristic_seq(C)/2. + VB.EulerCharacteristic_seq(D)/2.
 	elem, count = np.unique(C, return_counts=1)
