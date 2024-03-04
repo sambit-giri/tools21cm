@@ -20,7 +20,7 @@ def physical_lightcone_to_observational(physical_lightcone, input_z_low, output_
     to observational (angle/frequency) units.
     
     Parameters:
-        physical_lightcone (ndarray): the lightcone volume
+        physical_lightcone (numpy array): the lightcone volume
         input_z_low (float): the lowest redshift of the input lightcone
         output_dnu (float): the frequency resolution of the output volume in MHz
         output_dtheta (float): the angular resolution of the output in arcmin
@@ -191,7 +191,7 @@ def resample_slice(input_slice, n_output_cells, order=0, prefilter=True):
     Resample a 2D slice to new dimensions.
     
     Parameters:
-        input_slice (ndarray): the input slice
+        input_slice (numpy array): the input slice
         n_output_cells (int) : the number of output cells
 
     Returns:
@@ -213,7 +213,7 @@ def bin_lightcone_in_frequency(lightcone, z_low, box_size_mpc, dnu):
     Bin a lightcone in frequency bins.
     
     Parameters:
-        lightcone (ndarray): the lightcone in length units
+        lightcone (numpy array): the lightcone in length units
         z_low (float): the lowest redshift of the lightcone
         box_size_mpc (float): the side of the lightcone in Mpc
         dnu (float): the width of the frequency bins in MHz
