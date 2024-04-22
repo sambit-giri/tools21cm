@@ -35,6 +35,8 @@ lam = 1.0-Omega0; OmegaL = lam
 n_s = 0.96
 sigma_8 = 0.8
 
+q0 = 0.5*Omega0 - lam
+
 # Set cosmological parameter
 def set_hubble_h(value):
 	'''
@@ -48,9 +50,11 @@ def set_omega_matter(value):
 	'''
 	Define new omega matter value.
 	'''
-	global Omega0, lam
+	global Omega0, lam, q0
 	Omega0 = value
 	lam = 1.0-Omega0
+	q0 = 0.5*Omega0 - lam
+	# print(Omega0, q0)
 
 def set_omega_baryon(value):
 	'''
@@ -85,9 +89,8 @@ def set_sigma_8(value):
 H0 = 100.0*h
 H0cgs = H0*1e5/Mpc
 rho_crit_0 = 3.0*H0cgs*H0cgs/(8.0*np.pi*G_grav)
-q0 = 0.5*Omega0- lam
 rho_matter = rho_crit_0*Omega0  
-Tcmb0=2.725
+Tcmb0 = 2.725
 
 # Redshift dependent Hubble parameter, km/s/Mpc
 Hz = lambda z: H0*np.sqrt(Omega0*(1.0+z)**3.+lam) 

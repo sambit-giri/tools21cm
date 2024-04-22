@@ -78,6 +78,7 @@ precalc_table_cdist = np.array([   0.  ,     85.36535896,    170.02599243,
 def _ldist(z):
     # This function is used for the integration in luminosity_distance  
     # Only meant for internal use.
+    # print(const.q0,const.lam)
     term1 = (1+z)**2
     term2 =  1.+2.*(const.q0+const.lam)*z
     term3 = z*(2.+z)*const.lam
