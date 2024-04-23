@@ -4,7 +4,7 @@ Other modules
 
 Pre-defined constants
 ---------------------
-.. automodule:: t2c.const
+.. automodule:: tools21cm.const
     :members:
 
 For CUBEP\ :sup:`3`\M and C\ :sup:`2`\RAY simulations
@@ -12,22 +12,22 @@ For CUBEP\ :sup:`3`\M and C\ :sup:`2`\RAY simulations
 
 Conversion factors
 ~~~~~~~~~~~~~~~~~~
-.. automodule:: t2c.conv
+.. automodule:: tools21cm.conv
     :members:
 
 Density file
 ~~~~~~~~~~~~
-.. automodule:: t2c.density_file
+.. automodule:: tools21cm.density_file
     :members:
 
 Ionisation rate file
 ~~~~~~~~~~~~~~~~~~~~
-.. automodule:: t2c.irate_file
+.. automodule:: tools21cm.irate_file
     :members:
 
 
 Ionisation fraction file
 ~~~~~~~~~~~~~~~~~~~~~~~~
-.. automodule:: t2c.xfrac_file
+.. automodule:: tools21cm.xfrac_file
     :members:
 

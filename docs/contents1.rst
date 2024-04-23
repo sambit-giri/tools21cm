@@ -4,75 +4,75 @@ Main modules
 
 Angular coordinates
 -------------------
-.. automodule:: t2c.angular_coordinates
+.. automodule:: tools21cm.angular_coordinates
     :members:
 
 Bubble Statistics
 -----------------
-.. automodule:: t2c.bubble_stats
+.. automodule:: tools21cm.bubble_stats
     :members:
 
 Cosmological calculators
 ------------------------
-.. automodule:: t2c.cosmology
+.. automodule:: tools21cm.cosmology
     :members:
 
 Foreground model
 ----------------
-.. automodule:: t2c.foreground_model
+.. automodule:: tools21cm.foreground_model
     :members:
 
 Identifying regions
 -------------------
-.. automodule:: t2c.identify_regions
+.. automodule:: tools21cm.identify_regions
     :members:
 
 Lightcone
 ---------
-.. automodule:: t2c.lightcone
+.. automodule:: tools21cm.lightcone
     :members:
 
 Telescope noise
 ---------------
-.. automodule:: t2c.noise_model
+.. automodule:: tools21cm.noise_model
     :members:
 
-.. automodule:: t2c.telescope_functions
+.. automodule:: tools21cm.telescope_functions
     :members:
 
 Power spectrum
 --------------
-.. automodule:: t2c.power_spectrum
+.. automodule:: tools21cm.power_spectrum
     :members:
 
 Primary beam
 ------------
-.. automodule:: t2c.primary_beam
+.. automodule:: tools21cm.primary_beam
     :members:
 
 Reading simuation outputs
 -------------------------
-.. automodule:: t2c.read_files
+.. automodule:: tools21cm.read_files
     :members:
 
 Smoothing
 ---------
-.. automodule:: t2c.smoothing
+.. automodule:: tools21cm.smoothing
     :members:
 
 Point statistics
 ----------------
-.. automodule:: t2c.statistics
+.. automodule:: tools21cm.statistics
     :members:
 
 Temperature
 -----------
-.. automodule:: t2c.temperature
+.. automodule:: tools21cm.temperature
     :members:
 
 Topology
 --------
-.. automodule:: t2c.topology
+.. automodule:: tools21cm.topology
     :members:
 
 
