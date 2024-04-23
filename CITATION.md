@@ -3,7 +3,7 @@ If you use this package to model the impact of baryonic effects on the matter po
     Giri S. K., Schneider A., 2021, JCAP, 2021, 046. doi:10.1088/1475-7516/2021/12/046
 
 @ARTICLE{2021JCAP...12..046G,
-       author = {{Giri}, Sambit K. and {Schneider}, Aurel},
+       author = {Giri, Sambit K. and Schneider, Aurel},
         title = "{Emulation of baryonic effects on the matter power spectrum and constraints from galaxy cluster data}",
       journal = {\jcap},
      keywords = {cosmological simulations, galaxy clusters, power spectrum, weak gravitational lensing, Astrophysics - Cosmology and Nongalactic Astrophysics},
