@@ -1,4 +1,5 @@
 import numpy as np
+import matplotlib.pyplot as plt 
 from scipy.stats import spearmanr
 from skimage.segmentation import slic, mark_boundaries
 from skimage.filters import threshold_otsu
@@ -15,8 +16,8 @@ def slic_cube(cube, n_segments=5000, compactness=0.1, max_iter=20, sigma=0, min_
 	else:
 		multichannel = False
 	if verbose: print('Estimating superpixel labels using SLIC...')
-	try: labels = slic(cube, n_segments=n_segments, compactness=compactness, max_iter=max_iter, sigma=sigma, max_size_factor=max_size_factor, slic_zero=True, multichannel=multichannel, start_label=0)
-	except: labels = slic(cube, n_segments=n_segments, compactness=compactness, max_iter=max_iter, sigma=sigma, max_size_factor=max_size_factor, slic_zero=True, multichannel=multichannel)
+	try: labels = slic(cube, n_segments=n_segments, compactness=compactness, max_num_iter=max_iter, sigma=sigma, max_size_factor=max_size_factor, slic_zero=True, multichannel=multichannel, start_label=0)
+	except: labels = slic(cube, n_segments=n_segments, compactness=compactness, max_num_iter=max_iter, sigma=sigma, max_size_factor=max_size_factor, slic_zero=True, multichannel=multichannel)
 	if verbose: print("The output contains the labels with %d segments"%(labels.max()+1))
 	return labels
 
