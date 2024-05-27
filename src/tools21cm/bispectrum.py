@@ -57,7 +57,7 @@ def bispectrum_fast(input_array_fft,
                     binning='log',
                 ):
     box_vol = np.product(box_dims)
-    n_pixel = np.int(np.product(input_array_fft.shape))
+    n_pixel = (np.product(input_array_fft.shape)).astype(int)
     
     shell1 = spherical_shell_mask(input_array_fft.shape, k1, dk1, k_mag=k_mag)
     dfft1  = input_array_fft*shell1
