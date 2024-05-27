@@ -213,6 +213,7 @@ class BispectrumPylians:
     def __init__(self, input_array, box_dims=None, verbose=True):
         try:
             import Pk_library as PKL
+            self.PKL = PKL
         except:
             print('Install the Pylians package to use this class:')
             print('https://pylians3.readthedocs.io/en/master/installation.html')
@@ -233,7 +234,7 @@ class BispectrumPylians:
             print(f'k1, k2 = {k1:.2f}/Mpc, {k2:.2f}/Mpc')
             print(f'\\theta bins = {theta}')
         delta = self.input_array
-        BBk = PKL.Bk(delta, BoxSize, k1, k2, theta, MAS, threads)
+        BBk = self.PKL.Bk(delta, BoxSize, k1, k2, theta, MAS, threads)
         Bk  = BBk.B     #bispectrum
         Qk  = BBk.Q     #reduced bispectrum
         k3  = BBk.k     #k-bins for power spectrum
