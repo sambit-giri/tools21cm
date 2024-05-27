@@ -84,7 +84,7 @@ def bispectrum_fast(input_array_fft,
         
     d123 = np.real(d1*d2*d3)
     s123 = np.real(s1*s2*s3)
-    b123 = np.sum(d123)/np.sum(s123) * box_vol**2/n_pixel**3
+    b123 = np.sum(d123)/np.sum(s123) * box_vol.astype(np.float64)**2/n_pixel.astype(np.float64)**3
     
     return b123
 
@@ -100,6 +100,7 @@ def bispectrum_k1k2(input_array_nd,
                     n_jobs=1,
                 ):
     tstart = time()
+    input_array_nd = input_array_nd.astype(np.float64)
     if window is not None:
         from scipy.signal import windows
         if window.lower()=='blackmanharris':
