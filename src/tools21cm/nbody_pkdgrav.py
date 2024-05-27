@@ -263,16 +263,18 @@ class Pkdgrav3data(HaloCataloguePkdgrav3,PowerSpectrumPkdgrav3):
         
     def load_density_field(self,file):
         """
+        Loads the density field from a file and computes the density contrast.
+
         Parameters
         ----------
-        file : String. Path to the pkdgrav density field
-        LBox : Float, box size in Mpc/h
-        nGrid : Float, number of grid pixels
-
+        file : str
+            Path to the pkdgrav density field file.
+        
         Returns
         ----------
-        delta = rho_m/rho_mean-1
-        3-D mesh grid. Size (nGrid,nGrid,nGrid)
+        delta_b : ndarray
+            The density contrast delta, defined as (rho_m / rho_mean - 1).
+            It is a 3-D mesh grid of size (nGrid, nGrid, nGrid).
         """
         rhoc0 = self.rho_c
         LBox  = self.box_len
