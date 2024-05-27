@@ -109,9 +109,9 @@ def bispectrum_k1k2(input_array_nd,
         else:
                 input_array_nd *= window
     box_dims, box_dims_input  = _get_dims(box_dims, input_array_nd.shape), box_dims
-    if verbose and box_dims_input is None: print(f'box_dims set to {box_dims}')
+    if verbose and box_dims_input is None: print(f'box_dims set to {box_dims} Mpc')
     
-    if verbose: print(f'Computing bispectrum with k1,k2={k1:.2f},{k2:.2f} /Mpc...')
+    if verbose: print(f'Computing bispectrum with k1,k2={k1:.2f},{k2:.2f} 1/Mpc...')
     input_array_fft, k_comp, k_mag = fft_nd(input_array_nd, box_dims=box_dims, verbose=verbose)
     if verbose: print('FFT of data done')
          
@@ -168,7 +168,7 @@ def bispectrum_k(input_array_nd,
         else:
                 input_array_nd *= window
     box_dims, box_dims_input  = _get_dims(box_dims, input_array_nd.shape), box_dims
-    if verbose and box_dims_input is None: print(f'box_dims set to {box_dims}')
+    if verbose and box_dims_input is None: print(f'box_dims set to {box_dims} Mpc')
     
     if verbose: print(f'Computing bispectrum with k1=k2=k3...')
     input_array_fft, k_comp, k_mag = fft_nd(input_array_nd, box_dims=box_dims, verbose=verbose)
@@ -204,3 +204,42 @@ def bispectrum_k(input_array_nd,
     if verbose: print(f'...done | Runtime: {time()-tstart:.3f} s')
         
     return out_dict
+
+class BispectrumPylians:
+    def __init__(self, input_array, box_dims=None, verbose=True):
+        try:
+            import Pk_library as PKL
+        except:
+            print('Install the Pylians package to use this class:')
+            print('https://pylians3.readthedocs.io/en/master/installation.html')
+
+        box_dims, box_dims_input  = _get_dims(box_dims, input_array.shape), box_dims
+        if verbose and box_dims_input is None: print(f'box_dims set to {box_dims} Mpc')
+        self.input_array = input_array
+        self.box_dims = box_dims
+        self.verbose = verbose
+
+    def bispectrum_k1k2(self, k1, k2, n_bins=15, threads=1, MAS='CIC'):
+        BoxSize = self.box_dims #Size of the density field in Mpc
+        if isinstance(n_bins,(int,float)):
+            theta = np.linspace(0, np.pi, n_bins) #array with the angles between k1 and k2
+        else:
+            theta = n_bins 
+        if self.verbose:
+            print(f'k1, k2 = {k1:.2f}/Mpc, {k2:.2f}/Mpc')
+            print(f'\\theta bins = {theta}')
+        delta = self.input_array
+        BBk = PKL.Bk(delta, BoxSize, k1, k2, theta, MAS, threads)
+        Bk  = BBk.B     #bispectrum
+        Qk  = BBk.Q     #reduced bispectrum
+        k3  = BBk.k     #k-bins for power spectrum
+        Pk  = BBk.Pk    #power spectrum
+        return {
+            'k1': k1,
+            'k2': k2,
+            'k3': k3,
+            'theta': theta,
+            'Bk': Bk,
+            'Qk': Qk,
+            'Pk': Pk,
+            }
