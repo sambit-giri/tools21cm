@@ -142,6 +142,9 @@ def bispectrum_k1k2(input_array_nd,
         'B': B_list,
         'alpha': alphas, 
         'theta': np.pi - alphas,
+        'k1': k1,
+        'k2': k2,
+        'k3': k3_list,
         }
     
     if verbose: print(f'...done | Runtime: {time()-tstart:.3f} s')
