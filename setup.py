@@ -11,7 +11,7 @@ from Cython.Build import cythonize
 import numpy as np
 
 setup(name='tools21cm',
-      version='2.1.8',
+      version='2.1.9',
       author='Sambit Giri',
       author_email='sambit.giri@astro.su.se',
       packages=find_packages("src"),
