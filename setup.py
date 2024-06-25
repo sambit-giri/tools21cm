@@ -32,9 +32,9 @@ extensions = [
 
 setup(
     name='tools21cm',
-    version='2.1.9',
+    version='2.1.10',
     author='Sambit Giri',
-    author_email='sambit.giri@astro.su.se',
+    author_email='sambit.giri@gmail.com',
     packages=find_packages(where="src"),
     package_dir={"": "src"},
     package_data={'tools21cm': ['input_data/*']},
