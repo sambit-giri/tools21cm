@@ -7,6 +7,10 @@ Setup script
 from setuptools import setup, find_packages
 #from distutils.core import setup
 
+# Read requirements from requirements.txt
+with open('requirements.txt') as f:
+    requirements = f.read().splitlines()
+
 from Cython.Build import cythonize
 import numpy as np
 
@@ -17,10 +21,7 @@ setup(name='tools21cm',
       packages=find_packages("src"),
       package_dir={"": "src"},
       package_data={'tools21cm': ['input_data/*']},
-      install_requires=['numpy', 'scipy', 'matplotlib', 'numba',
-                        'scikit-learn', 'scikit-image', 'astropy',
-                        'tqdm', 'joblib', #'pyfftw', #'pyfits',
-                        'pytest', 'cython', 'pandas'],
+      install_requires=requirements,
       include_package_data=True,
       ext_modules = cythonize("src/tools21cm/ViteBetti_cython.pyx", language="c++"),
       include_dirs=[np.get_include()],
