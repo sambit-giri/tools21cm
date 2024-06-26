@@ -148,3 +148,44 @@ class NbodyFile:
 		print_msg( '...done')
 
 
+def read_pkdgrav_fof_halo_catalogue(filename, box_dim, nGrid=None, hlittle=0.67):
+    """
+    Loads the fof data created by the FOF halo finder implemented in the pkdgrav framework.
+
+    Parameters
+    ----------
+    filename : str
+        Path to the fof data file.
+    box_dim: float
+        Length of the simulation volume used while running the pkdgrav code in Mpc.
+    
+    Returns
+    ----------
+    fof_data : ndarray
+        An array of halo positions and mass [mass, pos_x, pos_y, pos_z].
+    """
+    box_len = box_dim*hlittle # converted from Mpc to Mpc/h units
+    rd = Pkdgrav3data(box_dim, nGrid, 
+            Omega_m=0.31, rho_c=2.77536627e11, verbose=True)
+    fof_data = rd.read_fof_data(filename)
+    return fof_data
+
+def read_pkdgrav_density_grid(filename, box_dim, nGrid=None):
+    """
+    Loads the density field from a file and computes the density contrast.
+
+    Parameters
+    ----------
+    file : str
+        Path to the pkdgrav density field file.
+    
+    Returns
+    ----------
+    delta : ndarray
+        The density contrast delta, defined as (rho_m / rho_mean - 1).
+        It is a 3-D mesh grid of size (nGrid, nGrid, nGrid).
+    """
+    rd = Pkdgrav3data(box_dim, nGrid, 
+            Omega_m=0.31, rho_c=2.77536627e11, verbose=True)
+    grid_data = rd.load_density_field(filename)
+    return grid_data
