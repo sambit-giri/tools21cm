@@ -149,26 +149,27 @@ class NbodyFile:
 
 
 def read_pkdgrav_fof_halo_catalogue(filename, box_dim, nGrid=None, hlittle=0.67):
-    """
-    Loads the fof data created by the FOF halo finder implemented in the pkdgrav framework.
+	"""
+	Loads the fof data created by the FOF halo finder implemented in the pkdgrav framework.
 
-    Parameters
-    ----------
-    filename : str
-        Path to the fof data file.
-    box_dim: float
-        Length of the simulation volume used while running the pkdgrav code in Mpc.
-    
-    Returns
-    ----------
-    fof_data : ndarray
-        An array of halo positions and mass [mass, pos_x, pos_y, pos_z].
-    """
-    box_len = box_dim*hlittle # converted from Mpc to Mpc/h units
-    rd = Pkdgrav3data(box_dim, nGrid, 
-            Omega_m=0.31, rho_c=2.77536627e11, verbose=True)
-    fof_data = rd.read_fof_data(filename)
-    return fof_data
+	Parameters
+	----------
+	filename : str
+		Path to the fof data file.
+	box_dim: float
+		Length of the simulation volume used while running the pkdgrav code in Mpc.
+
+	Returns
+	----------
+	fof_data : ndarray
+		An array of halo positions and mass [mass, pos_x, pos_y, pos_z].
+	"""
+	box_len = box_dim*hlittle # converted from Mpc to Mpc/h units
+	rd = Pkdgrav3data(box_dim, nGrid, 
+			Omega_m=0.31, rho_c=2.77536627e11, verbose=True)
+	fof_data = rd.read_fof_data(filename)
+	fof_data = rd.array_fof_data()
+	return fof_data
 
 def read_pkdgrav_density_grid(filename, box_dim, nGrid=None):
     """

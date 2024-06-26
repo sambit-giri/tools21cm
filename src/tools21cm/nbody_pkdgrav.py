@@ -5,6 +5,7 @@ N-body simulations.
 import numpy as np 
 from scipy.interpolate import splev, splrep
 import pandas as pd
+from tqdm import tqdm
 
 from .helper_functions import save_data
 
@@ -178,7 +179,7 @@ class HaloCataloguePkdgrav3(ReaderPkdgrav3):
             dVelFac  = self.dVelFac
 
             str_data = []
-            for g in data:
+            for g in tqdm(data):
                 pos = [(g['rPot'][j] + g['rcom'][j]) * BOX for j in range(3)]
                 vel = [dVelFac * g['vcom'][j] for j in range(3)]
                 fMass = dMassFac * g['fMass']
