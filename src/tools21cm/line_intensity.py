@@ -50,21 +50,21 @@ def Mhi_on_grid(z, mass, pos_xyz, box_dim, n_grid, cosmo=None,
         v_c0 = kwargs.get('v_c0', 10**1.56*units.km/units.s)
         beta = kwargs.get('beta', -0.58)
         
-        if isinstance(mass, astropy.units.quantity.Quantity):
-            mhalo_msun = mass.to('Msun').value
+        if isinstance(mass, units.quantity.Quantity):
+            mhalo = mass.to('Msun')
         else:
             print('The provided halo mass is assumed to be in Msun units.')
-            mhalo_msun = mass 
-        if isinstance(mass, astropy.units.quantity.Quantity):
-            srcpos_mpc = pos_xyz.to('Mpc').value
+            mhalo = mass*units.Msun
+        if isinstance(mass, units.quantity.Quantity):
+            srcpos = pos_xyz.to('Mpc')
         else:
             print('The provided halo mass is assumed to be in Mpc units.')
-            srcpos_mpc = pos_xyz 
+            srcpos = pos_xyz*units.Mpc
         fHc = (1-Y_p)*Ob/Om
         Delc = 178
         v_c = lambda Mh,z: 96.6*units.km/units.s*(Delc*Om/54.4)**(1/6)*((1+z)/3.3)**(1/2)*(Mh/(1e11*units.Msun))**(1/3)
-        v_c_Mh = v_c(mhalo_msun,z)
+        v_c_Mh = v_c(mhalo,z)
         M_hi = lambda Mh: alpha*fHc*Mh*(Mh/hlittle/units.Msun)**beta*np.exp(-(v_c0/v_c_Mh)**3)
-        mhi_msun = M_hi(mhalo_msun)
-        binned_mhi, bin_edges, bin_num = halo_list_to_grid(mhi_msun, pos_xyz, box_dim, n_grid)
+        mhi_msun = M_hi(mhalo)
+        binned_mhi, bin_edges, bin_num = halo_list_to_grid(mhi_msun, srcpos, box_dim, n_grid)
         return binned_mhi
