@@ -42,7 +42,9 @@ from .smoothing import *
 from .power_spectrum_noise import *
 from .gaussian_random_field import *
 from .corr_function import *
-from . import power_spect_fast
+# from . import power_spect_fast
+
+from .line_intensity import *
 
 from .bubble_stats import *
 #from zahnbubble import zahn
