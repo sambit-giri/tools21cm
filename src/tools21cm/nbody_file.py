@@ -1,5 +1,9 @@
 import numpy as np
 from glob import glob
+import astropy
+from scipy.spatial import cKDTree
+from scipy.stats import binned_statistic_dd
+
 from . import const
 from . import conv
 from .helper_functions import print_msg
@@ -189,4 +193,132 @@ def read_pkdgrav_density_grid(filename, box_dim, nGrid=None):
     rd = Pkdgrav3data(box_dim, nGrid, 
             Omega_m=0.31, rho_c=2.77536627e11, verbose=True)
     grid_data = rd.load_density_field(filename)
-    return grid_data
+    return 
+
+
+class Halo2Grid:
+	def __init__(self, box_len, n_grid, method='nearest'):
+		self.box_len = box_len
+		self.n_grid  = n_grid
+
+		self.mpc_to_cm = 3.085677581491367e+24 # in cm
+		self.Msun_to_g = 1.988409870698051e+33 # in gram
+		self.pos_grid = None
+
+	def set_halo_pos(self, pos, unit=None):
+		if unit.lower()=='cm':
+			self.pos_cm_to_grid(pos) 
+		elif unit.lower()=='mpc':
+			self.pos_mpc_to_grid(pos)
+		else:
+			self.pos_grid = pos 
+
+	def set_halo_mass(self, mass, unit=None):
+		if unit.lower()=='kg':
+			self.mass_Msun = mass*1000/self.Msun_to_g
+		elif unit.lower() in ['gram','g']:
+			self.mass_Msun = mass/self.Msun_to_g
+		elif unit.lower()=='msun':
+			self.mass_Msun = mass
+		else:
+			print('Unknown mass units')
+
+	def pos_cm_to_grid(self, pos_cm):
+		pos_mpc  = pos_cm/self.mpc_to_cm
+		pos_grid = pos_mpc*self.n_grid/self.box_len
+		self.pos_grid = pos_grid
+		print('Halo positions converted from cm to grid units')
+		return pos_grid
+
+	def pos_mpc_to_grid(self, pos_mpc):
+		pos_grid = pos_mpc*self.n_grid/self.box_len
+		self.pos_grid = pos_grid
+		print('Halo positions converted from Mpc to grid units')
+		return pos_grid
+
+	def construct_tree(self, **kwargs):
+		pos = kwargs.get('pos', self.pos_grid)
+		if pos is None:
+			print('Provide the halo positions via parameter "pos".')
+			return None
+
+		print('Creating a tree...')
+		kdtree = cKDTree(pos)
+		self.kdtree = kdtree
+		print('...done')
+
+	def value_on_grid(self, positions, values, **kwargs):
+		# https://docs.scipy.org/doc/scipy/reference/generated/scipy.stats.binned_statistic_dd.html
+		statistic = kwargs.get('statistic', 'sum')
+		bins = kwargs.get('bins', self.n_grid)
+		binned_mass, bin_edges, bin_num = binned_statistic_dd(positions, values, statistic=statistic, bins=bins)
+		return binned_mass, bin_edges, bin_num
+	
+	def halo_mass_on_grid(self, **kwargs):
+		pos = kwargs.get('pos', self.pos_grid)
+		if pos is None:
+			print('Provide the halo positions via parameter "pos".')
+			return None
+		mass = kwargs.get('mass', self.pos_grid)
+		if mass is None:
+			print('Provide the halo masses via parameter "mass".')
+			return None
+		binned_mass = kwargs.get('binned_mass')
+		if binned_mass is None: 
+			binned_mass, bin_edges, bin_num = self.value_on_grid(pos, mass, statistic='sum', bins=self.n_grid)
+		binned_pos_list  = np.argwhere(binned_mass>0) 
+		binned_mass_list = binned_mass[binned_mass>0]
+		return binned_pos_list, binned_mass_list
+	
+	def halo_value_on_grid(self, value, **kwargs):
+		pos = kwargs.get('pos', self.pos_grid)
+		if pos is None:
+			print('Provide the halo positions via parameter "pos".')
+			return None
+		binned_value = kwargs.get('binned_value')
+		if binned_value is None: 
+			binned_value, bin_edges, bin_num = self.value_on_grid(pos, value, statistic='sum', bins=self.n_grid)
+		binned_pos_list  = np.argwhere(binned_value>0) 
+		binned_value_list = binned_value[binned_value>0]
+		return binned_pos_list, binned_value_list
+	
+def halo_list_to_grid(mass, pos_xyz, box_dim, n_grid):
+	"""
+	Put the list of haloes on a grid.
+
+	Parameters
+	----------
+	mass : ndarray
+		Mass of haloes.
+	pos_xyz : ndarray
+		Position of the haloes.
+	box_dim : float
+		Length of simulation in each direction.
+	n_grid : int
+		Number of grids along each direction.
+
+	Returns
+	----------
+	binned_mhalo : ndarray
+		The haloes put on grids of shape (nGrid, nGrid, nGrid).
+	bin_edges : ndarray
+		Edges of the bins used to create the grids.
+	bin_num : ndarray
+		Number of bins.
+	"""
+	if isinstance(mass, astropy.units.quantity.Quantity):
+		mhalo_msun = mass.to('Msun').value
+	else:
+		print('The provided halo mass is assumed to be in Msun units.')
+		mhalo_msun = mass 
+	if isinstance(mass, astropy.units.quantity.Quantity):
+		srcpos_mpc = pos_xyz.to('Mpc').value
+	else:
+		print('The provided halo mass is assumed to be in Mpc units.')
+		srcpos_mpc = pos_xyz 
+
+	hg = Halo2Grid(box_len=box_dim, n_grid=n_grid)
+	hg.set_halo_pos(srcpos_mpc, unit='mpc')
+	hg.set_halo_mass(mhalo_msun, unit='Msun')
+	binned_mhalo, bin_edges, bin_num = hg.value_on_grid(hg.pos_grid, mhalo_msun)
+	return binned_mhalo, bin_edges, bin_num
