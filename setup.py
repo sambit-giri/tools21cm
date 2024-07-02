@@ -6,9 +6,23 @@ Setup script
 
 import setuptools
 from setuptools import Extension, setup, find_packages
-from Cython.Build import cythonize
-import numpy as np
 import os
+
+# Ensure Cython is installed before importing it
+def install_and_import(package):
+    import importlib
+    try:
+        importlib.import_module(package)
+    except ImportError:
+        import pip
+        pip.main(['install', package])
+    finally:
+        globals()[package] = importlib.import_module(package)
+
+install_and_import('cython')
+from Cython.Build import cythonize
+install_and_import('numpy')
+import numpy as np
 
 # Read requirements from requirements.txt
 with open('requirements.txt') as f:
