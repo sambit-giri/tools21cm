@@ -49,7 +49,7 @@ For detail documentation and how to use them, see [here](https://tools21cm.readt
 
 ## INSTALLATION
 
-One can install a stable version of this package using pip by running the following command::
+Before installing this package, please make sure that [cython](https://cython.org/) and [numpy](https://numpy.org/) are installed. One can install a stable version of this package using pip by running the following command::
 
     pip install tools21cm
 
