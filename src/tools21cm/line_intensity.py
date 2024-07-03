@@ -55,6 +55,9 @@ def M_HI_on_grid(z, mass, pos_xyz, box_dim, n_grid, cosmo=None,
         print('The provided halo mass is assumed to be in Mpc units.')
         srcpos = pos_xyz*units.Mpc
 
+    if not isinstance(box_dim, units.quantity.Quantity):
+        box_dim = box_dim*units.Mpc
+
     if recipe.lower() in ['padmanabhan2017']:
         Y_p = kwargs.get('Y_p', 0.249)
         alpha = kwargs.get('alpha', 0.9)
@@ -65,13 +68,13 @@ def M_HI_on_grid(z, mass, pos_xyz, box_dim, n_grid, cosmo=None,
         Delc = 178
         v_c = lambda Mh,z: 96.6*units.km/units.s*(Delc*Om/54.4)**(1/6)*((1+z)/3.3)**(1/2)*(Mh/(1e11*units.Msun))**(1/3)
         v_c_Mh = v_c(mhalo,z)
-        M_hi = lambda Mh: alpha*fHc*Mh*(Mh/hlittle/units.Msun)**beta*np.exp(-(v_c0/v_c_Mh)**3)
-        mhi_msun = M_hi(mhalo)
+        M_hi = lambda Mh: alpha*fHc*Mh*(Mh.to('Msun').value/hlittle/1e11)**beta*np.exp(-(v_c0/v_c_Mh)**3)
+        mhi_msun = M_hi(mhalo).to('Msun').value
         binned_mhi, bin_edges, bin_num = halo_list_to_grid(mhi_msun, srcpos, box_dim, n_grid)
-        return binned_mhi
+        return binned_mhi*units.Msun
     
 def L_CII_on_grid(z, mass, pos_xyz, box_dim, n_grid, SFR=None, cosmo=None, 
-                recipe='Silva2013', **kwargs):
+                recipe='Silva2015m1', **kwargs):
     """
     Assign HI line intensity to dark matter halos and distribute them on a grid.
 
@@ -103,7 +106,7 @@ def L_CII_on_grid(z, mass, pos_xyz, box_dim, n_grid, SFR=None, cosmo=None,
     lim_map : ndarray
         The HI line intensity distributed on a grid of shape (n_grid, n_grid, n_grid).
     """
-    assert recipe.lower() in ['Silva2015m1']
+    assert recipe.lower() in ['silva2015m1', 'silva2015m2', 'silva2015m3', 'silva2015m4']
     if cosmo is None:
         print('Assuming Planck18 cosmology.')
         cosmo = Planck18
@@ -116,12 +119,16 @@ def L_CII_on_grid(z, mass, pos_xyz, box_dim, n_grid, SFR=None, cosmo=None,
     else:
         print('The provided halo mass is assumed to be in Msun units.')
         mhalo = mass*units.Msun
-    if isinstance(mass, units.quantity.Quantity):
+    if isinstance(pos_xyz, units.quantity.Quantity):
         srcpos = pos_xyz.to('Mpc')
     else:
         print('The provided halo mass is assumed to be in Mpc units.')
         srcpos = pos_xyz*units.Mpc
+    
+    if not isinstance(box_dim, units.quantity.Quantity):
+        box_dim = box_dim*units.Mpc
 
+    if SFR is None: SFR = 'silva2013'
     if isinstance(SFR, str):
         if SFR.lower() in ['silva2013', 'silva2015']:
             SFR0 = kwargs.get('SFR0', 2.25e-26*units.Msun/units.yr)
@@ -151,6 +158,6 @@ def L_CII_on_grid(z, mass, pos_xyz, box_dim, n_grid, SFR=None, cosmo=None,
         return None 
 
     if recipe.lower() in ['silva2015m1', 'silva2015m2', 'silva2015m3', 'silva2015m4']:
-        LCII_lsun = lambda M,z: 10**(a_LCII*np.log10(SFR(mhalo,z).to('Msun/yr').value)+b_LCII)
+        LCII_lsun = 10**(a_LCII*np.log10(SFR(mhalo,z).to('Msun/yr').value)+b_LCII)
         binned_Lcii, bin_edges, bin_num = halo_list_to_grid(LCII_lsun, srcpos, box_dim, n_grid)
         return binned_Lcii*units.Lsun

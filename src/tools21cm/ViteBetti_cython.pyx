@@ -3,7 +3,7 @@
 import numpy as np
 cimport numpy as np
 
-def CubeMap(np.ndarray[np.int_t, ndim=3] arr, bint multi_marker=True):
+def CubeMap(np.ndarray[np.int32, ndim=3] arr, bint multi_marker=True):
     cdef int nx, ny, nz, Nx, Ny, Nz, i, j, k
     cdef np.ndarray[np.int_t, ndim=3] cubemap
     cdef tuple markers
