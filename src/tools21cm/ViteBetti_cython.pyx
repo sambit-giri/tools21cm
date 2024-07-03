@@ -2,6 +2,7 @@
 
 import numpy as np
 cimport numpy as np
+from cython cimport bint 
 
 def CubeMap(np.ndarray[np.int32, ndim=3] arr, bint multi_marker=True):
     cdef int nx, ny, nz, Nx, Ny, Nz, i, j, k
