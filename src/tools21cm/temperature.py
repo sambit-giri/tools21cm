@@ -214,7 +214,7 @@ def mean_dt(z):
 
 def _dt(rho, xi, z):
 		
-	rho_mean = const.rho_crit_0*const.OmegaB
+	rho_mean = const.rho_crit_0*const.OmegaB if rho.min()>=0 else 1
 
 	Cdt = mean_dt(z)
 	dt = Cdt*(1.0-xi)*rho/rho_mean
