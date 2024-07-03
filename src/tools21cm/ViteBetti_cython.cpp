@@ -1827,6 +1827,7 @@ static PyTypeObject *__pyx_ptype_5numpy_character = 0;
 static PyTypeObject *__pyx_ptype_5numpy_ufunc = 0;
 
 /* Module declarations from 'tools21cm.ViteBetti_cython' */
+static __Pyx_TypeInfo __Pyx_TypeInfo_nn___pyx_t_5numpy_int64_t = { "int64_t", NULL, sizeof(__pyx_t_5numpy_int64_t), { 0 }, 0, IS_UNSIGNED(__pyx_t_5numpy_int64_t) ? 'U' : 'I', IS_UNSIGNED(__pyx_t_5numpy_int64_t), 0 };
 static __Pyx_TypeInfo __Pyx_TypeInfo_nn___pyx_t_5numpy_int_t = { "int_t", NULL, sizeof(__pyx_t_5numpy_int_t), { 0 }, 0, IS_UNSIGNED(__pyx_t_5numpy_int_t) ? 'U' : 'I', IS_UNSIGNED(__pyx_t_5numpy_int_t), 0 };
 #define __Pyx_MODULE_NAME "tools21cm.ViteBetti_cython"
 extern int __pyx_module_is_main_tools21cm__ViteBetti_cython;
@@ -1906,10 +1907,10 @@ static PyObject *__pyx_tuple__5;
 static PyObject *__pyx_codeobj__6;
 /* Late includes */
 
-/* "tools21cm/ViteBetti_cython.pyx":6
- * cimport numpy as np
+/* "tools21cm/ViteBetti_cython.pyx":7
+ * from cython cimport bint
  * 
- * def CubeMap(np.ndarray[np.int_t, ndim=3] arr, bint multi_marker=True):             # <<<<<<<<<<<<<<
+ * def CubeMap(np.ndarray[np.int64_t, ndim=3] arr, bint multi_marker=True):             # <<<<<<<<<<<<<<
  *     cdef int nx, ny, nz, Nx, Ny, Nz, i, j, k
  *     cdef np.ndarray[np.int_t, ndim=3] cubemap
  */
@@ -1953,7 +1954,7 @@ static PyObject *__pyx_pw_9tools21cm_16ViteBetti_cython_1CubeMap(PyObject *__pyx
         }
       }
       if (unlikely(kw_args > 0)) {
-        if (unlikely(__Pyx_ParseOptionalKeywords(__pyx_kwds, __pyx_pyargnames, 0, values, pos_args, "CubeMap") < 0)) __PYX_ERR(0, 6, __pyx_L3_error)
+        if (unlikely(__Pyx_ParseOptionalKeywords(__pyx_kwds, __pyx_pyargnames, 0, values, pos_args, "CubeMap") < 0)) __PYX_ERR(0, 7, __pyx_L3_error)
       }
     } else {
       switch (PyTuple_GET_SIZE(__pyx_args)) {
@@ -1966,20 +1967,20 @@ static PyObject *__pyx_pw_9tools21cm_16ViteBetti_cython_1CubeMap(PyObject *__pyx
     }
     __pyx_v_arr = ((PyArrayObject *)values[0]);
     if (values[1]) {
-      __pyx_v_multi_marker = __Pyx_PyObject_IsTrue(values[1]); if (unlikely((__pyx_v_multi_marker == (int)-1) && PyErr_Occurred())) __PYX_ERR(0, 6, __pyx_L3_error)
+      __pyx_v_multi_marker = __Pyx_PyObject_IsTrue(values[1]); if (unlikely((__pyx_v_multi_marker == (int)-1) && PyErr_Occurred())) __PYX_ERR(0, 7, __pyx_L3_error)
     } else {
       __pyx_v_multi_marker = ((int)1);
     }
   }
   goto __pyx_L4_argument_unpacking_done;
   __pyx_L5_argtuple_error:;
-  __Pyx_RaiseArgtupleInvalid("CubeMap", 0, 1, 2, PyTuple_GET_SIZE(__pyx_args)); __PYX_ERR(0, 6, __pyx_L3_error)
+  __Pyx_RaiseArgtupleInvalid("CubeMap", 0, 1, 2, PyTuple_GET_SIZE(__pyx_args)); __PYX_ERR(0, 7, __pyx_L3_error)
   __pyx_L3_error:;
   __Pyx_AddTraceback("tools21cm.ViteBetti_cython.CubeMap", __pyx_clineno, __pyx_lineno, __pyx_filename);
   __Pyx_RefNannyFinishContext();
   return NULL;
   __pyx_L4_argument_unpacking_done:;
-  if (unlikely(!__Pyx_ArgTypeTest(((PyObject *)__pyx_v_arr), __pyx_ptype_5numpy_ndarray, 1, "arr", 0))) __PYX_ERR(0, 6, __pyx_L1_error)
+  if (unlikely(!__Pyx_ArgTypeTest(((PyObject *)__pyx_v_arr), __pyx_ptype_5numpy_ndarray, 1, "arr", 0))) __PYX_ERR(0, 7, __pyx_L1_error)
   __pyx_r = __pyx_pf_9tools21cm_16ViteBetti_cython_CubeMap(__pyx_self, __pyx_v_arr, __pyx_v_multi_marker);
 
   /* function exit code */
@@ -2049,11 +2050,11 @@ static PyObject *__pyx_pf_9tools21cm_16ViteBetti_cython_CubeMap(CYTHON_UNUSED Py
   __pyx_pybuffernd_arr.rcbuffer = &__pyx_pybuffer_arr;
   {
     __Pyx_BufFmt_StackElem __pyx_stack[1];
-    if (unlikely(__Pyx_GetBufferAndValidate(&__pyx_pybuffernd_arr.rcbuffer->pybuffer, (PyObject*)__pyx_v_arr, &__Pyx_TypeInfo_nn___pyx_t_5numpy_int_t, PyBUF_FORMAT| PyBUF_STRIDES, 3, 0, __pyx_stack) == -1)) __PYX_ERR(0, 6, __pyx_L1_error)
+    if (unlikely(__Pyx_GetBufferAndValidate(&__pyx_pybuffernd_arr.rcbuffer->pybuffer, (PyObject*)__pyx_v_arr, &__Pyx_TypeInfo_nn___pyx_t_5numpy_int64_t, PyBUF_FORMAT| PyBUF_STRIDES, 3, 0, __pyx_stack) == -1)) __PYX_ERR(0, 7, __pyx_L1_error)
   }
   __pyx_pybuffernd_arr.diminfo[0].strides = __pyx_pybuffernd_arr.rcbuffer->pybuffer.strides[0]; __pyx_pybuffernd_arr.diminfo[0].shape = __pyx_pybuffernd_arr.rcbuffer->pybuffer.shape[0]; __pyx_pybuffernd_arr.diminfo[1].strides = __pyx_pybuffernd_arr.rcbuffer->pybuffer.strides[1]; __pyx_pybuffernd_arr.diminfo[1].shape = __pyx_pybuffernd_arr.rcbuffer->pybuffer.shape[1]; __pyx_pybuffernd_arr.diminfo[2].strides = __pyx_pybuffernd_arr.rcbuffer->pybuffer.strides[2]; __pyx_pybuffernd_arr.diminfo[2].shape = __pyx_pybuffernd_arr.rcbuffer->pybuffer.shape[2];
 
-  /* "tools21cm/ViteBetti_cython.pyx":11
+  /* "tools21cm/ViteBetti_cython.pyx":12
  *     cdef tuple markers
  * 
  *     nx = <int> np.PyArray_DIM(arr, 0)             # <<<<<<<<<<<<<<
@@ -2062,7 +2063,7 @@ static PyObject *__pyx_pf_9tools21cm_16ViteBetti_cython_CubeMap(CYTHON_UNUSED Py
  */
   __pyx_v_nx = ((int)PyArray_DIM(((PyArrayObject *)__pyx_v_arr), 0));
 
-  /* "tools21cm/ViteBetti_cython.pyx":12
+  /* "tools21cm/ViteBetti_cython.pyx":13
  * 
  *     nx = <int> np.PyArray_DIM(arr, 0)
  *     ny = <int> np.PyArray_DIM(arr, 1)             # <<<<<<<<<<<<<<
@@ -2071,7 +2072,7 @@ static PyObject *__pyx_pf_9tools21cm_16ViteBetti_cython_CubeMap(CYTHON_UNUSED Py
  */
   __pyx_v_ny = ((int)PyArray_DIM(((PyArrayObject *)__pyx_v_arr), 1));
 
-  /* "tools21cm/ViteBetti_cython.pyx":13
+  /* "tools21cm/ViteBetti_cython.pyx":14
  *     nx = <int> np.PyArray_DIM(arr, 0)
  *     ny = <int> np.PyArray_DIM(arr, 1)
  *     nz = <int> np.PyArray_DIM(arr, 2)             # <<<<<<<<<<<<<<
@@ -2080,7 +2081,7 @@ static PyObject *__pyx_pf_9tools21cm_16ViteBetti_cython_CubeMap(CYTHON_UNUSED Py
  */
   __pyx_v_nz = ((int)PyArray_DIM(((PyArrayObject *)__pyx_v_arr), 2));
 
-  /* "tools21cm/ViteBetti_cython.pyx":14
+  /* "tools21cm/ViteBetti_cython.pyx":15
  *     ny = <int> np.PyArray_DIM(arr, 1)
  *     nz = <int> np.PyArray_DIM(arr, 2)
  *     Nx, Ny, Nz = int(2 * nx), int(2 * ny), int(2 * nz)             # <<<<<<<<<<<<<<
@@ -2091,25 +2092,25 @@ static PyObject *__pyx_pf_9tools21cm_16ViteBetti_cython_CubeMap(CYTHON_UNUSED Py
   __pyx_v_Ny = ((int)(2 * __pyx_v_ny));
   __pyx_v_Nz = ((int)(2 * __pyx_v_nz));
 
-  /* "tools21cm/ViteBetti_cython.pyx":16
+  /* "tools21cm/ViteBetti_cython.pyx":17
  *     Nx, Ny, Nz = int(2 * nx), int(2 * ny), int(2 * nz)
  * 
  *     cubemap = np.empty((Nx, Ny, Nz), dtype=int)             # <<<<<<<<<<<<<<
  * 
  *     if multi_marker:
  */
-  __Pyx_GetModuleGlobalName(__pyx_t_1, __pyx_n_s_np); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 16, __pyx_L1_error)
+  __Pyx_GetModuleGlobalName(__pyx_t_1, __pyx_n_s_np); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 17, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_1);
-  __pyx_t_2 = __Pyx_PyObject_GetAttrStr(__pyx_t_1, __pyx_n_s_empty); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 16, __pyx_L1_error)
+  __pyx_t_2 = __Pyx_PyObject_GetAttrStr(__pyx_t_1, __pyx_n_s_empty); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 17, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_2);
   __Pyx_DECREF(__pyx_t_1); __pyx_t_1 = 0;
-  __pyx_t_1 = __Pyx_PyInt_From_int(__pyx_v_Nx); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 16, __pyx_L1_error)
+  __pyx_t_1 = __Pyx_PyInt_From_int(__pyx_v_Nx); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 17, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_1);
-  __pyx_t_3 = __Pyx_PyInt_From_int(__pyx_v_Ny); if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 16, __pyx_L1_error)
+  __pyx_t_3 = __Pyx_PyInt_From_int(__pyx_v_Ny); if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 17, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_3);
-  __pyx_t_4 = __Pyx_PyInt_From_int(__pyx_v_Nz); if (unlikely(!__pyx_t_4)) __PYX_ERR(0, 16, __pyx_L1_error)
+  __pyx_t_4 = __Pyx_PyInt_From_int(__pyx_v_Nz); if (unlikely(!__pyx_t_4)) __PYX_ERR(0, 17, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_4);
-  __pyx_t_5 = PyTuple_New(3); if (unlikely(!__pyx_t_5)) __PYX_ERR(0, 16, __pyx_L1_error)
+  __pyx_t_5 = PyTuple_New(3); if (unlikely(!__pyx_t_5)) __PYX_ERR(0, 17, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_5);
   __Pyx_GIVEREF(__pyx_t_1);
   PyTuple_SET_ITEM(__pyx_t_5, 0, __pyx_t_1);
@@ -2120,20 +2121,20 @@ static PyObject *__pyx_pf_9tools21cm_16ViteBetti_cython_CubeMap(CYTHON_UNUSED Py
   __pyx_t_1 = 0;
   __pyx_t_3 = 0;
   __pyx_t_4 = 0;
-  __pyx_t_4 = PyTuple_New(1); if (unlikely(!__pyx_t_4)) __PYX_ERR(0, 16, __pyx_L1_error)
+  __pyx_t_4 = PyTuple_New(1); if (unlikely(!__pyx_t_4)) __PYX_ERR(0, 17, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_4);
   __Pyx_GIVEREF(__pyx_t_5);
   PyTuple_SET_ITEM(__pyx_t_4, 0, __pyx_t_5);
   __pyx_t_5 = 0;
-  __pyx_t_5 = __Pyx_PyDict_NewPresized(1); if (unlikely(!__pyx_t_5)) __PYX_ERR(0, 16, __pyx_L1_error)
+  __pyx_t_5 = __Pyx_PyDict_NewPresized(1); if (unlikely(!__pyx_t_5)) __PYX_ERR(0, 17, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_5);
-  if (PyDict_SetItem(__pyx_t_5, __pyx_n_s_dtype, ((PyObject *)(&PyInt_Type))) < 0) __PYX_ERR(0, 16, __pyx_L1_error)
-  __pyx_t_3 = __Pyx_PyObject_Call(__pyx_t_2, __pyx_t_4, __pyx_t_5); if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 16, __pyx_L1_error)
+  if (PyDict_SetItem(__pyx_t_5, __pyx_n_s_dtype, ((PyObject *)(&PyInt_Type))) < 0) __PYX_ERR(0, 17, __pyx_L1_error)
+  __pyx_t_3 = __Pyx_PyObject_Call(__pyx_t_2, __pyx_t_4, __pyx_t_5); if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 17, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_3);
   __Pyx_DECREF(__pyx_t_2); __pyx_t_2 = 0;
   __Pyx_DECREF(__pyx_t_4); __pyx_t_4 = 0;
   __Pyx_DECREF(__pyx_t_5); __pyx_t_5 = 0;
-  if (!(likely(((__pyx_t_3) == Py_None) || likely(__Pyx_TypeTest(__pyx_t_3, __pyx_ptype_5numpy_ndarray))))) __PYX_ERR(0, 16, __pyx_L1_error)
+  if (!(likely(((__pyx_t_3) == Py_None) || likely(__Pyx_TypeTest(__pyx_t_3, __pyx_ptype_5numpy_ndarray))))) __PYX_ERR(0, 17, __pyx_L1_error)
   __pyx_t_6 = ((PyArrayObject *)__pyx_t_3);
   {
     __Pyx_BufFmt_StackElem __pyx_stack[1];
@@ -2150,13 +2151,13 @@ static PyObject *__pyx_pf_9tools21cm_16ViteBetti_cython_CubeMap(CYTHON_UNUSED Py
       __pyx_t_8 = __pyx_t_9 = __pyx_t_10 = 0;
     }
     __pyx_pybuffernd_cubemap.diminfo[0].strides = __pyx_pybuffernd_cubemap.rcbuffer->pybuffer.strides[0]; __pyx_pybuffernd_cubemap.diminfo[0].shape = __pyx_pybuffernd_cubemap.rcbuffer->pybuffer.shape[0]; __pyx_pybuffernd_cubemap.diminfo[1].strides = __pyx_pybuffernd_cubemap.rcbuffer->pybuffer.strides[1]; __pyx_pybuffernd_cubemap.diminfo[1].shape = __pyx_pybuffernd_cubemap.rcbuffer->pybuffer.shape[1]; __pyx_pybuffernd_cubemap.diminfo[2].strides = __pyx_pybuffernd_cubemap.rcbuffer->pybuffer.strides[2]; __pyx_pybuffernd_cubemap.diminfo[2].shape = __pyx_pybuffernd_cubemap.rcbuffer->pybuffer.shape[2];
-    if (unlikely(__pyx_t_7 < 0)) __PYX_ERR(0, 16, __pyx_L1_error)
+    if (unlikely(__pyx_t_7 < 0)) __PYX_ERR(0, 17, __pyx_L1_error)
   }
   __pyx_t_6 = 0;
   __pyx_v_cubemap = ((PyArrayObject *)__pyx_t_3);
   __pyx_t_3 = 0;
 
-  /* "tools21cm/ViteBetti_cython.pyx":18
+  /* "tools21cm/ViteBetti_cython.pyx":19
  *     cubemap = np.empty((Nx, Ny, Nz), dtype=int)
  * 
  *     if multi_marker:             # <<<<<<<<<<<<<<
@@ -2166,7 +2167,7 @@ static PyObject *__pyx_pf_9tools21cm_16ViteBetti_cython_CubeMap(CYTHON_UNUSED Py
   __pyx_t_11 = (__pyx_v_multi_marker != 0);
   if (__pyx_t_11) {
 
-    /* "tools21cm/ViteBetti_cython.pyx":19
+    /* "tools21cm/ViteBetti_cython.pyx":20
  * 
  *     if multi_marker:
  *         markers = (1, 2, 3, 4)             # <<<<<<<<<<<<<<
@@ -2176,7 +2177,7 @@ static PyObject *__pyx_pf_9tools21cm_16ViteBetti_cython_CubeMap(CYTHON_UNUSED Py
     __Pyx_INCREF(__pyx_tuple_);
     __pyx_v_markers = __pyx_tuple_;
 
-    /* "tools21cm/ViteBetti_cython.pyx":18
+    /* "tools21cm/ViteBetti_cython.pyx":19
  *     cubemap = np.empty((Nx, Ny, Nz), dtype=int)
  * 
  *     if multi_marker:             # <<<<<<<<<<<<<<
@@ -2186,7 +2187,7 @@ static PyObject *__pyx_pf_9tools21cm_16ViteBetti_cython_CubeMap(CYTHON_UNUSED Py
     goto __pyx_L3;
   }
 
-  /* "tools21cm/ViteBetti_cython.pyx":21
+  /* "tools21cm/ViteBetti_cython.pyx":22
  *         markers = (1, 2, 3, 4)
  *     else:
  *         markers = (1, 1, 1, 1)             # <<<<<<<<<<<<<<
@@ -2199,7 +2200,7 @@ static PyObject *__pyx_pf_9tools21cm_16ViteBetti_cython_CubeMap(CYTHON_UNUSED Py
   }
   __pyx_L3:;
 
-  /* "tools21cm/ViteBetti_cython.pyx":24
+  /* "tools21cm/ViteBetti_cython.pyx":25
  * 
  *     # Vertices
  *     for i in range(nx):             # <<<<<<<<<<<<<<
@@ -2211,7 +2212,7 @@ static PyObject *__pyx_pf_9tools21cm_16ViteBetti_cython_CubeMap(CYTHON_UNUSED Py
   for (__pyx_t_13 = 0; __pyx_t_13 < __pyx_t_12; __pyx_t_13+=1) {
     __pyx_v_i = __pyx_t_13;
 
-    /* "tools21cm/ViteBetti_cython.pyx":25
+    /* "tools21cm/ViteBetti_cython.pyx":26
  *     # Vertices
  *     for i in range(nx):
  *         for j in range(ny):             # <<<<<<<<<<<<<<
@@ -2223,7 +2224,7 @@ static PyObject *__pyx_pf_9tools21cm_16ViteBetti_cython_CubeMap(CYTHON_UNUSED Py
     for (__pyx_t_16 = 0; __pyx_t_16 < __pyx_t_15; __pyx_t_16+=1) {
       __pyx_v_j = __pyx_t_16;
 
-      /* "tools21cm/ViteBetti_cython.pyx":26
+      /* "tools21cm/ViteBetti_cython.pyx":27
  *     for i in range(nx):
  *         for j in range(ny):
  *             for k in range(nz):             # <<<<<<<<<<<<<<
@@ -2235,7 +2236,7 @@ static PyObject *__pyx_pf_9tools21cm_16ViteBetti_cython_CubeMap(CYTHON_UNUSED Py
       for (__pyx_t_19 = 0; __pyx_t_19 < __pyx_t_18; __pyx_t_19+=1) {
         __pyx_v_k = __pyx_t_19;
 
-        /* "tools21cm/ViteBetti_cython.pyx":27
+        /* "tools21cm/ViteBetti_cython.pyx":28
  *         for j in range(ny):
  *             for k in range(nz):
  *                 if arr[i, j, k]:             # <<<<<<<<<<<<<<
@@ -2260,21 +2261,21 @@ static PyObject *__pyx_pf_9tools21cm_16ViteBetti_cython_CubeMap(CYTHON_UNUSED Py
         } else if (unlikely(__pyx_t_22 >= __pyx_pybuffernd_arr.diminfo[2].shape)) __pyx_t_23 = 2;
         if (unlikely(__pyx_t_23 != -1)) {
           __Pyx_RaiseBufferIndexError(__pyx_t_23);
-          __PYX_ERR(0, 27, __pyx_L1_error)
+          __PYX_ERR(0, 28, __pyx_L1_error)
         }
-        __pyx_t_11 = ((*__Pyx_BufPtrStrided3d(__pyx_t_5numpy_int_t *, __pyx_pybuffernd_arr.rcbuffer->pybuffer.buf, __pyx_t_20, __pyx_pybuffernd_arr.diminfo[0].strides, __pyx_t_21, __pyx_pybuffernd_arr.diminfo[1].strides, __pyx_t_22, __pyx_pybuffernd_arr.diminfo[2].strides)) != 0);
+        __pyx_t_11 = ((*__Pyx_BufPtrStrided3d(__pyx_t_5numpy_int64_t *, __pyx_pybuffernd_arr.rcbuffer->pybuffer.buf, __pyx_t_20, __pyx_pybuffernd_arr.diminfo[0].strides, __pyx_t_21, __pyx_pybuffernd_arr.diminfo[1].strides, __pyx_t_22, __pyx_pybuffernd_arr.diminfo[2].strides)) != 0);
         if (__pyx_t_11) {
 
-          /* "tools21cm/ViteBetti_cython.pyx":28
+          /* "tools21cm/ViteBetti_cython.pyx":29
  *             for k in range(nz):
  *                 if arr[i, j, k]:
  *                     cubemap[i * 2, j * 2, k * 2] = markers[0]             # <<<<<<<<<<<<<<
  * 
  *     # Edges
  */
-          __pyx_t_3 = __Pyx_GetItemInt_Tuple(__pyx_v_markers, 0, long, 1, __Pyx_PyInt_From_long, 0, 0, 1); if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 28, __pyx_L1_error)
+          __pyx_t_3 = __Pyx_GetItemInt_Tuple(__pyx_v_markers, 0, long, 1, __Pyx_PyInt_From_long, 0, 0, 1); if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 29, __pyx_L1_error)
           __Pyx_GOTREF(__pyx_t_3);
-          __pyx_t_24 = __Pyx_PyInt_As_npy_long(__pyx_t_3); if (unlikely((__pyx_t_24 == ((npy_long)-1)) && PyErr_Occurred())) __PYX_ERR(0, 28, __pyx_L1_error)
+          __pyx_t_24 = __Pyx_PyInt_As_npy_long(__pyx_t_3); if (unlikely((__pyx_t_24 == ((npy_long)-1)) && PyErr_Occurred())) __PYX_ERR(0, 29, __pyx_L1_error)
           __Pyx_DECREF(__pyx_t_3); __pyx_t_3 = 0;
           __pyx_t_22 = (__pyx_v_i * 2);
           __pyx_t_21 = (__pyx_v_j * 2);
@@ -2294,11 +2295,11 @@ static PyObject *__pyx_pf_9tools21cm_16ViteBetti_cython_CubeMap(CYTHON_UNUSED Py
           } else if (unlikely(__pyx_t_20 >= __pyx_pybuffernd_cubemap.diminfo[2].shape)) __pyx_t_23 = 2;
           if (unlikely(__pyx_t_23 != -1)) {
             __Pyx_RaiseBufferIndexError(__pyx_t_23);
-            __PYX_ERR(0, 28, __pyx_L1_error)
+            __PYX_ERR(0, 29, __pyx_L1_error)
           }
           *__Pyx_BufPtrStrided3d(__pyx_t_5numpy_int_t *, __pyx_pybuffernd_cubemap.rcbuffer->pybuffer.buf, __pyx_t_22, __pyx_pybuffernd_cubemap.diminfo[0].strides, __pyx_t_21, __pyx_pybuffernd_cubemap.diminfo[1].strides, __pyx_t_20, __pyx_pybuffernd_cubemap.diminfo[2].strides) = __pyx_t_24;
 
-          /* "tools21cm/ViteBetti_cython.pyx":27
+          /* "tools21cm/ViteBetti_cython.pyx":28
  *         for j in range(ny):
  *             for k in range(nz):
  *                 if arr[i, j, k]:             # <<<<<<<<<<<<<<
@@ -2310,7 +2311,7 @@ static PyObject *__pyx_pf_9tools21cm_16ViteBetti_cython_CubeMap(CYTHON_UNUSED Py
     }
   }
 
-  /* "tools21cm/ViteBetti_cython.pyx":31
+  /* "tools21cm/ViteBetti_cython.pyx":32
  * 
  *     # Edges
  *     for i in range(Nx):             # <<<<<<<<<<<<<<
@@ -2322,7 +2323,7 @@ static PyObject *__pyx_pf_9tools21cm_16ViteBetti_cython_CubeMap(CYTHON_UNUSED Py
   for (__pyx_t_13 = 0; __pyx_t_13 < __pyx_t_12; __pyx_t_13+=1) {
     __pyx_v_i = __pyx_t_13;
 
-    /* "tools21cm/ViteBetti_cython.pyx":32
+    /* "tools21cm/ViteBetti_cython.pyx":33
  *     # Edges
  *     for i in range(Nx):
  *         for j in range(Ny):             # <<<<<<<<<<<<<<
@@ -2334,7 +2335,7 @@ static PyObject *__pyx_pf_9tools21cm_16ViteBetti_cython_CubeMap(CYTHON_UNUSED Py
     for (__pyx_t_16 = 0; __pyx_t_16 < __pyx_t_15; __pyx_t_16+=1) {
       __pyx_v_j = __pyx_t_16;
 
-      /* "tools21cm/ViteBetti_cython.pyx":33
+      /* "tools21cm/ViteBetti_cython.pyx":34
  *     for i in range(Nx):
  *         for j in range(Ny):
  *             for k in range(Nz):             # <<<<<<<<<<<<<<
@@ -2346,7 +2347,7 @@ static PyObject *__pyx_pf_9tools21cm_16ViteBetti_cython_CubeMap(CYTHON_UNUSED Py
       for (__pyx_t_19 = 0; __pyx_t_19 < __pyx_t_18; __pyx_t_19+=1) {
         __pyx_v_k = __pyx_t_19;
 
-        /* "tools21cm/ViteBetti_cython.pyx":34
+        /* "tools21cm/ViteBetti_cython.pyx":35
  *         for j in range(Ny):
  *             for k in range(Nz):
  *                 if cubemap[i, j, k] == 0:             # <<<<<<<<<<<<<<
@@ -2371,12 +2372,12 @@ static PyObject *__pyx_pf_9tools21cm_16ViteBetti_cython_CubeMap(CYTHON_UNUSED Py
         } else if (unlikely(__pyx_t_22 >= __pyx_pybuffernd_cubemap.diminfo[2].shape)) __pyx_t_23 = 2;
         if (unlikely(__pyx_t_23 != -1)) {
           __Pyx_RaiseBufferIndexError(__pyx_t_23);
-          __PYX_ERR(0, 34, __pyx_L1_error)
+          __PYX_ERR(0, 35, __pyx_L1_error)
         }
         __pyx_t_11 = (((*__Pyx_BufPtrStrided3d(__pyx_t_5numpy_int_t *, __pyx_pybuffernd_cubemap.rcbuffer->pybuffer.buf, __pyx_t_20, __pyx_pybuffernd_cubemap.diminfo[0].strides, __pyx_t_21, __pyx_pybuffernd_cubemap.diminfo[1].strides, __pyx_t_22, __pyx_pybuffernd_cubemap.diminfo[2].strides)) == 0) != 0);
         if (__pyx_t_11) {
 
-          /* "tools21cm/ViteBetti_cython.pyx":35
+          /* "tools21cm/ViteBetti_cython.pyx":36
  *             for k in range(Nz):
  *                 if cubemap[i, j, k] == 0:
  *                     if cubemap[(i - 1), j, k] == markers[0] and cubemap[(i + 1) % Nx, j, k] == markers[0]:             # <<<<<<<<<<<<<<
@@ -2401,16 +2402,16 @@ static PyObject *__pyx_pf_9tools21cm_16ViteBetti_cython_CubeMap(CYTHON_UNUSED Py
           } else if (unlikely(__pyx_t_20 >= __pyx_pybuffernd_cubemap.diminfo[2].shape)) __pyx_t_23 = 2;
           if (unlikely(__pyx_t_23 != -1)) {
             __Pyx_RaiseBufferIndexError(__pyx_t_23);
-            __PYX_ERR(0, 35, __pyx_L1_error)
+            __PYX_ERR(0, 36, __pyx_L1_error)
           }
-          __pyx_t_3 = __Pyx_PyInt_From_npy_long((*__Pyx_BufPtrStrided3d(__pyx_t_5numpy_int_t *, __pyx_pybuffernd_cubemap.rcbuffer->pybuffer.buf, __pyx_t_22, __pyx_pybuffernd_cubemap.diminfo[0].strides, __pyx_t_21, __pyx_pybuffernd_cubemap.diminfo[1].strides, __pyx_t_20, __pyx_pybuffernd_cubemap.diminfo[2].strides))); if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 35, __pyx_L1_error)
+          __pyx_t_3 = __Pyx_PyInt_From_npy_long((*__Pyx_BufPtrStrided3d(__pyx_t_5numpy_int_t *, __pyx_pybuffernd_cubemap.rcbuffer->pybuffer.buf, __pyx_t_22, __pyx_pybuffernd_cubemap.diminfo[0].strides, __pyx_t_21, __pyx_pybuffernd_cubemap.diminfo[1].strides, __pyx_t_20, __pyx_pybuffernd_cubemap.diminfo[2].strides))); if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 36, __pyx_L1_error)
           __Pyx_GOTREF(__pyx_t_3);
-          __pyx_t_5 = __Pyx_GetItemInt_Tuple(__pyx_v_markers, 0, long, 1, __Pyx_PyInt_From_long, 0, 0, 1); if (unlikely(!__pyx_t_5)) __PYX_ERR(0, 35, __pyx_L1_error)
+          __pyx_t_5 = __Pyx_GetItemInt_Tuple(__pyx_v_markers, 0, long, 1, __Pyx_PyInt_From_long, 0, 0, 1); if (unlikely(!__pyx_t_5)) __PYX_ERR(0, 36, __pyx_L1_error)
           __Pyx_GOTREF(__pyx_t_5);
-          __pyx_t_4 = PyObject_RichCompare(__pyx_t_3, __pyx_t_5, Py_EQ); __Pyx_XGOTREF(__pyx_t_4); if (unlikely(!__pyx_t_4)) __PYX_ERR(0, 35, __pyx_L1_error)
+          __pyx_t_4 = PyObject_RichCompare(__pyx_t_3, __pyx_t_5, Py_EQ); __Pyx_XGOTREF(__pyx_t_4); if (unlikely(!__pyx_t_4)) __PYX_ERR(0, 36, __pyx_L1_error)
           __Pyx_DECREF(__pyx_t_3); __pyx_t_3 = 0;
           __Pyx_DECREF(__pyx_t_5); __pyx_t_5 = 0;
-          __pyx_t_25 = __Pyx_PyObject_IsTrue(__pyx_t_4); if (unlikely(__pyx_t_25 < 0)) __PYX_ERR(0, 35, __pyx_L1_error)
+          __pyx_t_25 = __Pyx_PyObject_IsTrue(__pyx_t_4); if (unlikely(__pyx_t_25 < 0)) __PYX_ERR(0, 36, __pyx_L1_error)
           __Pyx_DECREF(__pyx_t_4); __pyx_t_4 = 0;
           if (__pyx_t_25) {
           } else {
@@ -2420,7 +2421,7 @@ static PyObject *__pyx_pf_9tools21cm_16ViteBetti_cython_CubeMap(CYTHON_UNUSED Py
           __pyx_t_26 = (__pyx_v_i + 1);
           if (unlikely(__pyx_v_Nx == 0)) {
             PyErr_SetString(PyExc_ZeroDivisionError, "integer division or modulo by zero");
-            __PYX_ERR(0, 35, __pyx_L1_error)
+            __PYX_ERR(0, 36, __pyx_L1_error)
           }
           __pyx_t_20 = __Pyx_mod_long(__pyx_t_26, __pyx_v_Nx);
           __pyx_t_21 = __pyx_v_j;
@@ -2440,31 +2441,31 @@ static PyObject *__pyx_pf_9tools21cm_16ViteBetti_cython_CubeMap(CYTHON_UNUSED Py
           } else if (unlikely(__pyx_t_22 >= __pyx_pybuffernd_cubemap.diminfo[2].shape)) __pyx_t_23 = 2;
           if (unlikely(__pyx_t_23 != -1)) {
             __Pyx_RaiseBufferIndexError(__pyx_t_23);
-            __PYX_ERR(0, 35, __pyx_L1_error)
+            __PYX_ERR(0, 36, __pyx_L1_error)
           }
-          __pyx_t_4 = __Pyx_PyInt_From_npy_long((*__Pyx_BufPtrStrided3d(__pyx_t_5numpy_int_t *, __pyx_pybuffernd_cubemap.rcbuffer->pybuffer.buf, __pyx_t_20, __pyx_pybuffernd_cubemap.diminfo[0].strides, __pyx_t_21, __pyx_pybuffernd_cubemap.diminfo[1].strides, __pyx_t_22, __pyx_pybuffernd_cubemap.diminfo[2].strides))); if (unlikely(!__pyx_t_4)) __PYX_ERR(0, 35, __pyx_L1_error)
+          __pyx_t_4 = __Pyx_PyInt_From_npy_long((*__Pyx_BufPtrStrided3d(__pyx_t_5numpy_int_t *, __pyx_pybuffernd_cubemap.rcbuffer->pybuffer.buf, __pyx_t_20, __pyx_pybuffernd_cubemap.diminfo[0].strides, __pyx_t_21, __pyx_pybuffernd_cubemap.diminfo[1].strides, __pyx_t_22, __pyx_pybuffernd_cubemap.diminfo[2].strides))); if (unlikely(!__pyx_t_4)) __PYX_ERR(0, 36, __pyx_L1_error)
           __Pyx_GOTREF(__pyx_t_4);
-          __pyx_t_5 = __Pyx_GetItemInt_Tuple(__pyx_v_markers, 0, long, 1, __Pyx_PyInt_From_long, 0, 0, 1); if (unlikely(!__pyx_t_5)) __PYX_ERR(0, 35, __pyx_L1_error)
+          __pyx_t_5 = __Pyx_GetItemInt_Tuple(__pyx_v_markers, 0, long, 1, __Pyx_PyInt_From_long, 0, 0, 1); if (unlikely(!__pyx_t_5)) __PYX_ERR(0, 36, __pyx_L1_error)
           __Pyx_GOTREF(__pyx_t_5);
-          __pyx_t_3 = PyObject_RichCompare(__pyx_t_4, __pyx_t_5, Py_EQ); __Pyx_XGOTREF(__pyx_t_3); if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 35, __pyx_L1_error)
+          __pyx_t_3 = PyObject_RichCompare(__pyx_t_4, __pyx_t_5, Py_EQ); __Pyx_XGOTREF(__pyx_t_3); if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 36, __pyx_L1_error)
           __Pyx_DECREF(__pyx_t_4); __pyx_t_4 = 0;
           __Pyx_DECREF(__pyx_t_5); __pyx_t_5 = 0;
-          __pyx_t_25 = __Pyx_PyObject_IsTrue(__pyx_t_3); if (unlikely(__pyx_t_25 < 0)) __PYX_ERR(0, 35, __pyx_L1_error)
+          __pyx_t_25 = __Pyx_PyObject_IsTrue(__pyx_t_3); if (unlikely(__pyx_t_25 < 0)) __PYX_ERR(0, 36, __pyx_L1_error)
           __Pyx_DECREF(__pyx_t_3); __pyx_t_3 = 0;
           __pyx_t_11 = __pyx_t_25;
           __pyx_L19_bool_binop_done:;
           if (__pyx_t_11) {
 
-            /* "tools21cm/ViteBetti_cython.pyx":36
+            /* "tools21cm/ViteBetti_cython.pyx":37
  *                 if cubemap[i, j, k] == 0:
  *                     if cubemap[(i - 1), j, k] == markers[0] and cubemap[(i + 1) % Nx, j, k] == markers[0]:
  *                         cubemap[i, j, k] = markers[1]             # <<<<<<<<<<<<<<
  *                     elif cubemap[i, (j - 1), k] == markers[0] and cubemap[i, (j + 1) % Ny, k] == markers[0]:
  *                         cubemap[i, j, k] = markers[1]
  */
-            __pyx_t_3 = __Pyx_GetItemInt_Tuple(__pyx_v_markers, 1, long, 1, __Pyx_PyInt_From_long, 0, 0, 1); if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 36, __pyx_L1_error)
+            __pyx_t_3 = __Pyx_GetItemInt_Tuple(__pyx_v_markers, 1, long, 1, __Pyx_PyInt_From_long, 0, 0, 1); if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 37, __pyx_L1_error)
             __Pyx_GOTREF(__pyx_t_3);
-            __pyx_t_24 = __Pyx_PyInt_As_npy_long(__pyx_t_3); if (unlikely((__pyx_t_24 == ((npy_long)-1)) && PyErr_Occurred())) __PYX_ERR(0, 36, __pyx_L1_error)
+            __pyx_t_24 = __Pyx_PyInt_As_npy_long(__pyx_t_3); if (unlikely((__pyx_t_24 == ((npy_long)-1)) && PyErr_Occurred())) __PYX_ERR(0, 37, __pyx_L1_error)
             __Pyx_DECREF(__pyx_t_3); __pyx_t_3 = 0;
             __pyx_t_22 = __pyx_v_i;
             __pyx_t_21 = __pyx_v_j;
@@ -2484,11 +2485,11 @@ static PyObject *__pyx_pf_9tools21cm_16ViteBetti_cython_CubeMap(CYTHON_UNUSED Py
             } else if (unlikely(__pyx_t_20 >= __pyx_pybuffernd_cubemap.diminfo[2].shape)) __pyx_t_23 = 2;
             if (unlikely(__pyx_t_23 != -1)) {
               __Pyx_RaiseBufferIndexError(__pyx_t_23);
-              __PYX_ERR(0, 36, __pyx_L1_error)
+              __PYX_ERR(0, 37, __pyx_L1_error)
             }
             *__Pyx_BufPtrStrided3d(__pyx_t_5numpy_int_t *, __pyx_pybuffernd_cubemap.rcbuffer->pybuffer.buf, __pyx_t_22, __pyx_pybuffernd_cubemap.diminfo[0].strides, __pyx_t_21, __pyx_pybuffernd_cubemap.diminfo[1].strides, __pyx_t_20, __pyx_pybuffernd_cubemap.diminfo[2].strides) = __pyx_t_24;
 
-            /* "tools21cm/ViteBetti_cython.pyx":35
+            /* "tools21cm/ViteBetti_cython.pyx":36
  *             for k in range(Nz):
  *                 if cubemap[i, j, k] == 0:
  *                     if cubemap[(i - 1), j, k] == markers[0] and cubemap[(i + 1) % Nx, j, k] == markers[0]:             # <<<<<<<<<<<<<<
@@ -2498,7 +2499,7 @@ static PyObject *__pyx_pf_9tools21cm_16ViteBetti_cython_CubeMap(CYTHON_UNUSED Py
             goto __pyx_L18;
           }
 
-          /* "tools21cm/ViteBetti_cython.pyx":37
+          /* "tools21cm/ViteBetti_cython.pyx":38
  *                     if cubemap[(i - 1), j, k] == markers[0] and cubemap[(i + 1) % Nx, j, k] == markers[0]:
  *                         cubemap[i, j, k] = markers[1]
  *                     elif cubemap[i, (j - 1), k] == markers[0] and cubemap[i, (j + 1) % Ny, k] == markers[0]:             # <<<<<<<<<<<<<<
@@ -2523,16 +2524,16 @@ static PyObject *__pyx_pf_9tools21cm_16ViteBetti_cython_CubeMap(CYTHON_UNUSED Py
           } else if (unlikely(__pyx_t_22 >= __pyx_pybuffernd_cubemap.diminfo[2].shape)) __pyx_t_23 = 2;
           if (unlikely(__pyx_t_23 != -1)) {
             __Pyx_RaiseBufferIndexError(__pyx_t_23);
-            __PYX_ERR(0, 37, __pyx_L1_error)
+            __PYX_ERR(0, 38, __pyx_L1_error)
           }
-          __pyx_t_3 = __Pyx_PyInt_From_npy_long((*__Pyx_BufPtrStrided3d(__pyx_t_5numpy_int_t *, __pyx_pybuffernd_cubemap.rcbuffer->pybuffer.buf, __pyx_t_20, __pyx_pybuffernd_cubemap.diminfo[0].strides, __pyx_t_21, __pyx_pybuffernd_cubemap.diminfo[1].strides, __pyx_t_22, __pyx_pybuffernd_cubemap.diminfo[2].strides))); if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 37, __pyx_L1_error)
+          __pyx_t_3 = __Pyx_PyInt_From_npy_long((*__Pyx_BufPtrStrided3d(__pyx_t_5numpy_int_t *, __pyx_pybuffernd_cubemap.rcbuffer->pybuffer.buf, __pyx_t_20, __pyx_pybuffernd_cubemap.diminfo[0].strides, __pyx_t_21, __pyx_pybuffernd_cubemap.diminfo[1].strides, __pyx_t_22, __pyx_pybuffernd_cubemap.diminfo[2].strides))); if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 38, __pyx_L1_error)
           __Pyx_GOTREF(__pyx_t_3);
-          __pyx_t_5 = __Pyx_GetItemInt_Tuple(__pyx_v_markers, 0, long, 1, __Pyx_PyInt_From_long, 0, 0, 1); if (unlikely(!__pyx_t_5)) __PYX_ERR(0, 37, __pyx_L1_error)
+          __pyx_t_5 = __Pyx_GetItemInt_Tuple(__pyx_v_markers, 0, long, 1, __Pyx_PyInt_From_long, 0, 0, 1); if (unlikely(!__pyx_t_5)) __PYX_ERR(0, 38, __pyx_L1_error)
           __Pyx_GOTREF(__pyx_t_5);
-          __pyx_t_4 = PyObject_RichCompare(__pyx_t_3, __pyx_t_5, Py_EQ); __Pyx_XGOTREF(__pyx_t_4); if (unlikely(!__pyx_t_4)) __PYX_ERR(0, 37, __pyx_L1_error)
+          __pyx_t_4 = PyObject_RichCompare(__pyx_t_3, __pyx_t_5, Py_EQ); __Pyx_XGOTREF(__pyx_t_4); if (unlikely(!__pyx_t_4)) __PYX_ERR(0, 38, __pyx_L1_error)
           __Pyx_DECREF(__pyx_t_3); __pyx_t_3 = 0;
           __Pyx_DECREF(__pyx_t_5); __pyx_t_5 = 0;
-          __pyx_t_25 = __Pyx_PyObject_IsTrue(__pyx_t_4); if (unlikely(__pyx_t_25 < 0)) __PYX_ERR(0, 37, __pyx_L1_error)
+          __pyx_t_25 = __Pyx_PyObject_IsTrue(__pyx_t_4); if (unlikely(__pyx_t_25 < 0)) __PYX_ERR(0, 38, __pyx_L1_error)
           __Pyx_DECREF(__pyx_t_4); __pyx_t_4 = 0;
           if (__pyx_t_25) {
           } else {
@@ -2542,7 +2543,7 @@ static PyObject *__pyx_pf_9tools21cm_16ViteBetti_cython_CubeMap(CYTHON_UNUSED Py
           __pyx_t_26 = (__pyx_v_j + 1);
           if (unlikely(__pyx_v_Ny == 0)) {
             PyErr_SetString(PyExc_ZeroDivisionError, "integer division or modulo by zero");
-            __PYX_ERR(0, 37, __pyx_L1_error)
+            __PYX_ERR(0, 38, __pyx_L1_error)
           }
           __pyx_t_22 = __pyx_v_i;
           __pyx_t_21 = __Pyx_mod_long(__pyx_t_26, __pyx_v_Ny);
@@ -2562,31 +2563,31 @@ static PyObject *__pyx_pf_9tools21cm_16ViteBetti_cython_CubeMap(CYTHON_UNUSED Py
           } else if (unlikely(__pyx_t_20 >= __pyx_pybuffernd_cubemap.diminfo[2].shape)) __pyx_t_23 = 2;
           if (unlikely(__pyx_t_23 != -1)) {
             __Pyx_RaiseBufferIndexError(__pyx_t_23);
-            __PYX_ERR(0, 37, __pyx_L1_error)
+            __PYX_ERR(0, 38, __pyx_L1_error)
           }
-          __pyx_t_4 = __Pyx_PyInt_From_npy_long((*__Pyx_BufPtrStrided3d(__pyx_t_5numpy_int_t *, __pyx_pybuffernd_cubemap.rcbuffer->pybuffer.buf, __pyx_t_22, __pyx_pybuffernd_cubemap.diminfo[0].strides, __pyx_t_21, __pyx_pybuffernd_cubemap.diminfo[1].strides, __pyx_t_20, __pyx_pybuffernd_cubemap.diminfo[2].strides))); if (unlikely(!__pyx_t_4)) __PYX_ERR(0, 37, __pyx_L1_error)
+          __pyx_t_4 = __Pyx_PyInt_From_npy_long((*__Pyx_BufPtrStrided3d(__pyx_t_5numpy_int_t *, __pyx_pybuffernd_cubemap.rcbuffer->pybuffer.buf, __pyx_t_22, __pyx_pybuffernd_cubemap.diminfo[0].strides, __pyx_t_21, __pyx_pybuffernd_cubemap.diminfo[1].strides, __pyx_t_20, __pyx_pybuffernd_cubemap.diminfo[2].strides))); if (unlikely(!__pyx_t_4)) __PYX_ERR(0, 38, __pyx_L1_error)
           __Pyx_GOTREF(__pyx_t_4);
-          __pyx_t_5 = __Pyx_GetItemInt_Tuple(__pyx_v_markers, 0, long, 1, __Pyx_PyInt_From_long, 0, 0, 1); if (unlikely(!__pyx_t_5)) __PYX_ERR(0, 37, __pyx_L1_error)
+          __pyx_t_5 = __Pyx_GetItemInt_Tuple(__pyx_v_markers, 0, long, 1, __Pyx_PyInt_From_long, 0, 0, 1); if (unlikely(!__pyx_t_5)) __PYX_ERR(0, 38, __pyx_L1_error)
           __Pyx_GOTREF(__pyx_t_5);
-          __pyx_t_3 = PyObject_RichCompare(__pyx_t_4, __pyx_t_5, Py_EQ); __Pyx_XGOTREF(__pyx_t_3); if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 37, __pyx_L1_error)
+          __pyx_t_3 = PyObject_RichCompare(__pyx_t_4, __pyx_t_5, Py_EQ); __Pyx_XGOTREF(__pyx_t_3); if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 38, __pyx_L1_error)
           __Pyx_DECREF(__pyx_t_4); __pyx_t_4 = 0;
           __Pyx_DECREF(__pyx_t_5); __pyx_t_5 = 0;
-          __pyx_t_25 = __Pyx_PyObject_IsTrue(__pyx_t_3); if (unlikely(__pyx_t_25 < 0)) __PYX_ERR(0, 37, __pyx_L1_error)
+          __pyx_t_25 = __Pyx_PyObject_IsTrue(__pyx_t_3); if (unlikely(__pyx_t_25 < 0)) __PYX_ERR(0, 38, __pyx_L1_error)
           __Pyx_DECREF(__pyx_t_3); __pyx_t_3 = 0;
           __pyx_t_11 = __pyx_t_25;
           __pyx_L21_bool_binop_done:;
           if (__pyx_t_11) {
 
-            /* "tools21cm/ViteBetti_cython.pyx":38
+            /* "tools21cm/ViteBetti_cython.pyx":39
  *                         cubemap[i, j, k] = markers[1]
  *                     elif cubemap[i, (j - 1), k] == markers[0] and cubemap[i, (j + 1) % Ny, k] == markers[0]:
  *                         cubemap[i, j, k] = markers[1]             # <<<<<<<<<<<<<<
  *                     elif cubemap[i, j, (k - 1)] == markers[0] and cubemap[i, j, (k + 1) % Nz] == markers[0]:
  *                         cubemap[i, j, k] = markers[1]
  */
-            __pyx_t_3 = __Pyx_GetItemInt_Tuple(__pyx_v_markers, 1, long, 1, __Pyx_PyInt_From_long, 0, 0, 1); if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 38, __pyx_L1_error)
+            __pyx_t_3 = __Pyx_GetItemInt_Tuple(__pyx_v_markers, 1, long, 1, __Pyx_PyInt_From_long, 0, 0, 1); if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 39, __pyx_L1_error)
             __Pyx_GOTREF(__pyx_t_3);
-            __pyx_t_24 = __Pyx_PyInt_As_npy_long(__pyx_t_3); if (unlikely((__pyx_t_24 == ((npy_long)-1)) && PyErr_Occurred())) __PYX_ERR(0, 38, __pyx_L1_error)
+            __pyx_t_24 = __Pyx_PyInt_As_npy_long(__pyx_t_3); if (unlikely((__pyx_t_24 == ((npy_long)-1)) && PyErr_Occurred())) __PYX_ERR(0, 39, __pyx_L1_error)
             __Pyx_DECREF(__pyx_t_3); __pyx_t_3 = 0;
             __pyx_t_20 = __pyx_v_i;
             __pyx_t_21 = __pyx_v_j;
@@ -2606,11 +2607,11 @@ static PyObject *__pyx_pf_9tools21cm_16ViteBetti_cython_CubeMap(CYTHON_UNUSED Py
             } else if (unlikely(__pyx_t_22 >= __pyx_pybuffernd_cubemap.diminfo[2].shape)) __pyx_t_23 = 2;
             if (unlikely(__pyx_t_23 != -1)) {
               __Pyx_RaiseBufferIndexError(__pyx_t_23);
-              __PYX_ERR(0, 38, __pyx_L1_error)
+              __PYX_ERR(0, 39, __pyx_L1_error)
             }
             *__Pyx_BufPtrStrided3d(__pyx_t_5numpy_int_t *, __pyx_pybuffernd_cubemap.rcbuffer->pybuffer.buf, __pyx_t_20, __pyx_pybuffernd_cubemap.diminfo[0].strides, __pyx_t_21, __pyx_pybuffernd_cubemap.diminfo[1].strides, __pyx_t_22, __pyx_pybuffernd_cubemap.diminfo[2].strides) = __pyx_t_24;
 
-            /* "tools21cm/ViteBetti_cython.pyx":37
+            /* "tools21cm/ViteBetti_cython.pyx":38
  *                     if cubemap[(i - 1), j, k] == markers[0] and cubemap[(i + 1) % Nx, j, k] == markers[0]:
  *                         cubemap[i, j, k] = markers[1]
  *                     elif cubemap[i, (j - 1), k] == markers[0] and cubemap[i, (j + 1) % Ny, k] == markers[0]:             # <<<<<<<<<<<<<<
@@ -2620,7 +2621,7 @@ static PyObject *__pyx_pf_9tools21cm_16ViteBetti_cython_CubeMap(CYTHON_UNUSED Py
             goto __pyx_L18;
           }
 
-          /* "tools21cm/ViteBetti_cython.pyx":39
+          /* "tools21cm/ViteBetti_cython.pyx":40
  *                     elif cubemap[i, (j - 1), k] == markers[0] and cubemap[i, (j + 1) % Ny, k] == markers[0]:
  *                         cubemap[i, j, k] = markers[1]
  *                     elif cubemap[i, j, (k - 1)] == markers[0] and cubemap[i, j, (k + 1) % Nz] == markers[0]:             # <<<<<<<<<<<<<<
@@ -2645,16 +2646,16 @@ static PyObject *__pyx_pf_9tools21cm_16ViteBetti_cython_CubeMap(CYTHON_UNUSED Py
           } else if (unlikely(__pyx_t_20 >= __pyx_pybuffernd_cubemap.diminfo[2].shape)) __pyx_t_23 = 2;
           if (unlikely(__pyx_t_23 != -1)) {
             __Pyx_RaiseBufferIndexError(__pyx_t_23);
-            __PYX_ERR(0, 39, __pyx_L1_error)
+            __PYX_ERR(0, 40, __pyx_L1_error)
           }
-          __pyx_t_3 = __Pyx_PyInt_From_npy_long((*__Pyx_BufPtrStrided3d(__pyx_t_5numpy_int_t *, __pyx_pybuffernd_cubemap.rcbuffer->pybuffer.buf, __pyx_t_22, __pyx_pybuffernd_cubemap.diminfo[0].strides, __pyx_t_21, __pyx_pybuffernd_cubemap.diminfo[1].strides, __pyx_t_20, __pyx_pybuffernd_cubemap.diminfo[2].strides))); if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 39, __pyx_L1_error)
+          __pyx_t_3 = __Pyx_PyInt_From_npy_long((*__Pyx_BufPtrStrided3d(__pyx_t_5numpy_int_t *, __pyx_pybuffernd_cubemap.rcbuffer->pybuffer.buf, __pyx_t_22, __pyx_pybuffernd_cubemap.diminfo[0].strides, __pyx_t_21, __pyx_pybuffernd_cubemap.diminfo[1].strides, __pyx_t_20, __pyx_pybuffernd_cubemap.diminfo[2].strides))); if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 40, __pyx_L1_error)
           __Pyx_GOTREF(__pyx_t_3);
-          __pyx_t_5 = __Pyx_GetItemInt_Tuple(__pyx_v_markers, 0, long, 1, __Pyx_PyInt_From_long, 0, 0, 1); if (unlikely(!__pyx_t_5)) __PYX_ERR(0, 39, __pyx_L1_error)
+          __pyx_t_5 = __Pyx_GetItemInt_Tuple(__pyx_v_markers, 0, long, 1, __Pyx_PyInt_From_long, 0, 0, 1); if (unlikely(!__pyx_t_5)) __PYX_ERR(0, 40, __pyx_L1_error)
           __Pyx_GOTREF(__pyx_t_5);
-          __pyx_t_4 = PyObject_RichCompare(__pyx_t_3, __pyx_t_5, Py_EQ); __Pyx_XGOTREF(__pyx_t_4); if (unlikely(!__pyx_t_4)) __PYX_ERR(0, 39, __pyx_L1_error)
+          __pyx_t_4 = PyObject_RichCompare(__pyx_t_3, __pyx_t_5, Py_EQ); __Pyx_XGOTREF(__pyx_t_4); if (unlikely(!__pyx_t_4)) __PYX_ERR(0, 40, __pyx_L1_error)
           __Pyx_DECREF(__pyx_t_3); __pyx_t_3 = 0;
           __Pyx_DECREF(__pyx_t_5); __pyx_t_5 = 0;
-          __pyx_t_25 = __Pyx_PyObject_IsTrue(__pyx_t_4); if (unlikely(__pyx_t_25 < 0)) __PYX_ERR(0, 39, __pyx_L1_error)
+          __pyx_t_25 = __Pyx_PyObject_IsTrue(__pyx_t_4); if (unlikely(__pyx_t_25 < 0)) __PYX_ERR(0, 40, __pyx_L1_error)
           __Pyx_DECREF(__pyx_t_4); __pyx_t_4 = 0;
           if (__pyx_t_25) {
           } else {
@@ -2664,7 +2665,7 @@ static PyObject *__pyx_pf_9tools21cm_16ViteBetti_cython_CubeMap(CYTHON_UNUSED Py
           __pyx_t_26 = (__pyx_v_k + 1);
           if (unlikely(__pyx_v_Nz == 0)) {
             PyErr_SetString(PyExc_ZeroDivisionError, "integer division or modulo by zero");
-            __PYX_ERR(0, 39, __pyx_L1_error)
+            __PYX_ERR(0, 40, __pyx_L1_error)
           }
           __pyx_t_20 = __pyx_v_i;
           __pyx_t_21 = __pyx_v_j;
@@ -2684,31 +2685,31 @@ static PyObject *__pyx_pf_9tools21cm_16ViteBetti_cython_CubeMap(CYTHON_UNUSED Py
           } else if (unlikely(__pyx_t_22 >= __pyx_pybuffernd_cubemap.diminfo[2].shape)) __pyx_t_23 = 2;
           if (unlikely(__pyx_t_23 != -1)) {
             __Pyx_RaiseBufferIndexError(__pyx_t_23);
-            __PYX_ERR(0, 39, __pyx_L1_error)
+            __PYX_ERR(0, 40, __pyx_L1_error)
           }
-          __pyx_t_4 = __Pyx_PyInt_From_npy_long((*__Pyx_BufPtrStrided3d(__pyx_t_5numpy_int_t *, __pyx_pybuffernd_cubemap.rcbuffer->pybuffer.buf, __pyx_t_20, __pyx_pybuffernd_cubemap.diminfo[0].strides, __pyx_t_21, __pyx_pybuffernd_cubemap.diminfo[1].strides, __pyx_t_22, __pyx_pybuffernd_cubemap.diminfo[2].strides))); if (unlikely(!__pyx_t_4)) __PYX_ERR(0, 39, __pyx_L1_error)
+          __pyx_t_4 = __Pyx_PyInt_From_npy_long((*__Pyx_BufPtrStrided3d(__pyx_t_5numpy_int_t *, __pyx_pybuffernd_cubemap.rcbuffer->pybuffer.buf, __pyx_t_20, __pyx_pybuffernd_cubemap.diminfo[0].strides, __pyx_t_21, __pyx_pybuffernd_cubemap.diminfo[1].strides, __pyx_t_22, __pyx_pybuffernd_cubemap.diminfo[2].strides))); if (unlikely(!__pyx_t_4)) __PYX_ERR(0, 40, __pyx_L1_error)
           __Pyx_GOTREF(__pyx_t_4);
-          __pyx_t_5 = __Pyx_GetItemInt_Tuple(__pyx_v_markers, 0, long, 1, __Pyx_PyInt_From_long, 0, 0, 1); if (unlikely(!__pyx_t_5)) __PYX_ERR(0, 39, __pyx_L1_error)
+          __pyx_t_5 = __Pyx_GetItemInt_Tuple(__pyx_v_markers, 0, long, 1, __Pyx_PyInt_From_long, 0, 0, 1); if (unlikely(!__pyx_t_5)) __PYX_ERR(0, 40, __pyx_L1_error)
           __Pyx_GOTREF(__pyx_t_5);
-          __pyx_t_3 = PyObject_RichCompare(__pyx_t_4, __pyx_t_5, Py_EQ); __Pyx_XGOTREF(__pyx_t_3); if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 39, __pyx_L1_error)
+          __pyx_t_3 = PyObject_RichCompare(__pyx_t_4, __pyx_t_5, Py_EQ); __Pyx_XGOTREF(__pyx_t_3); if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 40, __pyx_L1_error)
           __Pyx_DECREF(__pyx_t_4); __pyx_t_4 = 0;
           __Pyx_DECREF(__pyx_t_5); __pyx_t_5 = 0;
-          __pyx_t_25 = __Pyx_PyObject_IsTrue(__pyx_t_3); if (unlikely(__pyx_t_25 < 0)) __PYX_ERR(0, 39, __pyx_L1_error)
+          __pyx_t_25 = __Pyx_PyObject_IsTrue(__pyx_t_3); if (unlikely(__pyx_t_25 < 0)) __PYX_ERR(0, 40, __pyx_L1_error)
           __Pyx_DECREF(__pyx_t_3); __pyx_t_3 = 0;
           __pyx_t_11 = __pyx_t_25;
           __pyx_L23_bool_binop_done:;
           if (__pyx_t_11) {
 
-            /* "tools21cm/ViteBetti_cython.pyx":40
+            /* "tools21cm/ViteBetti_cython.pyx":41
  *                         cubemap[i, j, k] = markers[1]
  *                     elif cubemap[i, j, (k - 1)] == markers[0] and cubemap[i, j, (k + 1) % Nz] == markers[0]:
  *                         cubemap[i, j, k] = markers[1]             # <<<<<<<<<<<<<<
  * 
  *     # Faces
  */
-            __pyx_t_3 = __Pyx_GetItemInt_Tuple(__pyx_v_markers, 1, long, 1, __Pyx_PyInt_From_long, 0, 0, 1); if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 40, __pyx_L1_error)
+            __pyx_t_3 = __Pyx_GetItemInt_Tuple(__pyx_v_markers, 1, long, 1, __Pyx_PyInt_From_long, 0, 0, 1); if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 41, __pyx_L1_error)
             __Pyx_GOTREF(__pyx_t_3);
-            __pyx_t_24 = __Pyx_PyInt_As_npy_long(__pyx_t_3); if (unlikely((__pyx_t_24 == ((npy_long)-1)) && PyErr_Occurred())) __PYX_ERR(0, 40, __pyx_L1_error)
+            __pyx_t_24 = __Pyx_PyInt_As_npy_long(__pyx_t_3); if (unlikely((__pyx_t_24 == ((npy_long)-1)) && PyErr_Occurred())) __PYX_ERR(0, 41, __pyx_L1_error)
             __Pyx_DECREF(__pyx_t_3); __pyx_t_3 = 0;
             __pyx_t_22 = __pyx_v_i;
             __pyx_t_21 = __pyx_v_j;
@@ -2728,11 +2729,11 @@ static PyObject *__pyx_pf_9tools21cm_16ViteBetti_cython_CubeMap(CYTHON_UNUSED Py
             } else if (unlikely(__pyx_t_20 >= __pyx_pybuffernd_cubemap.diminfo[2].shape)) __pyx_t_23 = 2;
             if (unlikely(__pyx_t_23 != -1)) {
               __Pyx_RaiseBufferIndexError(__pyx_t_23);
-              __PYX_ERR(0, 40, __pyx_L1_error)
+              __PYX_ERR(0, 41, __pyx_L1_error)
             }
             *__Pyx_BufPtrStrided3d(__pyx_t_5numpy_int_t *, __pyx_pybuffernd_cubemap.rcbuffer->pybuffer.buf, __pyx_t_22, __pyx_pybuffernd_cubemap.diminfo[0].strides, __pyx_t_21, __pyx_pybuffernd_cubemap.diminfo[1].strides, __pyx_t_20, __pyx_pybuffernd_cubemap.diminfo[2].strides) = __pyx_t_24;
 
-            /* "tools21cm/ViteBetti_cython.pyx":39
+            /* "tools21cm/ViteBetti_cython.pyx":40
  *                     elif cubemap[i, (j - 1), k] == markers[0] and cubemap[i, (j + 1) % Ny, k] == markers[0]:
  *                         cubemap[i, j, k] = markers[1]
  *                     elif cubemap[i, j, (k - 1)] == markers[0] and cubemap[i, j, (k + 1) % Nz] == markers[0]:             # <<<<<<<<<<<<<<
@@ -2742,7 +2743,7 @@ static PyObject *__pyx_pf_9tools21cm_16ViteBetti_cython_CubeMap(CYTHON_UNUSED Py
           }
           __pyx_L18:;
 
-          /* "tools21cm/ViteBetti_cython.pyx":34
+          /* "tools21cm/ViteBetti_cython.pyx":35
  *         for j in range(Ny):
  *             for k in range(Nz):
  *                 if cubemap[i, j, k] == 0:             # <<<<<<<<<<<<<<
@@ -2754,7 +2755,7 @@ static PyObject *__pyx_pf_9tools21cm_16ViteBetti_cython_CubeMap(CYTHON_UNUSED Py
     }
   }
 
-  /* "tools21cm/ViteBetti_cython.pyx":43
+  /* "tools21cm/ViteBetti_cython.pyx":44
  * 
  *     # Faces
  *     for i in range(Nx):             # <<<<<<<<<<<<<<
@@ -2766,7 +2767,7 @@ static PyObject *__pyx_pf_9tools21cm_16ViteBetti_cython_CubeMap(CYTHON_UNUSED Py
   for (__pyx_t_13 = 0; __pyx_t_13 < __pyx_t_12; __pyx_t_13+=1) {
     __pyx_v_i = __pyx_t_13;
 
-    /* "tools21cm/ViteBetti_cython.pyx":44
+    /* "tools21cm/ViteBetti_cython.pyx":45
  *     # Faces
  *     for i in range(Nx):
  *         for j in range(Ny):             # <<<<<<<<<<<<<<
@@ -2778,7 +2779,7 @@ static PyObject *__pyx_pf_9tools21cm_16ViteBetti_cython_CubeMap(CYTHON_UNUSED Py
     for (__pyx_t_16 = 0; __pyx_t_16 < __pyx_t_15; __pyx_t_16+=1) {
       __pyx_v_j = __pyx_t_16;
 
-      /* "tools21cm/ViteBetti_cython.pyx":45
+      /* "tools21cm/ViteBetti_cython.pyx":46
  *     for i in range(Nx):
  *         for j in range(Ny):
  *             for k in range(Nz):             # <<<<<<<<<<<<<<
@@ -2790,7 +2791,7 @@ static PyObject *__pyx_pf_9tools21cm_16ViteBetti_cython_CubeMap(CYTHON_UNUSED Py
       for (__pyx_t_19 = 0; __pyx_t_19 < __pyx_t_18; __pyx_t_19+=1) {
         __pyx_v_k = __pyx_t_19;
 
-        /* "tools21cm/ViteBetti_cython.pyx":46
+        /* "tools21cm/ViteBetti_cython.pyx":47
  *         for j in range(Ny):
  *             for k in range(Nz):
  *                 if cubemap[i, j, k] == 0:             # <<<<<<<<<<<<<<
@@ -2815,12 +2816,12 @@ static PyObject *__pyx_pf_9tools21cm_16ViteBetti_cython_CubeMap(CYTHON_UNUSED Py
         } else if (unlikely(__pyx_t_22 >= __pyx_pybuffernd_cubemap.diminfo[2].shape)) __pyx_t_23 = 2;
         if (unlikely(__pyx_t_23 != -1)) {
           __Pyx_RaiseBufferIndexError(__pyx_t_23);
-          __PYX_ERR(0, 46, __pyx_L1_error)
+          __PYX_ERR(0, 47, __pyx_L1_error)
         }
         __pyx_t_11 = (((*__Pyx_BufPtrStrided3d(__pyx_t_5numpy_int_t *, __pyx_pybuffernd_cubemap.rcbuffer->pybuffer.buf, __pyx_t_20, __pyx_pybuffernd_cubemap.diminfo[0].strides, __pyx_t_21, __pyx_pybuffernd_cubemap.diminfo[1].strides, __pyx_t_22, __pyx_pybuffernd_cubemap.diminfo[2].strides)) == 0) != 0);
         if (__pyx_t_11) {
 
-          /* "tools21cm/ViteBetti_cython.pyx":47
+          /* "tools21cm/ViteBetti_cython.pyx":48
  *             for k in range(Nz):
  *                 if cubemap[i, j, k] == 0:
  *                     if cubemap[(i - 1), j, k] == markers[1] and cubemap[(i + 1) % Nx, j, k] == markers[1] and cubemap[i, (j - 1), k] == markers[1] and cubemap[i, (j + 1) % Ny, k] == markers[1]:             # <<<<<<<<<<<<<<
@@ -2845,16 +2846,16 @@ static PyObject *__pyx_pf_9tools21cm_16ViteBetti_cython_CubeMap(CYTHON_UNUSED Py
           } else if (unlikely(__pyx_t_20 >= __pyx_pybuffernd_cubemap.diminfo[2].shape)) __pyx_t_23 = 2;
           if (unlikely(__pyx_t_23 != -1)) {
             __Pyx_RaiseBufferIndexError(__pyx_t_23);
-            __PYX_ERR(0, 47, __pyx_L1_error)
+            __PYX_ERR(0, 48, __pyx_L1_error)
           }
-          __pyx_t_3 = __Pyx_PyInt_From_npy_long((*__Pyx_BufPtrStrided3d(__pyx_t_5numpy_int_t *, __pyx_pybuffernd_cubemap.rcbuffer->pybuffer.buf, __pyx_t_22, __pyx_pybuffernd_cubemap.diminfo[0].strides, __pyx_t_21, __pyx_pybuffernd_cubemap.diminfo[1].strides, __pyx_t_20, __pyx_pybuffernd_cubemap.diminfo[2].strides))); if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 47, __pyx_L1_error)
+          __pyx_t_3 = __Pyx_PyInt_From_npy_long((*__Pyx_BufPtrStrided3d(__pyx_t_5numpy_int_t *, __pyx_pybuffernd_cubemap.rcbuffer->pybuffer.buf, __pyx_t_22, __pyx_pybuffernd_cubemap.diminfo[0].strides, __pyx_t_21, __pyx_pybuffernd_cubemap.diminfo[1].strides, __pyx_t_20, __pyx_pybuffernd_cubemap.diminfo[2].strides))); if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 48, __pyx_L1_error)
           __Pyx_GOTREF(__pyx_t_3);
-          __pyx_t_5 = __Pyx_GetItemInt_Tuple(__pyx_v_markers, 1, long, 1, __Pyx_PyInt_From_long, 0, 0, 1); if (unlikely(!__pyx_t_5)) __PYX_ERR(0, 47, __pyx_L1_error)
+          __pyx_t_5 = __Pyx_GetItemInt_Tuple(__pyx_v_markers, 1, long, 1, __Pyx_PyInt_From_long, 0, 0, 1); if (unlikely(!__pyx_t_5)) __PYX_ERR(0, 48, __pyx_L1_error)
           __Pyx_GOTREF(__pyx_t_5);
-          __pyx_t_4 = PyObject_RichCompare(__pyx_t_3, __pyx_t_5, Py_EQ); __Pyx_XGOTREF(__pyx_t_4); if (unlikely(!__pyx_t_4)) __PYX_ERR(0, 47, __pyx_L1_error)
+          __pyx_t_4 = PyObject_RichCompare(__pyx_t_3, __pyx_t_5, Py_EQ); __Pyx_XGOTREF(__pyx_t_4); if (unlikely(!__pyx_t_4)) __PYX_ERR(0, 48, __pyx_L1_error)
           __Pyx_DECREF(__pyx_t_3); __pyx_t_3 = 0;
           __Pyx_DECREF(__pyx_t_5); __pyx_t_5 = 0;
-          __pyx_t_25 = __Pyx_PyObject_IsTrue(__pyx_t_4); if (unlikely(__pyx_t_25 < 0)) __PYX_ERR(0, 47, __pyx_L1_error)
+          __pyx_t_25 = __Pyx_PyObject_IsTrue(__pyx_t_4); if (unlikely(__pyx_t_25 < 0)) __PYX_ERR(0, 48, __pyx_L1_error)
           __Pyx_DECREF(__pyx_t_4); __pyx_t_4 = 0;
           if (__pyx_t_25) {
           } else {
@@ -2864,7 +2865,7 @@ static PyObject *__pyx_pf_9tools21cm_16ViteBetti_cython_CubeMap(CYTHON_UNUSED Py
           __pyx_t_26 = (__pyx_v_i + 1);
           if (unlikely(__pyx_v_Nx == 0)) {
             PyErr_SetString(PyExc_ZeroDivisionError, "integer division or modulo by zero");
-            __PYX_ERR(0, 47, __pyx_L1_error)
+            __PYX_ERR(0, 48, __pyx_L1_error)
           }
           __pyx_t_20 = __Pyx_mod_long(__pyx_t_26, __pyx_v_Nx);
           __pyx_t_21 = __pyx_v_j;
@@ -2884,16 +2885,16 @@ static PyObject *__pyx_pf_9tools21cm_16ViteBetti_cython_CubeMap(CYTHON_UNUSED Py
           } else if (unlikely(__pyx_t_22 >= __pyx_pybuffernd_cubemap.diminfo[2].shape)) __pyx_t_23 = 2;
           if (unlikely(__pyx_t_23 != -1)) {
             __Pyx_RaiseBufferIndexError(__pyx_t_23);
-            __PYX_ERR(0, 47, __pyx_L1_error)
+            __PYX_ERR(0, 48, __pyx_L1_error)
           }
-          __pyx_t_4 = __Pyx_PyInt_From_npy_long((*__Pyx_BufPtrStrided3d(__pyx_t_5numpy_int_t *, __pyx_pybuffernd_cubemap.rcbuffer->pybuffer.buf, __pyx_t_20, __pyx_pybuffernd_cubemap.diminfo[0].strides, __pyx_t_21, __pyx_pybuffernd_cubemap.diminfo[1].strides, __pyx_t_22, __pyx_pybuffernd_cubemap.diminfo[2].strides))); if (unlikely(!__pyx_t_4)) __PYX_ERR(0, 47, __pyx_L1_error)
+          __pyx_t_4 = __Pyx_PyInt_From_npy_long((*__Pyx_BufPtrStrided3d(__pyx_t_5numpy_int_t *, __pyx_pybuffernd_cubemap.rcbuffer->pybuffer.buf, __pyx_t_20, __pyx_pybuffernd_cubemap.diminfo[0].strides, __pyx_t_21, __pyx_pybuffernd_cubemap.diminfo[1].strides, __pyx_t_22, __pyx_pybuffernd_cubemap.diminfo[2].strides))); if (unlikely(!__pyx_t_4)) __PYX_ERR(0, 48, __pyx_L1_error)
           __Pyx_GOTREF(__pyx_t_4);
-          __pyx_t_5 = __Pyx_GetItemInt_Tuple(__pyx_v_markers, 1, long, 1, __Pyx_PyInt_From_long, 0, 0, 1); if (unlikely(!__pyx_t_5)) __PYX_ERR(0, 47, __pyx_L1_error)
+          __pyx_t_5 = __Pyx_GetItemInt_Tuple(__pyx_v_markers, 1, long, 1, __Pyx_PyInt_From_long, 0, 0, 1); if (unlikely(!__pyx_t_5)) __PYX_ERR(0, 48, __pyx_L1_error)
           __Pyx_GOTREF(__pyx_t_5);
-          __pyx_t_3 = PyObject_RichCompare(__pyx_t_4, __pyx_t_5, Py_EQ); __Pyx_XGOTREF(__pyx_t_3); if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 47, __pyx_L1_error)
+          __pyx_t_3 = PyObject_RichCompare(__pyx_t_4, __pyx_t_5, Py_EQ); __Pyx_XGOTREF(__pyx_t_3); if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 48, __pyx_L1_error)
           __Pyx_DECREF(__pyx_t_4); __pyx_t_4 = 0;
           __Pyx_DECREF(__pyx_t_5); __pyx_t_5 = 0;
-          __pyx_t_25 = __Pyx_PyObject_IsTrue(__pyx_t_3); if (unlikely(__pyx_t_25 < 0)) __PYX_ERR(0, 47, __pyx_L1_error)
+          __pyx_t_25 = __Pyx_PyObject_IsTrue(__pyx_t_3); if (unlikely(__pyx_t_25 < 0)) __PYX_ERR(0, 48, __pyx_L1_error)
           __Pyx_DECREF(__pyx_t_3); __pyx_t_3 = 0;
           if (__pyx_t_25) {
           } else {
@@ -2918,16 +2919,16 @@ static PyObject *__pyx_pf_9tools21cm_16ViteBetti_cython_CubeMap(CYTHON_UNUSED Py
           } else if (unlikely(__pyx_t_20 >= __pyx_pybuffernd_cubemap.diminfo[2].shape)) __pyx_t_23 = 2;
           if (unlikely(__pyx_t_23 != -1)) {
             __Pyx_RaiseBufferIndexError(__pyx_t_23);
-            __PYX_ERR(0, 47, __pyx_L1_error)
+            __PYX_ERR(0, 48, __pyx_L1_error)
           }
-          __pyx_t_3 = __Pyx_PyInt_From_npy_long((*__Pyx_BufPtrStrided3d(__pyx_t_5numpy_int_t *, __pyx_pybuffernd_cubemap.rcbuffer->pybuffer.buf, __pyx_t_22, __pyx_pybuffernd_cubemap.diminfo[0].strides, __pyx_t_21, __pyx_pybuffernd_cubemap.diminfo[1].strides, __pyx_t_20, __pyx_pybuffernd_cubemap.diminfo[2].strides))); if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 47, __pyx_L1_error)
+          __pyx_t_3 = __Pyx_PyInt_From_npy_long((*__Pyx_BufPtrStrided3d(__pyx_t_5numpy_int_t *, __pyx_pybuffernd_cubemap.rcbuffer->pybuffer.buf, __pyx_t_22, __pyx_pybuffernd_cubemap.diminfo[0].strides, __pyx_t_21, __pyx_pybuffernd_cubemap.diminfo[1].strides, __pyx_t_20, __pyx_pybuffernd_cubemap.diminfo[2].strides))); if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 48, __pyx_L1_error)
           __Pyx_GOTREF(__pyx_t_3);
-          __pyx_t_5 = __Pyx_GetItemInt_Tuple(__pyx_v_markers, 1, long, 1, __Pyx_PyInt_From_long, 0, 0, 1); if (unlikely(!__pyx_t_5)) __PYX_ERR(0, 47, __pyx_L1_error)
+          __pyx_t_5 = __Pyx_GetItemInt_Tuple(__pyx_v_markers, 1, long, 1, __Pyx_PyInt_From_long, 0, 0, 1); if (unlikely(!__pyx_t_5)) __PYX_ERR(0, 48, __pyx_L1_error)
           __Pyx_GOTREF(__pyx_t_5);
-          __pyx_t_4 = PyObject_RichCompare(__pyx_t_3, __pyx_t_5, Py_EQ); __Pyx_XGOTREF(__pyx_t_4); if (unlikely(!__pyx_t_4)) __PYX_ERR(0, 47, __pyx_L1_error)
+          __pyx_t_4 = PyObject_RichCompare(__pyx_t_3, __pyx_t_5, Py_EQ); __Pyx_XGOTREF(__pyx_t_4); if (unlikely(!__pyx_t_4)) __PYX_ERR(0, 48, __pyx_L1_error)
           __Pyx_DECREF(__pyx_t_3); __pyx_t_3 = 0;
           __Pyx_DECREF(__pyx_t_5); __pyx_t_5 = 0;
-          __pyx_t_25 = __Pyx_PyObject_IsTrue(__pyx_t_4); if (unlikely(__pyx_t_25 < 0)) __PYX_ERR(0, 47, __pyx_L1_error)
+          __pyx_t_25 = __Pyx_PyObject_IsTrue(__pyx_t_4); if (unlikely(__pyx_t_25 < 0)) __PYX_ERR(0, 48, __pyx_L1_error)
           __Pyx_DECREF(__pyx_t_4); __pyx_t_4 = 0;
           if (__pyx_t_25) {
           } else {
@@ -2937,7 +2938,7 @@ static PyObject *__pyx_pf_9tools21cm_16ViteBetti_cython_CubeMap(CYTHON_UNUSED Py
           __pyx_t_26 = (__pyx_v_j + 1);
           if (unlikely(__pyx_v_Ny == 0)) {
             PyErr_SetString(PyExc_ZeroDivisionError, "integer division or modulo by zero");
-            __PYX_ERR(0, 47, __pyx_L1_error)
+            __PYX_ERR(0, 48, __pyx_L1_error)
           }
           __pyx_t_20 = __pyx_v_i;
           __pyx_t_21 = __Pyx_mod_long(__pyx_t_26, __pyx_v_Ny);
@@ -2957,31 +2958,31 @@ static PyObject *__pyx_pf_9tools21cm_16ViteBetti_cython_CubeMap(CYTHON_UNUSED Py
           } else if (unlikely(__pyx_t_22 >= __pyx_pybuffernd_cubemap.diminfo[2].shape)) __pyx_t_23 = 2;
           if (unlikely(__pyx_t_23 != -1)) {
             __Pyx_RaiseBufferIndexError(__pyx_t_23);
-            __PYX_ERR(0, 47, __pyx_L1_error)
+            __PYX_ERR(0, 48, __pyx_L1_error)
           }
-          __pyx_t_4 = __Pyx_PyInt_From_npy_long((*__Pyx_BufPtrStrided3d(__pyx_t_5numpy_int_t *, __pyx_pybuffernd_cubemap.rcbuffer->pybuffer.buf, __pyx_t_20, __pyx_pybuffernd_cubemap.diminfo[0].strides, __pyx_t_21, __pyx_pybuffernd_cubemap.diminfo[1].strides, __pyx_t_22, __pyx_pybuffernd_cubemap.diminfo[2].strides))); if (unlikely(!__pyx_t_4)) __PYX_ERR(0, 47, __pyx_L1_error)
+          __pyx_t_4 = __Pyx_PyInt_From_npy_long((*__Pyx_BufPtrStrided3d(__pyx_t_5numpy_int_t *, __pyx_pybuffernd_cubemap.rcbuffer->pybuffer.buf, __pyx_t_20, __pyx_pybuffernd_cubemap.diminfo[0].strides, __pyx_t_21, __pyx_pybuffernd_cubemap.diminfo[1].strides, __pyx_t_22, __pyx_pybuffernd_cubemap.diminfo[2].strides))); if (unlikely(!__pyx_t_4)) __PYX_ERR(0, 48, __pyx_L1_error)
           __Pyx_GOTREF(__pyx_t_4);
-          __pyx_t_5 = __Pyx_GetItemInt_Tuple(__pyx_v_markers, 1, long, 1, __Pyx_PyInt_From_long, 0, 0, 1); if (unlikely(!__pyx_t_5)) __PYX_ERR(0, 47, __pyx_L1_error)
+          __pyx_t_5 = __Pyx_GetItemInt_Tuple(__pyx_v_markers, 1, long, 1, __Pyx_PyInt_From_long, 0, 0, 1); if (unlikely(!__pyx_t_5)) __PYX_ERR(0, 48, __pyx_L1_error)
           __Pyx_GOTREF(__pyx_t_5);
-          __pyx_t_3 = PyObject_RichCompare(__pyx_t_4, __pyx_t_5, Py_EQ); __Pyx_XGOTREF(__pyx_t_3); if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 47, __pyx_L1_error)
+          __pyx_t_3 = PyObject_RichCompare(__pyx_t_4, __pyx_t_5, Py_EQ); __Pyx_XGOTREF(__pyx_t_3); if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 48, __pyx_L1_error)
           __Pyx_DECREF(__pyx_t_4); __pyx_t_4 = 0;
           __Pyx_DECREF(__pyx_t_5); __pyx_t_5 = 0;
-          __pyx_t_25 = __Pyx_PyObject_IsTrue(__pyx_t_3); if (unlikely(__pyx_t_25 < 0)) __PYX_ERR(0, 47, __pyx_L1_error)
+          __pyx_t_25 = __Pyx_PyObject_IsTrue(__pyx_t_3); if (unlikely(__pyx_t_25 < 0)) __PYX_ERR(0, 48, __pyx_L1_error)
           __Pyx_DECREF(__pyx_t_3); __pyx_t_3 = 0;
           __pyx_t_11 = __pyx_t_25;
           __pyx_L33_bool_binop_done:;
           if (__pyx_t_11) {
 
-            /* "tools21cm/ViteBetti_cython.pyx":48
+            /* "tools21cm/ViteBetti_cython.pyx":49
  *                 if cubemap[i, j, k] == 0:
  *                     if cubemap[(i - 1), j, k] == markers[1] and cubemap[(i + 1) % Nx, j, k] == markers[1] and cubemap[i, (j - 1), k] == markers[1] and cubemap[i, (j + 1) % Ny, k] == markers[1]:
  *                         cubemap[i, j, k] = markers[2]             # <<<<<<<<<<<<<<
  *                     elif cubemap[i, (j - 1), k] == markers[1] and cubemap[i, (j + 1) % Ny, k] == markers[1] and cubemap[i, j, (k - 1)] == markers[1] and cubemap[i, j, (k + 1) % Nz] == markers[1]:
  *                         cubemap[i, j, k] = markers[2]
  */
-            __pyx_t_3 = __Pyx_GetItemInt_Tuple(__pyx_v_markers, 2, long, 1, __Pyx_PyInt_From_long, 0, 0, 1); if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 48, __pyx_L1_error)
+            __pyx_t_3 = __Pyx_GetItemInt_Tuple(__pyx_v_markers, 2, long, 1, __Pyx_PyInt_From_long, 0, 0, 1); if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 49, __pyx_L1_error)
             __Pyx_GOTREF(__pyx_t_3);
-            __pyx_t_24 = __Pyx_PyInt_As_npy_long(__pyx_t_3); if (unlikely((__pyx_t_24 == ((npy_long)-1)) && PyErr_Occurred())) __PYX_ERR(0, 48, __pyx_L1_error)
+            __pyx_t_24 = __Pyx_PyInt_As_npy_long(__pyx_t_3); if (unlikely((__pyx_t_24 == ((npy_long)-1)) && PyErr_Occurred())) __PYX_ERR(0, 49, __pyx_L1_error)
             __Pyx_DECREF(__pyx_t_3); __pyx_t_3 = 0;
             __pyx_t_22 = __pyx_v_i;
             __pyx_t_21 = __pyx_v_j;
@@ -3001,11 +3002,11 @@ static PyObject *__pyx_pf_9tools21cm_16ViteBetti_cython_CubeMap(CYTHON_UNUSED Py
             } else if (unlikely(__pyx_t_20 >= __pyx_pybuffernd_cubemap.diminfo[2].shape)) __pyx_t_23 = 2;
             if (unlikely(__pyx_t_23 != -1)) {
               __Pyx_RaiseBufferIndexError(__pyx_t_23);
-              __PYX_ERR(0, 48, __pyx_L1_error)
+              __PYX_ERR(0, 49, __pyx_L1_error)
             }
             *__Pyx_BufPtrStrided3d(__pyx_t_5numpy_int_t *, __pyx_pybuffernd_cubemap.rcbuffer->pybuffer.buf, __pyx_t_22, __pyx_pybuffernd_cubemap.diminfo[0].strides, __pyx_t_21, __pyx_pybuffernd_cubemap.diminfo[1].strides, __pyx_t_20, __pyx_pybuffernd_cubemap.diminfo[2].strides) = __pyx_t_24;
 
-            /* "tools21cm/ViteBetti_cython.pyx":47
+            /* "tools21cm/ViteBetti_cython.pyx":48
  *             for k in range(Nz):
  *                 if cubemap[i, j, k] == 0:
  *                     if cubemap[(i - 1), j, k] == markers[1] and cubemap[(i + 1) % Nx, j, k] == markers[1] and cubemap[i, (j - 1), k] == markers[1] and cubemap[i, (j + 1) % Ny, k] == markers[1]:             # <<<<<<<<<<<<<<
@@ -3015,7 +3016,7 @@ static PyObject *__pyx_pf_9tools21cm_16ViteBetti_cython_CubeMap(CYTHON_UNUSED Py
             goto __pyx_L32;
           }
 
-          /* "tools21cm/ViteBetti_cython.pyx":49
+          /* "tools21cm/ViteBetti_cython.pyx":50
  *                     if cubemap[(i - 1), j, k] == markers[1] and cubemap[(i + 1) % Nx, j, k] == markers[1] and cubemap[i, (j - 1), k] == markers[1] and cubemap[i, (j + 1) % Ny, k] == markers[1]:
  *                         cubemap[i, j, k] = markers[2]
  *                     elif cubemap[i, (j - 1), k] == markers[1] and cubemap[i, (j + 1) % Ny, k] == markers[1] and cubemap[i, j, (k - 1)] == markers[1] and cubemap[i, j, (k + 1) % Nz] == markers[1]:             # <<<<<<<<<<<<<<
@@ -3040,16 +3041,16 @@ static PyObject *__pyx_pf_9tools21cm_16ViteBetti_cython_CubeMap(CYTHON_UNUSED Py
           } else if (unlikely(__pyx_t_22 >= __pyx_pybuffernd_cubemap.diminfo[2].shape)) __pyx_t_23 = 2;
           if (unlikely(__pyx_t_23 != -1)) {
             __Pyx_RaiseBufferIndexError(__pyx_t_23);
-            __PYX_ERR(0, 49, __pyx_L1_error)
+            __PYX_ERR(0, 50, __pyx_L1_error)
           }
-          __pyx_t_3 = __Pyx_PyInt_From_npy_long((*__Pyx_BufPtrStrided3d(__pyx_t_5numpy_int_t *, __pyx_pybuffernd_cubemap.rcbuffer->pybuffer.buf, __pyx_t_20, __pyx_pybuffernd_cubemap.diminfo[0].strides, __pyx_t_21, __pyx_pybuffernd_cubemap.diminfo[1].strides, __pyx_t_22, __pyx_pybuffernd_cubemap.diminfo[2].strides))); if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 49, __pyx_L1_error)
+          __pyx_t_3 = __Pyx_PyInt_From_npy_long((*__Pyx_BufPtrStrided3d(__pyx_t_5numpy_int_t *, __pyx_pybuffernd_cubemap.rcbuffer->pybuffer.buf, __pyx_t_20, __pyx_pybuffernd_cubemap.diminfo[0].strides, __pyx_t_21, __pyx_pybuffernd_cubemap.diminfo[1].strides, __pyx_t_22, __pyx_pybuffernd_cubemap.diminfo[2].strides))); if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 50, __pyx_L1_error)
           __Pyx_GOTREF(__pyx_t_3);
-          __pyx_t_5 = __Pyx_GetItemInt_Tuple(__pyx_v_markers, 1, long, 1, __Pyx_PyInt_From_long, 0, 0, 1); if (unlikely(!__pyx_t_5)) __PYX_ERR(0, 49, __pyx_L1_error)
+          __pyx_t_5 = __Pyx_GetItemInt_Tuple(__pyx_v_markers, 1, long, 1, __Pyx_PyInt_From_long, 0, 0, 1); if (unlikely(!__pyx_t_5)) __PYX_ERR(0, 50, __pyx_L1_error)
           __Pyx_GOTREF(__pyx_t_5);
-          __pyx_t_4 = PyObject_RichCompare(__pyx_t_3, __pyx_t_5, Py_EQ); __Pyx_XGOTREF(__pyx_t_4); if (unlikely(!__pyx_t_4)) __PYX_ERR(0, 49, __pyx_L1_error)
+          __pyx_t_4 = PyObject_RichCompare(__pyx_t_3, __pyx_t_5, Py_EQ); __Pyx_XGOTREF(__pyx_t_4); if (unlikely(!__pyx_t_4)) __PYX_ERR(0, 50, __pyx_L1_error)
           __Pyx_DECREF(__pyx_t_3); __pyx_t_3 = 0;
           __Pyx_DECREF(__pyx_t_5); __pyx_t_5 = 0;
-          __pyx_t_25 = __Pyx_PyObject_IsTrue(__pyx_t_4); if (unlikely(__pyx_t_25 < 0)) __PYX_ERR(0, 49, __pyx_L1_error)
+          __pyx_t_25 = __Pyx_PyObject_IsTrue(__pyx_t_4); if (unlikely(__pyx_t_25 < 0)) __PYX_ERR(0, 50, __pyx_L1_error)
           __Pyx_DECREF(__pyx_t_4); __pyx_t_4 = 0;
           if (__pyx_t_25) {
           } else {
@@ -3059,7 +3060,7 @@ static PyObject *__pyx_pf_9tools21cm_16ViteBetti_cython_CubeMap(CYTHON_UNUSED Py
           __pyx_t_26 = (__pyx_v_j + 1);
           if (unlikely(__pyx_v_Ny == 0)) {
             PyErr_SetString(PyExc_ZeroDivisionError, "integer division or modulo by zero");
-            __PYX_ERR(0, 49, __pyx_L1_error)
+            __PYX_ERR(0, 50, __pyx_L1_error)
           }
           __pyx_t_22 = __pyx_v_i;
           __pyx_t_21 = __Pyx_mod_long(__pyx_t_26, __pyx_v_Ny);
@@ -3079,16 +3080,16 @@ static PyObject *__pyx_pf_9tools21cm_16ViteBetti_cython_CubeMap(CYTHON_UNUSED Py
           } else if (unlikely(__pyx_t_20 >= __pyx_pybuffernd_cubemap.diminfo[2].shape)) __pyx_t_23 = 2;
           if (unlikely(__pyx_t_23 != -1)) {
             __Pyx_RaiseBufferIndexError(__pyx_t_23);
-            __PYX_ERR(0, 49, __pyx_L1_error)
+            __PYX_ERR(0, 50, __pyx_L1_error)
           }
-          __pyx_t_4 = __Pyx_PyInt_From_npy_long((*__Pyx_BufPtrStrided3d(__pyx_t_5numpy_int_t *, __pyx_pybuffernd_cubemap.rcbuffer->pybuffer.buf, __pyx_t_22, __pyx_pybuffernd_cubemap.diminfo[0].strides, __pyx_t_21, __pyx_pybuffernd_cubemap.diminfo[1].strides, __pyx_t_20, __pyx_pybuffernd_cubemap.diminfo[2].strides))); if (unlikely(!__pyx_t_4)) __PYX_ERR(0, 49, __pyx_L1_error)
+          __pyx_t_4 = __Pyx_PyInt_From_npy_long((*__Pyx_BufPtrStrided3d(__pyx_t_5numpy_int_t *, __pyx_pybuffernd_cubemap.rcbuffer->pybuffer.buf, __pyx_t_22, __pyx_pybuffernd_cubemap.diminfo[0].strides, __pyx_t_21, __pyx_pybuffernd_cubemap.diminfo[1].strides, __pyx_t_20, __pyx_pybuffernd_cubemap.diminfo[2].strides))); if (unlikely(!__pyx_t_4)) __PYX_ERR(0, 50, __pyx_L1_error)
           __Pyx_GOTREF(__pyx_t_4);
-          __pyx_t_5 = __Pyx_GetItemInt_Tuple(__pyx_v_markers, 1, long, 1, __Pyx_PyInt_From_long, 0, 0, 1); if (unlikely(!__pyx_t_5)) __PYX_ERR(0, 49, __pyx_L1_error)
+          __pyx_t_5 = __Pyx_GetItemInt_Tuple(__pyx_v_markers, 1, long, 1, __Pyx_PyInt_From_long, 0, 0, 1); if (unlikely(!__pyx_t_5)) __PYX_ERR(0, 50, __pyx_L1_error)
           __Pyx_GOTREF(__pyx_t_5);
-          __pyx_t_3 = PyObject_RichCompare(__pyx_t_4, __pyx_t_5, Py_EQ); __Pyx_XGOTREF(__pyx_t_3); if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 49, __pyx_L1_error)
+          __pyx_t_3 = PyObject_RichCompare(__pyx_t_4, __pyx_t_5, Py_EQ); __Pyx_XGOTREF(__pyx_t_3); if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 50, __pyx_L1_error)
           __Pyx_DECREF(__pyx_t_4); __pyx_t_4 = 0;
           __Pyx_DECREF(__pyx_t_5); __pyx_t_5 = 0;
-          __pyx_t_25 = __Pyx_PyObject_IsTrue(__pyx_t_3); if (unlikely(__pyx_t_25 < 0)) __PYX_ERR(0, 49, __pyx_L1_error)
+          __pyx_t_25 = __Pyx_PyObject_IsTrue(__pyx_t_3); if (unlikely(__pyx_t_25 < 0)) __PYX_ERR(0, 50, __pyx_L1_error)
           __Pyx_DECREF(__pyx_t_3); __pyx_t_3 = 0;
           if (__pyx_t_25) {
           } else {
@@ -3113,16 +3114,16 @@ static PyObject *__pyx_pf_9tools21cm_16ViteBetti_cython_CubeMap(CYTHON_UNUSED Py
           } else if (unlikely(__pyx_t_22 >= __pyx_pybuffernd_cubemap.diminfo[2].shape)) __pyx_t_23 = 2;
           if (unlikely(__pyx_t_23 != -1)) {
             __Pyx_RaiseBufferIndexError(__pyx_t_23);
-            __PYX_ERR(0, 49, __pyx_L1_error)
+            __PYX_ERR(0, 50, __pyx_L1_error)
           }
-          __pyx_t_3 = __Pyx_PyInt_From_npy_long((*__Pyx_BufPtrStrided3d(__pyx_t_5numpy_int_t *, __pyx_pybuffernd_cubemap.rcbuffer->pybuffer.buf, __pyx_t_20, __pyx_pybuffernd_cubemap.diminfo[0].strides, __pyx_t_21, __pyx_pybuffernd_cubemap.diminfo[1].strides, __pyx_t_22, __pyx_pybuffernd_cubemap.diminfo[2].strides))); if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 49, __pyx_L1_error)
+          __pyx_t_3 = __Pyx_PyInt_From_npy_long((*__Pyx_BufPtrStrided3d(__pyx_t_5numpy_int_t *, __pyx_pybuffernd_cubemap.rcbuffer->pybuffer.buf, __pyx_t_20, __pyx_pybuffernd_cubemap.diminfo[0].strides, __pyx_t_21, __pyx_pybuffernd_cubemap.diminfo[1].strides, __pyx_t_22, __pyx_pybuffernd_cubemap.diminfo[2].strides))); if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 50, __pyx_L1_error)
           __Pyx_GOTREF(__pyx_t_3);
-          __pyx_t_5 = __Pyx_GetItemInt_Tuple(__pyx_v_markers, 1, long, 1, __Pyx_PyInt_From_long, 0, 0, 1); if (unlikely(!__pyx_t_5)) __PYX_ERR(0, 49, __pyx_L1_error)
+          __pyx_t_5 = __Pyx_GetItemInt_Tuple(__pyx_v_markers, 1, long, 1, __Pyx_PyInt_From_long, 0, 0, 1); if (unlikely(!__pyx_t_5)) __PYX_ERR(0, 50, __pyx_L1_error)
           __Pyx_GOTREF(__pyx_t_5);
-          __pyx_t_4 = PyObject_RichCompare(__pyx_t_3, __pyx_t_5, Py_EQ); __Pyx_XGOTREF(__pyx_t_4); if (unlikely(!__pyx_t_4)) __PYX_ERR(0, 49, __pyx_L1_error)
+          __pyx_t_4 = PyObject_RichCompare(__pyx_t_3, __pyx_t_5, Py_EQ); __Pyx_XGOTREF(__pyx_t_4); if (unlikely(!__pyx_t_4)) __PYX_ERR(0, 50, __pyx_L1_error)
           __Pyx_DECREF(__pyx_t_3); __pyx_t_3 = 0;
           __Pyx_DECREF(__pyx_t_5); __pyx_t_5 = 0;
-          __pyx_t_25 = __Pyx_PyObject_IsTrue(__pyx_t_4); if (unlikely(__pyx_t_25 < 0)) __PYX_ERR(0, 49, __pyx_L1_error)
+          __pyx_t_25 = __Pyx_PyObject_IsTrue(__pyx_t_4); if (unlikely(__pyx_t_25 < 0)) __PYX_ERR(0, 50, __pyx_L1_error)
           __Pyx_DECREF(__pyx_t_4); __pyx_t_4 = 0;
           if (__pyx_t_25) {
           } else {
@@ -3132,7 +3133,7 @@ static PyObject *__pyx_pf_9tools21cm_16ViteBetti_cython_CubeMap(CYTHON_UNUSED Py
           __pyx_t_26 = (__pyx_v_k + 1);
           if (unlikely(__pyx_v_Nz == 0)) {
             PyErr_SetString(PyExc_ZeroDivisionError, "integer division or modulo by zero");
-            __PYX_ERR(0, 49, __pyx_L1_error)
+            __PYX_ERR(0, 50, __pyx_L1_error)
           }
           __pyx_t_22 = __pyx_v_i;
           __pyx_t_21 = __pyx_v_j;
@@ -3152,31 +3153,31 @@ static PyObject *__pyx_pf_9tools21cm_16ViteBetti_cython_CubeMap(CYTHON_UNUSED Py
           } else if (unlikely(__pyx_t_20 >= __pyx_pybuffernd_cubemap.diminfo[2].shape)) __pyx_t_23 = 2;
           if (unlikely(__pyx_t_23 != -1)) {
             __Pyx_RaiseBufferIndexError(__pyx_t_23);
-            __PYX_ERR(0, 49, __pyx_L1_error)
+            __PYX_ERR(0, 50, __pyx_L1_error)
           }
-          __pyx_t_4 = __Pyx_PyInt_From_npy_long((*__Pyx_BufPtrStrided3d(__pyx_t_5numpy_int_t *, __pyx_pybuffernd_cubemap.rcbuffer->pybuffer.buf, __pyx_t_22, __pyx_pybuffernd_cubemap.diminfo[0].strides, __pyx_t_21, __pyx_pybuffernd_cubemap.diminfo[1].strides, __pyx_t_20, __pyx_pybuffernd_cubemap.diminfo[2].strides))); if (unlikely(!__pyx_t_4)) __PYX_ERR(0, 49, __pyx_L1_error)
+          __pyx_t_4 = __Pyx_PyInt_From_npy_long((*__Pyx_BufPtrStrided3d(__pyx_t_5numpy_int_t *, __pyx_pybuffernd_cubemap.rcbuffer->pybuffer.buf, __pyx_t_22, __pyx_pybuffernd_cubemap.diminfo[0].strides, __pyx_t_21, __pyx_pybuffernd_cubemap.diminfo[1].strides, __pyx_t_20, __pyx_pybuffernd_cubemap.diminfo[2].strides))); if (unlikely(!__pyx_t_4)) __PYX_ERR(0, 50, __pyx_L1_error)
           __Pyx_GOTREF(__pyx_t_4);
-          __pyx_t_5 = __Pyx_GetItemInt_Tuple(__pyx_v_markers, 1, long, 1, __Pyx_PyInt_From_long, 0, 0, 1); if (unlikely(!__pyx_t_5)) __PYX_ERR(0, 49, __pyx_L1_error)
+          __pyx_t_5 = __Pyx_GetItemInt_Tuple(__pyx_v_markers, 1, long, 1, __Pyx_PyInt_From_long, 0, 0, 1); if (unlikely(!__pyx_t_5)) __PYX_ERR(0, 50, __pyx_L1_error)
           __Pyx_GOTREF(__pyx_t_5);
-          __pyx_t_3 = PyObject_RichCompare(__pyx_t_4, __pyx_t_5, Py_EQ); __Pyx_XGOTREF(__pyx_t_3); if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 49, __pyx_L1_error)
+          __pyx_t_3 = PyObject_RichCompare(__pyx_t_4, __pyx_t_5, Py_EQ); __Pyx_XGOTREF(__pyx_t_3); if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 50, __pyx_L1_error)
           __Pyx_DECREF(__pyx_t_4); __pyx_t_4 = 0;
           __Pyx_DECREF(__pyx_t_5); __pyx_t_5 = 0;
-          __pyx_t_25 = __Pyx_PyObject_IsTrue(__pyx_t_3); if (unlikely(__pyx_t_25 < 0)) __PYX_ERR(0, 49, __pyx_L1_error)
+          __pyx_t_25 = __Pyx_PyObject_IsTrue(__pyx_t_3); if (unlikely(__pyx_t_25 < 0)) __PYX_ERR(0, 50, __pyx_L1_error)
           __Pyx_DECREF(__pyx_t_3); __pyx_t_3 = 0;
           __pyx_t_11 = __pyx_t_25;
           __pyx_L37_bool_binop_done:;
           if (__pyx_t_11) {
 
-            /* "tools21cm/ViteBetti_cython.pyx":50
+            /* "tools21cm/ViteBetti_cython.pyx":51
  *                         cubemap[i, j, k] = markers[2]
  *                     elif cubemap[i, (j - 1), k] == markers[1] and cubemap[i, (j + 1) % Ny, k] == markers[1] and cubemap[i, j, (k - 1)] == markers[1] and cubemap[i, j, (k + 1) % Nz] == markers[1]:
  *                         cubemap[i, j, k] = markers[2]             # <<<<<<<<<<<<<<
  *                     elif cubemap[i, j, (k - 1)] == markers[1] and cubemap[i, j, (k + 1) % Nz] == markers[1] and cubemap[(i - 1), j, k] == markers[1] and cubemap[(i + 1) % Nx, j, k] == markers[1]:
  *                         cubemap[i, j, k] = markers[2]
  */
-            __pyx_t_3 = __Pyx_GetItemInt_Tuple(__pyx_v_markers, 2, long, 1, __Pyx_PyInt_From_long, 0, 0, 1); if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 50, __pyx_L1_error)
+            __pyx_t_3 = __Pyx_GetItemInt_Tuple(__pyx_v_markers, 2, long, 1, __Pyx_PyInt_From_long, 0, 0, 1); if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 51, __pyx_L1_error)
             __Pyx_GOTREF(__pyx_t_3);
-            __pyx_t_24 = __Pyx_PyInt_As_npy_long(__pyx_t_3); if (unlikely((__pyx_t_24 == ((npy_long)-1)) && PyErr_Occurred())) __PYX_ERR(0, 50, __pyx_L1_error)
+            __pyx_t_24 = __Pyx_PyInt_As_npy_long(__pyx_t_3); if (unlikely((__pyx_t_24 == ((npy_long)-1)) && PyErr_Occurred())) __PYX_ERR(0, 51, __pyx_L1_error)
             __Pyx_DECREF(__pyx_t_3); __pyx_t_3 = 0;
             __pyx_t_20 = __pyx_v_i;
             __pyx_t_21 = __pyx_v_j;
@@ -3196,11 +3197,11 @@ static PyObject *__pyx_pf_9tools21cm_16ViteBetti_cython_CubeMap(CYTHON_UNUSED Py
             } else if (unlikely(__pyx_t_22 >= __pyx_pybuffernd_cubemap.diminfo[2].shape)) __pyx_t_23 = 2;
             if (unlikely(__pyx_t_23 != -1)) {
               __Pyx_RaiseBufferIndexError(__pyx_t_23);
-              __PYX_ERR(0, 50, __pyx_L1_error)
+              __PYX_ERR(0, 51, __pyx_L1_error)
             }
             *__Pyx_BufPtrStrided3d(__pyx_t_5numpy_int_t *, __pyx_pybuffernd_cubemap.rcbuffer->pybuffer.buf, __pyx_t_20, __pyx_pybuffernd_cubemap.diminfo[0].strides, __pyx_t_21, __pyx_pybuffernd_cubemap.diminfo[1].strides, __pyx_t_22, __pyx_pybuffernd_cubemap.diminfo[2].strides) = __pyx_t_24;
 
-            /* "tools21cm/ViteBetti_cython.pyx":49
+            /* "tools21cm/ViteBetti_cython.pyx":50
  *                     if cubemap[(i - 1), j, k] == markers[1] and cubemap[(i + 1) % Nx, j, k] == markers[1] and cubemap[i, (j - 1), k] == markers[1] and cubemap[i, (j + 1) % Ny, k] == markers[1]:
  *                         cubemap[i, j, k] = markers[2]
  *                     elif cubemap[i, (j - 1), k] == markers[1] and cubemap[i, (j + 1) % Ny, k] == markers[1] and cubemap[i, j, (k - 1)] == markers[1] and cubemap[i, j, (k + 1) % Nz] == markers[1]:             # <<<<<<<<<<<<<<
@@ -3210,7 +3211,7 @@ static PyObject *__pyx_pf_9tools21cm_16ViteBetti_cython_CubeMap(CYTHON_UNUSED Py
             goto __pyx_L32;
           }
 
-          /* "tools21cm/ViteBetti_cython.pyx":51
+          /* "tools21cm/ViteBetti_cython.pyx":52
  *                     elif cubemap[i, (j - 1), k] == markers[1] and cubemap[i, (j + 1) % Ny, k] == markers[1] and cubemap[i, j, (k - 1)] == markers[1] and cubemap[i, j, (k + 1) % Nz] == markers[1]:
  *                         cubemap[i, j, k] = markers[2]
  *                     elif cubemap[i, j, (k - 1)] == markers[1] and cubemap[i, j, (k + 1) % Nz] == markers[1] and cubemap[(i - 1), j, k] == markers[1] and cubemap[(i + 1) % Nx, j, k] == markers[1]:             # <<<<<<<<<<<<<<
@@ -3235,16 +3236,16 @@ static PyObject *__pyx_pf_9tools21cm_16ViteBetti_cython_CubeMap(CYTHON_UNUSED Py
           } else if (unlikely(__pyx_t_20 >= __pyx_pybuffernd_cubemap.diminfo[2].shape)) __pyx_t_23 = 2;
           if (unlikely(__pyx_t_23 != -1)) {
             __Pyx_RaiseBufferIndexError(__pyx_t_23);
-            __PYX_ERR(0, 51, __pyx_L1_error)
+            __PYX_ERR(0, 52, __pyx_L1_error)
           }
-          __pyx_t_3 = __Pyx_PyInt_From_npy_long((*__Pyx_BufPtrStrided3d(__pyx_t_5numpy_int_t *, __pyx_pybuffernd_cubemap.rcbuffer->pybuffer.buf, __pyx_t_22, __pyx_pybuffernd_cubemap.diminfo[0].strides, __pyx_t_21, __pyx_pybuffernd_cubemap.diminfo[1].strides, __pyx_t_20, __pyx_pybuffernd_cubemap.diminfo[2].strides))); if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 51, __pyx_L1_error)
+          __pyx_t_3 = __Pyx_PyInt_From_npy_long((*__Pyx_BufPtrStrided3d(__pyx_t_5numpy_int_t *, __pyx_pybuffernd_cubemap.rcbuffer->pybuffer.buf, __pyx_t_22, __pyx_pybuffernd_cubemap.diminfo[0].strides, __pyx_t_21, __pyx_pybuffernd_cubemap.diminfo[1].strides, __pyx_t_20, __pyx_pybuffernd_cubemap.diminfo[2].strides))); if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 52, __pyx_L1_error)
           __Pyx_GOTREF(__pyx_t_3);
-          __pyx_t_5 = __Pyx_GetItemInt_Tuple(__pyx_v_markers, 1, long, 1, __Pyx_PyInt_From_long, 0, 0, 1); if (unlikely(!__pyx_t_5)) __PYX_ERR(0, 51, __pyx_L1_error)
+          __pyx_t_5 = __Pyx_GetItemInt_Tuple(__pyx_v_markers, 1, long, 1, __Pyx_PyInt_From_long, 0, 0, 1); if (unlikely(!__pyx_t_5)) __PYX_ERR(0, 52, __pyx_L1_error)
           __Pyx_GOTREF(__pyx_t_5);
-          __pyx_t_4 = PyObject_RichCompare(__pyx_t_3, __pyx_t_5, Py_EQ); __Pyx_XGOTREF(__pyx_t_4); if (unlikely(!__pyx_t_4)) __PYX_ERR(0, 51, __pyx_L1_error)
+          __pyx_t_4 = PyObject_RichCompare(__pyx_t_3, __pyx_t_5, Py_EQ); __Pyx_XGOTREF(__pyx_t_4); if (unlikely(!__pyx_t_4)) __PYX_ERR(0, 52, __pyx_L1_error)
           __Pyx_DECREF(__pyx_t_3); __pyx_t_3 = 0;
           __Pyx_DECREF(__pyx_t_5); __pyx_t_5 = 0;
-          __pyx_t_25 = __Pyx_PyObject_IsTrue(__pyx_t_4); if (unlikely(__pyx_t_25 < 0)) __PYX_ERR(0, 51, __pyx_L1_error)
+          __pyx_t_25 = __Pyx_PyObject_IsTrue(__pyx_t_4); if (unlikely(__pyx_t_25 < 0)) __PYX_ERR(0, 52, __pyx_L1_error)
           __Pyx_DECREF(__pyx_t_4); __pyx_t_4 = 0;
           if (__pyx_t_25) {
           } else {
@@ -3254,7 +3255,7 @@ static PyObject *__pyx_pf_9tools21cm_16ViteBetti_cython_CubeMap(CYTHON_UNUSED Py
           __pyx_t_26 = (__pyx_v_k + 1);
           if (unlikely(__pyx_v_Nz == 0)) {
             PyErr_SetString(PyExc_ZeroDivisionError, "integer division or modulo by zero");
-            __PYX_ERR(0, 51, __pyx_L1_error)
+            __PYX_ERR(0, 52, __pyx_L1_error)
           }
           __pyx_t_20 = __pyx_v_i;
           __pyx_t_21 = __pyx_v_j;
@@ -3274,16 +3275,16 @@ static PyObject *__pyx_pf_9tools21cm_16ViteBetti_cython_CubeMap(CYTHON_UNUSED Py
           } else if (unlikely(__pyx_t_22 >= __pyx_pybuffernd_cubemap.diminfo[2].shape)) __pyx_t_23 = 2;
           if (unlikely(__pyx_t_23 != -1)) {
             __Pyx_RaiseBufferIndexError(__pyx_t_23);
-            __PYX_ERR(0, 51, __pyx_L1_error)
+            __PYX_ERR(0, 52, __pyx_L1_error)
           }
-          __pyx_t_4 = __Pyx_PyInt_From_npy_long((*__Pyx_BufPtrStrided3d(__pyx_t_5numpy_int_t *, __pyx_pybuffernd_cubemap.rcbuffer->pybuffer.buf, __pyx_t_20, __pyx_pybuffernd_cubemap.diminfo[0].strides, __pyx_t_21, __pyx_pybuffernd_cubemap.diminfo[1].strides, __pyx_t_22, __pyx_pybuffernd_cubemap.diminfo[2].strides))); if (unlikely(!__pyx_t_4)) __PYX_ERR(0, 51, __pyx_L1_error)
+          __pyx_t_4 = __Pyx_PyInt_From_npy_long((*__Pyx_BufPtrStrided3d(__pyx_t_5numpy_int_t *, __pyx_pybuffernd_cubemap.rcbuffer->pybuffer.buf, __pyx_t_20, __pyx_pybuffernd_cubemap.diminfo[0].strides, __pyx_t_21, __pyx_pybuffernd_cubemap.diminfo[1].strides, __pyx_t_22, __pyx_pybuffernd_cubemap.diminfo[2].strides))); if (unlikely(!__pyx_t_4)) __PYX_ERR(0, 52, __pyx_L1_error)
           __Pyx_GOTREF(__pyx_t_4);
-          __pyx_t_5 = __Pyx_GetItemInt_Tuple(__pyx_v_markers, 1, long, 1, __Pyx_PyInt_From_long, 0, 0, 1); if (unlikely(!__pyx_t_5)) __PYX_ERR(0, 51, __pyx_L1_error)
+          __pyx_t_5 = __Pyx_GetItemInt_Tuple(__pyx_v_markers, 1, long, 1, __Pyx_PyInt_From_long, 0, 0, 1); if (unlikely(!__pyx_t_5)) __PYX_ERR(0, 52, __pyx_L1_error)
           __Pyx_GOTREF(__pyx_t_5);
-          __pyx_t_3 = PyObject_RichCompare(__pyx_t_4, __pyx_t_5, Py_EQ); __Pyx_XGOTREF(__pyx_t_3); if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 51, __pyx_L1_error)
+          __pyx_t_3 = PyObject_RichCompare(__pyx_t_4, __pyx_t_5, Py_EQ); __Pyx_XGOTREF(__pyx_t_3); if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 52, __pyx_L1_error)
           __Pyx_DECREF(__pyx_t_4); __pyx_t_4 = 0;
           __Pyx_DECREF(__pyx_t_5); __pyx_t_5 = 0;
-          __pyx_t_25 = __Pyx_PyObject_IsTrue(__pyx_t_3); if (unlikely(__pyx_t_25 < 0)) __PYX_ERR(0, 51, __pyx_L1_error)
+          __pyx_t_25 = __Pyx_PyObject_IsTrue(__pyx_t_3); if (unlikely(__pyx_t_25 < 0)) __PYX_ERR(0, 52, __pyx_L1_error)
           __Pyx_DECREF(__pyx_t_3); __pyx_t_3 = 0;
           if (__pyx_t_25) {
           } else {
@@ -3308,16 +3309,16 @@ static PyObject *__pyx_pf_9tools21cm_16ViteBetti_cython_CubeMap(CYTHON_UNUSED Py
           } else if (unlikely(__pyx_t_20 >= __pyx_pybuffernd_cubemap.diminfo[2].shape)) __pyx_t_23 = 2;
           if (unlikely(__pyx_t_23 != -1)) {
             __Pyx_RaiseBufferIndexError(__pyx_t_23);
-            __PYX_ERR(0, 51, __pyx_L1_error)
+            __PYX_ERR(0, 52, __pyx_L1_error)
           }
-          __pyx_t_3 = __Pyx_PyInt_From_npy_long((*__Pyx_BufPtrStrided3d(__pyx_t_5numpy_int_t *, __pyx_pybuffernd_cubemap.rcbuffer->pybuffer.buf, __pyx_t_22, __pyx_pybuffernd_cubemap.diminfo[0].strides, __pyx_t_21, __pyx_pybuffernd_cubemap.diminfo[1].strides, __pyx_t_20, __pyx_pybuffernd_cubemap.diminfo[2].strides))); if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 51, __pyx_L1_error)
+          __pyx_t_3 = __Pyx_PyInt_From_npy_long((*__Pyx_BufPtrStrided3d(__pyx_t_5numpy_int_t *, __pyx_pybuffernd_cubemap.rcbuffer->pybuffer.buf, __pyx_t_22, __pyx_pybuffernd_cubemap.diminfo[0].strides, __pyx_t_21, __pyx_pybuffernd_cubemap.diminfo[1].strides, __pyx_t_20, __pyx_pybuffernd_cubemap.diminfo[2].strides))); if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 52, __pyx_L1_error)
           __Pyx_GOTREF(__pyx_t_3);
-          __pyx_t_5 = __Pyx_GetItemInt_Tuple(__pyx_v_markers, 1, long, 1, __Pyx_PyInt_From_long, 0, 0, 1); if (unlikely(!__pyx_t_5)) __PYX_ERR(0, 51, __pyx_L1_error)
+          __pyx_t_5 = __Pyx_GetItemInt_Tuple(__pyx_v_markers, 1, long, 1, __Pyx_PyInt_From_long, 0, 0, 1); if (unlikely(!__pyx_t_5)) __PYX_ERR(0, 52, __pyx_L1_error)
           __Pyx_GOTREF(__pyx_t_5);
-          __pyx_t_4 = PyObject_RichCompare(__pyx_t_3, __pyx_t_5, Py_EQ); __Pyx_XGOTREF(__pyx_t_4); if (unlikely(!__pyx_t_4)) __PYX_ERR(0, 51, __pyx_L1_error)
+          __pyx_t_4 = PyObject_RichCompare(__pyx_t_3, __pyx_t_5, Py_EQ); __Pyx_XGOTREF(__pyx_t_4); if (unlikely(!__pyx_t_4)) __PYX_ERR(0, 52, __pyx_L1_error)
           __Pyx_DECREF(__pyx_t_3); __pyx_t_3 = 0;
           __Pyx_DECREF(__pyx_t_5); __pyx_t_5 = 0;
-          __pyx_t_25 = __Pyx_PyObject_IsTrue(__pyx_t_4); if (unlikely(__pyx_t_25 < 0)) __PYX_ERR(0, 51, __pyx_L1_error)
+          __pyx_t_25 = __Pyx_PyObject_IsTrue(__pyx_t_4); if (unlikely(__pyx_t_25 < 0)) __PYX_ERR(0, 52, __pyx_L1_error)
           __Pyx_DECREF(__pyx_t_4); __pyx_t_4 = 0;
           if (__pyx_t_25) {
           } else {
@@ -3327,7 +3328,7 @@ static PyObject *__pyx_pf_9tools21cm_16ViteBetti_cython_CubeMap(CYTHON_UNUSED Py
           __pyx_t_26 = (__pyx_v_i + 1);
           if (unlikely(__pyx_v_Nx == 0)) {
             PyErr_SetString(PyExc_ZeroDivisionError, "integer division or modulo by zero");
-            __PYX_ERR(0, 51, __pyx_L1_error)
+            __PYX_ERR(0, 52, __pyx_L1_error)
           }
           __pyx_t_20 = __Pyx_mod_long(__pyx_t_26, __pyx_v_Nx);
           __pyx_t_21 = __pyx_v_j;
@@ -3347,31 +3348,31 @@ static PyObject *__pyx_pf_9tools21cm_16ViteBetti_cython_CubeMap(CYTHON_UNUSED Py
           } else if (unlikely(__pyx_t_22 >= __pyx_pybuffernd_cubemap.diminfo[2].shape)) __pyx_t_23 = 2;
           if (unlikely(__pyx_t_23 != -1)) {
             __Pyx_RaiseBufferIndexError(__pyx_t_23);
-            __PYX_ERR(0, 51, __pyx_L1_error)
+            __PYX_ERR(0, 52, __pyx_L1_error)
           }
-          __pyx_t_4 = __Pyx_PyInt_From_npy_long((*__Pyx_BufPtrStrided3d(__pyx_t_5numpy_int_t *, __pyx_pybuffernd_cubemap.rcbuffer->pybuffer.buf, __pyx_t_20, __pyx_pybuffernd_cubemap.diminfo[0].strides, __pyx_t_21, __pyx_pybuffernd_cubemap.diminfo[1].strides, __pyx_t_22, __pyx_pybuffernd_cubemap.diminfo[2].strides))); if (unlikely(!__pyx_t_4)) __PYX_ERR(0, 51, __pyx_L1_error)
+          __pyx_t_4 = __Pyx_PyInt_From_npy_long((*__Pyx_BufPtrStrided3d(__pyx_t_5numpy_int_t *, __pyx_pybuffernd_cubemap.rcbuffer->pybuffer.buf, __pyx_t_20, __pyx_pybuffernd_cubemap.diminfo[0].strides, __pyx_t_21, __pyx_pybuffernd_cubemap.diminfo[1].strides, __pyx_t_22, __pyx_pybuffernd_cubemap.diminfo[2].strides))); if (unlikely(!__pyx_t_4)) __PYX_ERR(0, 52, __pyx_L1_error)
           __Pyx_GOTREF(__pyx_t_4);
-          __pyx_t_5 = __Pyx_GetItemInt_Tuple(__pyx_v_markers, 1, long, 1, __Pyx_PyInt_From_long, 0, 0, 1); if (unlikely(!__pyx_t_5)) __PYX_ERR(0, 51, __pyx_L1_error)
+          __pyx_t_5 = __Pyx_GetItemInt_Tuple(__pyx_v_markers, 1, long, 1, __Pyx_PyInt_From_long, 0, 0, 1); if (unlikely(!__pyx_t_5)) __PYX_ERR(0, 52, __pyx_L1_error)
           __Pyx_GOTREF(__pyx_t_5);
-          __pyx_t_3 = PyObject_RichCompare(__pyx_t_4, __pyx_t_5, Py_EQ); __Pyx_XGOTREF(__pyx_t_3); if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 51, __pyx_L1_error)
+          __pyx_t_3 = PyObject_RichCompare(__pyx_t_4, __pyx_t_5, Py_EQ); __Pyx_XGOTREF(__pyx_t_3); if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 52, __pyx_L1_error)
           __Pyx_DECREF(__pyx_t_4); __pyx_t_4 = 0;
           __Pyx_DECREF(__pyx_t_5); __pyx_t_5 = 0;
-          __pyx_t_25 = __Pyx_PyObject_IsTrue(__pyx_t_3); if (unlikely(__pyx_t_25 < 0)) __PYX_ERR(0, 51, __pyx_L1_error)
+          __pyx_t_25 = __Pyx_PyObject_IsTrue(__pyx_t_3); if (unlikely(__pyx_t_25 < 0)) __PYX_ERR(0, 52, __pyx_L1_error)
           __Pyx_DECREF(__pyx_t_3); __pyx_t_3 = 0;
           __pyx_t_11 = __pyx_t_25;
           __pyx_L41_bool_binop_done:;
           if (__pyx_t_11) {
 
-            /* "tools21cm/ViteBetti_cython.pyx":52
+            /* "tools21cm/ViteBetti_cython.pyx":53
  *                         cubemap[i, j, k] = markers[2]
  *                     elif cubemap[i, j, (k - 1)] == markers[1] and cubemap[i, j, (k + 1) % Nz] == markers[1] and cubemap[(i - 1), j, k] == markers[1] and cubemap[(i + 1) % Nx, j, k] == markers[1]:
  *                         cubemap[i, j, k] = markers[2]             # <<<<<<<<<<<<<<
  * 
  *     # Cubes
  */
-            __pyx_t_3 = __Pyx_GetItemInt_Tuple(__pyx_v_markers, 2, long, 1, __Pyx_PyInt_From_long, 0, 0, 1); if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 52, __pyx_L1_error)
+            __pyx_t_3 = __Pyx_GetItemInt_Tuple(__pyx_v_markers, 2, long, 1, __Pyx_PyInt_From_long, 0, 0, 1); if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 53, __pyx_L1_error)
             __Pyx_GOTREF(__pyx_t_3);
-            __pyx_t_24 = __Pyx_PyInt_As_npy_long(__pyx_t_3); if (unlikely((__pyx_t_24 == ((npy_long)-1)) && PyErr_Occurred())) __PYX_ERR(0, 52, __pyx_L1_error)
+            __pyx_t_24 = __Pyx_PyInt_As_npy_long(__pyx_t_3); if (unlikely((__pyx_t_24 == ((npy_long)-1)) && PyErr_Occurred())) __PYX_ERR(0, 53, __pyx_L1_error)
             __Pyx_DECREF(__pyx_t_3); __pyx_t_3 = 0;
             __pyx_t_22 = __pyx_v_i;
             __pyx_t_21 = __pyx_v_j;
@@ -3391,11 +3392,11 @@ static PyObject *__pyx_pf_9tools21cm_16ViteBetti_cython_CubeMap(CYTHON_UNUSED Py
             } else if (unlikely(__pyx_t_20 >= __pyx_pybuffernd_cubemap.diminfo[2].shape)) __pyx_t_23 = 2;
             if (unlikely(__pyx_t_23 != -1)) {
               __Pyx_RaiseBufferIndexError(__pyx_t_23);
-              __PYX_ERR(0, 52, __pyx_L1_error)
+              __PYX_ERR(0, 53, __pyx_L1_error)
             }
             *__Pyx_BufPtrStrided3d(__pyx_t_5numpy_int_t *, __pyx_pybuffernd_cubemap.rcbuffer->pybuffer.buf, __pyx_t_22, __pyx_pybuffernd_cubemap.diminfo[0].strides, __pyx_t_21, __pyx_pybuffernd_cubemap.diminfo[1].strides, __pyx_t_20, __pyx_pybuffernd_cubemap.diminfo[2].strides) = __pyx_t_24;
 
-            /* "tools21cm/ViteBetti_cython.pyx":51
+            /* "tools21cm/ViteBetti_cython.pyx":52
  *                     elif cubemap[i, (j - 1), k] == markers[1] and cubemap[i, (j + 1) % Ny, k] == markers[1] and cubemap[i, j, (k - 1)] == markers[1] and cubemap[i, j, (k + 1) % Nz] == markers[1]:
  *                         cubemap[i, j, k] = markers[2]
  *                     elif cubemap[i, j, (k - 1)] == markers[1] and cubemap[i, j, (k + 1) % Nz] == markers[1] and cubemap[(i - 1), j, k] == markers[1] and cubemap[(i + 1) % Nx, j, k] == markers[1]:             # <<<<<<<<<<<<<<
@@ -3405,7 +3406,7 @@ static PyObject *__pyx_pf_9tools21cm_16ViteBetti_cython_CubeMap(CYTHON_UNUSED Py
           }
           __pyx_L32:;
 
-          /* "tools21cm/ViteBetti_cython.pyx":46
+          /* "tools21cm/ViteBetti_cython.pyx":47
  *         for j in range(Ny):
  *             for k in range(Nz):
  *                 if cubemap[i, j, k] == 0:             # <<<<<<<<<<<<<<
@@ -3417,7 +3418,7 @@ static PyObject *__pyx_pf_9tools21cm_16ViteBetti_cython_CubeMap(CYTHON_UNUSED Py
     }
   }
 
-  /* "tools21cm/ViteBetti_cython.pyx":55
+  /* "tools21cm/ViteBetti_cython.pyx":56
  * 
  *     # Cubes
  *     for i in range(Nx):             # <<<<<<<<<<<<<<
@@ -3429,7 +3430,7 @@ static PyObject *__pyx_pf_9tools21cm_16ViteBetti_cython_CubeMap(CYTHON_UNUSED Py
   for (__pyx_t_13 = 0; __pyx_t_13 < __pyx_t_12; __pyx_t_13+=1) {
     __pyx_v_i = __pyx_t_13;
 
-    /* "tools21cm/ViteBetti_cython.pyx":56
+    /* "tools21cm/ViteBetti_cython.pyx":57
  *     # Cubes
  *     for i in range(Nx):
  *         for j in range(Ny):             # <<<<<<<<<<<<<<
@@ -3441,7 +3442,7 @@ static PyObject *__pyx_pf_9tools21cm_16ViteBetti_cython_CubeMap(CYTHON_UNUSED Py
     for (__pyx_t_16 = 0; __pyx_t_16 < __pyx_t_15; __pyx_t_16+=1) {
       __pyx_v_j = __pyx_t_16;
 
-      /* "tools21cm/ViteBetti_cython.pyx":57
+      /* "tools21cm/ViteBetti_cython.pyx":58
  *     for i in range(Nx):
  *         for j in range(Ny):
  *             for k in range(Nz):             # <<<<<<<<<<<<<<
@@ -3453,7 +3454,7 @@ static PyObject *__pyx_pf_9tools21cm_16ViteBetti_cython_CubeMap(CYTHON_UNUSED Py
       for (__pyx_t_19 = 0; __pyx_t_19 < __pyx_t_18; __pyx_t_19+=1) {
         __pyx_v_k = __pyx_t_19;
 
-        /* "tools21cm/ViteBetti_cython.pyx":58
+        /* "tools21cm/ViteBetti_cython.pyx":59
  *         for j in range(Ny):
  *             for k in range(Nz):
  *                 if cubemap[i, j, k] == 0:             # <<<<<<<<<<<<<<
@@ -3478,12 +3479,12 @@ static PyObject *__pyx_pf_9tools21cm_16ViteBetti_cython_CubeMap(CYTHON_UNUSED Py
         } else if (unlikely(__pyx_t_22 >= __pyx_pybuffernd_cubemap.diminfo[2].shape)) __pyx_t_23 = 2;
         if (unlikely(__pyx_t_23 != -1)) {
           __Pyx_RaiseBufferIndexError(__pyx_t_23);
-          __PYX_ERR(0, 58, __pyx_L1_error)
+          __PYX_ERR(0, 59, __pyx_L1_error)
         }
         __pyx_t_11 = (((*__Pyx_BufPtrStrided3d(__pyx_t_5numpy_int_t *, __pyx_pybuffernd_cubemap.rcbuffer->pybuffer.buf, __pyx_t_20, __pyx_pybuffernd_cubemap.diminfo[0].strides, __pyx_t_21, __pyx_pybuffernd_cubemap.diminfo[1].strides, __pyx_t_22, __pyx_pybuffernd_cubemap.diminfo[2].strides)) == 0) != 0);
         if (__pyx_t_11) {
 
-          /* "tools21cm/ViteBetti_cython.pyx":59
+          /* "tools21cm/ViteBetti_cython.pyx":60
  *             for k in range(Nz):
  *                 if cubemap[i, j, k] == 0:
  *                     if cubemap[(i - 1), j, k] == markers[2] and cubemap[(i + 1) % Nx, j, k] == markers[2]:             # <<<<<<<<<<<<<<
@@ -3508,16 +3509,16 @@ static PyObject *__pyx_pf_9tools21cm_16ViteBetti_cython_CubeMap(CYTHON_UNUSED Py
           } else if (unlikely(__pyx_t_20 >= __pyx_pybuffernd_cubemap.diminfo[2].shape)) __pyx_t_23 = 2;
           if (unlikely(__pyx_t_23 != -1)) {
             __Pyx_RaiseBufferIndexError(__pyx_t_23);
-            __PYX_ERR(0, 59, __pyx_L1_error)
+            __PYX_ERR(0, 60, __pyx_L1_error)
           }
-          __pyx_t_3 = __Pyx_PyInt_From_npy_long((*__Pyx_BufPtrStrided3d(__pyx_t_5numpy_int_t *, __pyx_pybuffernd_cubemap.rcbuffer->pybuffer.buf, __pyx_t_22, __pyx_pybuffernd_cubemap.diminfo[0].strides, __pyx_t_21, __pyx_pybuffernd_cubemap.diminfo[1].strides, __pyx_t_20, __pyx_pybuffernd_cubemap.diminfo[2].strides))); if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 59, __pyx_L1_error)
+          __pyx_t_3 = __Pyx_PyInt_From_npy_long((*__Pyx_BufPtrStrided3d(__pyx_t_5numpy_int_t *, __pyx_pybuffernd_cubemap.rcbuffer->pybuffer.buf, __pyx_t_22, __pyx_pybuffernd_cubemap.diminfo[0].strides, __pyx_t_21, __pyx_pybuffernd_cubemap.diminfo[1].strides, __pyx_t_20, __pyx_pybuffernd_cubemap.diminfo[2].strides))); if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 60, __pyx_L1_error)
           __Pyx_GOTREF(__pyx_t_3);
-          __pyx_t_5 = __Pyx_GetItemInt_Tuple(__pyx_v_markers, 2, long, 1, __Pyx_PyInt_From_long, 0, 0, 1); if (unlikely(!__pyx_t_5)) __PYX_ERR(0, 59, __pyx_L1_error)
+          __pyx_t_5 = __Pyx_GetItemInt_Tuple(__pyx_v_markers, 2, long, 1, __Pyx_PyInt_From_long, 0, 0, 1); if (unlikely(!__pyx_t_5)) __PYX_ERR(0, 60, __pyx_L1_error)
           __Pyx_GOTREF(__pyx_t_5);
-          __pyx_t_4 = PyObject_RichCompare(__pyx_t_3, __pyx_t_5, Py_EQ); __Pyx_XGOTREF(__pyx_t_4); if (unlikely(!__pyx_t_4)) __PYX_ERR(0, 59, __pyx_L1_error)
+          __pyx_t_4 = PyObject_RichCompare(__pyx_t_3, __pyx_t_5, Py_EQ); __Pyx_XGOTREF(__pyx_t_4); if (unlikely(!__pyx_t_4)) __PYX_ERR(0, 60, __pyx_L1_error)
           __Pyx_DECREF(__pyx_t_3); __pyx_t_3 = 0;
           __Pyx_DECREF(__pyx_t_5); __pyx_t_5 = 0;
-          __pyx_t_25 = __Pyx_PyObject_IsTrue(__pyx_t_4); if (unlikely(__pyx_t_25 < 0)) __PYX_ERR(0, 59, __pyx_L1_error)
+          __pyx_t_25 = __Pyx_PyObject_IsTrue(__pyx_t_4); if (unlikely(__pyx_t_25 < 0)) __PYX_ERR(0, 60, __pyx_L1_error)
           __Pyx_DECREF(__pyx_t_4); __pyx_t_4 = 0;
           if (__pyx_t_25) {
           } else {
@@ -3527,7 +3528,7 @@ static PyObject *__pyx_pf_9tools21cm_16ViteBetti_cython_CubeMap(CYTHON_UNUSED Py
           __pyx_t_26 = (__pyx_v_i + 1);
           if (unlikely(__pyx_v_Nx == 0)) {
             PyErr_SetString(PyExc_ZeroDivisionError, "integer division or modulo by zero");
-            __PYX_ERR(0, 59, __pyx_L1_error)
+            __PYX_ERR(0, 60, __pyx_L1_error)
           }
           __pyx_t_20 = __Pyx_mod_long(__pyx_t_26, __pyx_v_Nx);
           __pyx_t_21 = __pyx_v_j;
@@ -3547,22 +3548,22 @@ static PyObject *__pyx_pf_9tools21cm_16ViteBetti_cython_CubeMap(CYTHON_UNUSED Py
           } else if (unlikely(__pyx_t_22 >= __pyx_pybuffernd_cubemap.diminfo[2].shape)) __pyx_t_23 = 2;
           if (unlikely(__pyx_t_23 != -1)) {
             __Pyx_RaiseBufferIndexError(__pyx_t_23);
-            __PYX_ERR(0, 59, __pyx_L1_error)
+            __PYX_ERR(0, 60, __pyx_L1_error)
           }
-          __pyx_t_4 = __Pyx_PyInt_From_npy_long((*__Pyx_BufPtrStrided3d(__pyx_t_5numpy_int_t *, __pyx_pybuffernd_cubemap.rcbuffer->pybuffer.buf, __pyx_t_20, __pyx_pybuffernd_cubemap.diminfo[0].strides, __pyx_t_21, __pyx_pybuffernd_cubemap.diminfo[1].strides, __pyx_t_22, __pyx_pybuffernd_cubemap.diminfo[2].strides))); if (unlikely(!__pyx_t_4)) __PYX_ERR(0, 59, __pyx_L1_error)
+          __pyx_t_4 = __Pyx_PyInt_From_npy_long((*__Pyx_BufPtrStrided3d(__pyx_t_5numpy_int_t *, __pyx_pybuffernd_cubemap.rcbuffer->pybuffer.buf, __pyx_t_20, __pyx_pybuffernd_cubemap.diminfo[0].strides, __pyx_t_21, __pyx_pybuffernd_cubemap.diminfo[1].strides, __pyx_t_22, __pyx_pybuffernd_cubemap.diminfo[2].strides))); if (unlikely(!__pyx_t_4)) __PYX_ERR(0, 60, __pyx_L1_error)
           __Pyx_GOTREF(__pyx_t_4);
-          __pyx_t_5 = __Pyx_GetItemInt_Tuple(__pyx_v_markers, 2, long, 1, __Pyx_PyInt_From_long, 0, 0, 1); if (unlikely(!__pyx_t_5)) __PYX_ERR(0, 59, __pyx_L1_error)
+          __pyx_t_5 = __Pyx_GetItemInt_Tuple(__pyx_v_markers, 2, long, 1, __Pyx_PyInt_From_long, 0, 0, 1); if (unlikely(!__pyx_t_5)) __PYX_ERR(0, 60, __pyx_L1_error)
           __Pyx_GOTREF(__pyx_t_5);
-          __pyx_t_3 = PyObject_RichCompare(__pyx_t_4, __pyx_t_5, Py_EQ); __Pyx_XGOTREF(__pyx_t_3); if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 59, __pyx_L1_error)
+          __pyx_t_3 = PyObject_RichCompare(__pyx_t_4, __pyx_t_5, Py_EQ); __Pyx_XGOTREF(__pyx_t_3); if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 60, __pyx_L1_error)
           __Pyx_DECREF(__pyx_t_4); __pyx_t_4 = 0;
           __Pyx_DECREF(__pyx_t_5); __pyx_t_5 = 0;
-          __pyx_t_25 = __Pyx_PyObject_IsTrue(__pyx_t_3); if (unlikely(__pyx_t_25 < 0)) __PYX_ERR(0, 59, __pyx_L1_error)
+          __pyx_t_25 = __Pyx_PyObject_IsTrue(__pyx_t_3); if (unlikely(__pyx_t_25 < 0)) __PYX_ERR(0, 60, __pyx_L1_error)
           __Pyx_DECREF(__pyx_t_3); __pyx_t_3 = 0;
           __pyx_t_11 = __pyx_t_25;
           __pyx_L53_bool_binop_done:;
           if (__pyx_t_11) {
 
-            /* "tools21cm/ViteBetti_cython.pyx":60
+            /* "tools21cm/ViteBetti_cython.pyx":61
  *                 if cubemap[i, j, k] == 0:
  *                     if cubemap[(i - 1), j, k] == markers[2] and cubemap[(i + 1) % Nx, j, k] == markers[2]:
  *                         if cubemap[i, (j - 1), k] == markers[2] and cubemap[i, (j + 1) % Ny, k] == markers[2]:             # <<<<<<<<<<<<<<
@@ -3587,16 +3588,16 @@ static PyObject *__pyx_pf_9tools21cm_16ViteBetti_cython_CubeMap(CYTHON_UNUSED Py
             } else if (unlikely(__pyx_t_20 >= __pyx_pybuffernd_cubemap.diminfo[2].shape)) __pyx_t_23 = 2;
             if (unlikely(__pyx_t_23 != -1)) {
               __Pyx_RaiseBufferIndexError(__pyx_t_23);
-              __PYX_ERR(0, 60, __pyx_L1_error)
+              __PYX_ERR(0, 61, __pyx_L1_error)
             }
-            __pyx_t_3 = __Pyx_PyInt_From_npy_long((*__Pyx_BufPtrStrided3d(__pyx_t_5numpy_int_t *, __pyx_pybuffernd_cubemap.rcbuffer->pybuffer.buf, __pyx_t_22, __pyx_pybuffernd_cubemap.diminfo[0].strides, __pyx_t_21, __pyx_pybuffernd_cubemap.diminfo[1].strides, __pyx_t_20, __pyx_pybuffernd_cubemap.diminfo[2].strides))); if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 60, __pyx_L1_error)
+            __pyx_t_3 = __Pyx_PyInt_From_npy_long((*__Pyx_BufPtrStrided3d(__pyx_t_5numpy_int_t *, __pyx_pybuffernd_cubemap.rcbuffer->pybuffer.buf, __pyx_t_22, __pyx_pybuffernd_cubemap.diminfo[0].strides, __pyx_t_21, __pyx_pybuffernd_cubemap.diminfo[1].strides, __pyx_t_20, __pyx_pybuffernd_cubemap.diminfo[2].strides))); if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 61, __pyx_L1_error)
             __Pyx_GOTREF(__pyx_t_3);
-            __pyx_t_5 = __Pyx_GetItemInt_Tuple(__pyx_v_markers, 2, long, 1, __Pyx_PyInt_From_long, 0, 0, 1); if (unlikely(!__pyx_t_5)) __PYX_ERR(0, 60, __pyx_L1_error)
+            __pyx_t_5 = __Pyx_GetItemInt_Tuple(__pyx_v_markers, 2, long, 1, __Pyx_PyInt_From_long, 0, 0, 1); if (unlikely(!__pyx_t_5)) __PYX_ERR(0, 61, __pyx_L1_error)
             __Pyx_GOTREF(__pyx_t_5);
-            __pyx_t_4 = PyObject_RichCompare(__pyx_t_3, __pyx_t_5, Py_EQ); __Pyx_XGOTREF(__pyx_t_4); if (unlikely(!__pyx_t_4)) __PYX_ERR(0, 60, __pyx_L1_error)
+            __pyx_t_4 = PyObject_RichCompare(__pyx_t_3, __pyx_t_5, Py_EQ); __Pyx_XGOTREF(__pyx_t_4); if (unlikely(!__pyx_t_4)) __PYX_ERR(0, 61, __pyx_L1_error)
             __Pyx_DECREF(__pyx_t_3); __pyx_t_3 = 0;
             __Pyx_DECREF(__pyx_t_5); __pyx_t_5 = 0;
-            __pyx_t_25 = __Pyx_PyObject_IsTrue(__pyx_t_4); if (unlikely(__pyx_t_25 < 0)) __PYX_ERR(0, 60, __pyx_L1_error)
+            __pyx_t_25 = __Pyx_PyObject_IsTrue(__pyx_t_4); if (unlikely(__pyx_t_25 < 0)) __PYX_ERR(0, 61, __pyx_L1_error)
             __Pyx_DECREF(__pyx_t_4); __pyx_t_4 = 0;
             if (__pyx_t_25) {
             } else {
@@ -3606,7 +3607,7 @@ static PyObject *__pyx_pf_9tools21cm_16ViteBetti_cython_CubeMap(CYTHON_UNUSED Py
             __pyx_t_26 = (__pyx_v_j + 1);
             if (unlikely(__pyx_v_Ny == 0)) {
               PyErr_SetString(PyExc_ZeroDivisionError, "integer division or modulo by zero");
-              __PYX_ERR(0, 60, __pyx_L1_error)
+              __PYX_ERR(0, 61, __pyx_L1_error)
             }
             __pyx_t_20 = __pyx_v_i;
             __pyx_t_21 = __Pyx_mod_long(__pyx_t_26, __pyx_v_Ny);
@@ -3626,22 +3627,22 @@ static PyObject *__pyx_pf_9tools21cm_16ViteBetti_cython_CubeMap(CYTHON_UNUSED Py
             } else if (unlikely(__pyx_t_22 >= __pyx_pybuffernd_cubemap.diminfo[2].shape)) __pyx_t_23 = 2;
             if (unlikely(__pyx_t_23 != -1)) {
               __Pyx_RaiseBufferIndexError(__pyx_t_23);
-              __PYX_ERR(0, 60, __pyx_L1_error)
+              __PYX_ERR(0, 61, __pyx_L1_error)
             }
-            __pyx_t_4 = __Pyx_PyInt_From_npy_long((*__Pyx_BufPtrStrided3d(__pyx_t_5numpy_int_t *, __pyx_pybuffernd_cubemap.rcbuffer->pybuffer.buf, __pyx_t_20, __pyx_pybuffernd_cubemap.diminfo[0].strides, __pyx_t_21, __pyx_pybuffernd_cubemap.diminfo[1].strides, __pyx_t_22, __pyx_pybuffernd_cubemap.diminfo[2].strides))); if (unlikely(!__pyx_t_4)) __PYX_ERR(0, 60, __pyx_L1_error)
+            __pyx_t_4 = __Pyx_PyInt_From_npy_long((*__Pyx_BufPtrStrided3d(__pyx_t_5numpy_int_t *, __pyx_pybuffernd_cubemap.rcbuffer->pybuffer.buf, __pyx_t_20, __pyx_pybuffernd_cubemap.diminfo[0].strides, __pyx_t_21, __pyx_pybuffernd_cubemap.diminfo[1].strides, __pyx_t_22, __pyx_pybuffernd_cubemap.diminfo[2].strides))); if (unlikely(!__pyx_t_4)) __PYX_ERR(0, 61, __pyx_L1_error)
             __Pyx_GOTREF(__pyx_t_4);
-            __pyx_t_5 = __Pyx_GetItemInt_Tuple(__pyx_v_markers, 2, long, 1, __Pyx_PyInt_From_long, 0, 0, 1); if (unlikely(!__pyx_t_5)) __PYX_ERR(0, 60, __pyx_L1_error)
+            __pyx_t_5 = __Pyx_GetItemInt_Tuple(__pyx_v_markers, 2, long, 1, __Pyx_PyInt_From_long, 0, 0, 1); if (unlikely(!__pyx_t_5)) __PYX_ERR(0, 61, __pyx_L1_error)
             __Pyx_GOTREF(__pyx_t_5);
-            __pyx_t_3 = PyObject_RichCompare(__pyx_t_4, __pyx_t_5, Py_EQ); __Pyx_XGOTREF(__pyx_t_3); if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 60, __pyx_L1_error)
+            __pyx_t_3 = PyObject_RichCompare(__pyx_t_4, __pyx_t_5, Py_EQ); __Pyx_XGOTREF(__pyx_t_3); if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 61, __pyx_L1_error)
             __Pyx_DECREF(__pyx_t_4); __pyx_t_4 = 0;
             __Pyx_DECREF(__pyx_t_5); __pyx_t_5 = 0;
-            __pyx_t_25 = __Pyx_PyObject_IsTrue(__pyx_t_3); if (unlikely(__pyx_t_25 < 0)) __PYX_ERR(0, 60, __pyx_L1_error)
+            __pyx_t_25 = __Pyx_PyObject_IsTrue(__pyx_t_3); if (unlikely(__pyx_t_25 < 0)) __PYX_ERR(0, 61, __pyx_L1_error)
             __Pyx_DECREF(__pyx_t_3); __pyx_t_3 = 0;
             __pyx_t_11 = __pyx_t_25;
             __pyx_L56_bool_binop_done:;
             if (__pyx_t_11) {
 
-              /* "tools21cm/ViteBetti_cython.pyx":61
+              /* "tools21cm/ViteBetti_cython.pyx":62
  *                     if cubemap[(i - 1), j, k] == markers[2] and cubemap[(i + 1) % Nx, j, k] == markers[2]:
  *                         if cubemap[i, (j - 1), k] == markers[2] and cubemap[i, (j + 1) % Ny, k] == markers[2]:
  *                             if cubemap[i, j, (k - 1)] == markers[2] and cubemap[i, j, (k + 1) % Nz] == markers[2]:             # <<<<<<<<<<<<<<
@@ -3666,16 +3667,16 @@ static PyObject *__pyx_pf_9tools21cm_16ViteBetti_cython_CubeMap(CYTHON_UNUSED Py
               } else if (unlikely(__pyx_t_20 >= __pyx_pybuffernd_cubemap.diminfo[2].shape)) __pyx_t_23 = 2;
               if (unlikely(__pyx_t_23 != -1)) {
                 __Pyx_RaiseBufferIndexError(__pyx_t_23);
-                __PYX_ERR(0, 61, __pyx_L1_error)
+                __PYX_ERR(0, 62, __pyx_L1_error)
               }
-              __pyx_t_3 = __Pyx_PyInt_From_npy_long((*__Pyx_BufPtrStrided3d(__pyx_t_5numpy_int_t *, __pyx_pybuffernd_cubemap.rcbuffer->pybuffer.buf, __pyx_t_22, __pyx_pybuffernd_cubemap.diminfo[0].strides, __pyx_t_21, __pyx_pybuffernd_cubemap.diminfo[1].strides, __pyx_t_20, __pyx_pybuffernd_cubemap.diminfo[2].strides))); if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 61, __pyx_L1_error)
+              __pyx_t_3 = __Pyx_PyInt_From_npy_long((*__Pyx_BufPtrStrided3d(__pyx_t_5numpy_int_t *, __pyx_pybuffernd_cubemap.rcbuffer->pybuffer.buf, __pyx_t_22, __pyx_pybuffernd_cubemap.diminfo[0].strides, __pyx_t_21, __pyx_pybuffernd_cubemap.diminfo[1].strides, __pyx_t_20, __pyx_pybuffernd_cubemap.diminfo[2].strides))); if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 62, __pyx_L1_error)
               __Pyx_GOTREF(__pyx_t_3);
-              __pyx_t_5 = __Pyx_GetItemInt_Tuple(__pyx_v_markers, 2, long, 1, __Pyx_PyInt_From_long, 0, 0, 1); if (unlikely(!__pyx_t_5)) __PYX_ERR(0, 61, __pyx_L1_error)
+              __pyx_t_5 = __Pyx_GetItemInt_Tuple(__pyx_v_markers, 2, long, 1, __Pyx_PyInt_From_long, 0, 0, 1); if (unlikely(!__pyx_t_5)) __PYX_ERR(0, 62, __pyx_L1_error)
               __Pyx_GOTREF(__pyx_t_5);
-              __pyx_t_4 = PyObject_RichCompare(__pyx_t_3, __pyx_t_5, Py_EQ); __Pyx_XGOTREF(__pyx_t_4); if (unlikely(!__pyx_t_4)) __PYX_ERR(0, 61, __pyx_L1_error)
+              __pyx_t_4 = PyObject_RichCompare(__pyx_t_3, __pyx_t_5, Py_EQ); __Pyx_XGOTREF(__pyx_t_4); if (unlikely(!__pyx_t_4)) __PYX_ERR(0, 62, __pyx_L1_error)
               __Pyx_DECREF(__pyx_t_3); __pyx_t_3 = 0;
               __Pyx_DECREF(__pyx_t_5); __pyx_t_5 = 0;
-              __pyx_t_25 = __Pyx_PyObject_IsTrue(__pyx_t_4); if (unlikely(__pyx_t_25 < 0)) __PYX_ERR(0, 61, __pyx_L1_error)
+              __pyx_t_25 = __Pyx_PyObject_IsTrue(__pyx_t_4); if (unlikely(__pyx_t_25 < 0)) __PYX_ERR(0, 62, __pyx_L1_error)
               __Pyx_DECREF(__pyx_t_4); __pyx_t_4 = 0;
               if (__pyx_t_25) {
               } else {
@@ -3685,7 +3686,7 @@ static PyObject *__pyx_pf_9tools21cm_16ViteBetti_cython_CubeMap(CYTHON_UNUSED Py
               __pyx_t_26 = (__pyx_v_k + 1);
               if (unlikely(__pyx_v_Nz == 0)) {
                 PyErr_SetString(PyExc_ZeroDivisionError, "integer division or modulo by zero");
-                __PYX_ERR(0, 61, __pyx_L1_error)
+                __PYX_ERR(0, 62, __pyx_L1_error)
               }
               __pyx_t_20 = __pyx_v_i;
               __pyx_t_21 = __pyx_v_j;
@@ -3705,31 +3706,31 @@ static PyObject *__pyx_pf_9tools21cm_16ViteBetti_cython_CubeMap(CYTHON_UNUSED Py
               } else if (unlikely(__pyx_t_22 >= __pyx_pybuffernd_cubemap.diminfo[2].shape)) __pyx_t_23 = 2;
               if (unlikely(__pyx_t_23 != -1)) {
                 __Pyx_RaiseBufferIndexError(__pyx_t_23);
-                __PYX_ERR(0, 61, __pyx_L1_error)
+                __PYX_ERR(0, 62, __pyx_L1_error)
               }
-              __pyx_t_4 = __Pyx_PyInt_From_npy_long((*__Pyx_BufPtrStrided3d(__pyx_t_5numpy_int_t *, __pyx_pybuffernd_cubemap.rcbuffer->pybuffer.buf, __pyx_t_20, __pyx_pybuffernd_cubemap.diminfo[0].strides, __pyx_t_21, __pyx_pybuffernd_cubemap.diminfo[1].strides, __pyx_t_22, __pyx_pybuffernd_cubemap.diminfo[2].strides))); if (unlikely(!__pyx_t_4)) __PYX_ERR(0, 61, __pyx_L1_error)
+              __pyx_t_4 = __Pyx_PyInt_From_npy_long((*__Pyx_BufPtrStrided3d(__pyx_t_5numpy_int_t *, __pyx_pybuffernd_cubemap.rcbuffer->pybuffer.buf, __pyx_t_20, __pyx_pybuffernd_cubemap.diminfo[0].strides, __pyx_t_21, __pyx_pybuffernd_cubemap.diminfo[1].strides, __pyx_t_22, __pyx_pybuffernd_cubemap.diminfo[2].strides))); if (unlikely(!__pyx_t_4)) __PYX_ERR(0, 62, __pyx_L1_error)
               __Pyx_GOTREF(__pyx_t_4);
-              __pyx_t_5 = __Pyx_GetItemInt_Tuple(__pyx_v_markers, 2, long, 1, __Pyx_PyInt_From_long, 0, 0, 1); if (unlikely(!__pyx_t_5)) __PYX_ERR(0, 61, __pyx_L1_error)
+              __pyx_t_5 = __Pyx_GetItemInt_Tuple(__pyx_v_markers, 2, long, 1, __Pyx_PyInt_From_long, 0, 0, 1); if (unlikely(!__pyx_t_5)) __PYX_ERR(0, 62, __pyx_L1_error)
               __Pyx_GOTREF(__pyx_t_5);
-              __pyx_t_3 = PyObject_RichCompare(__pyx_t_4, __pyx_t_5, Py_EQ); __Pyx_XGOTREF(__pyx_t_3); if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 61, __pyx_L1_error)
+              __pyx_t_3 = PyObject_RichCompare(__pyx_t_4, __pyx_t_5, Py_EQ); __Pyx_XGOTREF(__pyx_t_3); if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 62, __pyx_L1_error)
               __Pyx_DECREF(__pyx_t_4); __pyx_t_4 = 0;
               __Pyx_DECREF(__pyx_t_5); __pyx_t_5 = 0;
-              __pyx_t_25 = __Pyx_PyObject_IsTrue(__pyx_t_3); if (unlikely(__pyx_t_25 < 0)) __PYX_ERR(0, 61, __pyx_L1_error)
+              __pyx_t_25 = __Pyx_PyObject_IsTrue(__pyx_t_3); if (unlikely(__pyx_t_25 < 0)) __PYX_ERR(0, 62, __pyx_L1_error)
               __Pyx_DECREF(__pyx_t_3); __pyx_t_3 = 0;
               __pyx_t_11 = __pyx_t_25;
               __pyx_L59_bool_binop_done:;
               if (__pyx_t_11) {
 
-                /* "tools21cm/ViteBetti_cython.pyx":62
+                /* "tools21cm/ViteBetti_cython.pyx":63
  *                         if cubemap[i, (j - 1), k] == markers[2] and cubemap[i, (j + 1) % Ny, k] == markers[2]:
  *                             if cubemap[i, j, (k - 1)] == markers[2] and cubemap[i, j, (k + 1) % Nz] == markers[2]:
  *                                 cubemap[i, j, k] = markers[3]             # <<<<<<<<<<<<<<
  * 
  *     return cubemap
  */
-                __pyx_t_3 = __Pyx_GetItemInt_Tuple(__pyx_v_markers, 3, long, 1, __Pyx_PyInt_From_long, 0, 0, 1); if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 62, __pyx_L1_error)
+                __pyx_t_3 = __Pyx_GetItemInt_Tuple(__pyx_v_markers, 3, long, 1, __Pyx_PyInt_From_long, 0, 0, 1); if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 63, __pyx_L1_error)
                 __Pyx_GOTREF(__pyx_t_3);
-                __pyx_t_24 = __Pyx_PyInt_As_npy_long(__pyx_t_3); if (unlikely((__pyx_t_24 == ((npy_long)-1)) && PyErr_Occurred())) __PYX_ERR(0, 62, __pyx_L1_error)
+                __pyx_t_24 = __Pyx_PyInt_As_npy_long(__pyx_t_3); if (unlikely((__pyx_t_24 == ((npy_long)-1)) && PyErr_Occurred())) __PYX_ERR(0, 63, __pyx_L1_error)
                 __Pyx_DECREF(__pyx_t_3); __pyx_t_3 = 0;
                 __pyx_t_22 = __pyx_v_i;
                 __pyx_t_21 = __pyx_v_j;
@@ -3749,11 +3750,11 @@ static PyObject *__pyx_pf_9tools21cm_16ViteBetti_cython_CubeMap(CYTHON_UNUSED Py
                 } else if (unlikely(__pyx_t_20 >= __pyx_pybuffernd_cubemap.diminfo[2].shape)) __pyx_t_23 = 2;
                 if (unlikely(__pyx_t_23 != -1)) {
                   __Pyx_RaiseBufferIndexError(__pyx_t_23);
-                  __PYX_ERR(0, 62, __pyx_L1_error)
+                  __PYX_ERR(0, 63, __pyx_L1_error)
                 }
                 *__Pyx_BufPtrStrided3d(__pyx_t_5numpy_int_t *, __pyx_pybuffernd_cubemap.rcbuffer->pybuffer.buf, __pyx_t_22, __pyx_pybuffernd_cubemap.diminfo[0].strides, __pyx_t_21, __pyx_pybuffernd_cubemap.diminfo[1].strides, __pyx_t_20, __pyx_pybuffernd_cubemap.diminfo[2].strides) = __pyx_t_24;
 
-                /* "tools21cm/ViteBetti_cython.pyx":61
+                /* "tools21cm/ViteBetti_cython.pyx":62
  *                     if cubemap[(i - 1), j, k] == markers[2] and cubemap[(i + 1) % Nx, j, k] == markers[2]:
  *                         if cubemap[i, (j - 1), k] == markers[2] and cubemap[i, (j + 1) % Ny, k] == markers[2]:
  *                             if cubemap[i, j, (k - 1)] == markers[2] and cubemap[i, j, (k + 1) % Nz] == markers[2]:             # <<<<<<<<<<<<<<
@@ -3762,7 +3763,7 @@ static PyObject *__pyx_pf_9tools21cm_16ViteBetti_cython_CubeMap(CYTHON_UNUSED Py
  */
               }
 
-              /* "tools21cm/ViteBetti_cython.pyx":60
+              /* "tools21cm/ViteBetti_cython.pyx":61
  *                 if cubemap[i, j, k] == 0:
  *                     if cubemap[(i - 1), j, k] == markers[2] and cubemap[(i + 1) % Nx, j, k] == markers[2]:
  *                         if cubemap[i, (j - 1), k] == markers[2] and cubemap[i, (j + 1) % Ny, k] == markers[2]:             # <<<<<<<<<<<<<<
@@ -3771,7 +3772,7 @@ static PyObject *__pyx_pf_9tools21cm_16ViteBetti_cython_CubeMap(CYTHON_UNUSED Py
  */
             }
 
-            /* "tools21cm/ViteBetti_cython.pyx":59
+            /* "tools21cm/ViteBetti_cython.pyx":60
  *             for k in range(Nz):
  *                 if cubemap[i, j, k] == 0:
  *                     if cubemap[(i - 1), j, k] == markers[2] and cubemap[(i + 1) % Nx, j, k] == markers[2]:             # <<<<<<<<<<<<<<
@@ -3780,7 +3781,7 @@ static PyObject *__pyx_pf_9tools21cm_16ViteBetti_cython_CubeMap(CYTHON_UNUSED Py
  */
           }
 
-          /* "tools21cm/ViteBetti_cython.pyx":58
+          /* "tools21cm/ViteBetti_cython.pyx":59
  *         for j in range(Ny):
  *             for k in range(Nz):
  *                 if cubemap[i, j, k] == 0:             # <<<<<<<<<<<<<<
@@ -3792,7 +3793,7 @@ static PyObject *__pyx_pf_9tools21cm_16ViteBetti_cython_CubeMap(CYTHON_UNUSED Py
     }
   }
 
-  /* "tools21cm/ViteBetti_cython.pyx":64
+  /* "tools21cm/ViteBetti_cython.pyx":65
  *                                 cubemap[i, j, k] = markers[3]
  * 
  *     return cubemap             # <<<<<<<<<<<<<<
@@ -3802,10 +3803,10 @@ static PyObject *__pyx_pf_9tools21cm_16ViteBetti_cython_CubeMap(CYTHON_UNUSED Py
   __pyx_r = ((PyObject *)__pyx_v_cubemap);
   goto __pyx_L0;
 
-  /* "tools21cm/ViteBetti_cython.pyx":6
- * cimport numpy as np
+  /* "tools21cm/ViteBetti_cython.pyx":7
+ * from cython cimport bint
  * 
- * def CubeMap(np.ndarray[np.int_t, ndim=3] arr, bint multi_marker=True):             # <<<<<<<<<<<<<<
+ * def CubeMap(np.ndarray[np.int64_t, ndim=3] arr, bint multi_marker=True):             # <<<<<<<<<<<<<<
  *     cdef int nx, ny, nz, Nx, Ny, Nz, i, j, k
  *     cdef np.ndarray[np.int_t, ndim=3] cubemap
  */
@@ -4933,7 +4934,7 @@ static __Pyx_StringTabEntry __pyx_string_tab[] = {
   {0, 0, 0, 0, 0, 0, 0}
 };
 static CYTHON_SMALL_CODE int __Pyx_InitCachedBuiltins(void) {
-  __pyx_builtin_range = __Pyx_GetBuiltinName(__pyx_n_s_range); if (!__pyx_builtin_range) __PYX_ERR(0, 24, __pyx_L1_error)
+  __pyx_builtin_range = __Pyx_GetBuiltinName(__pyx_n_s_range); if (!__pyx_builtin_range) __PYX_ERR(0, 25, __pyx_L1_error)
   __pyx_builtin_ImportError = __Pyx_GetBuiltinName(__pyx_n_s_ImportError); if (!__pyx_builtin_ImportError) __PYX_ERR(1, 944, __pyx_L1_error)
   return 0;
   __pyx_L1_error:;
@@ -4944,25 +4945,25 @@ static CYTHON_SMALL_CODE int __Pyx_InitCachedConstants(void) {
   __Pyx_RefNannyDeclarations
   __Pyx_RefNannySetupContext("__Pyx_InitCachedConstants", 0);
 
-  /* "tools21cm/ViteBetti_cython.pyx":19
+  /* "tools21cm/ViteBetti_cython.pyx":20
  * 
  *     if multi_marker:
  *         markers = (1, 2, 3, 4)             # <<<<<<<<<<<<<<
  *     else:
  *         markers = (1, 1, 1, 1)
  */
-  __pyx_tuple_ = PyTuple_Pack(4, __pyx_int_1, __pyx_int_2, __pyx_int_3, __pyx_int_4); if (unlikely(!__pyx_tuple_)) __PYX_ERR(0, 19, __pyx_L1_error)
+  __pyx_tuple_ = PyTuple_Pack(4, __pyx_int_1, __pyx_int_2, __pyx_int_3, __pyx_int_4); if (unlikely(!__pyx_tuple_)) __PYX_ERR(0, 20, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_tuple_);
   __Pyx_GIVEREF(__pyx_tuple_);
 
-  /* "tools21cm/ViteBetti_cython.pyx":21
+  /* "tools21cm/ViteBetti_cython.pyx":22
  *         markers = (1, 2, 3, 4)
  *     else:
  *         markers = (1, 1, 1, 1)             # <<<<<<<<<<<<<<
  * 
  *     # Vertices
  */
-  __pyx_tuple__2 = PyTuple_Pack(4, __pyx_int_1, __pyx_int_1, __pyx_int_1, __pyx_int_1); if (unlikely(!__pyx_tuple__2)) __PYX_ERR(0, 21, __pyx_L1_error)
+  __pyx_tuple__2 = PyTuple_Pack(4, __pyx_int_1, __pyx_int_1, __pyx_int_1, __pyx_int_1); if (unlikely(!__pyx_tuple__2)) __PYX_ERR(0, 22, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_tuple__2);
   __Pyx_GIVEREF(__pyx_tuple__2);
 
@@ -4988,17 +4989,17 @@ static CYTHON_SMALL_CODE int __Pyx_InitCachedConstants(void) {
   __Pyx_GOTREF(__pyx_tuple__4);
   __Pyx_GIVEREF(__pyx_tuple__4);
 
-  /* "tools21cm/ViteBetti_cython.pyx":6
- * cimport numpy as np
+  /* "tools21cm/ViteBetti_cython.pyx":7
+ * from cython cimport bint
  * 
- * def CubeMap(np.ndarray[np.int_t, ndim=3] arr, bint multi_marker=True):             # <<<<<<<<<<<<<<
+ * def CubeMap(np.ndarray[np.int64_t, ndim=3] arr, bint multi_marker=True):             # <<<<<<<<<<<<<<
  *     cdef int nx, ny, nz, Nx, Ny, Nz, i, j, k
  *     cdef np.ndarray[np.int_t, ndim=3] cubemap
  */
-  __pyx_tuple__5 = PyTuple_Pack(13, __pyx_n_s_arr, __pyx_n_s_multi_marker, __pyx_n_s_nx, __pyx_n_s_ny, __pyx_n_s_nz, __pyx_n_s_Nx, __pyx_n_s_Ny, __pyx_n_s_Nz, __pyx_n_s_i, __pyx_n_s_j, __pyx_n_s_k, __pyx_n_s_cubemap, __pyx_n_s_markers); if (unlikely(!__pyx_tuple__5)) __PYX_ERR(0, 6, __pyx_L1_error)
+  __pyx_tuple__5 = PyTuple_Pack(13, __pyx_n_s_arr, __pyx_n_s_multi_marker, __pyx_n_s_nx, __pyx_n_s_ny, __pyx_n_s_nz, __pyx_n_s_Nx, __pyx_n_s_Ny, __pyx_n_s_Nz, __pyx_n_s_i, __pyx_n_s_j, __pyx_n_s_k, __pyx_n_s_cubemap, __pyx_n_s_markers); if (unlikely(!__pyx_tuple__5)) __PYX_ERR(0, 7, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_tuple__5);
   __Pyx_GIVEREF(__pyx_tuple__5);
-  __pyx_codeobj__6 = (PyObject*)__Pyx_PyCode_New(2, 0, 13, 0, CO_OPTIMIZED|CO_NEWLOCALS, __pyx_empty_bytes, __pyx_empty_tuple, __pyx_empty_tuple, __pyx_tuple__5, __pyx_empty_tuple, __pyx_empty_tuple, __pyx_kp_s_src_tools21cm_ViteBetti_cython_p, __pyx_n_s_CubeMap, 6, __pyx_empty_bytes); if (unlikely(!__pyx_codeobj__6)) __PYX_ERR(0, 6, __pyx_L1_error)
+  __pyx_codeobj__6 = (PyObject*)__Pyx_PyCode_New(2, 0, 13, 0, CO_OPTIMIZED|CO_NEWLOCALS, __pyx_empty_bytes, __pyx_empty_tuple, __pyx_empty_tuple, __pyx_tuple__5, __pyx_empty_tuple, __pyx_empty_tuple, __pyx_kp_s_src_tools21cm_ViteBetti_cython_p, __pyx_n_s_CubeMap, 7, __pyx_empty_bytes); if (unlikely(!__pyx_codeobj__6)) __PYX_ERR(0, 7, __pyx_L1_error)
   __Pyx_RefNannyFinishContext();
   return 0;
   __pyx_L1_error:;
@@ -5338,23 +5339,23 @@ if (!__Pyx_RefNanny) {
  * 
  * import numpy as np             # <<<<<<<<<<<<<<
  * cimport numpy as np
- * 
+ * from cython cimport bint
  */
   __pyx_t_1 = __Pyx_Import(__pyx_n_s_numpy, 0, 0); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 3, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_1);
   if (PyDict_SetItem(__pyx_d, __pyx_n_s_np, __pyx_t_1) < 0) __PYX_ERR(0, 3, __pyx_L1_error)
   __Pyx_DECREF(__pyx_t_1); __pyx_t_1 = 0;
 
-  /* "tools21cm/ViteBetti_cython.pyx":6
- * cimport numpy as np
+  /* "tools21cm/ViteBetti_cython.pyx":7
+ * from cython cimport bint
  * 
- * def CubeMap(np.ndarray[np.int_t, ndim=3] arr, bint multi_marker=True):             # <<<<<<<<<<<<<<
+ * def CubeMap(np.ndarray[np.int64_t, ndim=3] arr, bint multi_marker=True):             # <<<<<<<<<<<<<<
  *     cdef int nx, ny, nz, Nx, Ny, Nz, i, j, k
  *     cdef np.ndarray[np.int_t, ndim=3] cubemap
  */
-  __pyx_t_1 = PyCFunction_NewEx(&__pyx_mdef_9tools21cm_16ViteBetti_cython_1CubeMap, NULL, __pyx_n_s_tools21cm_ViteBetti_cython); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 6, __pyx_L1_error)
+  __pyx_t_1 = PyCFunction_NewEx(&__pyx_mdef_9tools21cm_16ViteBetti_cython_1CubeMap, NULL, __pyx_n_s_tools21cm_ViteBetti_cython); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 7, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_1);
-  if (PyDict_SetItem(__pyx_d, __pyx_n_s_CubeMap, __pyx_t_1) < 0) __PYX_ERR(0, 6, __pyx_L1_error)
+  if (PyDict_SetItem(__pyx_d, __pyx_n_s_CubeMap, __pyx_t_1) < 0) __PYX_ERR(0, 7, __pyx_L1_error)
   __Pyx_DECREF(__pyx_t_1); __pyx_t_1 = 0;
 
   /* "tools21cm/ViteBetti_cython.pyx":1
