@@ -7,6 +7,46 @@ from . import const, conv
 from . import cosmo
 from .helper_functions import print_msg, read_cbin, \
 	get_data_and_type, determine_redshift_from_filename
+from astropy import constants, units
+from astropy.cosmology import Planck18
+
+def calc_dt_halo(mhalo, box_dim, z, Y_p=0.249, cosmo=None):
+	'''
+	Calculate the differential brightness temperature assuming T_s >> T_CMB
+
+	Parameters:
+		mhalo (numpy array): the ionization fraction
+		box_dim (float): Length of the simulation box in each direction.
+		z (float): The redshift.
+		Y_p = 0.249 (float): Helium abundance mass factor.
+		cosmo : astropy.cosmology.Cosmology, optional
+        Cosmology object. If None, assumes Planck18 cosmology.
+		
+	Returns:
+		The differential brightness temperature (in mK) as a numpy array with
+		the same dimensions as xfrac.
+	'''
+	if cosmo is None:
+		print('Assuming Planck18 cosmology.')
+		cosmo = Planck18
+		
+	if isinstance(mhalo, units.quantity.Quantity):
+		mhalo = mhalo.to('Msun')
+	else:
+		print('The provided halo mass is assumed to be in Msun units.')
+		mhalo = mhalo*units.Msun
+
+	if not isinstance(box_dim, units.quantity.Quantity):
+		box_dim = box_dim*units.Mpc
+	
+	mu = 1/(1-Y_p)
+	Vcell = (box_dim/mhalo.shape[0])**3
+	nHI = (mhalo/Vcell/mu/constants.m_p).to('1/cm^3')
+	nH  = (cosmo.Ob0*cosmo.critical_density0/mu/constants.m_p).to('1/cm^3')
+	xHI = (nHI/nH).to('')
+	Cdt = mean_dt(z)
+	dt = Cdt*xHI
+	return dt
 
 def calc_dt(xfrac, dens, z = -1):
 	'''
