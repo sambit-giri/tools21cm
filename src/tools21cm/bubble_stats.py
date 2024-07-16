@@ -251,8 +251,9 @@ def mfp(data, xth=0.5, boxsize=None, iterations = 10000000, verbose=True, upper_
 
 	if verbose: print("\nProgram runtime: %.2f minutes." %runtime)
 	if check_box==0:
-		if verbose: print("There is no ROI in the data. Therefore, the BSD is zero everywhere.")
-		return rr*boxsize/data.shape[0], np.zeros(rr.shape)
+		if verbose: print("There is no ROI in the data. Therefore, the number density of all the sizes are zero.")
+		# return rr*boxsize/data.shape[0], np.zeros(rr.shape)
+		nn = np.zeros(rr.shape)
 	if verbose: print("The output contains a tuple with three values: r, rdP/dr")
 	if verbose: print("The curve has been normalized.")
 
@@ -325,7 +326,7 @@ def mfp_from_point(data, point, xth=0.5, boxsize=None, iterations = 10000000, ve
 
 	print("Program runtime: %f minutes." %runtime)
 	if check_box==0:
-		print("There is no ROI in the data. Therefore, the BSD is zero everywhere.")
+		print("There is no ROI in the data. Therefore, the number density of all the sizes are zero.")
 		# return rr*boxsize/data.shape[0], np.zeros(rr.shape)
 		nn = np.zeros(rr.shape)
 	print("The output contains a tuple with three values: r, rdP/dr")
