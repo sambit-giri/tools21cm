@@ -193,7 +193,7 @@ def read_pkdgrav_density_grid(filename, box_dim, nGrid=None):
     rd = Pkdgrav3data(box_dim, nGrid, 
             Omega_m=0.31, rho_c=2.77536627e11, verbose=True)
     grid_data = rd.load_density_field(filename)
-    return 
+    return grid_data
 
 
 class Halo2Grid:
