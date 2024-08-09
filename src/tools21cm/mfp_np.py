@@ -130,8 +130,10 @@ def mfp3d(arr, xth=0.5, iterations=10000000, verbose=True, point='random'):
             
             pbar.update(1)  # Increment the progress bar
             if len(xs) == 0:
+                pbar.n = pbar.total  # Manually set the progress to 100%
+                pbar.refresh()  # Refresh the bar to show the update
                 break
-        pbar.set_postfix({'Completion': '100%'})
+        # pbar.set_postfix({'Completion': '100%'})
 
     size_px = np.arange(longest)
     return num_sz, size_px
@@ -201,8 +203,10 @@ def mfp2d(arr, xth=0.5, iterations=1000000, verbose=True, point='random'):
             
             pbar.update(1)  # Increment the progress bar
             if len(xs) == 0:
+                pbar.n = pbar.total  # Manually set the progress to 100%
+                pbar.refresh()  # Refresh the bar to show the update
                 break
-        pbar.set_postfix({'Completion': '100%'})
+        # pbar.set_postfix({'Completion': '100%'})
 
     size_px = np.arange(longest)
     return num_sz, size_px
