@@ -230,16 +230,16 @@ def mfp(data, xth=0.5, boxsize=None, iterations = 10000000, verbose=True, upper_
 		data = -1.*data
 		xth  = -1.*xth
 	check_box = (data>=xth).sum()
+	if verbose:
+		print(f'{check_box}/{data.size} cells are marked as region of interest (ROI).')
 	if check_box==0:
 		data = np.ones(data.shape)
 		iterations = 3
 	if dim == 2:
-		# if verbose: print("MFP method applied on 2D data (ver 1.0)")
-		#out = mfp2d(data, xth, iterations=iterations, verbose=verbose)
+		if verbose: print("MFP method applied on 2D data.")
 		out = mfp_np.mfp2d(data, xth, iterations=iterations, verbose=verbose)
 	elif dim == 3:
-		# if verbose: print("MFP method applied on 3D data (ver 1.0)")
-		#out = mfp3d(data, xth, iterations=iterations, verbose=verbose)
+		if verbose: print("MFP method applied on 3D data.")
 		out = mfp_np.mfp3d(data, xth, iterations=iterations, verbose=verbose)
 	else:
 		if verbose: print("The data doesn't have the correct dimension")

@@ -137,63 +137,75 @@ def mfp3d(arr, xth=0.5, iterations=10000000, verbose=True, point='random'):
     return num_sz, size_px
 
 def mfp2d(arr, xth=0.5, iterations=1000000, verbose=True, point='random'):
-	#2D interpolation is required
-	#RegularGridInterpolator in scipy(>0.14) is used to do the interpolation
-	
-	info    = arr.shape
-	longy	= max([info[0], info[1]])
-	longest = int(np.sqrt(2)*longy)
-	num_sz  = np.zeros(longest)
+    iterations = int(iterations)
+    
+    if verbose: print('Initializing random rays...', end=' ')
+    
+    info = arr.shape
+    longest = int(np.sqrt(2) * max(info))
+    num_sz  = np.zeros(longest)
 
-	ar  = np.zeros(arr.shape)
-	ar[arr >= xth] = 1
+    ar = np.zeros(info, dtype=np.float64)
+    ar[arr >= xth] = 1
 
-	thetas   = np.random.randint(0, 360, size=iterations)
-	ls       = np.sin(thetas*np.pi/180)
-	ms       = np.cos(thetas*np.pi/180)
+    thetas = np.random.randint(0, 360, size=iterations)
+    
+    # Precompute trigonometric values
+    sin_thetas = np.sin(np.radians(thetas))
+    cos_thetas = np.cos(np.radians(thetas))
 
-	if point=='random':
-		loc = np.argwhere(ar == 1)
-		rand_loc = np.random.randint(0, high=loc.shape[0], size=iterations)
-		xs,ys    = loc[rand_loc,0],loc[rand_loc,1]
-	else:
-		xs,ys = point
-		if ar[xs,ys]==0:
-			print('Given point is outside the structure.')
-			return None
-		xs,ys = xs*np.ones(iterations), ys*np.ones(iterations)
-	
-	interp_func = RegularGridInterpolator((np.arange(info[0]), np.arange(info[1])), ar, bounds_error=False, fill_value=0)
+    ls = sin_thetas
+    ms = cos_thetas
 
-	if verbose:
-		for rr in tqdm(range(longest)):
-			xs,ys  = xs+ls,ys+ms
-			pts    = np.vstack((xs,ys)).T
-			vals   = interp_func(pts)
-			check  = np.argwhere(vals<=0.5)
-			num_sz[rr] = check.shape[0]
-			xs,ys  = np.delete(xs, check),np.delete(ys, check)
-			ls,ms  = np.delete(ls, check),np.delete(ms, check)
-			# if verbose:
-			# 	perc = (rr+1)*100/longest
-			# 	msg  = '%.1f'%perc + '%'
-			# 	loading_verbose(msg)
-			if not xs.size: break
-		# msg  = '100.0' + '%'
-		# loading_verbose(msg)
-	else:
-		for rr in range(longest):
-			xs,ys  = xs+ls,ys+ms
-			pts    = np.vstack((xs,ys)).T
-			vals   = interp_func(pts)
-			check  = np.argwhere(vals<=0.5)
-			num_sz[rr] = check.shape[0]
-			xs,ys  = np.delete(xs, check),np.delete(ys, check)
-			ls,ms  = np.delete(ls, check),np.delete(ms, check)
-			if not xs.size: break
-	size_px = np.arange(longest)
-	return num_sz, size_px
+    if point == 'random':
+        loc = np.argwhere(ar == 1)
+        rand_loc = np.random.randint(0, high=loc.shape[0], size=iterations)
+        xs, ys = loc[rand_loc, 0], loc[rand_loc, 1]
+    else:
+        xs, ys = point
+        if ar[xs, ys] == 0:
+            print('Given point is outside the structure.')
+            return None
+        xs, ys = np.full(iterations, xs, dtype=np.float64), np.full(iterations, ys, dtype=np.float64)
+    
+    # Ensure coordinates are of type float64 for compatibility with interpolation
+    xs, ys = xs.astype(np.float64), ys.astype(np.float64)
 
+    interp_func = RegularGridInterpolator(
+        (np.arange(info[0]), np.arange(info[1])),
+        ar,
+        bounds_error=False,
+        fill_value=0
+    )
+
+    if verbose:
+        print('done')
+        print('Estimating ray lengths...')
+    
+    sleep(0.01)
+    total_iterations = longest
+    with tqdm(total=total_iterations, dynamic_ncols=False, disable=not verbose) as pbar:
+        for rr in range(longest):
+            xs += ls
+            ys += ms
+            
+            # Efficiently create points and interpolate values
+            pts = np.column_stack((xs, ys))
+            vals = interp_func(pts)
+            
+            # Use boolean indexing instead of np.argwhere and np.delete
+            valid = vals > 0.5
+            num_sz[rr] = len(xs) - np.sum(valid)
+            xs, ys = xs[valid], ys[valid]
+            ls, ms = ls[valid], ms[valid]
+            
+            pbar.update(1)  # Increment the progress bar
+            if len(xs) == 0:
+                break
+        pbar.set_postfix({'Completion': '100%'})
+
+    size_px = np.arange(longest)
+    return num_sz, size_px
 
 def loading_verbose(string):
 	msg = ("Completed: " + string )
