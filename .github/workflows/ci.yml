@@ -31,6 +31,18 @@ jobs:
           environment-file: environment.yml
           activate-environment: tools21cm
 
+      - name: Initialize Conda
+        run: |
+          conda init bash  # Initialize Conda for bash
+          source ~/.bashrc  # Source the updated bash configuration
+        shell: bash
+
+      - name: Update Python version in Conda environment
+        run: |
+          conda activate tools21cm
+          conda install python=3.8 --update-deps  # Specify exact Python version
+        shell: bash
+
       - name: Install additional dependencies
         run: |
           conda activate tools21cm
