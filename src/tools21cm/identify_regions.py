@@ -160,7 +160,7 @@ def threshold_kmeans(cube, upper_lim=False, mean_remove=True, n_jobs=1):
 	
 	array = np.zeros(cube.shape)
 	X  = cube.reshape(-1,1)
-	y = KMeans(n_clusters=2).fit_predict(X, n_init='auto')
+	y = KMeans(n_clusters=2, n_init='auto').fit_predict(X)
 	t_th = X[y==0].max()/2.+X[y==1].max()/2.
 	if upper_lim: array[cube<=t_th] = 1
 	else: array[cube>t_th] = 1
@@ -170,10 +170,10 @@ def threshold_kmeans(cube, upper_lim=False, mean_remove=True, n_jobs=1):
 def threshold_kmeans_3cluster(cube, upper_lim=False, n_jobs=1):
 	#The input is the brightness temperature cube.
 	
-	km = KMeans(n_clusters=3)
+	km = KMeans(n_clusters=3, n_init='auto')
 	X  = cube.reshape(-1,1)
 	array = np.zeros(X.shape)
-	km.fit(X, n_init='auto')
+	km.fit(X)
 	y = km.labels_
 	centers = km.cluster_centers_
 	if upper_lim: true_label = centers.argmin()
