@@ -1,0 +1,17 @@
+language: python
+
+# Specify the versions of Python to test against
+python:
+  - "3.8"
+  - "3.9"
+  - "3.10"
+
+# Install dependencies
+install:
+  - pip install -r requirements.txt
+  - pip install pytest
+  - pip install .
+
+# Run tests
+script:
+  - pytest
