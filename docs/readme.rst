@@ -5,7 +5,7 @@ Tools21cm
 .. image:: https://joss.theoj.org/papers/10.21105/joss.02363/status.svg
    :target: https://doi.org/10.21105/joss.02363
 
-A python package for analysing 21-cm signals from the Epoch of Reionization (EoR) and Cosmic Dawn (CD). The source files can be found `here <https://github.com/sambit-giri/tools21cm>`_.
+A python package for analysing 21-cm signals from the Epoch of Reionization (EoR) and Cosmic Dawn (CD). The source files can be found at its `GitHub page <https://github.com/sambit-giri/tools21cm>`_.
 
 Note: There are some modules in the package that are still under active development. Therefore please contact the authors if you get erronous results.
 
@@ -59,7 +59,7 @@ There are various manipulation and analysis moduled in `Tools21cm`.
 
 * Temperature: methods to estimate the brightness temperature
 
-For detail documentation and how to use them, see `here <https://tools21cm.readthedocs.io/contents.html>`_.
+For detail documentation and how to use them, see `contents page <https://tools21cm.readthedocs.io/contents.html>`_.
 
 Under Developement
 ------------------
