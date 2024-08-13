@@ -160,7 +160,7 @@ def threshold_kmeans(cube, upper_lim=False, mean_remove=True, n_jobs=1):
 	
 	array = np.zeros(cube.shape)
 	X  = cube.reshape(-1,1)
-	y = KMeans(n_clusters=2).fit_predict(X)
+	y = KMeans(n_clusters=2).fit_predict(X, n_init='auto')
 	t_th = X[y==0].max()/2.+X[y==1].max()/2.
 	if upper_lim: array[cube<=t_th] = 1
 	else: array[cube>t_th] = 1
@@ -173,7 +173,7 @@ def threshold_kmeans_3cluster(cube, upper_lim=False, n_jobs=1):
 	km = KMeans(n_clusters=3)
 	X  = cube.reshape(-1,1)
 	array = np.zeros(X.shape)
-	km.fit(X)
+	km.fit(X, n_init='auto')
 	y = km.labels_
 	centers = km.cluster_centers_
 	if upper_lim: true_label = centers.argmin()

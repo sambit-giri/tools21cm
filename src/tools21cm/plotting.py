@@ -52,8 +52,8 @@ def plot_slice(data, los_axis = 0, slice_num = 0, logscale = False, **kwargs):
     #Plot
     pl.imshow(data_slice, extent=ext, **kwargs)
     cbar = pl.colorbar()
-    pl.xlabel('$\mathrm{cMpc}$')
-    pl.ylabel('$\mathrm{cMpc}$')
+    pl.xlabel(r'$\mathrm{cMpc}$')
+    pl.ylabel(r'$\mathrm{cMpc}$')
     
     #Make redshift string
     try:
@@ -64,15 +64,15 @@ def plot_slice(data, los_axis = 0, slice_num = 0, logscale = False, **kwargs):
     #Set labels etc
     if datatype == 'xfrac':
         if (logscale):
-            cbar.set_label('$\log_{10} x_i$')
+            cbar.set_label(r'$\log_{10} x_i$')
         else:
-            cbar.set_label('$x_i$')
+            cbar.set_label(r'$x_i$')
         pl.title('Ionized fraction, %s' % z_str)
     elif datatype == 'density':
         if (logscale):
-            cbar.set_label('$\log_{10} \\rho \; \mathrm{[g \; cm^{-3}]}$')
+            cbar.set_label(r'$\log_{10} \\rho \; \mathrm{[g \; cm^{-3}]}$')
         else:
-            cbar.set_label('$\\rho \; \mathrm{[g \; cm^{-3}]}$')
+            cbar.set_label(r'$\\rho \; \mathrm{[g \; cm^{-3}]}$')
         pl.title('Density, %s' % z_str)
         
 def plot_hist(data, logscale = False, **kwargs):
@@ -116,7 +116,7 @@ def plot_hist(data, logscale = False, **kwargs):
     if datatype == 'xfrac':
         pl.xlabel('$x_i$')
     elif datatype == 'density':
-        pl.xlabel('$\\rho \; \mathrm{[g \; cm^{-3}]}$')
+        pl.xlabel(r'$\\rho \; \mathrm{[g \; cm^{-3}]}$')
         
 if __name__ == '__main__':
     import tools21cm as t2c

@@ -532,7 +532,7 @@ def _get_dims(box_dims, ashape):
         return box_dims
 
 def dimensionless_ps(data, kbins=100, box_dims=None, binning='log', factor=10):
-        """
+        r'''
         Dimensionless power spectrum is P(k)*k^3/(2pi^2)
 
         Parameters
@@ -551,7 +551,7 @@ def dimensionless_ps(data, kbins=100, box_dims=None, binning='log', factor=10):
         Returns
         -------
         (\Delta^2, ks)
-        """
+        '''
         from scipy.interpolate import interp1d
         Pk, ks = power_spectrum_1d(data, kbins=kbins*factor, box_dims=box_dims, binning=binning)
         f_Dlta = interp1d(ks, Pk*ks**3/2/np.pi**2)

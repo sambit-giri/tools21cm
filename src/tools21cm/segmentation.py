@@ -3,7 +3,6 @@ Created by Michele Bianco, 9 July 2021
 """
 
 import numpy as np
-import pkg_resources
 from tqdm import tqdm
 import warnings
 warnings.filterwarnings("ignore")
@@ -109,7 +108,7 @@ class segunet21cm:
 
     def load_model(self):
         import tensorflow as tf
-        import pkg_resources
+        import importlib.resources as pkg_resources
 
         METRICS = {
             'balanced_cross_entropy': balanced_cross_entropy,

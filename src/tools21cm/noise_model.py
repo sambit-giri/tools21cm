@@ -207,7 +207,7 @@ def make_uv_map_lightcone(ncells, zs, filename=None, total_int_time=6., int_time
 		z = zs[i]
 		uv_map, N_ant = get_uv_map(ncells, z, filename=filename, total_int_time=total_int_time, int_time=int_time, boxsize=boxsize, declination=declination, verbose=verbose)
 		uv_lc[:,:,i] = uv_map
-		print("\nThe lightcone has been constructed upto %.1f \%" %(i*percc))
+		print("\nThe lightcone has been constructed upto %.1f per cent." %(i*percc))
 	return uv_lc, N_ant
 
 def telescope_response_on_coeval(array, z, depth_mhz=None, obs_time=1000, filename=None, boxsize=None, total_int_time=6., int_time=10., declination=-30., uv_map=np.array([]), N_ant=None):
