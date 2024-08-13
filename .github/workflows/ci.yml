@@ -12,21 +12,15 @@ jobs:
   test:
     timeout-minutes: 60  # Set a 60-minute timeout for the entire job
 
+    runs-on: ubuntu-latest  # Use only Ubuntu
+
     strategy:
       matrix:
-        os: [macos-latest]
-        python-version: [3.8]  
-
-    runs-on: ${{ matrix.os }}
+        python-version: [3.8]  # Test specifically with Python 3.8
 
     steps:
       - name: Check out repository code
         uses: actions/checkout@v3
-
-      - name: Set up Python ${{ matrix.python-version }}
-        uses: actions/setup-python@v4
-        with:
-          python-version: ${{ matrix.python-version }}
 
       - name: Set up Miniconda
         uses: conda-incubator/setup-miniconda@v2
@@ -36,15 +30,31 @@ jobs:
           auto-update-conda: true
           environment-file: environment.yml
           activate-environment: tools21cm
-          auto-activate-base: false
+
+      - name: Initialize Conda
+        run: |
+          source ~/miniconda/etc/profile.d/conda.sh  # Initialize Conda
+          conda init bash  # Initialize Conda shell integration
+        shell: bash
+
+      - name: Update Python version in Conda environment
+        run: |
+          source ~/miniconda/etc/profile.d/conda.sh
+          conda activate tools21cm
+          conda install python=3.8 --update-deps  # Specify exact Python version
+        shell: bash
 
       - name: Install additional dependencies
         run: |
+          source ~/miniconda/etc/profile.d/conda.sh
           conda activate tools21cm
           conda install -y pip
           pip install .
+        shell: bash
 
       - name: Run tests
         run: |
+          source ~/miniconda/etc/profile.d/conda.sh
           conda activate tools21cm
           pytest
+        shell: bash
