@@ -36,10 +36,10 @@ jobs:
           auto-update-conda: true
           environment-file: environment.yml
           activate-environment: tools21cm
+          auto-activate-base: true
 
       - name: Install additional dependencies
         run: |
-          conda init
           conda activate tools21cm
           conda install -y pip
           pip install .
