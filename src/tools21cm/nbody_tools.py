@@ -1,25 +1,26 @@
 import numpy as np 
-from astropy import cosmology, units
+import astropy
+from astropy import units
 
 def _set_cosmo(cosmo):
     try:
         hlittle = cosmo.h
     except:
         cosmo_dict = {
-            'PLANCK13': cosmology.Planck13,
-            'PLANCK15': cosmology.Planck15,
-            'PLANCK18': cosmology.Planck18,
-            'WMAP1': cosmology.WMAP1,
-            'WMAP3': cosmology.WMAP3,
-            'WMAP5': cosmology.WMAP5,
-            'WMAP7': cosmology.WMAP7,
-            'WMAP9': cosmology.WMAP9, 
+            'PLANCK13': astropy.cosmology.Planck13,
+            'PLANCK15': astropy.cosmology.Planck15,
+            'PLANCK18': astropy.cosmology.Planck18,
+            'WMAP1': astropy.cosmology.WMAP1,
+            'WMAP3': astropy.cosmology.WMAP3,
+            'WMAP5': astropy.cosmology.WMAP5,
+            'WMAP7': astropy.cosmology.WMAP7,
+            'WMAP9': astropy.cosmology.WMAP9, 
             }
         if cosmo.upper() in cosmo_dict.keys():
             cosmo = cosmo_dict[cosmo.upper()]
         else:
             print('{} cosmology not implemented and, therefore, using the default Planck18.')
-            cosmo = cosmology.Planck18
+            cosmo = astropy.cosmology.Planck18
         # hlittle = cosmo.h
     return cosmo 
 
