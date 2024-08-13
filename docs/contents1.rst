@@ -14,7 +14,7 @@ Bubble Statistics
 
 Cosmological calculators
 ------------------------
-.. automodule:: tools21cm.cosmology
+.. automodule:: tools21cm.cosmo
     :members:
 
 Foreground model
