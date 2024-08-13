@@ -33,18 +33,29 @@ jobs:
 
       - name: Initialize Conda
         run: |
-          conda init bash  # Initialize Conda for bash
-          source ~/.bashrc  # Source the updated bash configuration
+          # Initialize Conda and source the bash configuration
+          conda init bash
+          source ~/.bashrc
+        shell: bash
+
+      - name: Verify Conda Installation
+        run: |
+          # Print Conda info to verify installation
+          conda info
         shell: bash
 
       - name: Update Python version in Conda environment
         run: |
+          # Activate the Conda environment and update Python
+          source ~/.bashrc
           conda activate tools21cm
           conda install python=3.8 --update-deps  # Specify exact Python version
         shell: bash
 
       - name: Install additional dependencies
         run: |
+          # Install additional dependencies
+          source ~/.bashrc
           conda activate tools21cm
           conda install -y pip
           pip install .
@@ -52,6 +63,8 @@ jobs:
 
       - name: Run tests
         run: |
+          # Run tests using the activated Conda environment
+          source ~/.bashrc
           conda activate tools21cm
           pytest
         shell: bash
