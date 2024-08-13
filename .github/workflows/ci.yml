@@ -31,22 +31,8 @@ jobs:
           environment-file: environment.yml
           activate-environment: tools21cm
 
-      - name: Initialize Conda
-        run: |
-          source ~/miniconda/etc/profile.d/conda.sh  # Initialize Conda
-          conda init bash  # Initialize Conda shell integration
-        shell: bash
-
-      - name: Update Python version in Conda environment
-        run: |
-          source ~/miniconda/etc/profile.d/conda.sh
-          conda activate tools21cm
-          conda install python=3.8 --update-deps  # Specify exact Python version
-        shell: bash
-
       - name: Install additional dependencies
         run: |
-          source ~/miniconda/etc/profile.d/conda.sh
           conda activate tools21cm
           conda install -y pip
           pip install .
@@ -54,7 +40,6 @@ jobs:
 
       - name: Run tests
         run: |
-          source ~/miniconda/etc/profile.d/conda.sh
           conda activate tools21cm
           pytest
         shell: bash
