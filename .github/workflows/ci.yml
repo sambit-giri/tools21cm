@@ -1,36 +1,48 @@
+name: CI
+
+on:
+  push:
+    branches:
+      - master  # Trigger the workflow on push to the master branch
+  pull_request:
+    branches:
+      - master  # Trigger the workflow on pull requests to the master branch
+
 jobs:
   test:
+    timeout-minutes: 60  # Set a 60-minute timeout for the entire job
+
     strategy:
       matrix:
-        os: [ubuntu-latest, macos-latest]  # Add macOS to the matrix
+        os: [ubuntu-latest, macos-latest]
         python-version: [3.10, 3.11, 3.12]
 
     runs-on: ${{ matrix.os }}
 
     steps:
-    - name: Check out repository code
-      uses: actions/checkout@v3
+      - name: Check out repository code
+        uses: actions/checkout@v3
 
-    - name: Set up Python ${{ matrix.python-version }}
-      uses: actions/setup-python@v4
-      with:
-        python-version: ${{ matrix.python-version }}
+      - name: Set up Python ${{ matrix.python-version }}
+        uses: actions/setup-python@v4
+        with:
+          python-version: ${{ matrix.python-version }}
 
-    - name: Set up conda
-      uses: conda-incubator/setup-miniconda@v2
-      with:
-        python-version: ${{ matrix.python-version }}
-        auto-update-conda: true
-        environment-file: environment.yml
-        activate-environment: tools21cm
+      - name: Set up Miniconda
+        uses: conda-incubator/setup-miniconda@v2
+        with:
+          python-version: ${{ matrix.python-version }}
+          auto-update-conda: true
+          environment-file: environment.yml
+          activate-environment: tools21cm
 
-    - name: Install additional dependencies
-      run: |
-        conda activate tools21cm
-        conda install -y pip
-        pip install .
+      - name: Install additional dependencies
+        run: |
+          conda activate tools21cm
+          conda install -y pip
+          pip install .
 
-    - name: Run tests
-      run: |
-        conda activate tools21cm
-        pytest
+      - name: Run tests
+        run: |
+          conda activate tools21cm
+          pytest
