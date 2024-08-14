@@ -44,8 +44,6 @@ Power spectrum
 --------------
 .. automodule:: tools21cm.power_spectrum
     :members:
-.. automodule:: tools21cm.power_spect_fast
-    :members:
 
 Primary beam
 ------------
