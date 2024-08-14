@@ -2,6 +2,8 @@
 Tools21cm
 =========
 
+.. :noindex::
+
 .. image:: https://joss.theoj.org/papers/10.21105/joss.02363/status.svg
    :target: https://doi.org/10.21105/joss.02363
 
@@ -9,11 +11,14 @@ A python package for analysing 21-cm signals from the Epoch of Reionization (EoR
 
 Note: There are some modules in the package that are still under active development. Therefore please contact the authors if you get erronous results.
 
+.. :noindex::
 
 Package details
 ===============
 
 The package provides tools to analyse cosmological simulations of EoR and CD. It contains modules to create mock 21-cm observations for current and upcoming radio telescopes, such as LOFAR, MWA and SKA, and to construct statistical measures.
+
+.. :noindex::
 
 Input
 -----
@@ -27,21 +32,22 @@ Currently, `Tools21cm` supports the following simulation codes:
 * `Simfast21 <https://github.com/mariogrs/Simfast21>`_: a semi-numerical cosmological simulation code for the radio 21cm signal
 * `sem_num <https://arxiv.org/abs/1403.0941>`_: a simple set of codes to semi-numerically simulate HI maps during reionization
 
-
 .. |c2ray| replace:: C\ :sup:`2`\RAY
 .. _c2ray: https://github.com/garrelt/C2-Ray3Dm
 
 .. |cubep3m| replace:: CUBEP\ :sup:`3`\M
 .. _cubep3m: https://github.com/jharno/cubep3m
 
+.. :noindex::
+
 Outputs
 -------
 
-There are various manipulation and analysis moduled in `Tools21cm`. 
+There are various manipulation and analysis modules in `Tools21cm`. 
 
 * Angular coordinates: methods to convert data between physical (cMpc) coordinates and observational (angular-frequency) coordinates
 
-* Bubble Statistics: methods to calcluate the sizes of the regions of interest and estimate the size distributions
+* Bubble Statistics: methods to calculate the sizes of the regions of interest and estimate the size distributions
 
 * Cosmological calculators: various functions for calculating some cosmological stuff
 
@@ -49,9 +55,9 @@ There are various manipulation and analysis moduled in `Tools21cm`.
 
 * Lightcone: methods to construct lightcones
 
-* Power spectrum: contains functions to estimate various two point statistics
+* Power spectrum: contains functions to estimate various two-point statistics
 
-* Reading simuation outputs: methods to read simulations outputs
+* Reading simulation outputs: methods to read simulations outputs
 
 * Smoothing: methods to smooth or reduce resolution of the data to reduce noise
 
@@ -59,9 +65,11 @@ There are various manipulation and analysis moduled in `Tools21cm`.
 
 * Temperature: methods to estimate the brightness temperature
 
-For detail documentation and how to use them, see `contents page <https://tools21cm.readthedocs.io/contents.html>`_.
+For detailed documentation and how to use them, see `contents page <https://tools21cm.readthedocs.io/contents.html>`_.
 
-Under Developement
+.. :noindex::
+
+Under Development
 ------------------
 
 * Foreground model: methods to simulate and analyse the foreground signal for 21 cm signal
@@ -70,4 +78,3 @@ Under Developement
 	* simulate the radio telescope observation strategy
 	* simulate telescope noise
 * Topology: methods to estimate the topology of the region of interest
-
