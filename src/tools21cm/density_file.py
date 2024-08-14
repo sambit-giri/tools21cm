@@ -33,16 +33,6 @@ class DensityFile:
 			self.read_from_file(filename, old_format)
 
 	def read_from_file(self, filename, old_format = False):
-		'''
-		Read data from file.
-		
-		Parameters:
-			filename (string): the file to read from.
-			old_format = False (bool): whether to use the old-style file format.
-
-		Returns:
-			Nothing
-		'''
 
 		print_msg('Reading density file:%s ...' % filename)
 		self.filename = filename
@@ -110,14 +100,6 @@ class ClumpingFile:
             self.read_from_file(filename)
 
     def read_from_file(self, filename):
-        '''
-        Read data from file.
-
-        Parameters:
-            * filename (string): the file to read from.
-        Returns:
-            Nothing
-        '''
 
         print('Reading clumping factor file: %s ...' %
               (filename.rpartition("/")[-1]))

@@ -32,18 +32,7 @@ class XfracFile:
 
 	def read_from_file(self, filename, old_format=False, neutral=False,
                            binary_format=False):
-		'''
-		Read data from file.
-		
-		Parameters:
-			filename (string): the file to read from.
-			old_format = False (bool): whether to use the old-style (32 bits)
-				file format.
-                        neutral = False (bool): whether the content is the neutral or ionized fraction
-                        binary_format = False (bool): whether the file is in Fortran unformatted or binary (no record separators) format 
-		Returns:
-			Nothing
-		'''
+
 		print_msg('Reading xfrac file:%s...' % filename)
 		self.filename = filename
 

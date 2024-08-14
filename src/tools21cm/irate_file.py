@@ -30,16 +30,7 @@ class IonRateFile:
             self.read_from_file(filename, old_format)
 
     def read_from_file(self, filename, old_format=False):
-        '''
-        Read data from file.
-            
-        Parameters:
-            filename (string): the file to read from.
-            old_format = False (bool): whether to use the old-style (32 bits)
-                file format.
-        Returns:
-            Nothing
-        '''
+        
         print_msg('Reading IonRates3 file:%s...' % filename)
         self.filename = filename
 
