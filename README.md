@@ -1,6 +1,7 @@
 # Tools21cm
 
 [![DOI](https://joss.theoj.org/papers/10.21105/joss.02363/status.svg)](https://doi.org/10.21105/joss.02363)
+[![CI](https://github.com/sambit-giri/tools21cm/actions/workflows/ci.yml/badge.svg)](https://github.com/sambit-giri/tools21cm/actions/workflows/ci.yml)
 
 A python package for analysing simulated 21-cm signals from the Epoch of Reionization (EoR) and Cosmic Dawn (CD). Full documentation (with examples, installation instructions and complete module description) can be found at [readthedocs](https://tools21cm.readthedocs.io/).
 
@@ -33,18 +34,19 @@ There are various manipulation and analysis moduled in `Tools21cm`.
 * Smoothing: methods to smooth or reduce resolution of the data to reduce noise
 * Point statistics: contains various useful statistical methods
 * Temperature: methods to estimate the brightness temperature
+* Radio telescope noise: 
+	* simulate the radio telescope observation strategy
+	* simulate telescope noise
+* Topology: methods to estimate the topology of the region of interest
+* Foreground model: methods to simulate and analyse the foreground signal for 21 cm signal
 
 For detail documentation and how to use them, see [here](https://tools21cm.readthedocs.io/contents.html).
 
 ### Under Developement
 
-* Foreground model: methods to simulate and analyse the foreground signal for 21 cm signal
-* Primary beam: methods to simulate the primary beam of radio telescope
-* Telescope noise: 
-	* simulate the radio telescope observation strategy
-	* simulate telescope noise
-* Topology: methods to estimate the topology of the region of interest
-
+* Radio telescope beam: 
+	* simulate the sensitivity and evolution of the primary beam
+	* simulate the impact of side-lobes
 
 
 ## INSTALLATION
