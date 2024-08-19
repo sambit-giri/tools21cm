@@ -7,6 +7,9 @@ Tools21cm
 .. image:: https://joss.theoj.org/papers/10.21105/joss.02363/status.svg
    :target: https://doi.org/10.21105/joss.02363
 
+.. image:: https://img.shields.io/github/repo-size/sambit-giri/tools21cm
+   :target: https://github.com/sambit-giri/tools21cm
+
 .. image:: https://github.com/sambit-giri/tools21cm/actions/workflows/ci.yml/badge.svg
    :target: https://github.com/sambit-giri/tools21cm/actions/workflows/ci.yml
 
