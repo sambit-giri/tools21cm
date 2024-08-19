@@ -5,3 +5,4 @@ _static
 _templates
 
 examples/.ipynb_checkpoints
+examples/data
