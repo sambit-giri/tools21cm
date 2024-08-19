@@ -1,7 +1,8 @@
 # Tools21cm
 
 [![DOI](https://joss.theoj.org/papers/10.21105/joss.02363/status.svg)](https://doi.org/10.21105/joss.02363)
-[![CI](https://github.com/sambit-giri/tools21cm/actions/workflows/ci.yml/badge.svg)](https://github.com/sambit-giri/tools21cm/actions/workflows/ci.yml)
+[![CI status](https://github.com/sambit-giri/tools21cm/actions/workflows/ci.yml/badge.svg)](https://github.com/sambit-giri/tools21cm/actions/workflows/ci.yml)
+[![GitHub Repository](https://img.shields.io/github/repo-size/sambit-giri/toolscosmo)](https://github.com/sambit-giri/toolscosmo)
 
 A python package for analysing simulated 21-cm signals from the Epoch of Reionization (EoR) and Cosmic Dawn (CD). Full documentation (with examples, installation instructions and complete module description) can be found at [readthedocs](https://tools21cm.readthedocs.io/).
 
@@ -24,27 +25,27 @@ Currently, `Tools21cm` supports the following simulation codes:
 
 There are various manipulation and analysis moduled in `Tools21cm`. 
 
-* Angular coordinates: methods to convert data between physical (cMpc) coordinates and observational (angular-frequency) coordinates
-* Bubble Statistics: methods to calcluate the sizes of the regions of interest and estimate the size distributions
-* Cosmological calculators: various functions for calculating some cosmological stuff
-* Identifying regions: methods to identify regions of interest in images
-* Lightcone: methods to construct lightcones
-* Power spectrum: contains functions to estimate various two point statistics
-* Reading simuation outputs: methods to read simulations outputs
-* Smoothing: methods to smooth or reduce resolution of the data to reduce noise
-* Point statistics: contains various useful statistical methods
-* Temperature: methods to estimate the brightness temperature
-* Radio telescope noise: 
+* **Angular coordinates:** methods to convert data between physical (cMpc) coordinates and observational (angular-frequency) coordinates
+* **Bubble Statistics:** methods to calcluate the sizes of the regions of interest and estimate the size distributions
+* **Cosmological calculators:** various functions for calculating some cosmological stuff
+* **Identifying regions:** methods to identify regions of interest in images
+* **Lightcone:** methods to construct lightcones
+* **Power spectrum:** contains functions to estimate various two point statistics
+* **Reading simuation outputs:** methods to read simulations outputs
+* **Smoothing:** methods to smooth or reduce resolution of the data to reduce noise
+* **Point statistics:** contains various useful statistical methods
+* **Temperature:** methods to estimate the brightness temperature
+* **Radio telescope noise:** 
 	* simulate the radio telescope observation strategy
 	* simulate telescope noise
-* Topology: methods to estimate the topology of the region of interest
-* Foreground model: methods to simulate and analyse the foreground signal for 21 cm signal
+* **Topology:** methods to estimate the topology of the region of interest
+* **Foreground model:** methods to simulate and analyse the foreground signal for 21 cm signal
 
 For detail documentation and how to use them, see [here](https://tools21cm.readthedocs.io/contents.html).
 
 ### Under Developement
 
-* Radio telescope beam: 
+* **Radio telescope beam:** 
 	* simulate the sensitivity and evolution of the primary beam
 	* simulate the impact of side-lobes
 
