@@ -49,7 +49,7 @@ There are various manipulation and analysis modules in `Tools21cm`.
 
 * Bubble Statistics: methods to calculate the sizes of the regions of interest and estimate the size distributions
 
-* Cosmological calculators: various functions for calculating some cosmological stuff
+* Cosmological calculators: various functions for sevaral cosmological calculations and conversions
 
 * Identifying regions: methods to identify regions of interest in images
 
@@ -65,6 +65,14 @@ There are various manipulation and analysis modules in `Tools21cm`.
 
 * Temperature: methods to estimate the brightness temperature
 
+* Radio telescope noise: 
+	* simulate the radio telescope observation strategy
+	* simulate telescope noise
+
+* Topology: methods to estimate the topology of the region of interest
+
+* Foreground model: methods to simulate and analyse the foreground signal for 21 cm signal
+
 For detailed documentation and how to use them, see `contents page <https://tools21cm.readthedocs.io/contents.html>`_.
 
 .. :noindex::
@@ -72,12 +80,9 @@ For detailed documentation and how to use them, see `contents page <https://tool
 Under Development
 ------------------
 
-* Foreground model: methods to simulate and analyse the foreground signal for 21 cm signal
-* Primary beam: methods to simulate the primary beam of radio telescope
-* Telescope noise: 
-	* simulate the radio telescope observation strategy
-	* simulate telescope noise
-* Topology: methods to estimate the topology of the region of interest
+* Radio telescope beam: 
+	* simulate the sensitivity and evolution of the primary beam
+	* simulate the impact of side-lobes
 
 Contents
 ========
