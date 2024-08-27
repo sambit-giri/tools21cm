@@ -32,12 +32,9 @@ Lightcone
 .. automodule:: tools21cm.lightcone
     :members:
 
-Telescope noise
----------------
-.. automodule:: tools21cm.noise_model
-    :members:
-
-.. automodule:: tools21cm.telescope_functions
+Point statistics
+----------------
+.. automodule:: tools21cm.statistics
     :members:
 
 Power spectrum
@@ -55,14 +52,22 @@ Reading simuation outputs
 .. automodule:: tools21cm.read_files
     :members:
 
+Redshift space distortion
+-------------------------
+.. automodule:: tools21cm.pv_mpm
+    :members:
+
 Smoothing
 ---------
 .. automodule:: tools21cm.smoothing
     :members:
 
-Point statistics
-----------------
-.. automodule:: tools21cm.statistics
+Telescope noise
+---------------
+.. automodule:: tools21cm.noise_model
+    :members:
+
+.. automodule:: tools21cm.telescope_functions
     :members:
 
 Temperature
