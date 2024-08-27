@@ -17,58 +17,84 @@ from tqdm import tqdm
 
 def make_lightcone(filenames, z_low = None, z_high = None, depth_mhz = None, file_redshifts = None, cbin_bits = 32, cbin_order = 'c', los_axis = 0, raw_density = False, interpolation='linear', reading_function=None, box_length_mpc=None):
     '''
-    Make a lightcone from xfrac, density or dT data. Replaces freq_box.
+    Generate a lightcone from xfrac, density, or dT data cubes.
     
     Parameters:
-        filenames (string or array): The coeval cubes. 
-            Can be either any of the following:
-            
-                - An array with the file names
-                
-                - A text file containing the file names
-                
-                - The directory containing the files (must only contain one type of files)
-        z_low (float): the lowest redshift. If not given, the redshift of the 
-            lowest-z coeval cube is used.
-        z_high (float): the highest redshift. If not given, the redshift of the 
-            highest-z coeval cube is used.
-        file_redshifts (string or array): The redshifts of the coeval cubes.
-            Can be any of the following types:
-            
-            - None: determine the redshifts from file names
-             
-            - array: array containing the redshift of each coeval cube
-            
-            - filename: the name of a data file to read the redshifts from
-            
-        cbin_bits (int): If the data files are in cbin format, you may specify 
-            the number of bits.
-        cbin_order (char): If the data files are in cbin format, you may specify 
-            the order of the data.
-        los_axis (int): the axis to use as line-of-sight for the coeval cubes
-        raw_density (bool): if this is true, and the data is a 
-            density file, the raw (simulation units) density will be returned
-            instead of the density in cgs units
-        interpolation (string): can be 'linear', 'step', 'sigmoid' or
-            'step_cell'. 
-            Determines how slices in between output redshifts are interpolated.
-
+    -----------
+    filenames : str, array-like, or dict
+        The coeval cubes can be specified in one of the following formats:
+            - An array of file names.
+            - A text file containing the file names.
+            - A dictionary with redshift values as keys and data as values.
+    
+    z_low : float, optional
+        The lowest redshift for the lightcone. If not provided, the redshift of 
+        the lowest-z coeval cube is used.
+    
+    z_high : float, optional
+        The highest redshift for the lightcone. If not provided, the redshift of 
+        the highest-z coeval cube is used.
+    
+    depth_mhz : float, optional
+        The frequency depth of the lightcone in MHz. Used in determining the 
+        output redshifts.
+    
+    file_redshifts : str or array-like, optional
+        The redshifts corresponding to the coeval cubes. This can be:
+            - None: redshifts are inferred from file names.
+            - Array: an array containing the redshift of each coeval cube.
+            - Filename: a file from which redshifts will be read.
+    
+    cbin_bits : int, default=32
+        The number of bits in the cbin format data files, if applicable.
+    
+    cbin_order : char, default='c'
+        The data order in the cbin format files ('c' for C-order, 'f' for Fortran-order).
+    
+    los_axis : int, default=0
+        The axis to use as the line-of-sight for the coeval cubes.
+    
+    raw_density : bool, default=False
+        If True and the data is from a density file, the raw simulation units will be 
+        returned instead of the density in cgs units.
+    
+    interpolation : str, default='linear'
+        The interpolation method to use for slices between output redshifts.
+        Options: 'linear', 'step', 'sigmoid', 'step_cell'.
+    
+    reading_function : callable, optional
+        A custom function to read the data cubes. If not provided, the function will 
+        use a default method to read the files.
+    
+    box_length_mpc : float, optional
+        The length of the simulation box in comoving megaparsecs (Mpc). Used to 
+        calculate the output redshifts.
+    
     Returns:
-        (lightcone, z) tuple
+    --------
+    tuple
+        A tuple containing:
+        - lightcone (ndarray): The lightcone volume, where the first two axes 
+          have the same size as the input cubes.
+        - z (ndarray): An array containing the redshifts along the line-of-sight.
         
-        - lightcone is the lightcone volume where the first two axes have the same size as the input cubes
-        
-        - z is an array containing the redshifts along the line-of-sight
-        
-    .. note::
-        If z_low is given, that redshift will be the lowest one included,
-        even if there is no coeval box at exactly that redshift. This can 
-        give results that are subtly different from results calculated with
-        the old freq_box routine.
+    Notes:
+    ------
+    - If `z_low` is provided, that redshift will be the lowest included, even if 
+      there is no coeval cube at exactly that redshift. This may result in subtle 
+      differences from results calculated with the old `freq_box` routine.
+    - If `filenames` is a dictionary, it should have redshift values as keys and 
+      corresponding file names as values.
     '''
     
     if not interpolation in ['linear', 'step', 'sigmoid', 'step_cell']:
         raise ValueError('Unknown interpolation type: %s' % interpolation)
+    
+    if isinstance(filenames,dict):
+        if reading_function is None: 
+            reading_function = lambda x: x
+        file_redshifts = np.sort(list(filenames.keys()))
+        filenames = {ii: filenames[zi] for ii,zi in enumerate(file_redshifts)}
     
     if reading_function is None:
         #Figure out output redshifts, file names and size of output
@@ -127,52 +153,82 @@ def make_lightcone(filenames, z_low = None, z_high = None, depth_mhz = None, fil
 
 
 def make_velocity_lightcone(vel_filenames, dens_filenames, z_low = None, \
-                            z_high = None, file_redshifts = None, los_axis = 0):
+                            z_high = None, file_redshifts = None, los_axis = 0,
+                            vel_reading_function=None, dens_reading_function=None):
     '''
-    Make a lightcone from velocity data. Since velocity files contain momentum
-    rather than actual velocity, you must specify filenames for both velocity
-    and density.
+    Generate a lightcone from velocity data. Since velocity files contain momentum
+    rather than actual velocity, filenames for both velocity and density must be specified.
     
     Parameters:
-        vel_filenames (string or array): The coeval velocity cubes. 
-            Can be any of the following:
-            
-                - An array with the file names
-                
-                - A text file containing the file names
-                
-                - The directory containing the files (must only contain one type of files)
-        dens_filenames (string or array): The coeval density cubes.
-            Same format as vel_filenames.
-        z_low (float): the lowest redshift. If not given, the redshift of the 
-            lowest-z coeval cube is used.
-        z_high (float): the highest redshift. If not given, the redshift of the 
-            highest-z coeval cube is used.
-        file_redshifts (string or array): The redshifts of the coeval cubes.
-            Can be any of the following types:
-            
-            - None: determine the redshifts from file names
-             
-            - array: array containing the redshift of each coeval cube
-            
-            - filename: the name of a data file to read the redshifts from
-            
-        los_axis (int): the axis to use as line-of-sight for the coeval cubes
-        
+    -----------
+    vel_filenames : str, array-like, or dict
+        The coeval velocity cubes. Can be specified in one of the following formats:
+            - An array of file names.
+            - A text file containing the file names.
+            - A dictionary with redshift values as keys and data as values.
+    
+    dens_filenames : str, array-like, or dict
+        The coeval density cubes in the same way as `vel_filenames`.
+    
+    z_low : float, optional
+        The lowest redshift for the lightcone. If not provided, the redshift of 
+        the lowest-z coeval cube is used.
+    
+    z_high : float, optional
+        The highest redshift for the lightcone. If not provided, the redshift of 
+        the highest-z coeval cube is used.
+    
+    file_redshifts : str or array-like, optional
+        The redshifts corresponding to the coeval cubes. This can be:
+            - None: redshifts are inferred from file names.
+            - Array: an array containing the redshift of each coeval cube.
+            - Filename: a file from which redshifts will be read.
+    
+    los_axis : int, default=0
+        The axis to use as the line-of-sight for the coeval cubes.
+    
     Returns:
-        (lightcone, z) tuple
-        
-        - lightcone is the lightcone volume where the first two axes have the same size as the input cubes
-        
-        - z is an array containing the redshifts along the line-of-sight
+    --------
+    tuple
+        A tuple containing:
+        - lightcone (ndarray): The lightcone volume where the first two axes 
+          have the same size as the input cubes.
+        - z (ndarray): An array containing the redshifts along the line-of-sight.
+    
+    Notes:
+    ------
+    If `z_low` is provided, that redshift will be the lowest included, even if 
+    there is no coeval cube at exactly that redshift. This may result in subtle 
+    differences from results calculated with the old `freq_box` routine.
+    
+    If `vel_filenames` or `dens_filenames` is provided as a dictionary, it should 
+    have redshift values as keys and corresponding file names as values.
     '''
     
-    dens_filenames = _get_filenames(dens_filenames)
-    file_redshifts = _get_file_redshifts(file_redshifts, dens_filenames)
-    vel_filenames = _get_filenames(vel_filenames)
+    if isinstance(vel_filenames, dict):
+        file_redshifts = np.sort(list(vel_filenames.keys()))
+        vel_filenames = {ii: vel_filenames[zi] for ii, zi in enumerate(file_redshifts)}
+        dens_filenames = {ii: dens_filenames[zi] for ii, zi in enumerate(file_redshifts)}
+        if vel_reading_function is None:
+            vel_reading_function = lambda x: x
+        if dens_reading_function is None:
+            dens_reading_function = lambda x: x
+        mesh_size = dens_reading_function(dens_filenames[0]).shape
+        get_kms = lambda vel_file, dfile: vel_file
+    else:
+        dens_filenames = _get_filenames(dens_filenames)
+        file_redshifts = _get_file_redshifts(file_redshifts, dens_filenames)
+        vel_filenames = _get_filenames(vel_filenames)
+        mesh_size = get_mesh_size(dens_filenames[0])
+        if vel_reading_function is None:
+            vel_reading_function = lambda x: VelocityFile(x)
+        if dens_reading_function is None:
+            dens_reading_function = lambda x: DensityFile(x)
+        get_kms = lambda vel_file, dfile: vel_file.get_kms_from_density(dfile)
+
+
     assert(len(file_redshifts) == len(vel_filenames))
     assert(len(vel_filenames) == len(dens_filenames))
-    mesh_size = get_mesh_size(dens_filenames[0])
     
     output_z = _get_output_z(file_redshifts, z_low, z_high, mesh_size[0])
 
@@ -191,18 +247,18 @@ def make_velocity_lightcone(vel_filenames, dens_filenames, z_low = None, \
         if z_bracket_low_new != z_bracket_low:
             z_bracket_low = z_bracket_low_new
             file_idx = np.argmin(np.abs(file_redshifts - z_bracket_low))
-            dfile = DensityFile(dens_filenames[file_idx])
-            vel_file = VelocityFile(vel_filenames[file_idx])
-            data_low = vel_file.get_kms_from_density(dfile)
+            dfile = dens_reading_function(dens_filenames[file_idx])
+            vel_file = vel_reading_function(vel_filenames[file_idx])
+            data_low = get_kms(vel_file,dfile)
             del dfile
             del vel_file
             
         if z_bracket_high_new != z_bracket_high:
             z_bracket_high = z_bracket_high_new
             file_idx = np.argmin(np.abs(file_redshifts - z_bracket_high))
-            dfile = DensityFile(dens_filenames[file_idx])
-            vel_file = VelocityFile(vel_filenames[file_idx])
-            data_high = vel_file.get_kms_from_density(dfile)
+            dfile = dens_reading_function(dens_filenames[file_idx])
+            vel_file = vel_reading_function(vel_filenames[file_idx])
+            data_high = get_kms(vel_file,dfile)
             del dfile
             del vel_file
         

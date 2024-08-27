@@ -75,6 +75,11 @@ Temperature
 .. automodule:: tools21cm.temperature
     :members:
 
+Thompson Optical Depth
+----------------------
+.. automodule:: tools21cm.tau
+    :members:
+
 Topology
 --------
 .. automodule:: tools21cm.topology
