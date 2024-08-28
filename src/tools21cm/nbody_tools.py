@@ -36,11 +36,11 @@ def ParticleMass_to_ParticleNumber(Lbox, particle_mass, cosmo='Planck18'):
     print('Particles | along each direction = {} | total = {}'.format(particle_number,particle_number**3))
     return particle_number.value
 
-def HaloMass_to_ParticleNumber(Lbox, halo_mass, particles_in_halo, cosmo='Planck18'):
+def halo_mass_to_particle_number(Lbox, halo_mass, particles_in_halo, cosmo='Planck18'):
     particle_mass = halo_mass/particles_in_halo
-    return ParticleMass_to_ParticleNumber(Lbox, particle_mass, cosmo=cosmo)
+    return particle_number_to_particle_mass(Lbox, particle_mass, cosmo=cosmo)
 
-def ParticleNumber_to_ParticleMass(Lbox, particle_each_direction=None, particle_total=None, cosmo='Planck18'):
+def particle_number_to_particle_mass(Lbox, particle_each_direction=None, particle_total=None, cosmo='Planck18'):
     particle_number = particle_each_direction if particle_each_direction is not None else np.cbrt(particle_total)
     cosmo = _set_cosmo(cosmo)
     if not isinstance(Lbox, units.Quantity): 

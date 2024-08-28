@@ -32,6 +32,14 @@ Lightcone
 .. automodule:: tools21cm.lightcone
     :members:
 
+N-Body Tools 
+------------
+.. automodule:: tools21cm.nbody_tools
+    :members:
+    
+.. automodule:: tools21cm.nbody_file
+    :members:
+
 Point statistics
 ----------------
 .. automodule:: tools21cm.statistics
