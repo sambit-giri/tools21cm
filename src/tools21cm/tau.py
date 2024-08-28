@@ -55,7 +55,7 @@ def tau(ionfractions, redshifts, num_points = 50):
 	return tau0, tau_z
 
 def tau_map(ionfractions, redshifts=None, num_points=50, reading_function=None):
-    """
+    '''
     Calculate the optical depth to Thomson scattering for lightcones or maps.
 
     This function computes the optical depth (`tau_0`) and corresponding redshifts (`tau_z`)
@@ -85,8 +85,7 @@ def tau_map(ionfractions, redshifts=None, num_points=50, reading_function=None):
             Optical depth values at each spatial position and redshift. The shape is `(N_x, N_y, N_z + num_points)`, where `N_x` and `N_y` are spatial dimensions, and `N_z` is the number of redshift slices in `output_z`.
         - tau_z : ndarray
             Array of redshift values corresponding to each slice in `tau_0`. The length is `N_z + num_points`.
-
-    """
+    '''
     if redshifts is None:
         assert isinstance(ionfractions, dict), "redshifts must be provided if ionfractions is not a dict."
         redshifts = np.sort(np.array(list(ionfractions.keys())))
