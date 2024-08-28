@@ -26,17 +26,6 @@ def tau(ionfractions, redshifts, num_points = 50):
 		* The Universe is assumed to be fully ionized at the lowest redshift supplied.
 		* To get the total optical depth, look at the last value in tau_0
 		
-	Example:
-		To calculate the optical depth for a scenario where the Universe is instantaneously
-		reionized:
-		
-		>>> z_reion = 11.
-		>>> redshifts = np.linspace(z_reion, 1100., 50)
-		>>> ionfracs = np.zeros(len(redshifts))
-		>>> tau0, tau_z = tau(ionfracs, redshifts)
-		>>> print 'Total tau: ', tau0[-1]
-		0.0884755058758
-		
 	'''
 	
 	if len(ionfractions) != len(redshifts):
