@@ -99,9 +99,6 @@ class NbodyFile:
 
 
 	def read_from_file(self, node=None):
-		'''
-		Read data from file.
-		'''
 		if node != None:
 			self.node = node
 		else:
