@@ -1,8 +1,9 @@
 # Tools21cm
 
+[![License](https://img.shields.io/github/license/sambit-giri/tools21cm.svg)](https://github.com/sambit-giri/tools21cm/blob/main/LICENSE)
 [![DOI](https://joss.theoj.org/papers/10.21105/joss.02363/status.svg)](https://doi.org/10.21105/joss.02363)
-[![CI status](https://github.com/sambit-giri/tools21cm/actions/workflows/ci.yml/badge.svg)](https://github.com/sambit-giri/tools21cm/actions/workflows/ci.yml)
 [![GitHub Repository](https://img.shields.io/github/repo-size/sambit-giri/tools21cm)](https://github.com/sambit-giri/tools21cm)
+[![CI status](https://github.com/sambit-giri/tools21cm/actions/workflows/ci.yml/badge.svg)](https://github.com/sambit-giri/tools21cm/actions/workflows/ci.yml)
 [![PyPI version](https://badge.fury.io/py/tools21cm.svg)](https://badge.fury.io/py/tools21cm)
 
 A python package for analysing simulated 21-cm signals from the Epoch of Reionization (EoR) and Cosmic Dawn (CD). Full documentation (with examples, installation instructions and complete module description) can be found at [readthedocs](https://tools21cm.readthedocs.io/).
