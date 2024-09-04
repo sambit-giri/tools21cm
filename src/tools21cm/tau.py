@@ -23,7 +23,7 @@ def tau(ionfractions, redshifts, num_points = 50):
 		tau_z is the corresponding redshift
 		
 	Notes:
-		* The Universe is assumed to be fully ionized at the lowest redshift supplied.
+		* The Universe is assumed to be fully ionized below the lowest redshift supplied.
 		* To get the total optical depth, look at the last value in tau_0
 		
 	'''
@@ -58,38 +58,41 @@ def tau_map(ionfractions, redshifts=None, num_points=50, reading_function=None):
     '''
     Calculate the optical depth to Thomson scattering for lightcones or maps.
 
-    This function computes the optical depth (tau_0) and corresponding redshifts (tau_z)
-    for a given set of ionization fractions across different redshifts. The calculation
-    accounts for the evolution of the ionization state of the universe and integrates over
-    specified redshift intervals.
+    Parameters:
+        * ionfractions (ndarray or dict): Ionized fraction data across various 
+            points along the line-of-sight. 
 
-    Parameters
-    ----------
-    ionfractions : ndarray or dict
-        Ionized fraction data across various points along the line-of-sight. 
+        * redshifts (ndarray, optional): Array of redshift values corresponding to 
+            the ionfractions data. Must be the same length as ionfractions if `ionfractions` 
+            is an ndarray. If `ionfractions` is a dict and redshifts is None, redshifts are 
+            inferred from the keys of the dictionary.
 
-    redshifts : ndarray, optional
-        Array of redshift values corresponding to the ionfractions data. Must be the same length as ionfractions if ionfractions is an ndarray. If ionfractions is a dict and redshifts is None, redshifts are inferred from the keys of the dictionary.
-    
-    num_points : int, optional
-        Number of initial points used for the integration to account for high-redshift contributions where ionization is assumed to be negligible. Default is 50.
-    
-    reading_function : callable, optional
-        Custom function to read and process ionization fraction data when ionfractions is provided in a format that requires specialized reading. The function should take a filename or data identifier as input and return an ndarray of ionization fractions.
-    
-    Returns
-    -------
-    tuple
-        A tuple containing:
-        - tau_0 : ndarray
-            Optical depth values at each spatial position and redshift. The shape is (N_x, N_y, N_z + num_points), where N_x and N_y are spatial dimensions, and N_z is the number of redshift slices in output_z.
-        - tau_z : ndarray
-            Array of redshift values corresponding to each slice in tau_0 The length is N_z + num_points.     
+        * num_points (int, optional): Number of initial points used for the integration 
+            to account for high-redshift contributions where ionization is assumed to be negligible. 
+            Default is 50.
+
+        * reading_function (callable, optional): Custom function to read and process ionization 
+            fraction data when ionfractions is provided in a format that requires specialized reading. 
+            The function should take a filename or data identifier as input and return an ndarray of ionization fractions.
+
+    Returns:
+        Tuple containing (tau_0, tau_z)
+
+        * tau_0 (ndarray): Optical depth values at each spatial position and redshift. 
+            The shape is (N_x, N_y, N_z + num_points), where N_x and N_y are spatial dimensions, 
+            and N_z is the number of redshift slices in output_z.
+
+        * tau_z (ndarray): Array of redshift values corresponding to each slice in tau_0. 
+            The length is N_z + num_points.
+
+    Notes:
+        * The Universe is assumed to be fully ionized below the lowest redshift supplied.
+        * The reading_function is useful when working with custom data formats.
     '''
     if redshifts is None:
         assert isinstance(ionfractions, dict), "redshifts must be provided if ionfractions is not a dict."
         redshifts = np.sort(np.array(list(ionfractions.keys())))
-    
+
     if isinstance(ionfractions, np.ndarray):
         lightcone, output_z = ionfractions, redshifts
     else:
@@ -98,7 +101,7 @@ def tau_map(ionfractions, redshifts=None, num_points=50, reading_function=None):
     sigma_T = 6.65e-25  # Thomson scattering cross-section in cm^2
     chi1 = 1.0 + const.abu_he  # Accounting for Helium abundance
     coeff = (2.0 * const.c * 1e5 * sigma_T * const.OmegaB / const.Omega0 * const.rho_crit_0 *
-             chi1 / const.mean_molecular / const.m_p / (3.0 * const.H0cgs))
+                chi1 / const.mean_molecular / const.m_p / (3.0 * const.H0cgs))
 
     tau_z = np.hstack((np.linspace(output_z[0] / num_points, output_z[0], num_points), output_z))
     tau_0 = np.zeros((lightcone.shape[0], lightcone.shape[1], len(tau_z)))
