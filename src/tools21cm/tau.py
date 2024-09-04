@@ -69,7 +69,7 @@ def tau_map(ionfractions, redshifts=None, num_points=50, reading_function=None):
         Ionized fraction data across various points along the line-of-sight. 
 
     redshifts : ndarray, optional
-        Array of redshift values corresponding to the ionfractions data. Must be the same length as ionfractions if `ionfractions` is an ndarray. If ionfractions is a dict and redshifts is None, redshifts are inferred from the keys of the dictionary.
+        Array of redshift values corresponding to the ionfractions data. Must be the same length as ionfractions if ionfractions is an ndarray. If ionfractions is a dict and redshifts is None, redshifts are inferred from the keys of the dictionary.
     
     num_points : int, optional
         Number of initial points used for the integration to account for high-redshift contributions where ionization is assumed to be negligible. Default is 50.
