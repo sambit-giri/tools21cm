@@ -82,10 +82,9 @@ def tau_map(ionfractions, redshifts=None, num_points=50, reading_function=None):
     tuple
         A tuple containing:
         - tau_0 : ndarray
-            Optical depth values at each spatial position and redshift. The shape is `(N_x, N_y, N_z + num_points)`, where `N_x` and `N_y` are spatial dimensions, and `N_z` is the number of redshift slices in `output_z`.
+            Optical depth values at each spatial position and redshift. The shape is (N_x, N_y, N_z + num_points), where N_x and N_y are spatial dimensions, and N_z is the number of redshift slices in output_z.
         - tau_z : ndarray
-            Array of redshift values corresponding to each slice in `tau_0`. The length is `N_z + num_points`.
-            
+            Array of redshift values corresponding to each slice in tau_0 The length is N_z + num_points.     
     '''
     if redshifts is None:
         assert isinstance(ionfractions, dict), "redshifts must be provided if ionfractions is not a dict."
