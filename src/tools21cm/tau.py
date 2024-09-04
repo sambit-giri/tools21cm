@@ -58,7 +58,7 @@ def tau_map(ionfractions, redshifts=None, num_points=50, reading_function=None):
     '''
     Calculate the optical depth to Thomson scattering for lightcones or maps.
 
-    This function computes the optical depth (`tau_0`) and corresponding redshifts (`tau_z`)
+    This function computes the optical depth (tau_0) and corresponding redshifts (tau_z)
     for a given set of ionization fractions across different redshifts. The calculation
     accounts for the evolution of the ionization state of the universe and integrates over
     specified redshift intervals.
@@ -66,16 +66,16 @@ def tau_map(ionfractions, redshifts=None, num_points=50, reading_function=None):
     Parameters
     ----------
     ionfractions : ndarray or dict
-        Ionized fraction data across various points along the line-of-sight. If `ndarray`: A 2D or 3D array where each element represents the ionized fraction at a specific spatial position and redshift. If `dict`: A dictionary with redshift values as keys and corresponding ionized fraction arrays as values.
-    
+        Ionized fraction data across various points along the line-of-sight. 
+
     redshifts : ndarray, optional
-        Array of redshift values corresponding to the `ionfractions` data. Must be the same length as `ionfractions` if `ionfractions` is an ndarray. If `ionfractions` is a dict and `redshifts` is None, redshifts are inferred from the keys of the dictionary.
+        Array of redshift values corresponding to the ionfractions data. Must be the same length as ionfractions if `ionfractions` is an ndarray. If ionfractions is a dict and redshifts is None, redshifts are inferred from the keys of the dictionary.
     
     num_points : int, optional
         Number of initial points used for the integration to account for high-redshift contributions where ionization is assumed to be negligible. Default is 50.
     
     reading_function : callable, optional
-        Custom function to read and process ionization fraction data when `ionfractions` is provided in a format that requires specialized reading. The function should take a filename or data identifier as input and return an ndarray of ionization fractions.
+        Custom function to read and process ionization fraction data when ionfractions is provided in a format that requires specialized reading. The function should take a filename or data identifier as input and return an ndarray of ionization fractions.
     
     Returns
     -------
