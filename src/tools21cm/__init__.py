@@ -75,6 +75,9 @@ from .bispectrum import *
 from .position_dependent_power_spectrum import *
 from .test_case import *
 
+# Interface to simulation codes
+from .model_21cmfast import *
+
 #Suppress warnings from zero-divisions and nans
 import numpy
 numpy.seterr(all='ignore')
