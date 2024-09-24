@@ -45,6 +45,7 @@ from .corr_function import *
 # from . import power_spect_fast
 
 from .line_intensity import *
+from .lyman_alpha_transmission import *
 
 from .bubble_stats import *
 #from zahnbubble import zahn

@@ -165,4 +165,3 @@ def _get_slice(data, idx, los_axis, slice_depth=1):
         elif los_axis == 1:
             return np.squeeze(data[:,:,idx1:idx2,:])
         return np.squeeze(data[:,:,:,idx1:idx2])
-    
