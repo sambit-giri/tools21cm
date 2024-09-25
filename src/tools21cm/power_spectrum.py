@@ -10,7 +10,7 @@ from .helper_functions import print_msg, get_eval
 from scipy import fftpack, stats
 
 
-def power_spectrum_nd(input_array, box_dims=None, verbose=False):
+def power_spectrum_nd(input_array, box_dims=None, verbose=False, **kwargs):
         ''' 
         Calculate the power spectrum of input_array and return it as an n-dimensional array.
         
@@ -27,6 +27,7 @@ def power_spectrum_nd(input_array, box_dims=None, verbose=False):
                 The power spectrum in the same dimensions as the input array.           
         '''
 
+        if kwargs.get('boxsize') is not None: box_dims = kwargs.get('boxsize')
         box_dims = _get_dims(box_dims, input_array.shape)
 
         if(verbose): print( 'Calculating power spectrum...')
@@ -42,7 +43,7 @@ def power_spectrum_nd(input_array, box_dims=None, verbose=False):
         return power_spectrum
 
 
-def cross_power_spectrum_nd(input_array1, input_array2, box_dims):
+def cross_power_spectrum_nd(input_array1, input_array2, box_dims, **kwargs):
         ''' 
         Calculate the cross power spectrum two arrays and return it as an n-dimensional array.
         
@@ -66,6 +67,7 @@ def cross_power_spectrum_nd(input_array1, input_array2, box_dims):
 
         assert(input_array1.shape == input_array2.shape)
 
+        if kwargs.get('boxsize') is not None: box_dims = kwargs.get('boxsize')
         box_dims = _get_dims(box_dims, input_array1.shape)
 
         print_msg( 'Calculating power spectrum...')
@@ -82,7 +84,7 @@ def cross_power_spectrum_nd(input_array1, input_array2, box_dims):
         return power_spectrum
 
 
-def radial_average(input_array, box_dims, kbins=10, binning='log', breakpoint=0.1):
+def radial_average(input_array, box_dims, kbins=10, binning='log', breakpoint=0.1, **kwargs):
         '''
         Radially average data. Mostly for internal use.
         
@@ -104,8 +106,8 @@ def radial_average(input_array, box_dims, kbins=10, binning='log', breakpoint=0.
 
         '''
 
+        if kwargs.get('boxsize') is not None: box_dims = kwargs.get('boxsize')
         k_comp, k = _get_k(input_array, box_dims)
-
         kbins = _get_kbins(kbins, box_dims, k, binning=binning, breakpoint=breakpoint)
         
         #Bin the data
@@ -121,7 +123,7 @@ def radial_average(input_array, box_dims, kbins=10, binning='log', breakpoint=0.
         return outdata, kbins[:-1]+dk, n_modes
         
 
-def power_spectrum_1d(input_array_nd, kbins=100, box_dims=None, return_n_modes=False, binning='log', breakpoint=0.1, window=None):
+def power_spectrum_1d(input_array_nd, kbins=100, box_dims=None, return_n_modes=False, binning='log', breakpoint=0.1, window=None, **kwargs):
         ''' Calculate the spherically averaged power spectrum of an array 
         and return it as a one-dimensional array.
         
@@ -157,6 +159,7 @@ def power_spectrum_1d(input_array_nd, kbins=100, box_dims=None, return_n_modes=F
                 else:
                         input_array_nd *= window
 
+        if kwargs.get('boxsize') is not None: box_dims = kwargs.get('boxsize')
         box_dims = _get_dims(box_dims, input_array_nd.shape)
 
         input_array = power_spectrum_nd(input_array_nd, box_dims=box_dims)      
@@ -167,7 +170,7 @@ def power_spectrum_1d(input_array_nd, kbins=100, box_dims=None, return_n_modes=F
         return ps, bins
 
 
-def power_spectrum_2d(input_array, kbins=10, binning='log', box_dims=244/.7, return_modes=False, nu_axis=2, window=None):
+def power_spectrum_2d(input_array, kbins=10, binning='log', box_dims=244/.7, return_modes=False, nu_axis=2, window=None, **kwargs):
         '''
         Calculate the power spectrum and bin it in kper and kpar
         input_array is the array to calculate the power spectrum from
@@ -214,6 +217,7 @@ def power_spectrum_2d(input_array, kbins=10, binning='log', box_dims=244/.7, ret
         elif not isinstance(kbins[0], int): 
                 binning = None
 
+        if kwargs.get('boxsize') is not None: box_dims = kwargs.get('boxsize')
         box_dims = _get_dims(box_dims, input_array.shape)
         power = power_spectrum_nd(input_array, box_dims)
         k_xyz, k = _get_k(input_array, box_dims)
@@ -253,7 +257,7 @@ def power_spectrum_2d(input_array, kbins=10, binning='log', box_dims=244/.7, ret
                 return ps.statistic, kper_mid, kpar_mid
 
 
-def cross_power_spectrum_1d(input_array1_nd, input_array2_nd, kbins=100, box_dims=None, return_n_modes=False, binning='log',breakpoint=0.1):
+def cross_power_spectrum_1d(input_array1_nd, input_array2_nd, kbins=100, box_dims=None, return_n_modes=False, binning='log', breakpoint=0.1, **kwargs):
         ''' Calculate the spherically averaged cross power spectrum of two arrays 
         and return it as a one-dimensional array.
         
@@ -277,7 +281,7 @@ def cross_power_spectrum_1d(input_array1_nd, input_array2_nd, kbins=100, box_dim
                 A tuple with (Pk, bins), where Pk is an array with the 
                 cross power spectrum and bins is an array with the k bin centers.
         '''
-
+        if kwargs.get('boxsize') is not None: box_dims = kwargs.get('boxsize')
         box_dims = _get_dims(box_dims, input_array1_nd.shape)
 
         input_array = cross_power_spectrum_nd(input_array1_nd, input_array2_nd, box_dims=box_dims)      
@@ -288,8 +292,7 @@ def cross_power_spectrum_1d(input_array1_nd, input_array2_nd, kbins=100, box_dim
         return ps, bins
 
 
-def power_spectrum_mu(input_array, los_axis = 0, mubins=20, kbins=10, box_dims = None, weights=None,exclude_zero_modes = True, return_n_modes=False, absolute_mus = True):
-
+def power_spectrum_mu(input_array, los_axis=0, mubins=20, kbins=10, box_dims=None, weights=None, exclude_zero_modes=True, return_n_modes=False, absolute_mus=True, **kwargs):
         '''
         Calculate the power spectrum and bin it in mu=cos(theta) and k.
         
@@ -319,6 +322,7 @@ def power_spectrum_mu(input_array, los_axis = 0, mubins=20, kbins=10, box_dims =
         
         '''
 
+        if kwargs.get('boxsize') is not None: box_dims = kwargs.get('boxsize')
         box_dims = _get_dims(box_dims, input_array.shape)
 
         #Calculate the power spectrum
@@ -331,7 +335,7 @@ def power_spectrum_mu(input_array, los_axis = 0, mubins=20, kbins=10, box_dims =
         return ps, mu_bins, k_bins
 
 
-def cross_power_spectrum_mu(input_array1, input_array2, los_axis = 0, mubins=20, kbins=10, box_dims = None, weights=None, exclude_zero_modes = True, return_n_modes=False, absolute_mus=True):
+def cross_power_spectrum_mu(input_array1, input_array2, los_axis=0, mubins=20, kbins=10, box_dims=None, weights=None, exclude_zero_modes=True, return_n_modes=False, absolute_mus=True, **kwargs):
         '''
         Calculate the cross power spectrum and bin it in mu=cos(theta) and k.
         
@@ -364,6 +368,7 @@ def cross_power_spectrum_mu(input_array1, input_array2, los_axis = 0, mubins=20,
                 Add support for (non-numpy) lists for the bins
         '''
 
+        if kwargs.get('boxsize') is not None: box_dims = kwargs.get('boxsize')
         box_dims = _get_dims(box_dims, input_array1.shape)
         
         #Calculate the power spectrum
@@ -573,3 +578,40 @@ def _get_nonzero_idx(ps_shape, los_axis):
         return good_idx
 
 
+def anisotropy_ratio_r_mu(input_array, los_axis=0, mu_cut=0.5, mubins=20, kbins=10, box_dims=None, weights=None, exclude_zero_modes=True, return_n_modes=False, absolute_mus=True, **kwargs):
+    '''
+    Calculate the anisotropy ratio r_mu(k).
+
+    Parameters: 
+            input_array (numpy array): the data array
+            los_axis = 0 (integer): the line-of-sight axis
+            mu_cut = 0.5 (float): the value of mu to split the P(k,mu) data.
+            mubins = 20 (integer): the number of mu bins
+            kbins = 10 (integer or array-like): The number of bins,
+                    or a list containing the bin edges. If an integer is given, the bins
+                    are logarithmically spaced.
+            box_dims = None (float or array-like): the dimensions of the 
+                    box in Mpc. If this is None, the current box volume is used along all
+                    dimensions. If it is a float, this is taken as the box length
+                    along all dimensions. If it is an array-like, the elements are
+                    taken as the box length along each axis.
+            return_n_modes = False (bool): if true, also return the
+                    number of modes in each bin
+            exlude_zero_modes = True (bool): if true, modes with any components
+                    of k equal to zero will be excluded.
+            absolute_mus = True (boolean): if true, use the absolute values of mu, range [0,1]. If false, use the range [-1,1] 
+
+    Returns: 
+            A tuple with (Pk, mubins, kbins), where Pk is an array with the 
+            power spectrum of dimensions (n_mubins x n_kbins), 
+            mubins is an array with the mu bin centers and
+            kbins is an array with the k bin centers.
+
+    '''
+    Pk, mubins, kbins = power_spectrum_mu(input_array, los_axis=los_axis, mubins=mubins, kbins=kbins, box_dims=box_dims, weights=weights, exclude_zero_modes=exclude_zero_modes, return_n_modes=return_n_modes, absolute_mus=absolute_mus, **kwargs)
+    Pup = Pk[mubins>=mu_cut,:]
+    Pdn = Pk[mubins<mu_cut,:]
+    rup = np.array([pp[np.isfinite(pp)].mean() for pp in Pup.T])
+    rdn = np.array([pp[np.isfinite(pp)].mean() for pp in Pdn.T])     
+    rmu = rup/rdn-1.0
+    return rmu, kbins
