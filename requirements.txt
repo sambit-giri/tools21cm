@@ -1,3 +1,4 @@
+cython
 numpy
 scipy
 matplotlib
@@ -12,4 +13,3 @@ pandas
 
 ## cosmospectra  # cosmospectra@git+https://github.com/sambit-giri/cosmospectra.git
 pytest
-cython
