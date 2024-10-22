@@ -7,7 +7,7 @@ Created on Apr 23, 2015
 import numpy as np
 from scipy import fftpack
 from .power_spectrum import _get_dims, _get_k, power_spectrum_1d
-from scipy.interpolate import interp1d
+from scipy.interpolate import interp1d, splrep, splev
 
 def make_gaussian_random_field(dims, box_dims, power_spectrum, random_seed=None):
     '''
@@ -97,6 +97,8 @@ def _get_ps_func_for_field(input_field, box_dims, kbins=10):
                             box_dims=box_dims, kbins=kbins, return_n_modes=True)
     ps_k = interp1d(k_input[n_modes>0], ps_input[n_modes>0], kind='linear', \
                     bounds_error=False, fill_value=0.)
+    # tckp = splrep(np.log10(k_input[n_modes>0]), np.log10(ps_input[n_modes>0]), k=1)
+    # ps_k = lambda k: 10**splev(np.log10(k), tckp)
     return ps_k
     
     
