@@ -6,7 +6,7 @@ from cython cimport bint
 
 def CubeMap(np.ndarray[np.int64_t, ndim=3] arr, bint multi_marker=True):
     cdef int nx, ny, nz, Nx, Ny, Nz, i, j, k
-    cdef np.ndarray[np.int_t, ndim=3] cubemap
+    cdef np.ndarray[np.int64_t, ndim=3] cubemap
     cdef tuple markers
 
     nx = <int> np.PyArray_DIM(arr, 0)
