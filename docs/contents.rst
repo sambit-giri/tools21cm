@@ -7,6 +7,11 @@ Angular coordinates
 .. automodule:: tools21cm.angular_coordinates
     :members:
 
+Useful Conversion Functions
+---------------------------
+.. automodule:: tools21cm.astro_tools
+    :members:
+
 Bubble Statistics
 -----------------
 .. automodule:: tools21cm.bubble_stats

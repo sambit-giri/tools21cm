@@ -67,6 +67,7 @@ from .box_counting import *
 from .fitting_methods import *
 from .percolation import *
 from .compare_constraints import *
+from .astro_tools import *
 
 # from .power_spect_fast import *
 ### Cosmospectra
