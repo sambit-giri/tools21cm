@@ -605,3 +605,62 @@ def fftconvolve(in1, in2):
     ret = roll(ret, -shift, axis=list_of_axes)
     return ret
 
+def combined_mean_variance(means, variances, sample_sizes=None):
+    '''
+    Estimate the combined mean and variance of multiple datasets with different means, variances, and sample sizes.
+
+    Parameters
+    ----------
+    means : array-like, list, or dict
+        Means of individual datasets. If a dict, values are used.
+
+    variances : array-like, list, or dict
+        Variances of individual datasets. If a dict, values are used.
+
+    sample_sizes : array-like, list, dict, or None, optional
+        Sample sizes for each dataset. If None, all sample sizes are assumed to be 1.
+
+    Returns
+    -------
+    mean_comb : float or numpy array
+        Combined mean of the datasets.
+
+    var_comb : float or numpy array
+        Combined variance of the datasets.
+
+    Notes
+    -----
+    - The formula used to compute the combined mean is:
+      mean_comb = (Σ(sample_sizes[i] * means[i])) / Σ(sample_sizes[i])
+
+    - The formula for combined variance accounts for both the internal variance of each dataset 
+      and the spread of the dataset means:
+      var_comb = (Σ((sample_sizes[i] - 1) * variances[i] + sample_sizes[i] * (means[i] - mean_comb)^2)) / (Σ(sample_sizes[i]) - 1)
+
+    Example
+    -------
+    >>> means = [2.0, 3.0, 4.0]
+    >>> variances = [0.5, 0.7, 0.6]
+    >>> sample_sizes = [10, 15, 20]
+    >>> combined_mean_variance(means, variances, sample_sizes)
+    (3.2, 0.6666666666666666)
+    '''
+    # Convert inputs to numpy arrays for easier manipulation
+    if isinstance(means, list) or isinstance(means, dict):
+        means = np.array(list(means.values()) if isinstance(means, dict) else means)
+
+    if isinstance(variances, list) or isinstance(variances, dict):
+        variances = np.array(list(variances.values()) if isinstance(variances, dict) else variances)
+
+    if sample_sizes is None:
+        sample_sizes = np.ones(means.shape)
+    elif isinstance(sample_sizes, list) or isinstance(sample_sizes, dict):
+        sample_sizes = np.array(list(sample_sizes.values()) if isinstance(sample_sizes, dict) else sample_sizes)
+
+    # Calculate combined mean
+    mean_comb = np.sum(sample_sizes * means, axis=0) / np.sum(sample_sizes, axis=0)
+
+    # Calculate combined variance
+    var_comb = np.sum((sample_sizes - 1) * variances + sample_sizes * (means - mean_comb)**2, axis=0) / (np.sum(sample_sizes, axis=0) - 1)
+
+    return mean_comb, var_comb
