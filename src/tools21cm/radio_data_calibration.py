@@ -98,6 +98,12 @@ def get_uv_map_with_gains(ncells, z, gain_model={'name': 'random_uniform', 'min'
     
     return gain_uv_map, N_ant
 
+def gain_uv_map_to_uv_map(gain_uv_map, verbose=True):
+    uv_map = np.zeros_like(gain_uv_map)
+    for (i, j), gains in tqdm(np.ndenumerate(gain_uv_map), total=gain_uv_map.size, disable=not verbose):
+        uv_map[i, j] = len(gains)
+    return uv_map.astype(int)
+
 
 def grid_uv_tracks_with_gains(Nbase, gain_vals, gain_uv_map, z, ncells, boxsize=None, include_mirror_baselines=False, verbose=True):
     """
@@ -138,7 +144,7 @@ def grid_uv_tracks_with_gains(Nbase, gain_vals, gain_uv_map, z, ncells, boxsize=
     )
     Nb, gain_vals = Nb[in_bounds], gain_vals[in_bounds]
     
-    for (x, y), gain in tqdm(zip(Nb[:, :2], gain_vals), total=len(gain_vals), disable=not verbose):
+    for (x, y), gain in zip(Nb[:, :2], gain_vals):
         gain_uv_map[int(x), int(y)].append(gain)
         if include_mirror_baselines:
             gain_uv_map[-int(x), -int(y)].append(gain)

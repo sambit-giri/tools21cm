@@ -51,7 +51,7 @@ from .bubble_stats import *
 
 from .foreground_model import *
 from .telescope_functions import *
-from radio_data_calibration import *
+from .radio_data_calibration import *
 
 #if 'numba' in sys.modules: 
 #from numba_functions import *
