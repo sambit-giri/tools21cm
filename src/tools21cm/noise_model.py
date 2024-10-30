@@ -19,11 +19,9 @@ import pickle
 from joblib import Parallel, delayed
 from tqdm import tqdm
 
-def noise_map(ncells, z, depth_mhz, obs_time=1000, filename=None, boxsize=None, total_int_time=6., int_time=10., declination=-30., uv_map=np.array([]), N_ant=None, verbose=True, fft_wrap=False):
+def noise_map(ncells, z, depth_mhz, obs_time=1000, filename=None, boxsize=None, total_int_time=6., int_time=10., declination=-30., uv_map=None, N_ant=None, verbose=True, fft_wrap=False):
 	"""
-	@ Ghara et al. (2017), Giri et al. (2018b)
-
-	It creates a noise map by simulating the radio observation strategy.
+	It creates a noise map by simulating the radio observation strategy (1801.06550).
 
 	Parameters
 	----------
@@ -62,7 +60,7 @@ def noise_map(ncells, z, depth_mhz, obs_time=1000, filename=None, boxsize=None, 
 		A 2D slice of the interferometric noise at that frequency (in muJy).
 	"""
 	if not filename: N_ant = SKA1_LowConfig_Sept2016().shape[0]
-	if not uv_map.size: uv_map, N_ant  = get_uv_map(ncells, z, filename=filename, total_int_time=total_int_time, int_time=int_time, boxsize=boxsize, declination=declination)
+	if uv_map is None: uv_map, N_ant  = get_uv_map(ncells, z, filename=filename, total_int_time=total_int_time, int_time=int_time, boxsize=boxsize, declination=declination)
 	if not N_ant: N_ant = np.loadtxt(filename, dtype=str).shape[0]
 	sigma, rms_noi = sigma_noise_radio(z, uv_map, depth_mhz, obs_time, int_time, N_ant=N_ant, verbose=False)
 	noise_real = np.random.normal(loc=0.0, scale=rms_noi, size=(ncells, ncells))
@@ -90,46 +88,20 @@ def ifft2_wrap(nn1):
 	imap = np.fft.ifft2(bla3)
 	return imap[nn1.shape[0]/2:-nn1.shape[0]/2,nn1.shape[1]/2:-nn1.shape[1]/2]
 
-def telescope_response_on_image(array, z, depth_mhz, obs_time=1000, filename=None, boxsize=None, total_int_time=6., int_time=10., declination=-30., uv_map=np.array([]), N_ant=None):
+def apply_uv_response_on_image(array, uv_map):
 	"""
 	Parameters
 	----------
 	array: ndarray
 		Image array
-	z: float
-		Redshift.
-	depth_mhz: float
-		The bandwidth in MHz.
-	obs_time: float
-		The observation time in hours.
-	total_int_time: float
-		Total observation per day time in hours
-	int_time: float
-		Intergration time in seconds
-	declination: float
-		Declination angle in deg
 	uv_map: ndarray
-		numpy array containing gridded uv coverage. If nothing given, then the uv map 
-		will be simulated
-	N_ant: int
-		Number of antennae
-	filename: str
-		The path to the file containing the telescope configuration.
-
-			- As a default, it takes the SKA-Low configuration from Sept 2016
-			- It is not used if uv_map and N_ant is provided
-	boxsize: float
-		Boxsize in Mpc
+		numpy array containing gridded uv coverage. 
 	
 	Returns
 	-------
 	Radio image after applying the effect of radio observation strategy.
 	"""
-	assert array.shape[0] == array.shape[1]
-	ncells = array.shape[0]
-	if not filename: N_ant = SKA1_LowConfig_Sept2016().shape[0]
-	if not uv_map.size: uv_map, N_ant  = get_uv_map(ncells, z, filename=filename, total_int_time=total_int_time, int_time=int_time, boxsize=boxsize, declination=declination) 
-	if not N_ant: N_ant = np.loadtxt(filename, dtype=str).shape[0]
+	assert array.shape == uv_map.shape
 	img_arr  = np.fft.fft2(array)
 	img_arr[uv_map==0] = 0
 	img_map  = np.fft.ifft2(img_arr)
@@ -137,6 +109,8 @@ def telescope_response_on_image(array, z, depth_mhz, obs_time=1000, filename=Non
 
 def get_uv_map(ncells, z, filename=None, total_int_time=6., int_time=10., boxsize=None, declination=-30., verbose=True):
 	"""
+	It creates the uv map at a given redshift (z).
+
 	Parameters
 	----------
 	ncells: int
@@ -172,6 +146,8 @@ def get_uv_map(ncells, z, filename=None, total_int_time=6., int_time=10., boxsiz
 
 def make_uv_map_lightcone(ncells, zs, filename=None, total_int_time=6., int_time=10., boxsize=None, declination=-30., verbose=True):
 	"""
+	It creates uv maps at every redshift of the lightcone.
+
 	Parameters
 	----------
 	ncells: int
@@ -210,25 +186,23 @@ def make_uv_map_lightcone(ncells, zs, filename=None, total_int_time=6., int_time
 		print("\nThe lightcone has been constructed upto %.1f per cent." %(i*percc))
 	return uv_lc, N_ant
 
-def telescope_response_on_coeval(array, z, depth_mhz=None, obs_time=1000, filename=None, boxsize=None, total_int_time=6., int_time=10., declination=-30., uv_map=np.array([]), N_ant=None):
+def apply_uv_response_on_coeval(array, z, depth_mhz=None, obs_time=1000, filename=None, boxsize=None, total_int_time=6., int_time=10., declination=-30., uv_map=None, N_ant=None):
 	ncells = array.shape[-1]
 	if not filename: N_ant = SKA1_LowConfig_Sept2016().shape[0]
 	if not boxsize: boxsize = conv.LB
 	if not depth_mhz: depth_mhz = (cm.z_to_nu(cm.cdist_to_z(cm.z_to_cdist(z)-boxsize/2))-cm.z_to_nu(cm.cdist_to_z(cm.z_to_cdist(z)+boxsize/2)))/ncells
-	if not uv_map.size: uv_map, N_ant  = get_uv_map(ncells, z, filename=filename, total_int_time=total_int_time, int_time=int_time, boxsize=boxsize, declination=declination)
+	if uv_map is None: uv_map, N_ant  = get_uv_map(ncells, z, filename=filename, total_int_time=total_int_time, int_time=int_time, boxsize=boxsize, declination=declination)
 	if not N_ant: N_ant = np.loadtxt(filename, dtype=str).shape[0]
 	data3d = np.zeros(array.shape)
 	print("Creating the noise cube")
 	for k in range(ncells):
-		data2d = telescope_response_on_image(array[:,:,k], z, depth_mhz, obs_time=obs_time, filename=filename, boxsize=boxsize, total_int_time=total_int_time, int_time=int_time, declination=declination, uv_map=uv_map, N_ant=N_ant)
+		data2d = apply_uv_response_on_image(array[:,:,k], uv_map=uv_map)
 		data3d[:,:,k] = data2d
 	return data3d
 
-def noise_cube_coeval(ncells, z, depth_mhz=None, obs_time=1000, filename=None, boxsize=None, total_int_time=6., int_time=10., declination=-30., uv_map=np.array([]), N_ant=None, verbose=True, fft_wrap=False):
+def noise_cube_coeval(ncells, z, depth_mhz=None, obs_time=1000, filename=None, boxsize=None, total_int_time=6., int_time=10., declination=-30., uv_map=None, N_ant=None, verbose=True, fft_wrap=False):
 	"""
-	@ Ghara et al. (2017), Giri et al. (2018b)
-
-	It creates a noise coeval cube by simulating the radio observation strategy.
+	It creates a noise coeval cube by simulating the radio observation strategy (1801.06550).
 
 	Parameters
 	----------
@@ -270,7 +244,7 @@ def noise_cube_coeval(ncells, z, depth_mhz=None, obs_time=1000, filename=None, b
 	if not filename: N_ant = SKA1_LowConfig_Sept2016().shape[0]
 	if not boxsize: boxsize = conv.LB
 	if not depth_mhz: depth_mhz = (cm.z_to_nu(cm.cdist_to_z(cm.z_to_cdist(z)-boxsize/2))-cm.z_to_nu(cm.cdist_to_z(cm.z_to_cdist(z)+boxsize/2)))/ncells
-	if not uv_map.size: uv_map, N_ant  = get_uv_map(ncells, z, filename=filename, total_int_time=total_int_time, int_time=int_time, boxsize=boxsize, declination=declination)
+	if uv_map is None: uv_map, N_ant  = get_uv_map(ncells, z, filename=filename, total_int_time=total_int_time, int_time=int_time, boxsize=boxsize, declination=declination)
 	if not N_ant: N_ant = np.loadtxt(filename, dtype=str).shape[0]
 	# ncells = int(ncells); print(ncells)
 	noise3d = np.zeros((ncells,ncells,ncells))
@@ -287,9 +261,7 @@ def noise_cube_coeval(ncells, z, depth_mhz=None, obs_time=1000, filename=None, b
 
 def noise_cube_lightcone(ncells, z, obs_time=1000, filename=None, boxsize=None, save_uvmap=None, total_int_time=6., int_time=10., declination=-30., N_ant=None, fft_wrap=False, n_jobs=4, checkpoint=64):
 	"""
-	@ Ghara et al. (2017), Giri et al. (2018b)
-
-	It creates a noise cube by simulating the radio observation strategy. 
+	It creates a noise cube by simulating the radio observation strategy (1801.06550). 
 	We assume the third axis to be along the line-of-sight and therefore 
 	each each will correspond to a different redshift.
 
@@ -411,9 +383,7 @@ def noise_cube_lightcone(ncells, z, obs_time=1000, filename=None, boxsize=None, 
 
 def noise_lightcone(ncells, zs, obs_time=1000, filename=None, boxsize=None, save_uvmap=None, total_int_time=6., int_time=10., declination=-30., N_ant=None, fft_wrap=False, n_jobs=4, checkpoint=64):
 	"""
-	@ Ghara et al. (2017), Giri et al. (2018b)
-
-	It creates a noise lightcone by simulating the radio observation strategy.
+	It creates a noise lightcone by simulating the radio observation strategy (1801.06550).
 
 	Parameters
 	----------

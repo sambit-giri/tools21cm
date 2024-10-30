@@ -48,10 +48,11 @@ from .line_intensity import *
 from .lyman_alpha_transmission import *
 
 from .bubble_stats import *
-#from zahnbubble import zahn
-#from c2raytools import *
+
 from .foreground_model import *
 from .telescope_functions import *
+from radio_data_calibration import *
+
 #if 'numba' in sys.modules: 
 #from numba_functions import *
 from .usefuls import *
