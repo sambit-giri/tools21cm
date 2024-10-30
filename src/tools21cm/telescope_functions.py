@@ -37,9 +37,9 @@ def from_antenna_config(filename, z, nu=None):
 	if filename is None: antll  = SKA1_LowConfig_Sept2016()
 	else: antll  = np.loadtxt(filename, dtype=str)
 	antll  = antll[:,-2:].astype(float)
-	Re     = 6.371e6                                            # in m
+	Re     = 6.371e6                                        # in m
 	pp     = np.pi/180
-	if not nu: nu = cm.z_to_nu(z)                              # MHz
+	if not nu: nu = cm.z_to_nu(z)                           # MHz
 	antxyz = np.zeros((antll.shape[0],3))		            # in m
 	antxyz[:,0] = Re*np.cos(antll[:,1]*pp)*np.cos(antll[:,0]*pp)
 	antxyz[:,1] = Re*np.cos(antll[:,1]*pp)*np.sin(antll[:,0]*pp)
@@ -59,134 +59,169 @@ def from_antenna_config(filename, z, nu=None):
 	Nbase = np.array(Nbase)	
 	return Nbase, N_ant
 
-def earth_rotation_effect(Nbase, slice_num, int_time, declination=-30.):
-	"""
-	The rotation of the earth over the observation times makes changes the part of the 
-	sky measured by each antenna.
+def earth_rotation_effect(Nbase, slice_nums, int_time, declination=-30.):
+    """
+    Computes the effect of Earth's rotation over observation times, adjusting the measured 
+    sky coordinates for each antenna configuration at specified time slices.
 
-	Parameters
-	----------
-	Nbase       : ndarray
-		The array containing all the ux,uy,uz values of the antenna configuration.
-	slice_num   : int
-		The number of the observed slice after each of the integration time.
-	int_time    : float
-		The integration time is the time after which the signal is recorded (in seconds).
-	declination : float
-		The angle of declination refers to the lattitute where telescope is located 
-		(in degres). Default: -30
-	
-	Returns
-	-------
-	new_Nbase   : ndarray
-		It is the new Nbase calculated for the rotated antenna configurations.
-	"""
+    Parameters
+    ----------
+    Nbase       : ndarray
+        Array containing the initial ux, uy, uz values of the antenna configuration.
+    slice_nums  : ndarray or int
+        Array of observed slice numbers corresponding to each integration time, 
+        or a single integer slice number if only one is required.
+    int_time    : float
+        Integration time after which the signal is recorded (in seconds).
+    declination : float, optional
+        Declination angle (latitude) where the telescope is located (in degrees).
+        Default is -30 degrees.
 
-	p     = np.pi/180.
-	delta = p*declination
-	k     = slice_num
-	HA    =-15.0*p*(k-1)*int_time/(3600.0) - np.pi/180.0*90.0 + np.pi/180.0*360.0
-	
-	new_Nbase = np.zeros(Nbase.shape)
-	new_Nbase[:,0] = np.sin(HA)*Nbase[:,0] + np.cos(HA)*Nbase[:,1]
-	new_Nbase[:,1] = -1.0*np.sin(delta)*np.cos(HA)*Nbase[:,0] + np.sin(delta)*np.sin(HA)*Nbase[:,1] + np.cos(delta)*Nbase[:,2]
-	new_Nbase[:,2] = np.cos(delta)*np.cos(HA)*Nbase[:,0] - np.cos(delta)*np.sin(HA)*Nbase[:,1] + np.sin(delta)*Nbase[:,2]
-	return new_Nbase
+    Returns
+    -------
+    new_Nbase   : ndarray
+        Adjusted Nbase values for each time slice, with shape (len(slice_nums), N, 3).
+    """
+    # Convert to radians
+    p = np.pi / 180.
+    delta = p * declination
+    
+    # Ensure slice_nums is an array for vectorized handling of multiple slices
+    slice_nums = np.atleast_1d(slice_nums)
+    
+    # Compute hour angles (HA) for each slice_num in vectorized manner
+    HA = -15.0 * p * (slice_nums - 1) * int_time / 3600. - np.pi / 2 + 2 * np.pi
+
+    # Rotation matrices for each HA and declination delta
+    cos_HA, sin_HA = np.cos(HA), np.sin(HA)
+    cos_delta, sin_delta = np.cos(delta), np.sin(delta)
+
+    # Pre-allocate new_Nbase for each time slice
+    new_Nbase = np.empty((len(slice_nums), *Nbase.shape))
+    
+    # Apply rotation transformations
+    new_Nbase[:, :, 0] = sin_HA[:, None] * Nbase[:, 0] + cos_HA[:, None] * Nbase[:, 1]
+    new_Nbase[:, :, 1] = (-sin_delta * cos_HA[:, None] * Nbase[:, 0] +
+                          sin_delta * sin_HA[:, None] * Nbase[:, 1] + cos_delta * Nbase[:, 2])
+    new_Nbase[:, :, 2] = (cos_delta * cos_HA[:, None] * Nbase[:, 0] -
+                          cos_delta * sin_HA[:, None] * Nbase[:, 1] + sin_delta * Nbase[:, 2])
+    
+    return new_Nbase.squeeze() if len(slice_nums) == 1 else new_Nbase
 
 def get_uv_daily_observation(ncells, z, filename=None, total_int_time=4., int_time=10., boxsize=None, declination=-30., include_mirror_baselines=False, verbose=True):
+    """
+    Simulates daily radio observations and generates a uv map based on antenna configurations.
+
+    Parameters
+    ----------
+    ncells         : int
+        Number of cells in the image grid.
+    z              : float
+        Redshift of the observed slice.
+    filename       : str
+        Name of the file containing antenna configurations.
+    total_int_time : float
+        Total observation time per day in hours.
+    int_time       : float
+        Integration time per observation in seconds.
+    boxsize        : float, optional
+        Comoving size of the sky observed.
+    declination    : float
+        Declination angle of the SKA in degrees.
+    include_mirror_baselines : bool, optional
+        If True, includes mirrored baselines on the grid.
+    verbose        : bool, optional
+        If True, prints progress information.
+
+    Returns
+    -------
+    uv_map : ndarray
+        ncells x ncells array of baseline counts per pixel, averaged over total observations.
+    N_ant  : int
+        Number of antennas.
+    """
+    # Load antenna configurations and initialize parameters
+    Nbase, N_ant = from_antenna_config(filename, z)
+    uv_map = np.zeros((ncells, ncells), dtype=np.float32)
+    total_observations = int((total_int_time * 3600) / int_time)
+    
+    if verbose: 
+        print("Generating uv map from daily observations.")
+    
+    # Vectorize the observation loop by calculating all rotations at once
+    time_indices = np.arange(total_observations) + 1
+    all_rotated_Nbase = np.array([earth_rotation_effect(Nbase, i, int_time, declination) for i in time_indices])
+    
+    # Grid uv tracks for each observation without individual loops
+    for rotated_Nbase in tqdm(all_rotated_Nbase, disable=not verbose):
+        uv_map += grid_uv_tracks(rotated_Nbase, z, ncells, boxsize=boxsize, include_mirror_baselines=include_mirror_baselines)
+    
+    uv_map /= total_observations  # Normalize by the total number of observations
+    
+    if verbose:
+        print("Observation complete.")
+
+    return uv_map, N_ant	
+
+def grid_uv_tracks(Nbase, z, ncells, boxsize=None, include_mirror_baselines=False):
+    """
+    Places uv tracks on a grid.
+
+    Parameters
+    ----------
+    Nbase   : ndarray
+        Array containing ux, uy, uz values of the antenna configuration.
+    z       : float
+        Redshift of the slice observed.
+    ncells  : int
+        Number of cells in the image.
+    boxsize : float, optional
+        Comoving size of the sky observed. Default: determined by simulation constants.
+    include_mirror_baselines : bool, optional
+        If True, includes mirrored baselines on the grid.
+
+    Returns
+    -------
+    uv_map  : ndarray
+        ncells x ncells array of baseline counts per pixel.
+    """
+    z = float(z)
+    if not boxsize: 
+        boxsize = conv.LB  # Assuming conv.LB is defined elsewhere in your code
+
+    uv_map = np.zeros((ncells, ncells), dtype=np.int32)  # Using int32 for faster summing operations
+    theta_max = boxsize / cm.z_to_cdist(z)
+    
+    # Scale and round the coordinates in a single operation for efficiency
+    Nb = np.round(Nbase * theta_max).astype(int)
+
+    # Vectorized conditionals to select points within grid bounds, skipping for-loops
+    mask = (
+        (Nb[:, 0] < ncells / 2) & (Nb[:, 0] >= -ncells / 2) &
+        (Nb[:, 1] < ncells / 2) & (Nb[:, 1] >= -ncells / 2)
+    )
+    Nb = Nb[mask]
+    
+    # Convert from negative to positive indexing within the grid and use broadcasting
+    xx = (Nb[:, 0] + ncells // 2).astype(int)
+    yy = (Nb[:, 1] + ncells // 2).astype(int)
+    
+    # Fast counting using numpy's bincount and reshaping
+    uv_map_flat = np.bincount(xx * ncells + yy, minlength=ncells * ncells)
+    uv_map = uv_map_flat.reshape(ncells, ncells)
+
+    # Include mirrored baselines if requested
+    if include_mirror_baselines:
+        uv_map += np.flip(np.flip(uv_map, axis=0), axis=1)  # Flip along both axes for mirror effect
+        uv_map /= 2  # Average with mirrored baselines
+    
+    return np.fft.fftshift(uv_map)
+
+
+def sigma_noise_radio(z, uv_map, depth_mhz, obs_time, int_time, N_ant=564., verbose=True):
 	"""
-	The radio telescopes observe the sky for 'total_int_time' hours each day. The signal is recorded 
-	every 'int_time' seconds. 
 
-	Parameters
-	----------
-	ncells         : int
-		The number of cell used to make the image.
-	z              : float
-		Redhsift of the slice observed.
-	filename       : str
-		Name of the file containing the antenna configurations (text file).
-	total_int_time : float
-		Total hours of observation per day (in hours).
-	int_time       : float
-		Integration time of the telescope observation (in seconds).
-	boxsize        : float
-		The comoving size of the sky observed. Default: It is determined from the simulation constants set.
-	declination    : float
-		The declination angle of the SKA (in degree). Default: 30. 
-
-	Returns
-	-------
-	(uv_map, N_ant)
-	"""
-	z = float(z)
-	#if 'numba' in sys.modules: 
-	#	from .numba_functions import get_uv_daily_observation_numba
-	#	uv_map, N_ant = get_uv_daily_observation_numba(ncells, z, filename=filename, total_int_time=total_int_time, int_time=int_time, boxsize=boxsize, declination=declination, verbose=verbose)
-	#	return uv_map, N_ant
-	Nbase, N_ant = from_antenna_config(filename, z)
-	uv_map0      = get_uv_coverage(Nbase, z, ncells, boxsize=boxsize, include_mirror_baselines=include_mirror_baselines)
-	uv_map       = np.zeros(uv_map0.shape)
-	tot_num_obs  = int(3600.*total_int_time/int_time)
-	if verbose: 
-		print("Making uv map from daily observations.")
-		time.sleep(5)
-	for i in tqdm(range(tot_num_obs-1)):
-		new_Nbase = earth_rotation_effect(Nbase, i+1, int_time, declination=declination)
-		uv_map1   = get_uv_coverage(new_Nbase, z, ncells, boxsize=boxsize, include_mirror_baselines=include_mirror_baselines)
-		uv_map   += uv_map1
-		# if verbose:
-		# 	perc = int((i+2)*100/tot_num_obs)
-		# 	msg = '%.1f %%'%(perc)
-		# 	loading_verbose(msg)
-	uv_map = (uv_map+uv_map0)/tot_num_obs
-	print('...done')
-	return uv_map, N_ant
-	
-
-def get_uv_coverage(Nbase, z, ncells, boxsize=None, include_mirror_baselines=False):
-	"""
-	It calculated the uv_map for the uv-coverage.
-
-	Parameters
-	----------
-	Nbase   : ndarray
-		The array containing all the ux,uy,uz values of the antenna configuration.
-	z       : float
-		Redhsift of the slice observed.
-	ncells  : int
-		The number of cell used to make the image.
-	boxsize : float
-		The comoving size of the sky observed. Default: It is determined from the simulation constants set.
-	Returns
-	-------
-	uv_map  : ndarray
-		ncells x ncells numpy array containing the number of baselines observing each pixel.
-	"""
-	z = float(z)
-	if not boxsize: boxsize = conv.LB
-	uv_map = np.zeros((int(ncells),int(ncells)))
-	theta_max = boxsize/cm.z_to_cdist(z)
-	Nb  = np.round(Nbase*theta_max)
-	Nb  = Nb[(Nb[:,0]<ncells/2)]
-	Nb  = Nb[(Nb[:,1]<ncells/2)]
-	#Nb  = Nb[(Nb[:,2]<ncells/2)]
-	Nb  = Nb[(Nb[:,0]>=-ncells/2)]
-	Nb  = Nb[(Nb[:,1]>=-ncells/2)]
-	#Nb  = Nb[(Nb[:,2]>=-ncells/2)]
-	xx,yy,zz = Nb[:,0], Nb[:,1], Nb[:,2]
-	for p in range(xx.shape[0]): 
-		uv_map[int(xx[p]),int(yy[p])] += 1
-		if include_mirror_baselines: uv_map[-int(xx[p]),-int(yy[p])] += 1
-	if include_mirror_baselines: uv_map /= 2
-	return uv_map
-
-
-def kanan_noise_image_ska(z, uv_map, depth_mhz, obs_time, int_time, N_ant_ska=564., verbose=True):
-	"""
-	@ Kanan Datta
-	
-	It calculates the rms of the noise added by the interferrometers of ska. 
+	It calculates the rms of the noise added by radio interferrometers. 
 
 	Parameters
 	----------
@@ -198,7 +233,7 @@ def kanan_noise_image_ska(z, uv_map, depth_mhz, obs_time, int_time, N_ant_ska=56
 		The bandwidth of the observation (in MHz).
 	obs_time  : float
 		The total hours of observations time.
-	N_ant_ska : float
+	N_ant : float
 		Number of anntennas in SKA. Default: 564.
 
 	Returns
@@ -226,12 +261,12 @@ def kanan_noise_image_ska(z, uv_map, depth_mhz, obs_time, int_time, N_ant_ska=56
 	if nuso>nu_crit: ep = (nu_crit/nuso)**2
 	else: ep = 1. 	
 	A_ant_ska = ep*np.pi*ant_radius_ska*ant_radius_ska
-	sigma     = np.sqrt(2.0)*KB_SI*(T_sys/A_ant_ska)/np.sqrt((depth_mhz*1e6)*(obs_time*3600.0))/janskytowatt*1e3/np.sqrt(N_ant_ska*N_ant_ska/2.0) ## in mJy
+	sigma     = np.sqrt(2.0)*KB_SI*(T_sys/A_ant_ska)/np.sqrt((depth_mhz*1e6)*(obs_time*3600.0))/janskytowatt*1e3/np.sqrt(N_ant*N_ant/2.0) ## in mJy
 	rms_noi  = 1e6*np.sqrt(2)*KB_SI*T_sys/A_ant_ska/np.sqrt(depth_mhz*1e6*int_time)/janskytowatt #in muJy
-	sigma    = rms_noi/np.sqrt(N_ant_ska*(N_ant_ska-1)/2.0)/np.sqrt(3600*obs_time/int_time)      #in muJy
+	sigma    = rms_noi/np.sqrt(N_ant*(N_ant-1)/2.0)/np.sqrt(3600*obs_time/int_time)      #in muJy
 	if verbose:
 		print('\nExpected: rms in image in muJy per beam for full =', sigma)
-		print('Effective baseline =', sigma*np.sqrt(N_ant_ska*N_ant_ska/2.0)/np.sqrt(effective_baseline), 'm')
+		print('Effective baseline =', sigma*np.sqrt(N_ant*N_ant/2.0)/np.sqrt(effective_baseline), 'm')
 		print('Calculated: rms in the visibility =', rms_noi, 'muJy')
 	return sigma, rms_noi
 
