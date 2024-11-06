@@ -59,9 +59,11 @@ def noise_map(ncells, z, depth_mhz, obs_time=1000, filename=None, boxsize=None, 
 	noise_map: ndarray
 		A 2D slice of the interferometric noise at that frequency (in muJy).
 	"""
-	if not filename: N_ant = SKA1_LowConfig_Sept2016().shape[0]
+	if filename is None: N_ant = SKA1_LowConfig_Sept2016().shape[0]
+	elif isinstance(filename, np.ndarray): N_ant = filename.shape[0]
+	else: pass
 	if uv_map is None: uv_map, N_ant  = get_uv_map(ncells, z, filename=filename, total_int_time=total_int_time, int_time=int_time, boxsize=boxsize, declination=declination)
-	if not N_ant: N_ant = np.loadtxt(filename, dtype=str).shape[0]
+	if N_ant is None: N_ant = np.loadtxt(filename, dtype=str).shape[0]
 	sigma, rms_noi = sigma_noise_radio(z, uv_map, depth_mhz, obs_time, int_time, N_ant=N_ant, verbose=False)
 	noise_real = np.random.normal(loc=0.0, scale=rms_noi, size=(ncells, ncells))
 	noise_imag = np.random.normal(loc=0.0, scale=rms_noi, size=(ncells, ncells))
@@ -140,7 +142,9 @@ def get_uv_map(ncells, z, filename=None, total_int_time=6., int_time=10., boxsiz
 	N_ant: int
 		Number of antennae
 	"""
-	if not filename: N_ant = SKA1_LowConfig_Sept2016().shape[0]
+	if filename is None: N_ant = SKA1_LowConfig_Sept2016().shape[0]
+	elif isinstance(filename, np.ndarray): N_ant = filename.shape[0]
+	else: pass
 	uv_map, N_ant  = get_uv_daily_observation(ncells, z, filename, total_int_time=total_int_time, int_time=int_time, boxsize=boxsize, declination=declination, verbose=verbose)
 	return uv_map, N_ant
 
@@ -188,11 +192,13 @@ def make_uv_map_lightcone(ncells, zs, filename=None, total_int_time=6., int_time
 
 def apply_uv_response_on_coeval(array, z, depth_mhz=None, obs_time=1000, filename=None, boxsize=None, total_int_time=6., int_time=10., declination=-30., uv_map=None, N_ant=None):
 	ncells = array.shape[-1]
-	if not filename: N_ant = SKA1_LowConfig_Sept2016().shape[0]
-	if not boxsize: boxsize = conv.LB
-	if not depth_mhz: depth_mhz = (cm.z_to_nu(cm.cdist_to_z(cm.z_to_cdist(z)-boxsize/2))-cm.z_to_nu(cm.cdist_to_z(cm.z_to_cdist(z)+boxsize/2)))/ncells
+	if filename is None: N_ant = SKA1_LowConfig_Sept2016().shape[0]
+	elif isinstance(filename, np.ndarray): N_ant = filename.shape[0]
+	else: pass
+	if boxsize is None: boxsize = conv.LB
+	if depth_mhz is None: depth_mhz = (cm.z_to_nu(cm.cdist_to_z(cm.z_to_cdist(z)-boxsize/2))-cm.z_to_nu(cm.cdist_to_z(cm.z_to_cdist(z)+boxsize/2)))/ncells
 	if uv_map is None: uv_map, N_ant  = get_uv_map(ncells, z, filename=filename, total_int_time=total_int_time, int_time=int_time, boxsize=boxsize, declination=declination)
-	if not N_ant: N_ant = np.loadtxt(filename, dtype=str).shape[0]
+	if N_ant is None: N_ant = np.loadtxt(filename, dtype=str).shape[0]
 	data3d = np.zeros(array.shape)
 	print("Creating the noise cube")
 	for k in range(ncells):
@@ -241,11 +247,13 @@ def noise_cube_coeval(ncells, z, depth_mhz=None, obs_time=1000, filename=None, b
 		A 3D cube of the interferometric noise (in mK).
 		The frequency is assumed to be the same along the assumed frequency (last) axis.	
 	"""
-	if not filename: N_ant = SKA1_LowConfig_Sept2016().shape[0]
-	if not boxsize: boxsize = conv.LB
-	if not depth_mhz: depth_mhz = (cm.z_to_nu(cm.cdist_to_z(cm.z_to_cdist(z)-boxsize/2))-cm.z_to_nu(cm.cdist_to_z(cm.z_to_cdist(z)+boxsize/2)))/ncells
+	if filename is None: N_ant = SKA1_LowConfig_Sept2016().shape[0]
+	elif isinstance(filename, np.ndarray): N_ant = filename.shape[0]
+	else: pass
+	if boxsize is None: boxsize = conv.LB
+	if depth_mhz is None: depth_mhz = (cm.z_to_nu(cm.cdist_to_z(cm.z_to_cdist(z)-boxsize/2))-cm.z_to_nu(cm.cdist_to_z(cm.z_to_cdist(z)+boxsize/2)))/ncells
 	if uv_map is None: uv_map, N_ant  = get_uv_map(ncells, z, filename=filename, total_int_time=total_int_time, int_time=int_time, boxsize=boxsize, declination=declination)
-	if not N_ant: N_ant = np.loadtxt(filename, dtype=str).shape[0]
+	if N_ant is None: N_ant = np.loadtxt(filename, dtype=str).shape[0]
 	# ncells = int(ncells); print(ncells)
 	noise3d = np.zeros((ncells,ncells,ncells))
 	if verbose: print("Creating the noise cube...")
@@ -307,10 +315,12 @@ def noise_cube_lightcone(ncells, z, obs_time=1000, filename=None, boxsize=None, 
 	noise_lightcone: A 3D cubical lightcone of the interferometric noise with frequency varying 
 	along last axis(in mK).	
 	"""
-	if not filename: N_ant = SKA1_LowConfig_Sept2016().shape[0]
-	if not boxsize: boxsize = conv.LB
+	if filename is None: N_ant = SKA1_LowConfig_Sept2016().shape[0]
+	elif isinstance(filename, np.ndarray): N_ant = filename.shape[0]
+	else: pass
+	if boxsize is None: boxsize = conv.LB
 	zs = cm.cdist_to_z(np.linspace(cm.z_to_cdist(z)-boxsize/2, cm.z_to_cdist(z)+boxsize/2, ncells))
-	if not N_ant: N_ant = np.loadtxt(filename, dtype=str).shape[0]
+	if N_ant is None: N_ant = np.loadtxt(filename, dtype=str).shape[0]
 	noise3d = np.zeros((ncells,ncells,ncells))
 	verbose = True
 	
@@ -427,10 +437,12 @@ def noise_lightcone(ncells, zs, obs_time=1000, filename=None, boxsize=None, save
 	noise_lightcone: A 3D lightcone of the interferometric noise with frequency varying 
 	along last axis(in mK).	
 	"""
-	if not filename: N_ant = SKA1_LowConfig_Sept2016().shape[0]
-	if not boxsize: boxsize = conv.LB
+	if filename is None: N_ant = SKA1_LowConfig_Sept2016().shape[0]
+	elif isinstance(filename, np.ndarray): N_ant = filename.shape[0]
+	else: pass
+	if boxsize is None: boxsize = conv.LB
 	# zs = cm.cdist_to_z(np.linspace(cm.z_to_cdist(z)-boxsize/2, cm.z_to_cdist(z)+boxsize/2, ncells))
-	if not N_ant: N_ant = np.loadtxt(filename, dtype=str).shape[0]
+	if N_ant is None: N_ant = np.loadtxt(filename, dtype=str).shape[0]
 	noise3d = np.zeros((ncells,ncells,zs.size))
 	verbose = True
 
