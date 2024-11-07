@@ -138,10 +138,10 @@ def get_uv_map_with_gains(ncells, z, gain_model={'name': 'random_uniform', 'min'
     # Iterate through time slices, performing incremental rotation and gridding
     for time_idx in tqdm(range(total_observations), disable=not verbose, desc="Gridding uv tracks"):
         # Apply incremental rotation for the time step
-        rotated_Nbase = earth_rotation_effect(Nbase, time_idx, int_time, declination)
+        rotated_Nbase = earth_rotation_effect(Nbase[:,:3], time_idx, int_time, declination)
 
         # Grid the rotated baselines with gain values
-        grid_uv_tracks_with_gains(rotated_Nbase[:,:3], rotated_Nbase[:,3:], gain_uv_map, z, ncells,
+        grid_uv_tracks_with_gains(rotated_Nbase, Nbase[:,3:], gain_uv_map, z, ncells,
                                   boxsize=boxsize, include_mirror_baselines=include_mirror_baselines)
 
     if verbose:
