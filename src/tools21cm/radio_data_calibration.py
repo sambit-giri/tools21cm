@@ -19,8 +19,74 @@ import pickle
 from joblib import Parallel, delayed
 from tqdm import tqdm
 
-def get_uv_map_with_gains(ncells, z, gain_model={'name': 'random_uniform', 'min': 0.5, 'max': 1.1}, filename=None, 
-                 total_int_time=6., int_time=10., boxsize=None, declination=-30., include_mirror_baselines=False, verbose=True):
+
+def from_antenna_config_with_gains(filename, z, nu=None, 
+                gain_model={'name': 'random_uniform', 'min': 0.5, 'max': 1.1}):
+    """
+    The function reads the antenna positions (N_ant antennas) from the file given.
+
+    Parameters
+    ----------
+    filename: str
+        Name of the file containing the antenna configurations (text file).
+    z       : float
+        Redhsift of the slice observed.
+    nu      : float
+        The frequency observed by the telescope.
+
+    Returns
+    -------
+    Nbase   : ndarray
+        Numpy array (N_ant(N_ant-1)/2 x 3) containing the (ux,uy,uz) values derived 
+                from the antenna positions.
+    N_ant   : int
+        Number of antennas.
+    """
+    if isinstance(gain_model, dict):
+        if gain_model['name'].lower() == 'random_gaussian':
+            mu, std = gain_model['mu'], gain_model['std']
+            gain_model = lambda N: np.random.normal(mu, std, N)
+        elif gain_model['name'].lower() == 'random_uniform':
+            mn, mx = gain_model['min'], gain_model['max']
+            gain_model = lambda N: np.random.uniform(mn, mx, N)
+        else:
+            pass
+
+    z = float(z)
+    if filename is None: antll  = SKA1_LowConfig_Sept2016()
+    else: antll  = np.loadtxt(filename, dtype=str) if isinstance(filename, str) else filename
+    antll  = antll[:,-2:].astype(float)
+    Re     = 6.371e6                                        # in m
+    pp     = np.pi/180
+    if not nu: nu = cm.z_to_nu(z)                           # MHz
+    antxyz = np.zeros((antll.shape[0],3))		            # in m
+    antxyz[:,0] = Re*np.cos(antll[:,1]*pp)*np.cos(antll[:,0]*pp)
+    antxyz[:,1] = Re*np.cos(antll[:,1]*pp)*np.sin(antll[:,0]*pp)
+    antxyz[:,2] = Re*np.sin(antll[:,1]*pp)	
+    del pp, antll
+    N_ant = antxyz.shape[0]
+    pair_comb = itertools.combinations(range(N_ant), 2)
+    pair_comb = list(pair_comb)	
+    lam = c_light/(nu*1e6)/1e2 			            # in m
+    all_gains_real = gain_model(N_ant)
+    all_gains_imag = gain_model(N_ant)
+    Nbase_with_gains = []
+    for ii,jj in list(pair_comb):
+        # print(ii,jj,len(Nbase_with_gains))
+        ux = (antxyz[ii,0]-antxyz[jj,0])/lam
+        uy = (antxyz[ii,1]-antxyz[jj,1])/lam
+        uz = (antxyz[ii,2]-antxyz[jj,2])/lam
+        gr = np.array([all_gains_real[ii], all_gains_real[jj]])
+        gi = np.array([all_gains_imag[ii], all_gains_imag[jj]])
+        if ux==0: print(ii,jj)
+        Nbase_with_gains.append([ux,uy,uz,gr[0]*gr[1],gi[0]*gi[1]])
+    Nbase = np.array(Nbase_with_gains)	
+    return Nbase, N_ant
+
+
+def get_uv_map_with_gains(ncells, z, gain_model={'name': 'random_uniform', 'min': 0.5, 'max': 1.1}, filename=None,
+                          total_int_time=6., int_time=10., boxsize=None, declination=-30., 
+                          include_mirror_baselines=False, verbose=True):
     """
     Create the gain and uv maps with individual gain values for each baseline stored per pixel.
 
@@ -32,8 +98,6 @@ def get_uv_map_with_gains(ncells, z, gain_model={'name': 'random_uniform', 'min'
         Redshift.
     gain_model : dict or function
         Gain model parameters or a custom function that returns random gain values.
-        If a dictionary with 'name' key, options are:
-            - 'random_gaussian': requires 'mu' and 'std' for Gaussian distribution.
     filename : str
         Path to the file with telescope configuration.
     total_int_time : float
@@ -56,46 +120,33 @@ def get_uv_map_with_gains(ncells, z, gain_model={'name': 'random_uniform', 'min'
     N_ant : int
         Number of antennas.
     """
-    # Define gain model if passed as a dictionary
-    if isinstance(gain_model, dict):
-        if gain_model['name'].lower() == 'random_gaussian':
-            mu, std = gain_model['mu'], gain_model['std']
-            gain_model = lambda N: np.random.normal(mu, std, N)
-        elif gain_model['name'].lower() == 'random_uniform':
-            mn, mx = gain_model['min'], gain_model['max']
-            gain_model = lambda N: np.random.uniform(mn, mx, N)
-        else:
-            pass
-    
-    z = float(z)
-    Nbase, N_ant = from_antenna_config(filename, z)
+
+    # Load the antenna configuration with gains only once
+    if verbose: 
+        print("Loading antenna configuration with gains...")
+    Nbase, N_ant = from_antenna_config_with_gains(filename, z, gain_model=gain_model)
+
+    # Calculate the total number of time steps
     total_observations = int(3600. * total_int_time / int_time)
-    
-    if verbose: 
-        print("Generating UV map with daily observations and gain values...")
-    
-    # Initialize uv_map as a 2D array of empty lists to store gain values per pixel
-    gain_uv_map = np.empty((ncells, ncells), dtype=object)
-    for i in range(ncells):
-        for j in range(ncells):
-            gain_uv_map[i, j] = []  # Each cell will store a list of gain values
 
-    # Vectorize observation process with gain application
-    if verbose: 
-        print("Modelling the rotation of earth")
-    time_indices = np.arange(total_observations) + 1
-    all_rotated_Nbase = np.array([earth_rotation_effect(Nbase, i, int_time, declination) for i in time_indices])
-    if verbose: 
-        print("Getting gains for the baseline using the provided gain_model")
-    all_gains = gain_model(np.product(all_rotated_Nbase.shape[:2])).reshape(all_rotated_Nbase.shape[:2])
-
-    # Grid uv tracks and store gain values at each pixel
-    for rotated_Nbase, gain_vals in tqdm(zip(all_rotated_Nbase, all_gains), total=total_observations, disable=not verbose, desc="Gridding uv tracks"):
-        grid_uv_tracks_with_gains(rotated_Nbase, gain_vals, gain_uv_map, z, ncells, boxsize=boxsize, include_mirror_baselines=include_mirror_baselines)
+    # Initialize uv_map for storing accumulated gain information
+    gain_uv_map = np.zeros((ncells, ncells, 3))
     
+    if verbose: 
+        print("Starting UV map generation...")
+
+    # Iterate through time slices, performing incremental rotation and gridding
+    for time_idx in tqdm(range(total_observations), disable=not verbose, desc="Gridding uv tracks"):
+        # Apply incremental rotation for the time step
+        rotated_Nbase = earth_rotation_effect(Nbase, time_idx, int_time, declination)
+
+        # Grid the rotated baselines with gain values
+        grid_uv_tracks_with_gains(rotated_Nbase[:,:3], rotated_Nbase[:,3:], gain_uv_map, z, ncells,
+                                  boxsize=boxsize, include_mirror_baselines=include_mirror_baselines)
+
     if verbose:
-        print("Observation with gains complete.")
-    
+        print("UV map generation complete.")
+
     return gain_uv_map, N_ant
 
 def gain_uv_map_to_uv_map(gain_uv_map, verbose=True):
@@ -103,7 +154,6 @@ def gain_uv_map_to_uv_map(gain_uv_map, verbose=True):
     for (i, j), gains in tqdm(np.ndenumerate(gain_uv_map), total=gain_uv_map.size, disable=not verbose):
         uv_map[i, j] = len(gains)
     return uv_map.astype(int)
-
 
 def grid_uv_tracks_with_gains(Nbase, gain_vals, gain_uv_map, z, ncells, boxsize=None, include_mirror_baselines=False, verbose=True):
     """
@@ -142,12 +192,18 @@ def grid_uv_tracks_with_gains(Nbase, gain_vals, gain_uv_map, z, ncells, boxsize=
         (Nb[:, 0] < ncells / 2) & (Nb[:, 1] < ncells / 2) &
         (Nb[:, 0] >= -ncells / 2) & (Nb[:, 1] >= -ncells / 2)
     )
-    Nb, gain_vals = Nb[in_bounds], gain_vals[in_bounds]
+    gain_vals1, gain_vals2 = gain_vals[:,0], gain_vals[:,1]
+    Nb, gain_vals1, gain_vals2 = Nb[in_bounds], gain_vals1[in_bounds], gain_vals2[in_bounds]
     
-    for (x, y), gain in zip(Nb[:, :2], gain_vals):
-        gain_uv_map[int(x), int(y)].append(gain)
+    for (x, y), gain1, gain2 in zip(Nb[:, :2], gain_vals1, gain_vals2):
+        gain_uv_map[int(x), int(y), 0] += 1
+        gain_uv_map[int(x), int(y), 1] += gain1
+        gain_uv_map[int(x), int(y), 2] += gain2
         if include_mirror_baselines:
-            gain_uv_map[-int(x), -int(y)].append(gain)
+            gain_uv_map[-int(x), -int(y), 0] += 1
+            gain_uv_map[-int(x), -int(y), 1] += gain1
+            gain_uv_map[-int(x), -int(y), 2] += gain2
+
 
 def apply_uv_with_gains_response_on_image(array, uv_map, verbose=True):
     """

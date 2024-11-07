@@ -14,20 +14,31 @@ import os
 with open('requirements.txt') as f:
     requirements = f.read().splitlines()
 
-# Check if the Cython source file exists
-cython_file = "src/tools21cm/ViteBetti_cython.pyx"
+# Check if the Cython source files exist
+cython_files = [
+    "src/tools21cm/ViteBetti_cython.pyx",
+    "src/tools21cm/uv_map_cython.pyx"
+]
 
-if not os.path.isfile(cython_file):
-    raise FileNotFoundError(f"Required file not found: {cython_file}")
+# Check if each Cython file exists
+for cython_file in cython_files:
+    if not os.path.isfile(cython_file):
+        raise FileNotFoundError(f"Required file not found: {cython_file}")
 
-# Define the extension module
+# Define the extension modules
 extensions = [
     Extension(
         'tools21cm.ViteBetti_cython',
-        [cython_file],
+        [cython_files[0]],
         language="c++",
         include_dirs=[np.get_include()]
-    )
+    ),
+    # Extension(
+    #     'tools21cm.uv_map_cython',
+    #     [cython_files[1]],
+    #     language="c++",
+    #     include_dirs=[np.get_include()]
+    # )
 ]
 
 setup(
