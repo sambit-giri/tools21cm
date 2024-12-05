@@ -250,32 +250,85 @@ class BispectrumPylians:
             'Qk': Qk,
             'Pk': Pk,
             }
-    
+
 def bispectrum_k1k2(input_array, k1, k2, n_bins=15, box_dims=None, window=None, n_jobs=1, **kwargs):
+    """
+    Calculate the bispectrum for given k1 and k2 values.
+
+    Parameters:
+    -----------
+    input_array : numpy.ndarray
+        The input array representing the data.
+    k1 : float
+        The first wavenumber.
+    k2 : float
+        The second wavenumber.
+    n_bins : int, optional
+        The number of bins for the bispectrum calculation. Default is 15.
+    box_dims : tuple, optional
+        The dimensions of the box. Default is None.
+    window : numpy.ndarray, optional
+        The window function to apply to the input array. Default is None.
+    n_jobs : int, optional
+        The number of jobs to run in parallel. Default is 1.
+    **kwargs : dict
+        Additional keyword arguments.
+
+    Returns:
+    --------
+    outp : dict
+        A dictionary containing the bispectrum results.
+    """
     input_array = apply_window(input_array, window).astype(np.float32)
-    bisp = BispectrumPylians(input_array, box_dims=box_dims, verbose=kwargs.get('verbose',True), n_jobs=n_jobs)
+    bisp = BispectrumPylians(input_array, box_dims=box_dims, verbose=kwargs.get('verbose', True), n_jobs=n_jobs)
     outp = bisp.bispectrum_k1k2(k1, k2, n_bins=n_bins)
     return outp
 
 def bispectrum_equilateral(input_array, n_bins=15, box_dims=None, window=None, n_jobs=1, **kwargs):
+    """
+    Calculate the equilateral bispectrum.
+
+    Parameters:
+    -----------
+    input_array : numpy.ndarray
+        The input array representing the data.
+    n_bins : int, optional
+        The number of bins for the bispectrum calculation. Default is 15.
+    box_dims : tuple, optional
+        The dimensions of the box. Default is None.
+    window : numpy.ndarray, optional
+        The window function to apply to the input array. Default is None.
+    n_jobs : int, optional
+        The number of jobs to run in parallel. Default is 1.
+    **kwargs : dict
+        Additional keyword arguments.
+
+    Returns:
+    --------
+    outp : dict
+        A dictionary containing the equilateral bispectrum results.
+    """
     tstart = time()
     input_array = apply_window(input_array, window).astype(np.float32)
     binning = kwargs.get('binning', 'log')
-    kmin = 2*np.pi/box_dims
-    kmax = kmin*np.min(input_array.shape)/2
+    kmin = 2 * np.pi / box_dims
+    kmax = kmin * np.min(input_array.shape) / 2
     if binning.lower() in ['linear', 'lin']:
-        kbins = np.linspace(kmin, kmax, n_bins+1)
-        kbins = (kbins[1:]+kbins[:-1])/2
+        kbins = np.linspace(kmin, kmax, n_bins + 1)
+        kbins = (kbins[1:] + kbins[:-1]) / 2
     elif binning.lower() in ['logarithmic', 'log']:
-        kbins = np.linspace(np.log10(kmin), np.log10(kmax), n_bins+1)
-        kbins = 10**((kbins[1:]+kbins[:-1])/2)
-    verbose = kwargs.get('verbose',True)
+        kbins = np.linspace(np.log10(kmin), np.log10(kmax), n_bins + 1)
+        kbins = 10 ** ((kbins[1:] + kbins[:-1]) / 2)
+    verbose = kwargs.get('verbose', True)
     bisp = BispectrumPylians(input_array, box_dims=box_dims, verbose=False, n_jobs=n_jobs)
     outp = {ke: np.array([]) for ke in ['k1', 'k2', 'k3', 'theta', 'Bk', 'Qk', 'Pk']}
-    for ii,ki in enumerate(kbins):
-        if verbose: print(f'{ii+1}/{len(kbins)} | k={ki:.2f}')
-        outi = bisp.bispectrum_k1k2(ki, ki, n_bins=np.array([np.pi/3]))
+    for ii, ki in enumerate(kbins):
+        if verbose:
+            print(f'{ii + 1}/{len(kbins)} | k={ki:.2f}')
+        outi = bisp.bispectrum_k1k2(ki, ki, n_bins=np.array([np.pi / 3]))
         for ke in ['k1', 'k2', 'k3', 'theta', 'Bk', 'Qk', 'Pk']:
-            outp[ke] = np.append(outp[ke],outi[ke])
-    if verbose: print(f'Total Runtime: {time()-tstart:.3f} s')
+            outp[ke] = np.append(outp[ke], outi[ke])
+    if verbose:
+        print(f'Total Runtime: {time() - tstart:.3f} s')
     return outp
+
