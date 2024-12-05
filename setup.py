@@ -17,7 +17,6 @@ with open('requirements.txt') as f:
 # Check if the Cython source files exist
 cython_files = [
     "src/tools21cm/ViteBetti_cython.pyx",
-    "src/tools21cm/uv_map_cython.pyx"
 ]
 
 # Check if each Cython file exists
@@ -33,12 +32,6 @@ extensions = [
         language="c++",
         include_dirs=[np.get_include()]
     ),
-    # Extension(
-    #     'tools21cm.uv_map_cython',
-    #     [cython_files[1]],
-    #     language="c++",
-    #     include_dirs=[np.get_include()]
-    # )
 ]
 
 setup(
