@@ -9,6 +9,17 @@ from .helper_functions import print_msg, get_eval
 # from .power_spect_fast import power_spect_2d as power_spectrum_2d
 from scipy import fftpack, stats
 
+def apply_window(input_array, window):
+    if window is None: return input_array
+    from scipy.signal import windows
+    if window.lower()=='blackmanharris':
+            input_array *= windows.blackmanharris(input_array.shape[-1])[None,None,:]
+    elif window.lower()=='tukey':
+            input_array *= windows.tukey(input_array.shape[-1])[None,None,:]
+    else:
+            input_array *= window
+    return input_array
+
 
 def power_spectrum_nd(input_array, box_dims=None, verbose=False, **kwargs):
         ''' 
@@ -150,14 +161,7 @@ def power_spectrum_1d(input_array_nd, kbins=100, box_dims=None, return_n_modes=F
                 power spectrum and bins is an array with the k bin centers.
         '''
 
-        if window is not None:
-                from scipy.signal import windows
-                if window.lower()=='blackmanharris':
-                        input_array_nd *= windows.blackmanharris(input_array_nd.shape[-1])[None,None,:]
-                elif window.lower()=='tukey':
-                        input_array_nd *= windows.tukey(input_array_nd.shape[-1])[None,None,:]
-                else:
-                        input_array_nd *= window
+        input_array_nd = apply_window(input_array_nd, window)
 
         if kwargs.get('boxsize') is not None: box_dims = kwargs.get('boxsize')
         box_dims = _get_dims(box_dims, input_array_nd.shape)
@@ -201,14 +205,7 @@ def power_spectrum_2d(input_array, kbins=10, binning='log', box_dims=244/.7, ret
                 n_modes is the number of modes.
         
         '''
-        if window is not None:
-                from scipy.signal import windows
-                if window.lower()=='blackmanharris':
-                        input_array *= windows.blackmanharris(input_array.shape[-1])[None,None,:]
-                elif window.lower()=='tukey':
-                        input_array *= windows.tukey(input_array.shape[-1])[None,None,:]
-                else:
-                        input_array *= window
+        input_array = apply_window(input_array, window)
         
         if type(kbins) == list:
                 binning = None
