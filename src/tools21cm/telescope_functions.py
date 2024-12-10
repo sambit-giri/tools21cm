@@ -17,14 +17,14 @@ def geographic_to_cartesian_coordinate_system(antll):
     Converts geographic coordinates (longitude, latitude) into Cartesian coordinates (x, y, z)
     assuming a spherical Earth with a fixed radius.
 
-    Parameters:
+    Parameters
     ----------
     antll : np.ndarray
         A 2D NumPy array of shape (N, 2), where:
         - Column 0 is longitude in degrees (λ).
         - Column 1 is latitude in degrees (φ).
 
-    Returns:
+    Returns
     -------
     antxyz : np.ndarray
         A 2D NumPy array of shape (N, 3) containing the Cartesian coordinates:
@@ -32,12 +32,12 @@ def geographic_to_cartesian_coordinate_system(antll):
         - Column 1: y-coordinate in meters.
         - Column 2: z-coordinate in meters.
     
-    Notes:
+    Notes
     -----
     - The Earth's radius (mean radius) is assumed to be 6,371 km (6.371e6 meters).
     - Geographic coordinates are converted to radians for trigonometric calculations.
 
-    Example:
+    Example
     -------
     >>> antll = np.array([[0, 0], [90, 0], [0, 90]])
     >>> geographic_to_cartesian_coordinate_system(antll)
@@ -60,7 +60,7 @@ def cartesian_to_geographic_coordinate_system(antxyz):
     Converts Cartesian coordinates (x, y, z) back to geographic coordinates 
     (longitude, latitude, height above Earth's surface).
 
-    Parameters:
+    Parameters
     ----------
     antxyz : np.ndarray
         A 2D NumPy array of shape (N, 3), where:
@@ -68,7 +68,7 @@ def cartesian_to_geographic_coordinate_system(antxyz):
         - Column 1 is the y-coordinate in meters.
         - Column 2 is the z-coordinate in meters.
 
-    Returns:
+    Returns
     -------
     antll : np.ndarray
         A 2D NumPy array of shape (N, 3) containing the geographic coordinates:
@@ -76,14 +76,14 @@ def cartesian_to_geographic_coordinate_system(antxyz):
         - Column 1: Latitude (φ) in degrees.
         - Column 2: Height (h) in meters above the Earth's surface.
 
-    Notes:
+    Notes
     -----
     - The Earth's radius (mean radius) is assumed to be 6,371 km (6.371e6 meters).
     - Longitude is calculated using the arctan2 function to handle all quadrants.
     - Latitude is derived from the z-coordinate and radial distance.
     - Height is the radial distance minus the Earth's radius.
 
-    Example:
+    Example
     -------
     >>> antxyz = np.array([[6371000, 0, 0], [0, 6371000, 0], [0, 0, 6371000]])
     >>> cartesian_to_geographic_coordinate_system_with_height(antxyz)
