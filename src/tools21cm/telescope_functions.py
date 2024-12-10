@@ -12,6 +12,102 @@ KB_SI   = 1.38e-23
 c_light = 2.99792458e+10  #in cm/s
 janskytowatt = 1e-26
 
+def geographic_to_cartesian_coordinate_system(antll):
+    """
+    Converts geographic coordinates (longitude, latitude) into Cartesian coordinates (x, y, z)
+    assuming a spherical Earth with a fixed radius.
+
+    Parameters:
+    ----------
+    antll : np.ndarray
+        A 2D NumPy array of shape (N, 2), where:
+        - Column 0 is longitude in degrees (λ).
+        - Column 1 is latitude in degrees (φ).
+
+    Returns:
+    -------
+    antxyz : np.ndarray
+        A 2D NumPy array of shape (N, 3) containing the Cartesian coordinates:
+        - Column 0: x-coordinate in meters.
+        - Column 1: y-coordinate in meters.
+        - Column 2: z-coordinate in meters.
+    
+    Notes:
+    ------
+    - The Earth's radius (mean radius) is assumed to be 6,371 km (6.371e6 meters).
+    - Geographic coordinates are converted to radians for trigonometric calculations.
+
+    Example:
+    -------
+    >>> antll = np.array([[0, 0], [90, 0], [0, 90]])
+    >>> geographic_to_cartesian_coordinate_system(antll)
+    array([[ 6371000.,       0.,       0.],
+           [      0.,  6371000.,       0.],
+           [      0.,       0.,  6371000.]])
+    """
+    Re = 6.371e6  # Earth's radius in meters (mean radius)
+    pp = np.pi / 180  # Conversion factor from degrees to radians
+    antxyz = np.zeros((antll.shape[0], 3))  # Initialize Cartesian coordinate array
+    
+    antxyz[:, 0] = Re * np.cos(antll[:, 1] * pp) * np.cos(antll[:, 0] * pp)  # x-coordinate
+    antxyz[:, 1] = Re * np.cos(antll[:, 1] * pp) * np.sin(antll[:, 0] * pp)  # y-coordinate
+    antxyz[:, 2] = Re * np.sin(antll[:, 1] * pp)                           # z-coordinate
+    
+    return antxyz
+
+def cartesian_to_geographic_coordinate_system_with_height(antxyz):
+    """
+    Converts Cartesian coordinates (x, y, z) back to geographic coordinates 
+    (longitude, latitude, height above Earth's surface).
+
+    Parameters:
+    ----------
+    antxyz : np.ndarray
+        A 2D NumPy array of shape (N, 3), where:
+        - Column 0 is the x-coordinate in meters.
+        - Column 1 is the y-coordinate in meters.
+        - Column 2 is the z-coordinate in meters.
+
+    Returns:
+    -------
+    antll : np.ndarray
+        A 2D NumPy array of shape (N, 3) containing the geographic coordinates:
+        - Column 0: Longitude (λ) in degrees.
+        - Column 1: Latitude (φ) in degrees.
+        - Column 2: Height (h) in meters above the Earth's surface.
+
+    Notes:
+    ------
+    - The Earth's radius (mean radius) is assumed to be 6,371 km (6.371e6 meters).
+    - Longitude is calculated using the arctan2 function to handle all quadrants.
+    - Latitude is derived from the z-coordinate and radial distance.
+    - Height is the radial distance minus the Earth's radius.
+
+    Example:
+    -------
+    >>> antxyz = np.array([[6371000, 0, 0], [0, 6371000, 0], [0, 0, 6371000]])
+    >>> cartesian_to_geographic_coordinate_system_with_height(antxyz)
+    array([[ 0.,  0.,  0.],
+           [90.,  0.,  0.],
+           [ 0., 90.,  0.]])
+    """
+    Re = 6.371e6  # Earth's radius in meters
+    antll = np.zeros((antxyz.shape[0], 3))  # Initialize geographic coordinate array
+    
+    # Compute longitude (λ) in degrees
+    antll[:, 0] = np.arctan2(antxyz[:, 1], antxyz[:, 0]) * (180 / np.pi)
+    
+    # Compute radial distance (r)
+    r = np.sqrt(antxyz[:, 0]**2 + antxyz[:, 1]**2 + antxyz[:, 2]**2)
+    
+    # Compute latitude (φ) in degrees
+    antll[:, 1] = np.arcsin(antxyz[:, 2] / r) * (180 / np.pi)
+    
+    # Compute height above Earth's surface (h)
+    antll[:, 2] = r - Re
+    
+    return antll
+
 def from_antenna_config(filename, z, nu=None):
 	"""
 	The function reads the antenna positions (N_ant antennas) from the file given.
@@ -37,15 +133,9 @@ def from_antenna_config(filename, z, nu=None):
 	if filename is None: antll  = SKA1_LowConfig_Sept2016()
 	else: antll  = np.loadtxt(filename, dtype=str) if isinstance(filename, str) else filename
 	antll  = antll[:,-2:].astype(float)
-	Re     = 6.371e6                                        # in m
-	pp     = np.pi/180
 	if not nu: nu = cm.z_to_nu(z)                           # MHz
-	antxyz = np.zeros((antll.shape[0],3))		            # in m
-	antxyz[:,0] = Re*np.cos(antll[:,1]*pp)*np.cos(antll[:,0]*pp)
-	antxyz[:,1] = Re*np.cos(antll[:,1]*pp)*np.sin(antll[:,0]*pp)
-	antxyz[:,2] = Re*np.sin(antll[:,1]*pp)	
-	del pp, antll
-	N_ant = antxyz.shape[0]
+	antxyz = geographic_to_cartesian_coordinate_system(antll)
+	N_ant = antll.shape[0]
 	pair_comb = itertools.combinations(range(N_ant), 2)
 	pair_comb = list(pair_comb)	
 	lam = c_light/(nu*1e6)/1e2 			            # in m
