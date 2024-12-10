@@ -33,7 +33,7 @@ def geographic_to_cartesian_coordinate_system(antll):
         - Column 2: z-coordinate in meters.
     
     Notes:
-    ------
+    -----
     - The Earth's radius (mean radius) is assumed to be 6,371 km (6.371e6 meters).
     - Geographic coordinates are converted to radians for trigonometric calculations.
 
@@ -55,7 +55,7 @@ def geographic_to_cartesian_coordinate_system(antll):
     
     return antxyz
 
-def cartesian_to_geographic_coordinate_system_with_height(antxyz):
+def cartesian_to_geographic_coordinate_system(antxyz):
     """
     Converts Cartesian coordinates (x, y, z) back to geographic coordinates 
     (longitude, latitude, height above Earth's surface).
@@ -77,7 +77,7 @@ def cartesian_to_geographic_coordinate_system_with_height(antxyz):
         - Column 2: Height (h) in meters above the Earth's surface.
 
     Notes:
-    ------
+    -----
     - The Earth's radius (mean radius) is assumed to be 6,371 km (6.371e6 meters).
     - Longitude is calculated using the arctan2 function to handle all quadrants.
     - Latitude is derived from the z-coordinate and radial distance.
