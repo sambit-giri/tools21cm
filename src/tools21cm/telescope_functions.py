@@ -307,58 +307,72 @@ def grid_uv_tracks(Nbase, z, ncells, boxsize=None, include_mirror_baselines=Fals
     
     return np.fft.fftshift(uv_map)
 
+def sigma_noise_radio(z, uv_map, depth_mhz, obs_time, int_time, N_ant=564., verbose=True, T_sys=None):
+    """
+    Calculate the rms of the noise added by radio interferometers.
 
-def sigma_noise_radio(z, uv_map, depth_mhz, obs_time, int_time, N_ant=564., verbose=True):
-	"""
+    Parameters
+    ----------
+    z : float
+        Redshift of the slice observed.
+    uv_map : ndarray
+        ncells x ncells numpy array containing the number of baselines observing each pixel.
+    depth_mhz : float
+        The bandwidth of the observation (in MHz).
+    obs_time : float
+        The total hours of observation time.
+    int_time : float
+        The integration time.
+    N_ant : float, optional
+        Number of antennas in SKA. Default is 564.
+    verbose : bool, optional
+        If True, print detailed information. Default is True.
+    T_sys : callable or None, optional
+        System temperature as a function of frequency. If None, a default model is used.
 
-	It calculates the rms of the noise added by radio interferrometers. 
+    Returns
+    -------
+    sigma : float
+        The rms of the noise in the image produced by SKA for uniformly distributed antennas (in µJy).
+    rms_noise : float
+        The rms of the noise due to the antenna positions in the uv field (in µJy).
+    """
+    z = float(z)
+    nuso = 1420.0 / (1.0 + z)
+    delnu = depth_mhz * 1e3  # in kHz
+    effective_baseline = np.sum(uv_map)
 
-	Parameters
-	----------
-	z         : float
-		Redhsift of the slice observed.
-	uv_map    : ndarray
-		ncells x ncells numpy array containing the number of baselines observing each pixel.
-	depth_mhz : float
-		The bandwidth of the observation (in MHz).
-	obs_time  : float
-		The total hours of observations time.
-	N_ant : float
-		Number of anntennas in SKA. Default: 564.
+    if T_sys is None:
+        # Standard definition of sky temperature
+        T_sky_atnu300MHz = 60.0  # K
+        T_sky = lambda nu: T_sky_atnu300MHz * (300.0 / nu) ** 2.55
+        T_rcvr = 100  # K
+        T_sys = lambda nu: T_sky(nu) + T_rcvr
 
-	Returns
-	-------
-	sigma     : float
-		The rms of the noise in the image produced by SKA for uniformly distributed antennas.
-	rms_noise : float
-		The rms of the noise due to the antenna positions in uv field.
-	"""
-	z = float(z)
-	nuso  = 1420.0/(1.0 + z)
-	delnu = depth_mhz*1e3	                                            # in kHz
-	effective_baseline = np.sum(uv_map)
-	# Standard definition of sky temperature
-	T_sky_atnu300MHz= 60.0                                              #K
-	# Koopmans et al. (2015) definition of sky temperature
-	# T_sky_atnu300MHz= 68.3  					    #K
-	T_sky = T_sky_atnu300MHz*(300.0/nuso)**2.55
-	# Koopmans et al. 
-	# Receiver temperature
-	T_rcvr = 100                                                         #K
-	T_sys  = T_sky + T_rcvr
-	ant_radius_ska  = 35./2. 	                                    #in m
-	nu_crit = 1.1e5 						    # in kHz
-	if nuso>nu_crit: ep = (nu_crit/nuso)**2
-	else: ep = 1. 	
-	A_ant_ska = ep*np.pi*ant_radius_ska*ant_radius_ska
-	sigma     = np.sqrt(2.0)*KB_SI*(T_sys/A_ant_ska)/np.sqrt((depth_mhz*1e6)*(obs_time*3600.0))/janskytowatt*1e3/np.sqrt(N_ant*N_ant/2.0) ## in mJy
-	rms_noi  = 1e6*np.sqrt(2)*KB_SI*T_sys/A_ant_ska/np.sqrt(depth_mhz*1e6*int_time)/janskytowatt #in muJy
-	sigma    = rms_noi/np.sqrt(N_ant*(N_ant-1)/2.0)/np.sqrt(3600*obs_time/int_time)      #in muJy
-	if verbose:
-		print('\nExpected: rms in image in muJy per beam for full =', sigma)
-		print('Effective baseline =', sigma*np.sqrt(N_ant*N_ant/2.0)/np.sqrt(effective_baseline), 'm')
-		print('Calculated: rms in the visibility =', rms_noi, 'muJy')
-	return sigma, rms_noi
+    try:
+        T_sys = T_sys(nuso)
+    except:
+        pass
+
+    ant_radius_ska = 35.0 / 2.0  # in m
+    nu_crit = 110.0  # in MHz
+    ep = (nu_crit / nuso) ** 2 if nuso > nu_crit else 1.0
+    A_ant_ska = ep * np.pi * ant_radius_ska ** 2
+
+    KB_SI = 1.380649e-23  # Boltzmann constant in SI units
+    janskytowatt = 1e-26  # Conversion factor from Jansky to Watts
+
+    rms_noise = (1e6 * np.sqrt(2) * KB_SI * T_sys / A_ant_ska /
+                 np.sqrt(depth_mhz * 1e6 * int_time) / janskytowatt)  # in µJy
+    sigma = (rms_noise / np.sqrt(N_ant * (N_ant - 1) / 2.0) /
+             np.sqrt(3600 * obs_time / int_time))  # in µJy
+
+    if verbose:
+        print('\nExpected: rms in image in µJy per beam for full =', sigma)
+        print('Effective baseline =', sigma * np.sqrt(N_ant * N_ant / 2.0) / np.sqrt(effective_baseline), 'm')
+        print('Calculated: rms in the visibility =', rms_noise, 'µJy')
+
+    return sigma, rms_noise
 
 def apply_uv_response(array, uv_map):
 	"""
