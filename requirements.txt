@@ -10,6 +10,4 @@ scikit-image
 tqdm
 joblib
 pandas
-
-## cosmospectra  # cosmospectra@git+https://github.com/sambit-giri/cosmospectra.git
 pytest

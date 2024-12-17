@@ -36,13 +36,18 @@ extensions = [
 
 setup(
     name='tools21cm',
-    version='2.2.4',
+    version='2.2.5',
     author='Sambit Giri',
     author_email='sambit.giri@gmail.com',
     packages=find_packages(where="src"),
     package_dir={"": "src"},
     package_data={'tools21cm': ['input_data/*']},
     install_requires=requirements,
+    setup_requires=[
+        'setuptools>=18.0',
+        'cython',
+        'numpy',
+    ],
     include_package_data=True,
     ext_modules=cythonize(extensions, language_level=3),
     include_dirs=[np.get_include()],
