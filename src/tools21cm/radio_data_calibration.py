@@ -42,6 +42,12 @@ def from_antenna_config_with_gains(filename, z, nu=None,
     N_ant   : int
         Number of antennas.
     """
+    z = float(z)
+    if filename is None: antll  = SKA1_LowConfig_Sept2016()
+    else: antll  = np.loadtxt(filename, dtype=str) if isinstance(filename, str) else filename
+    antll  = antll[:,-2:].astype(float)
+    N_ant  = antll.shape[0]
+
     if isinstance(gain_model, dict):
         if 'name' in gain_model.keys():
             if gain_model['name'].lower() == 'random_gaussian':
@@ -63,20 +69,16 @@ def from_antenna_config_with_gains(filename, z, nu=None,
         else:
             print('The provided gain_model is not implemented.')
             return None
-
-    z = float(z)
-    if filename is None: antll  = SKA1_LowConfig_Sept2016()
-    else: antll  = np.loadtxt(filename, dtype=str) if isinstance(filename, str) else filename
-    antll  = antll[:,-2:].astype(float)
+    
     Re     = 6.371e6                                        # in m
     pp     = np.pi/180
     if not nu: nu = cm.z_to_nu(z)                           # MHz
+    
     antxyz = np.zeros((antll.shape[0],3))		            # in m
     antxyz[:,0] = Re*np.cos(antll[:,1]*pp)*np.cos(antll[:,0]*pp)
     antxyz[:,1] = Re*np.cos(antll[:,1]*pp)*np.sin(antll[:,0]*pp)
     antxyz[:,2] = Re*np.sin(antll[:,1]*pp)	
     del pp, antll
-    N_ant = antxyz.shape[0]
     pair_comb = itertools.combinations(range(N_ant), 2)
     pair_comb = list(pair_comb)	
     lam = c_light/(nu*1e6)/1e2 			            # in m
