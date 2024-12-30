@@ -8,7 +8,7 @@ python setup.py sdist bdist_wheel
 ls dist
 
 ## Upload the distribution files to pypi’s test server ##
-python -m twine upload --repository-url https://test.pypi.org/legacy/ dist/*
+# python -m twine upload --repository-url https://test.pypi.org/legacy/ dist/*
 ## Check the upload on the test.pypi server: ##
 ## https://test.pypi.org/project/PACKAGE/VERSION/ ##
 
