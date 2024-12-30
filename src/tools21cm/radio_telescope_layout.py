@@ -29,7 +29,7 @@ def geographic_to_cartesian_coordinate_system(antll):
     - Astropy is used to ensure unit consistency.
     """
     Re = 6371 * u.km  # Earth's radius
-    if isinstance(antll, u.quantity.Quantity):
+    if not isinstance(antll, u.quantity.Quantity):
         antll *= u.deg
     lon = antll[:, 0] 
     lat = antll[:, 1] 
@@ -74,7 +74,7 @@ def cartesian_to_geographic_coordinate_system(antxyz):
 
     # Extract Cartesian coordinates and attach units
     if isinstance(antxyz, u.quantity.Quantity):
-        antxyz *= antxyz
+        antxyz *= u.m
     x = antxyz[:, 0]
     y = antxyz[:, 1]
     z = antxyz[:, 2]
