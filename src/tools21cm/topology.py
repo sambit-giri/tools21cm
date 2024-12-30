@@ -6,7 +6,7 @@ from sklearn.neighbors import NearestNeighbors
 from .bubble_stats import fof
 from skimage.measure import label
 
-def EulerCharacteristic(data, thres=0.5, neighbors=6, speed_up='cython', verbose=True):
+def EulerCharacteristic(data, thres=0.5, neighbors=6, speed_up='numba', verbose=True):
 	"""
 	Parameters
 	----------
@@ -28,6 +28,7 @@ def EulerCharacteristic(data, thres=0.5, neighbors=6, speed_up='cython', verbose
 	"""
 	tstart = time()
 	A = (data>thres).astype(int)
+	if speed_up is None: speed_up = 'numpy'
 	if speed_up.lower()=='cython': 
 		try:
 			from . import ViteBetti_cython as VB
@@ -95,7 +96,7 @@ def betti2(data, thres=0.5, neighbors=6):
 	else: b2 = label(1-A, return_num=1, connectivity=2)[1]
 	return b2
 
-def betti1(data, thres=0.5, neighbors=6, b0=None, b2=None, chi=None, use_numba=False):
+def betti1(data, thres=0.5, neighbors=6, b0=None, b2=None, chi=None, speed_up='numba', verbose=True):
 	"""
 	Parameters
 	----------
@@ -113,7 +114,7 @@ def betti1(data, thres=0.5, neighbors=6, b0=None, b2=None, chi=None, use_numba=F
 	-------
 	Betti 1
 	"""
-	if chi is None: chi = EulerCharacteristic(data, thres=thres, neighbors=neighbors)
+	if chi is None: chi = EulerCharacteristic(data, thres=thres, neighbors=neighbors, speed_up=speed_up, verbose=verbose)
 	if b0 is None: b0  = betti0(data, thres=thres, neighbors=neighbors)
 	if b2 is None: b2  = betti2(data, thres=thres, neighbors=neighbors)
 	return b0 + b2 - chi
