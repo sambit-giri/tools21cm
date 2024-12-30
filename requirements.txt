@@ -3,10 +3,8 @@ numpy
 scipy
 matplotlib
 astropy
-# pyfftw
 scikit-learn
 scikit-image
-## pyfits
 tqdm
 joblib
 pandas
