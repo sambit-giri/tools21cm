@@ -9,7 +9,7 @@ build-backend = "setuptools.build_meta"
 
 [tool.poetry]
 name = "tools21cm"
-version = "2.2.6"
+version = "2.2.7"
 description = "A package providing tools to analyse cosmological simulations of reionization"
 authors = ["Sambit Giri <sambit.giri@gmail.com>"]
 license = "MIT"
@@ -36,3 +36,5 @@ pytest = "^6.2"
 [tool.poetry.dev-dependencies]
 pytest = "^6.2"  # If you want pytest to be part of development dependencies, but you already have it above too.
 
+[tool.poetry.publish]
+  repository = "pypi"
