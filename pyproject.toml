@@ -6,28 +6,23 @@ build-backend = "setuptools.build_meta"
 name = "tools21cm"
 version = "2.2.6"
 authors = [
-    { name="Sambit Giri", email="sambit.giri@gmail.com" }
+    { name = "Sambit Giri", email = "sambit.giri@gmail.com" }
 ]
 description = "A package for 21cm tools"
 readme = "README.md"
 requires-python = ">=3.6"
 dependencies = [
     "numpy",
-    # Add other dependencies from requirements.txt here
+    # Add other dependencies here, such as scipy, pandas, etc.
 ]
 
 [tool.setuptools]
 packages = ["tools21cm"]
-package-dir = {"" = "src"}
+package-dir = { "" = "src" }
 include-package-data = true
 
 [tool.setuptools.package-data]
 tools21cm = ["input_data/*"]
-
-[tool.setuptools.setup-requires]
-setuptools = ">=18.0"
-cython = "*"
-numpy = "*"
 
 [tool.setuptools.ext-modules]
 tools21cm.ViteBetti_cython = {
