@@ -141,11 +141,11 @@ def get_uv_daily_observation(ncells, z, filename=None, total_int_time=4., int_ti
     total_observations = int((total_int_time * 3600) / int_time)
     
     if verbose: 
-        print("Generating uv map from daily observations.")
+        print("Generating uv map from daily observations...")
     
     # Vectorize the observation loop by calculating all rotations at once
     time_indices = np.arange(total_observations) + 1
-    all_rotated_Nbase = np.array([earth_rotation_effect(Nbase, i, int_time, declination) for i in time_indices])
+    all_rotated_Nbase = (earth_rotation_effect(Nbase, i, int_time, declination) for i in time_indices)
     
     # Grid uv tracks for each observation without individual loops
     for rotated_Nbase in tqdm(all_rotated_Nbase, disable=not verbose, desc="Gridding uv tracks"):
@@ -154,9 +154,9 @@ def get_uv_daily_observation(ncells, z, filename=None, total_int_time=4., int_ti
     uv_map /= total_observations  # Normalize by the total number of observations
     
     if verbose:
-        print("Observation complete.")
+        print("...done")
 
-    return uv_map, N_ant	
+    return uv_map, N_ant
 
 def grid_uv_tracks(Nbase, z, ncells, boxsize=None, include_mirror_baselines=False):
     """
