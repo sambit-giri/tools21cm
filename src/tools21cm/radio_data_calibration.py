@@ -16,7 +16,7 @@ import scipy
 from glob import glob
 from time import time, sleep
 import pickle
-from joblib import Parallel, delayed
+from joblib import cpu_count, Parallel, delayed
 from tqdm import tqdm
 
 
@@ -161,12 +161,6 @@ def get_uv_map_with_gains(ncells, z, gain_model={'real': lambda n: np.random.nor
 
     return gain_uv_map, N_ant
 
-def gain_uv_map_to_uv_map(gain_uv_map, verbose=True):
-    uv_map = np.zeros_like(gain_uv_map)
-    for (i, j), gains in tqdm(np.ndenumerate(gain_uv_map), total=gain_uv_map.size, disable=not verbose):
-        uv_map[i, j] = len(gains)
-    return uv_map.astype(int)
-
 def grid_uv_tracks_with_gains(Nbase, gain_vals, gain_uv_map, z, ncells, boxsize=None, include_mirror_baselines=False, verbose=True):
     """
     Grid uv tracks with gain values on a grid, storing individual gain values for each baseline at each pixel.
@@ -216,6 +210,11 @@ def grid_uv_tracks_with_gains(Nbase, gain_vals, gain_uv_map, z, ncells, boxsize=
             gain_uv_map[-int(x), -int(y), 1] += gain1
             gain_uv_map[-int(x), -int(y), 2] += gain2
 
+def gain_uv_map_to_uv_map(gain_uv_map, verbose=True):
+    uv_map = np.zeros_like(gain_uv_map)
+    for (i, j), gains in tqdm(np.ndenumerate(gain_uv_map), total=gain_uv_map.size, disable=not verbose):
+        uv_map[i, j] = len(gains)
+    return uv_map.astype(int)
 
 def apply_uv_with_gains_response_on_image(array, uv_map, verbose=True):
     """
@@ -303,9 +302,60 @@ def from_antenna_config_with_antenna_stamp(filename, z, nu=None):
     Nbase = np.array(Nbase_with_gains)	
     return Nbase, N_ant
 
-def get_uv_map_with_antenna_stamp(ncells, z, 
-                          filename=None, total_int_time=6., int_time=10., boxsize=None, declination=-30., 
-                          include_mirror_baselines=False, verbose=True):
+
+def process_chunk_get_full_uv_map_with_antenna_stamp(chunk_start, chunk_end, ncells, z, Nbase, int_time, declination, boxsize, include_mirror_baselines, verbose, show_progress):
+    """
+    Process a chunk of time slices.
+
+    Parameters
+    ----------
+    chunk_start : int
+        Start index of the chunk.
+    chunk_end : int
+        End index of the chunk.
+    ncells : int
+        Number of cells in each dimension of the grid.
+    z : float
+        Redshift.
+    Nbase : ndarray
+        Array containing ux, uy, uz values of the antenna configuration.
+    int_time : float
+        Integration time (in seconds).
+    declination : float
+        Declination angle in degrees.
+    boxsize : float
+        Size of the observed sky area in Mpc.
+    include_mirror_baselines : bool
+        Whether to include mirror baselines.
+    verbose : bool
+        If True, enables verbose output.
+    show_progress : bool
+        If True, shows the progress bar.
+
+    Returns
+    -------
+    ant_tag_uv_map_chunk : ndarray
+        Array of lists, each containing gain values for the pixel for the chunk.
+    """
+    ant_tag_uv_map_chunk = np.empty((chunk_end - chunk_start, ncells, ncells), dtype=object)
+    for t in range(chunk_start, chunk_end):
+        for x in range(ncells):
+            for y in range(ncells):
+                ant_tag_uv_map_chunk[t - chunk_start, x, y] = []
+
+    time_indices = range(chunk_start, chunk_end)
+    if show_progress:
+        time_indices = tqdm(time_indices, desc="Gridding uv tracks", disable=not verbose)
+
+    for time_idx in time_indices:
+        rotated_Nbase = earth_rotation_effect(Nbase[:, :3], time_idx, int_time, declination)
+        grid_uv_tracks_with_antenna_stamp(rotated_Nbase, Nbase[:, 3:], ant_tag_uv_map_chunk, z, ncells, time_idx - chunk_start,
+                                          boxsize=boxsize, include_mirror_baselines=include_mirror_baselines)
+
+    return ant_tag_uv_map_chunk
+
+def get_full_uv_map_with_antenna_stamp(ncells, z, filename=None, total_int_time=6., int_time=10., boxsize=None, declination=-30.,
+                                       include_mirror_baselines=False, verbose=True, n_jobs=-1):
     """
     Create the gain and uv maps with individual gain values for each baseline stored per pixel.
 
@@ -329,6 +379,8 @@ def get_uv_map_with_antenna_stamp(ncells, z,
         Whether to include mirror baselines.
     verbose : bool
         If True, enables verbose output.
+    n_jobs : int
+        Number of parallel jobs to run. -1 means using all processors.
 
     Returns
     -------
@@ -337,40 +389,38 @@ def get_uv_map_with_antenna_stamp(ncells, z,
     N_ant : int
         Number of antennas.
     """
+    total_observations = int(3600. * total_int_time / int_time)
+    if total_observations*ncells**2>6e6:
+        print('CAUTION: This setup will create a huge array that the memory might struggle to handle.')
 
-    # Load the antenna configuration with gains only once
-    if verbose: 
+    if verbose:
         print("Loading antenna configuration with antenna stamps...")
     Nbase, N_ant = from_antenna_config_with_antenna_stamp(filename, z)
 
-    # Calculate the total number of time steps
-    total_observations = int(3600. * total_int_time / int_time)
+    if n_jobs == -1:
+        n_jobs = cpu_count()
 
-    # Initialize uv_map for storing accumulated gain information
-    ant_tag_uv_map = np.zeros((ncells, ncells, 2, total_observations))
-    
-    if verbose: 
-        print("Starting UV map generation...")
+    if verbose:
+        print(f"Starting UV map generation on {n_jobs} CPUs...")
 
-    # Iterate through time slices, performing incremental rotation and gridding
-    for time_idx in tqdm(range(total_observations), disable=not verbose, desc="Gridding uv tracks"):
-        # Apply incremental rotation for the time step
-        rotated_Nbase = earth_rotation_effect(Nbase[:,:3], time_idx, int_time, declination)
+    # Split the workload into chunks
+    chunk_size = total_observations // n_jobs
+    chunks = [(i, min(i + chunk_size, total_observations)) for i in range(0, total_observations, chunk_size)]
 
-        # Grid the rotated baselines with gain values
-        grid_uv_tracks_with_antenna_stamp(rotated_Nbase, Nbase[:,3:], ant_tag_uv_map, z, ncells, time_idx,
-                                  boxsize=boxsize, include_mirror_baselines=include_mirror_baselines)
+    # Parallel processing with progress bar for the first chunk
+    results = Parallel(n_jobs=n_jobs)(
+        delayed(process_chunk_get_full_uv_map_with_antenna_stamp)(
+            chunk_start, chunk_end, ncells, z, Nbase, int_time, declination, boxsize, include_mirror_baselines, verbose, show_progress=(i == 0))
+            for i, (chunk_start, chunk_end) in enumerate(chunks)
+    )
+
+    # Combine the results
+    ant_tag_uv_map = np.concatenate(results, axis=0)
 
     if verbose:
         print("UV map generation complete.")
 
     return ant_tag_uv_map, N_ant
-
-def antenna_stamp_uv_map_to_uv_map(ant_tag_uv_map, verbose=True):
-    uv_map = np.zeros_like(ant_tag_uv_map[:,:,0,0])
-    for (i, j), gains in tqdm(np.ndenumerate(uv_map), total=uv_map.size, disable=not verbose):
-        uv_map[i, j] = (ant_tag_uv_map[i,j,0,:]>0).sum()
-    return uv_map.astype(int)
 
 def grid_uv_tracks_with_antenna_stamp(Nbase, ant_tag, ant_tag_uv_map, z, ncells, time_idx,
                                       boxsize=None, include_mirror_baselines=False, verbose=True):
@@ -413,8 +463,13 @@ def grid_uv_tracks_with_antenna_stamp(Nbase, ant_tag, ant_tag_uv_map, z, ncells,
     ant_tag1, ant_tag2 = ant_tag[:,0], ant_tag[:,1]
     Nb, ant_tag1, ant_tag2 = Nb[in_bounds], ant_tag1[in_bounds], ant_tag2[in_bounds]
     
-    for (x, y), ant1, ant2 in zip(Nb[:, :2], ant_tag1, ant_tag2):
-        ant_tag_uv_map[int(x), int(y), 0, time_idx] = ant1
-        ant_tag_uv_map[int(x), int(y), 1, time_idx] = ant2
+    for (x, y), ant1, ant2 in zip(Nb[:, :2].astype(int), ant_tag1.astype(int), ant_tag2.astype(int)):
+        ant_tag_uv_map[time_idx, x, y].append([ant1, ant2])
         if include_mirror_baselines:
             print('include_mirror_baselines is not implemented yet.')
+
+def full_uv_map_with_antenna_stamp_to_uv_map(ant_tag_uv_map, verbose=True):
+    uv_map = np.zeros_like(ant_tag_uv_map[0,:,:])
+    for (i, j), gains in tqdm(np.ndenumerate(uv_map), total=uv_map.size, disable=not verbose):
+        uv_map[i, j] = np.array([np.array(val).shape[0] for val in ant_tag_uv_map[:,i,j]]).sum()
+    return uv_map.astype(int)

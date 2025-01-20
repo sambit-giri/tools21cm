@@ -4,8 +4,7 @@ Various functions for calculating some cosmological stuff
 
 from . import const
 import numpy as np
-from scipy.integrate import quadrature
-from scipy.interpolate import interp1d
+from .scipy_func import *
 from .helper_functions import outputify
 
 #Precalculated table of comoving distances at various redshifts
@@ -120,7 +119,7 @@ def luminosity_distance(z, k=0):
             if z[i] <= 0:
                 dlum[i] = 0.0
             else:
-                dlum[i] = quadrature(_ldist, 0, z[i])[0]
+                dlum[i] = quad(_ldist, 0, z[i])[0]
 
     if k > 0:
         dlum = np.sinh(np.sqrt(k)*dlum)/np.sqrt(k)
@@ -142,7 +141,7 @@ def z_to_cdist(z):
     dist = np.zeros_like(z)
     for i in range(len(z)):
         Ez_func = lambda x: 1./np.sqrt(const.Omega0*(1.+x)**3+const.lam)
-        dist[i] = const.c/const.H0 * quadrature(Ez_func, 0, z[i])[0]
+        dist[i] = const.c/const.H0 * quad(Ez_func, 0, z[i])[0]
     return outputify(dist)
 
 
@@ -187,7 +186,7 @@ def z_to_age(z):
     tage = np.zeros_like(z)
     for i in range(len(a)):
         Ea_func = lambda x: 1./x/np.sqrt(const.Omega0*x**-3+const.lam)
-        tage[i] = 1/const.H0 * quadrature(Ea_func, 0, a[i])[0]
+        tage[i] = 1/const.H0 * quad(Ea_func, 0, a[i])[0]
     return outputify(tage) * (const.kms/const.Mpc)**-1/const.yr_in_sec/1e9
 
 def angular_size(dl, z):

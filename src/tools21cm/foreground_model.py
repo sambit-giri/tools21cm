@@ -3,7 +3,7 @@ Methods to simulate and analyse the foreground signal for 21 cm signal.
 '''
 
 import numpy as np
-from scipy.integrate import quadrature
+from .scipy_func import *
 from .telescope_functions import jansky_2_kelvin, from_antenna_config
 from . import cosmo as cm
 from . import const
@@ -168,7 +168,7 @@ def rolling_wedge_removal_lightcone(lightcone, redshifts, cell_size=None, chunk_
 	def one_over_E(z, OMm):
 		return 1 / np.sqrt(OMm*(1.+z)**3 + (1 - OMm))
 	def multiplicative_factor(z, OMm):
-		return 1 / one_over_E(z, OMm) / (1+z) * quadrature(lambda x: one_over_E(x, OMm), 0, z)[0]
+		return 1 / one_over_E(z, OMm) / (1+z) * quad(lambda x: one_over_E(x, OMm), 0, z)[0]
 
 	if cell_size is None:
 		cell_size = np.min(lightcone.shape)
