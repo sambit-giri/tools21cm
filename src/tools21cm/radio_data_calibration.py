@@ -58,17 +58,19 @@ def from_antenna_config_with_gains(filename, z, nu=None,
                 gain_model_gen = lambda N: np.random.uniform(mn, mx, N)
             else:
                 pass
-            all_gains_1 = gain_model_gen(N_ant) #Real or Amplitudes
-            all_gains_2 = gain_model_gen(N_ant) #Imag or phases
+            all_gains_r = gain_model_gen(N_ant) #Real or Amplitudes
+            all_gains_i = gain_model_gen(N_ant) #Imag or phases
         elif 'real' in gain_model.keys():
-            all_gains_1 = gain_model['real'](N_ant) #Real or Amplitudes
-            all_gains_2 = gain_model['imag'](N_ant) #Imag or phases
+            all_gains_r = gain_model['real'](N_ant) #Real or Amplitudes
+            all_gains_i = gain_model['imag'](N_ant) #Imag or phases
         elif 'phase' in gain_model.keys():
-            all_gains_1 = gain_model['amplitude'](N_ant) #Real or Amplitudes
-            all_gains_2 = gain_model['phase'](N_ant) #Imag or phases
+            all_gains_r = gain_model['amplitude'](N_ant) #Real or Amplitudes
+            all_gains_i = gain_model['phase'](N_ant) #Imag or phases
         else:
             print('The provided gain_model is not implemented.')
             return None
+    else:
+        all_gains_r, all_gains_i = gain_model[:,0], gain_model[:,1]
     
     Re     = 6.371e6                                        # in m
     pp     = np.pi/180
@@ -88,15 +90,19 @@ def from_antenna_config_with_gains(filename, z, nu=None,
         ux = (antxyz[ii,0]-antxyz[jj,0])/lam
         uy = (antxyz[ii,1]-antxyz[jj,1])/lam
         uz = (antxyz[ii,2]-antxyz[jj,2])/lam
-        gr = np.array([all_gains_1[ii], all_gains_1[jj]])
-        gi = np.array([all_gains_2[ii], all_gains_2[jj]])
+        jm = [all_gains_r[ii]*all_gains_r[jj],
+              all_gains_i[ii]*all_gains_i[jj],
+              all_gains_r[ii]*all_gains_i[jj],
+              all_gains_i[ii]*all_gains_r[jj] ]
         if ux==0: print(ii,jj)
-        Nbase_with_gains.append([ux,uy,uz,gr[0]*gr[1],gi[0]*gi[1]])
+        Nbase_with_gains.append([ux,uy,uz,jm[0],jm[1],jm[2],jm[3]])
     Nbase = np.array(Nbase_with_gains)	
     return Nbase, N_ant
 
 
-def get_uv_map_with_gains(ncells, z, gain_model={'real': lambda n: np.random.normal(1,0.5,n), 'imag': lambda n: np.random.normal(1,0.5,n)}, 
+def get_uv_map_with_gains(ncells, z, 
+                          gain_model={'real': lambda n: np.random.normal(1,0.5,n), 'imag': lambda n: np.random.normal(1,0.5,n)}, 
+                          gain_timescale=[10,60],
                           filename=None, total_int_time=6., int_time=10., boxsize=None, declination=-30., 
                           include_mirror_baselines=False, verbose=True):
     """
@@ -110,6 +116,8 @@ def get_uv_map_with_gains(ncells, z, gain_model={'real': lambda n: np.random.nor
         Redshift.
     gain_model : dict or function
         Gain model parameters or a custom function that returns random gain values.
+    gain_timescale : list
+        Timescale after which gain values will evolve.
     filename : str
         Path to the file with telescope configuration.
     total_int_time : float
@@ -136,19 +144,21 @@ def get_uv_map_with_gains(ncells, z, gain_model={'real': lambda n: np.random.nor
     # Load the antenna configuration with gains only once
     if verbose: 
         print("Loading antenna configuration with gains...")
-    Nbase, N_ant = from_antenna_config_with_gains(filename, z, gain_model=gain_model)
 
     # Calculate the total number of time steps
     total_observations = int(3600. * total_int_time / int_time)
 
     # Initialize uv_map for storing accumulated gain information
-    gain_uv_map = np.zeros((ncells, ncells, 3))
+    gain_uv_map = np.zeros((ncells, ncells, 5))
     
     if verbose: 
         print("Starting UV map generation...")
 
     # Iterate through time slices, performing incremental rotation and gridding
     for time_idx in tqdm(range(total_observations), disable=not verbose, desc="Gridding uv tracks"):
+        if np.any([not time_idx*int_time%tt for tt in gain_timescale]):
+            Nbase, N_ant = from_antenna_config_with_gains(filename, z, gain_model=gain_model)
+
         # Apply incremental rotation for the time step
         rotated_Nbase = earth_rotation_effect(Nbase[:,:3], time_idx, int_time, declination)
 
@@ -198,25 +208,28 @@ def grid_uv_tracks_with_gains(Nbase, gain_vals, gain_uv_map, z, ncells, boxsize=
         (Nb[:, 0] < ncells / 2) & (Nb[:, 1] < ncells / 2) &
         (Nb[:, 0] >= -ncells / 2) & (Nb[:, 1] >= -ncells / 2)
     )
-    gain_vals1, gain_vals2 = gain_vals[:,0], gain_vals[:,1]
-    Nb, gain_vals1, gain_vals2 = Nb[in_bounds], gain_vals1[in_bounds], gain_vals2[in_bounds]
+    gain_vals = gain_vals[in_bounds,:]
+    gain_rr, gain_ii = gain_vals[:,0], gain_vals[:,1]
+    gain_ri, gain_ir = gain_vals[:,2], gain_vals[:,3]
+    Nb = Nb[in_bounds]
     
-    for (x, y), gain1, gain2 in zip(Nb[:, :2], gain_vals1, gain_vals2):
+    for (x, y), gain1, gain2, gain3, gain4 in zip(Nb[:, :2], gain_rr, gain_ii, gain_ri, gain_ir):
         gain_uv_map[int(x), int(y), 0] += 1
         gain_uv_map[int(x), int(y), 1] += gain1
         gain_uv_map[int(x), int(y), 2] += gain2
+        gain_uv_map[int(x), int(y), 3] += gain3
+        gain_uv_map[int(x), int(y), 4] += gain4
         if include_mirror_baselines:
             gain_uv_map[-int(x), -int(y), 0] += 1
             gain_uv_map[-int(x), -int(y), 1] += gain1
             gain_uv_map[-int(x), -int(y), 2] += gain2
+            gain_uv_map[-int(x), -int(y), 3] += gain3
+            gain_uv_map[-int(x), -int(y), 4] += gain4
 
-def gain_uv_map_to_uv_map(gain_uv_map, verbose=True):
-    uv_map = np.zeros_like(gain_uv_map)
-    for (i, j), gains in tqdm(np.ndenumerate(gain_uv_map), total=gain_uv_map.size, disable=not verbose):
-        uv_map[i, j] = len(gains)
-    return uv_map.astype(int)
+def gain_uv_map_to_uv_map(gain_uv_map):
+    return gain_uv_map[:,:,0].astype(int)
 
-def apply_uv_with_gains_response_on_image(array, uv_map, verbose=True):
+def apply_uv_with_gains_response_on_image(array, gain_uv_map, verbose=True):
     """
     Apply the effect of radio observation strategy with varied antenna/baseline gains on an image.
     
@@ -224,7 +237,7 @@ def apply_uv_with_gains_response_on_image(array, uv_map, verbose=True):
     ----------
     array : ndarray
         The input image array.
-    uv_map : ndarray of lists
+    gain_uv_map : ndarray of lists
         The uv_map, where each entry is a list of gain values for that pixel.
     verbose : bool, optional
         If True, enables verbose progress output using tqdm.
@@ -234,18 +247,13 @@ def apply_uv_with_gains_response_on_image(array, uv_map, verbose=True):
     img_map : ndarray
         The resulting radio image after applying the uv_map with gains in the Fourier domain.
     """
-    assert array.shape == uv_map.shape, "Array and uv_map must have the same shape"
+    assert array.shape == gain_uv_map[:,:,0].shape, "Array and uv_map must have the same shape"
     
     # Perform the Fourier transform of the input image
-    img_arr = np.fft.fft2(array)
-    
-    # Initialize an array to hold the gain-weighted Fourier components
-    gain_applied_ft = np.zeros_like(img_arr, dtype=complex)
-    
-    # Iterate over each pixel in the Fourier-transformed array with tqdm
-    for (i, j), gains in tqdm(np.ndenumerate(uv_map), total=uv_map.size, disable=not verbose, desc="Applying gains"):
-        if gains:  # Only process if there are gain values for this pixel
-            gain_applied_ft[i, j] = np.mean(gains) * img_arr[i, j] 
+    arr_ft = np.fft.fft2(array)
+
+    # Apply the games
+    gain_applied_ft = arr_ft*np.sqrt(np.nan_to_num((gain_uv_map[:,:,1]+1.j*gain_uv_map[:,:,2])/gain_uv_map[:,:,0]))
     
     # Apply inverse Fourier transform to obtain the final image
     img_map = np.fft.ifft2(gain_applied_ft)
