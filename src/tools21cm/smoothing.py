@@ -578,4 +578,64 @@ def convolve_uvmap_coeval(cube, z, box_size_mpc=False, max_baseline=2., ratio=1.
         if nu_axis not in [2,-1]: output_cube = np.swapaxes(output_cube,nu_axis,2)
         return output_cube
 
+def smooth_line(y, window=3, kind='tophat'):
+    """
+    Smooths a 1D array using a specified window type.
 
+    Parameters:
+    ----------
+    y : array-like
+        The input data to smooth, typically a 1D array.
+    window : int or array-like
+        The size of the smoothing window (for predefined types) or a custom window (as an array).
+        If an integer is provided, it defines the width of the window.
+    kind : str, optional
+        The type of window to use. Options are:
+        - 'tophat' or 'boxcar': A uniform window of equal weights.
+        - 'gaussian' or 'normal': A Gaussian window.
+        - 'triangular': A triangular window.
+        - 'hamming': A Hamming window.
+        - 'hanning': A Hanning window.
+        Defaults to 'tophat'.
+
+    Returns:
+    -------
+    y_smooth : ndarray
+        The smoothed version of the input array `y`.
+
+    Raises:
+    ------
+    ValueError
+        If the provided `kind` is not recognized.
+
+    Examples:
+    --------
+    >>> y = [1, 2, 3, 4, 5, 6, 7]
+    >>> smooth_line(y, window=3, kind='gaussian')
+    array([...])  # Smoothed values
+    """
+    if isinstance(window, int):
+        if kind.lower() in ['tophat', 'boxcar']:
+            window = np.ones(window) / window
+        elif kind.lower() in ['normal', 'gaussian']:
+            x = np.linspace(-3 * window, 3 * window, 6 * window + 1)
+            window = np.exp(-x**2 / (2 * (window**2)))
+            window /= np.sum(window)  # Normalize the Gaussian
+        elif kind.lower() == 'triangular':
+            window = np.arange(1, window + 1)
+            window = np.concatenate([window, window[::-1][1:]])
+            window = window / window.sum()
+        elif kind.lower() == 'hamming':
+            window = np.hamming(window)
+        elif kind.lower() == 'hanning':
+            window = np.hanning(window)
+        else:
+            raise ValueError(f"Unsupported window kind: '{kind}'. Choose from 'tophat', 'gaussian', 'triangular', 'hamming', or 'hanning'.")
+    elif isinstance(window, (list, np.ndarray)):
+        window = np.array(window)
+        window /= np.sum(window)  # Ensure the custom window is normalized
+    else:
+        raise ValueError("Window must be an integer or an array-like object.")
+
+    y_smooth = np.convolve(y, window, mode='same')
+    return y_smooth
