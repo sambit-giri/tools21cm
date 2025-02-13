@@ -1,6 +1,7 @@
 import numpy as np
 from glob import glob
 from time import time
+from tqdm import tqdm
 from .helper_functions import print_msg
 from . import const
 from . import conv
@@ -53,7 +54,7 @@ class HaloRockstar:
 		from astropy import units as U
 
 		#Read the file line by line, since it's large
-		for linenumber, line in enumerate(fileinput.input(filename)):
+		for linenumber, line in tqdm(enumerate(fileinput.input(filename))):
 			if(linenumber == 0):
 				# Store the variable from the file header
 				header = line.split()
@@ -113,19 +114,19 @@ class HaloRockstar:
 	
 	def get(self, var=None):
 		if(var == 'm'):
-			data = np.array([halo.m for halo in self.halos])
+			data = np.array([halo.m for halo in tqdm(self.halos)])
 		elif(var == 'r'):
-			data = np.array([halo.r for halo in self.halos])
+			data = np.array([halo.r for halo in tqdm(self.halos)])
 		elif(var == 'pos'):
-			data = np.array([halo.pos for halo in self.halos])
+			data = np.array([halo.pos for halo in tqdm(self.halos)])
 		elif(var == 'vel'):
-			data = np.array([halo.vel for halo in self.halos])
+			data = np.array([halo.vel for halo in tqdm(self.halos)])
 		elif(var == 'vel_disp'):
-			data = np.array([halo.vel_disp for halo in self.halos])
+			data = np.array([halo.vel_disp for halo in tqdm(self.halos)])
 		elif(var == 'l'):
-			data = np.array([halo.l for halo in self.halos])
+			data = np.array([halo.l for halo in tqdm(self.halos)])
 		elif(var == 'pos_cm'):
-			data = np.array([halo.pos_cm for halo in self.halos])
+			data = np.array([halo.pos_cm for halo in tqdm(self.halos)])
 		return data
 
 
@@ -210,7 +211,7 @@ class HaloCubeP3MFull:
 				print_msg('Max_select_mass: %g' % max_select_mass)
 				max_select_grid_mass = max_select_mass/(conv.M_grid*const.solar_masses_per_gram)
 
-		for line in fileinput.input(filename):
+		for line in tqdm(fileinput.input(filename)):
 				if linenumber < startline: #If you want to read from a particular line
 						linenumber += 1
 						continue
@@ -261,17 +262,17 @@ class HaloCubeP3MFull:
 
 	def get(self, var=None):
 		if(var == 'm'):
-			data = np.array([halo.m for halo in self.halos])
+			data = np.array([halo.m for halo in tqdm(self.halos)])
 		elif(var == 'pos'):
-			data = np.array([halo.pos for halo in self.halos])
+			data = np.array([halo.pos for halo in tqdm(self.halos)])
 		elif(var == 'vel'):
-			data = np.array([halo.vel for halo in self.halos])
+			data = np.array([halo.vel for halo in tqdm(self.halos)])
 		elif(var == 'vel_disp'):
-			data = np.array([halo.vel_disp for halo in self.halos])
+			data = np.array([halo.vel_disp for halo in tqdm(self.halos)])
 		elif(var == 'l'):
-			data = np.array([halo.l for halo in self.halos])
+			data = np.array([halo.l for halo in tqdm(self.halos)])
 		elif(var == 'pos_cm'):
-			data = np.array([halo.pos_cm for halo in self.halos])
+			data = np.array([halo.pos_cm for halo in tqdm(self.halos)])
 		return data
 
 	def _reposition(self, pos):
@@ -413,19 +414,19 @@ class HaloCubeP3M:
 
 	def get(self, var=None):
 		if(var == 'm'):
-			data = np.array([halo.m for halo in self.halos])
+			data = np.array([halo.m for halo in tqdm(self.halos)])
 		elif(var == 'r'):
-			data = np.array([halo.r for halo in self.halos])
+			data = np.array([halo.r for halo in tqdm(self.halos)])
 		elif(var == 'pos'):
-			data = np.array([halo.pos for halo in self.halos])
+			data = np.array([halo.pos for halo in tqdm(self.halos)])
 		elif(var == 'vel'):
-			data = np.array([halo.vel for halo in self.halos])
+			data = np.array([halo.vel for halo in tqdm(self.halos)])
 		elif(var == 'vel_disp'):
-			data = np.array([halo.vel_disp for halo in self.halos])
+			data = np.array([halo.vel_disp for halo in tqdm(self.halos)])
 		elif(var == 'l'):
-			data = np.array([halo.l for halo in self.halos])
+			data = np.array([halo.l for halo in tqdm(self.halos)])
 		elif(var == 'pos_cm'):
-			data = np.array([halo.pos_cm for halo in self.halos])
+			data = np.array([halo.pos_cm for halo in tqdm(self.halos)])
 		return data
 
 
@@ -500,7 +501,7 @@ class HaloList:
 			print_msg('Max_select_mass: %g' % max_select_mass)
 			max_select_grid_mass = max_select_mass/(conv.M_grid*const.solar_masses_per_gram)
 
-		for line in fileinput.input(filename):
+		for line in tqdm(fileinput.input(filename)):
 			if linenumber < startline: #If you want to read from a particular line
 				linenumber += 1
 				continue
