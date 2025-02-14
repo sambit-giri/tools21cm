@@ -267,9 +267,10 @@ def noise_cube_coeval(ncells, z, depth_mhz=None, obs_time=1000, filename=None, b
 	if verbose: print("...noise cube created.")
 	return jansky_2_kelvin(noise3d, z, boxsize=boxsize)
 
-def noise_cube_lightcone(ncells, z, obs_time=1000, filename=None, boxsize=None, save_uvmap=None, total_int_time=6., int_time=10., declination=-30., N_ant=None, fft_wrap=False, n_jobs=4, checkpoint=64):
+def noise_cube_lightcone(ncells, z, obs_time=1000, filename=None, boxsize=None, save_uvmap=None, total_int_time=6., int_time=10., declination=-30., N_ant=None, fft_wrap=False, verbose=True, n_jobs=4, checkpoint=64):
 	"""
-	It creates a noise cube by simulating the radio observation strategy (1801.06550). 
+	It creates a noise cube by simulating the radio observation strategy (1801.06550)
+	considerng the input redshift (z) as the centre.
 	We assume the third axis to be along the line-of-sight and therefore 
 	each each will correspond to a different redshift.
 
@@ -322,7 +323,6 @@ def noise_cube_lightcone(ncells, z, obs_time=1000, filename=None, boxsize=None, 
 	zs = cm.cdist_to_z(np.linspace(cm.z_to_cdist(z)-boxsize/2, cm.z_to_cdist(z)+boxsize/2, ncells))
 	if N_ant is None: N_ant = np.loadtxt(filename, dtype=str).shape[0]
 	noise3d = np.zeros((ncells,ncells,ncells))
-	verbose = True
 	
 	if save_uvmap is not None:
 		save_uvmap = save_uvmap.split('.')[0]+'.pkl'
@@ -339,16 +339,14 @@ def noise_cube_lightcone(ncells, z, obs_time=1000, filename=None, boxsize=None, 
 	if n_jobs<=1:
 		tstart = time()
 		for k,zi in enumerate(zs):
+			print(f'{k+1}/{len(zs)} | z={zi:.3f}')
 			if '{:.3f}'.format(zi) not in uvs.keys():
-				# 	uv_map, N_ant  = uvs['{:.3f}'.format(zi)], uvs['Nant']
-				# else:
-				uv_map, N_ant  = get_uv_map(ncells, zi, filename=filename, total_int_time=total_int_time, int_time=int_time, boxsize=boxsize, declination=declination)
+				uv_map, N_ant  = get_uv_map(ncells, zi, filename=filename, total_int_time=total_int_time, int_time=int_time, boxsize=boxsize, declination=declination, verbose=verbose)
 				uvs['{:.3f}'.format(zi)] = uv_map
 				uvs['Nant'] = N_ant
 				pickle.dump(uvs, open(save_uvmap, 'wb'))
-			verbose = False
 			tend = time()
-			print('\nz = {:.3f} | {:.2f} % completed | Elapsed time: {:.2f} mins'.format(zi,100*(k+1)/zs.size,(tend-tstart)/60))
+			# print('\nz = {:.3f} | {:.2f} % completed | Elapsed time: {:.2f} mins'.format(zi,100*(k+1)/zs.size,(tend-tstart)/60))
 	else:
 		Nbase, N_ant = from_antenna_config(filename, zs[0])
 		uvs['Nant'] = N_ant
@@ -391,7 +389,7 @@ def noise_cube_lightcone(ncells, z, obs_time=1000, filename=None, boxsize=None, 
 	return jansky_2_kelvin(noise3d, z, boxsize=boxsize)
 
 
-def noise_lightcone(ncells, zs, obs_time=1000, filename=None, boxsize=None, save_uvmap=None, total_int_time=6., int_time=10., declination=-30., N_ant=None, fft_wrap=False, n_jobs=4, checkpoint=64):
+def noise_lightcone(ncells, zs, obs_time=1000, filename=None, boxsize=None, save_uvmap=None, total_int_time=6., int_time=10., declination=-30., N_ant=None, fft_wrap=False, verbose=True, n_jobs=4, checkpoint=64):
 	"""
 	It creates a noise lightcone by simulating the radio observation strategy (1801.06550).
 
@@ -441,10 +439,9 @@ def noise_lightcone(ncells, zs, obs_time=1000, filename=None, boxsize=None, save
 	elif isinstance(filename, np.ndarray): N_ant = filename.shape[0]
 	else: pass
 	if boxsize is None: boxsize = conv.LB
-	# zs = cm.cdist_to_z(np.linspace(cm.z_to_cdist(z)-boxsize/2, cm.z_to_cdist(z)+boxsize/2, ncells))
+	if isinstance(zs, list): zs = np.array(zs)
 	if N_ant is None: N_ant = np.loadtxt(filename, dtype=str).shape[0]
 	noise3d = np.zeros((ncells,ncells,zs.size))
-	verbose = True
 
 	if save_uvmap is not None:
 		save_uvmap = save_uvmap.split('.')[0]+'.pkl'
@@ -461,16 +458,14 @@ def noise_lightcone(ncells, zs, obs_time=1000, filename=None, boxsize=None, save
 	if n_jobs<=1:
 		tstart = time()
 		for k,zi in enumerate(zs):
+			print(f'{k+1}/{len(zs)} | z={zi:.3f}')
 			if '{:.3f}'.format(zi) not in uvs.keys():
-				# 	uv_map, N_ant  = uvs['{:.3f}'.format(zi)], uvs['Nant']
-				# else:
 				uv_map, N_ant  = get_uv_map(ncells, zi, filename=filename, total_int_time=total_int_time, int_time=int_time, boxsize=boxsize, declination=declination)
 				uvs['{:.3f}'.format(zi)] = uv_map
 				uvs['Nant'] = N_ant
-				pickle.dump(uvs, open(save_uvmap, 'wb'))
-			verbose = False
+				if save_uvmap is not None: pickle.dump(uvs, open(save_uvmap, 'wb'))
 			tend = time()
-			print('\nz = {:.3f} | {:.2f} % completed | Elapsed time: {:.2f} mins'.format(zi,100*(k+1)/zs.size,(tend-tstart)/60))
+			# print('\nz = {:.3f} | {:.2f} % completed | Elapsed time: {:.2f} mins'.format(zi,100*(k+1)/zs.size,(tend-tstart)/60))
 	else:
 		Nbase, N_ant = from_antenna_config(filename, zs[0])
 		uvs['Nant'] = N_ant
@@ -507,10 +502,8 @@ def noise_lightcone(ncells, zs, obs_time=1000, filename=None, boxsize=None, save
 		uv_map, N_ant  = uvs['{:.3f}'.format(zi)], uvs['Nant']
 		noise2d = noise_map(ncells, zi, depth_mhz, obs_time=obs_time, filename=filename, boxsize=boxsize, total_int_time=total_int_time, int_time=int_time, declination=declination, uv_map=uv_map, N_ant=N_ant, verbose=verbose, fft_wrap=fft_wrap)
 		noise3d[:,:,k] = jansky_2_kelvin(noise2d, zi, boxsize=boxsize)
-		verbose = False
 		print('\nz = {:.3f} | {:.2f} % completed'.format(zi,100*(k+1)/zs.size))
 	return noise3d
-
 
 def gauss_kernel_3d(size, sigma=1.0, fwhm=None):
 	''' 
