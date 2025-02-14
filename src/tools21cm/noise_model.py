@@ -325,14 +325,17 @@ def noise_cube_lightcone(ncells, z, obs_time=1000, filename=None, boxsize=None, 
 	noise3d = np.zeros((ncells,ncells,ncells))
 	
 	if save_uvmap is not None:
-		save_uvmap = save_uvmap.split('.')[0]+'.pkl'
+		if save_uvmap[-4:]!='.pkl': save_uvmap += '.pkl'
 		if len(glob(save_uvmap)):
 			uvs = pickle.load(open(save_uvmap, 'rb'))
-			print('All or some uv maps is read from the given file. Be sure that they were run with the same parameter values as provided now.')
+			if uvs['ncells']!=ncells or uvs['boxsize']!=boxsize or uvs['total_int_time']!=total_int_time or uvs['int_time']!=int_time or uvs['declination']!=declination:
+				print('All or some uv maps is read from the given file. Be sure that they were run with the same parameter values as provided now.')
+				print('Compare to the values of the parameters in the output dictionary.')
+				return uvs
 		else:
-			uvs = {}
+			uvs = {'ncells':ncells, 'boxsize':boxsize, 'total_int_time':total_int_time, 'int_time':int_time, 'declination':declination}
 	else:
-		uvs = {}
+		uvs = {'ncells':ncells, 'boxsize':boxsize, 'total_int_time':total_int_time, 'int_time':int_time, 'declination':declination}
 
 	# Create uv maps
 	print('Creating the uv maps.')
@@ -444,14 +447,17 @@ def noise_lightcone(ncells, zs, obs_time=1000, filename=None, boxsize=None, save
 	noise3d = np.zeros((ncells,ncells,zs.size))
 
 	if save_uvmap is not None:
-		save_uvmap = save_uvmap.split('.')[0]+'.pkl'
+		if save_uvmap[-4:]!='.pkl': save_uvmap += '.pkl'
 		if len(glob(save_uvmap)):
 			uvs = pickle.load(open(save_uvmap, 'rb'))
-			print('All or some uv maps is read from the given file. Be sure that they were run with the same parameter values as provided now.')
+			if uvs['ncells']!=ncells or uvs['boxsize']!=boxsize or uvs['total_int_time']!=total_int_time or uvs['int_time']!=int_time or uvs['declination']!=declination:
+				print('All or some uv maps is read from the given file. Be sure that they were run with the same parameter values as provided now.')
+				print('Compare to the values of the parameters in the output dictionary.')
+				return uvs
 		else:
-			uvs = {}
+			uvs = {'ncells':ncells, 'boxsize':boxsize, 'total_int_time':total_int_time, 'int_time':int_time, 'declination':declination}
 	else:
-		uvs = {}
+		uvs = {'ncells':ncells, 'boxsize':boxsize, 'total_int_time':total_int_time, 'int_time':int_time, 'declination':declination}
 
 	# Create uv maps
 	print('Creating the uv maps.')
