@@ -1,19 +1,25 @@
 import numpy as np
-try:
-    import py21cmfast as p21c
-except:
-    print('Install py21cmfast (https://21cmfast.readthedocs.io/) to model reionization with 21cmFAST.')
 
+def _is_py21cmfast_installed():
+    try:
+        import py21cmfast as p21c
+        return p21c
+    except:
+        print('Install py21cmfast (https://21cmfast.readthedocs.io/) to model reionization with 21cmFAST.')
+        return None
 
 def run_21cmfast_init(
                     user_params={"HII_DIM":32, "DIM":32*3, "BOX_LEN":128, "USE_INTERPOLATION_TABLES": True},
                     cosmo_params={"OMb":0.049, "OMm":0.31, "POWER_INDEX":0.96, "SIGMA_8":0.83, "hlittle":0.67},
-                    write=True,
+                    write=False,
                     direc=None,
                     random_seed=42,
                     regenerate=False,
                     verbose=True,
                     **global_kwargs):
+    p21c = _is_py21cmfast_installed()
+    if p21c is None: return None
+
     if verbose: print('Creating initial conditions...')
     ic = p21c.initial_conditions(
                     user_params=user_params,
@@ -32,10 +38,13 @@ def run_21cmfast_matter(redshift,
                         cosmo_params={"OMb":0.049, "OMm":0.31, "POWER_INDEX":0.96, "SIGMA_8":0.83, "hlittle":0.67},
                         random_seed=42,
                         regenerate=False,
-                        write=True,
+                        write=False,
                         direc=None,
                         verbose=True,
                         **global_kwargs):
+    p21c = _is_py21cmfast_installed()
+    if p21c is None: return None
+
     if init_box is None:
         if verbose: print('Creating initial conditions...')
         init_box = p21c.initial_conditions(
@@ -70,6 +79,9 @@ def run_21cmfast_coeval(redshift,
                         random_seed=42,
                         verbose=True,
                         **global_kwargs):
+    p21c = _is_py21cmfast_installed()
+    if p21c is None: return None
+
     if isinstance(redshift,(int,float)): redshift = [float(redshift)]
     if isinstance(redshift,(np.ndarray)): redshift = list(redshift)
     if verbose: print('Modelling reionization...')

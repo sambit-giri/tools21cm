@@ -80,7 +80,7 @@ from .position_dependent_power_spectrum import *
 from .test_case import *
 
 # Interface to simulation codes
-from .model_21cmfast import *
+from . import model_21cmfast
 
 #Suppress warnings from zero-divisions and nans
 import numpy
