@@ -47,8 +47,8 @@ def beam_convolve(input_array, z, fov_mpc, beam_w = None, max_baseline = None, \
 	else:
 		raise Exception('Unknown beamshape: %g' % beamshape)
 
-	#out =  signal.fftconvolve(input_array, kernel)
-	out =  fftconvolve(input_array, kernel)
+	out =  signal.fftconvolve(input_array, kernel, mode='same')
+	# out =  fftconvolve(input_array, kernel)
 
 	#fftconvolve makes the output twice the size, so return only the central part	
 	ox = out.shape[0]

@@ -239,7 +239,8 @@ def smooth_with_kernel(input_array, kernel):
         '''
         assert len(input_array.shape) == len(kernel.shape)
         
-        out = fftconvolve(input_array, kernel)
+        # out = fftconvolve(input_array, kernel)
+        out = signal.fftconvolve(input_array, kernel, mode='same')
         
         return out
 
