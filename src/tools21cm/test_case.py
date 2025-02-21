@@ -105,5 +105,7 @@ def spherical_bubble_model(n_cells, x_ion, r=10, source_distribution='Poisson', 
     pbar.n = pbar.total  # Set to total iterations to fill to 100%
     pbar.refresh()  # Refresh to show the updated state
     pbar.close()  # Close the progress bar
-    print('Cube filling complete.')
+    
+    cube[cube>1.] = 1.
+    print(f'min={cube.min():.2f}, mean={cube.mean():.2f}, max={cube.max():.2f} | Cube filling complete.')
     return cube
