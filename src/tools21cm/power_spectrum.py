@@ -6,7 +6,7 @@ import numpy as np, gc
 from . import const
 from . import conv
 from .helper_functions import print_msg, get_eval
-# from .power_spect_fast import power_spect_2d as power_spectrum_2d
+from .scipy_func import numpy_product
 from scipy import fftpack, stats
 
 def apply_window(input_array, window):
@@ -47,8 +47,8 @@ def power_spectrum_nd(input_array, box_dims=None, verbose=False, **kwargs):
         if(verbose): print( '...done')
 
         # scale
-        boxvol = np.product(box_dims)
-        pixelsize = boxvol/(np.product(input_array.shape))
+        boxvol = numpy_product(box_dims)
+        pixelsize = boxvol/(numpy_product(input_array.shape))
         power_spectrum *= pixelsize**2/boxvol
         
         return power_spectrum
@@ -88,8 +88,8 @@ def cross_power_spectrum_nd(input_array1, input_array2, box_dims, **kwargs):
         print_msg( '...done')
 
         # scale
-        boxvol = np.product(box_dims)
-        pixelsize = boxvol/(np.product(input_array1.shape))
+        boxvol = numpy_product(box_dims)
+        pixelsize = boxvol/(numpy_product(input_array1.shape))
         power_spectrum *= pixelsize**2/boxvol
 
         return power_spectrum

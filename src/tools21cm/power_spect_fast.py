@@ -6,6 +6,7 @@ from scipy import interpolate, stats
 from tqdm import tqdm
 
 from . import cosmo, smoothing, const 
+from .scipy_func import numpy_product
 
 def power_spect_nd(input_array, box_dims, verbose=True):
 	''' 
@@ -35,9 +36,9 @@ def power_spect_nd(input_array, box_dims, verbose=True):
 
 	# scale
 	#print(box_dims)
-	boxvol = np.product(box_dims)
+	boxvol = numpy_product(box_dims)
 	#print(boxvol)
-	pixelsize = boxvol/(np.product(input_array.shape))
+	pixelsize = boxvol/(numpy_product(input_array.shape))
 	power_spectrum *= pixelsize**2/boxvol
 	
 	return power_spectrum

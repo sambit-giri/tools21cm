@@ -11,7 +11,7 @@ from joblib import Parallel, delayed
 from . import const
 from . import conv
 from .helper_functions import print_msg, get_eval
-# from .power_spect_fast import power_spect_2d as power_spectrum_2d
+from .scipy_func import numpy_product
 from .power_spectrum import _get_dims, _get_k, _get_kbins, apply_window
 
 def fft_nd(input_array, box_dims=None, verbose=False):
@@ -64,8 +64,8 @@ class Bispectrum:
                         return_n_modes=False,
                         binning='log',
                     ):
-        box_vol = np.product(box_dims)
-        n_pixel = (np.product(input_array_fft.shape)).astype(int)
+        box_vol = numpy_product(box_dims)
+        n_pixel = (numpy_product(input_array_fft.shape)).astype(int)
         
         shell1 = self.spherical_shell_mask(input_array_fft.shape, k1, dk1, k_mag=k_mag)
         dfft1  = input_array_fft*shell1
