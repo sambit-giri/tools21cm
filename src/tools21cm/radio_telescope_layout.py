@@ -1,5 +1,6 @@
 import numpy as np
-import os, pickle, pkg_resources
+import os, pickle
+import importlib.resources #pkg_resources
 import astropy.units as u
 from astropy.coordinates import EarthLocation
 
@@ -104,8 +105,9 @@ def get_SKA_Low_layout(subarray_type="AA4"):
         filename = 'input_data/skalow_AA0.5_layout.txt'
     else:
         filename = 'input_data/skalow1_layout.txt'
-    path_to_file   = pkg_resources.resource_filename('tools21cm', filename)
-    antxyz = np.loadtxt(path_to_file)
+    # path_to_file = pkg_resources.resource_filename('tools21cm', filename)
+    with importlib.resources.path('tools21cm', filename) as path_to_file:
+        antxyz = np.loadtxt(path_to_file)
     N_ant = antxyz.shape[0]
     print(f'{subarray_type} contains {N_ant} antennae.')
     return antxyz*u.m
