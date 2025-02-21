@@ -59,8 +59,8 @@ def spherical_bubble_model(n_cells, x_ion, r=10, source_distribution='Poisson', 
     cube = kwargs.get('cube')
     if cube is None:
         print('Cube initialized to zeros...')
-    else:
         cube = np.zeros((n_cells, n_cells, n_cells), dtype=float)
+    else:
         print(f'Cube with filling fraction of {cube.mean():.3f} provided...')
     
     # Volume fraction of a single bubble
