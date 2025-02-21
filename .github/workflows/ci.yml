@@ -16,7 +16,7 @@ jobs:
 
     strategy:
       matrix:
-        python-version: [3.8]  # Test specifically with Python 3.8
+        python-version: [3.11]  # Test specifically with Python 3.11
 
     steps:
       - name: Check out repository code
@@ -49,7 +49,7 @@ jobs:
           # Activate the Conda environment and update Python
           source ~/.bashrc
           conda activate tools21cm
-          conda install python=3.8 --update-deps  # Specify exact Python version
+          conda install python=3.11 --update-deps  # Specify exact Python version
         shell: bash
 
       - name: Install additional dependencies
