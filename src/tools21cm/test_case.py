@@ -84,7 +84,9 @@ def spherical_bubble_model(n_cells, x_ion, r=10, source_distribution='Poisson', 
     for _ in range(max_iter):
         # Select positions based on source_distribution
         if source_distribution == 'Poisson':
-            positions = np.random.randint(0, n_cells, (batch_size, 3))
+            # positions = np.random.randint(0, n_cells, (batch_size, 3))
+            arg_zero = np.argwhere(cube==0)
+            positions = arg_zero[np.random.randint(0, arg_zero.shape[0], batch_size)]
         
         # Apply the kernel at selected positions
         paint_kernel(cube, positions, kernel)
