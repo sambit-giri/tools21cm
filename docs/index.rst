@@ -19,7 +19,7 @@ Tools21cm
 .. image:: https://badge.fury.io/py/tools21cm.svg
    :target: https://badge.fury.io/py/tools21cm
 
-A python package for analysing 21-cm signals from the Epoch of Reionization (EoR) and Cosmic Dawn (CD). The source files can be found at its `GitHub page <https://github.com/sambit-giri/tools21cm>`_.
+A python package for analysing the 21-cm signal from the Epoch of Reionization (EoR) and Cosmic Dawn (CD). The source files can be found at its `GitHub page <https://github.com/sambit-giri/tools21cm>`_.
 
 Note: There are some modules in the package that are still under active development. Therefore please contact the authors if you get erronous results.
 
