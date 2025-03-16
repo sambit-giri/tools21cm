@@ -584,7 +584,7 @@ def smooth_line(y, window=3, kind='tophat'):
     Smooths a 1D array using a specified window type.
 
     Parameters:
-    ----------
+    -----------
     y : array-like
         The input data to smooth, typically a 1D array.
     window : int or array-like
@@ -600,17 +600,17 @@ def smooth_line(y, window=3, kind='tophat'):
         Defaults to 'tophat'.
 
     Returns:
-    -------
+    --------
     y_smooth : ndarray
         The smoothed version of the input array `y`.
 
     Raises:
-    ------
+    -------
     ValueError
         If the provided `kind` is not recognized.
 
     Examples:
-    --------
+    ---------
     >>> y = [1, 2, 3, 4, 5, 6, 7]
     >>> smooth_line(y, window=3, kind='gaussian')
     array([...])  # Smoothed values
