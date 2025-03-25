@@ -1,6 +1,8 @@
 import numpy as np
 import os, pickle
-import importlib.resources #pkg_resources
+from tqdm import tqdm
+# import pkg_resources
+from importlib.resources import files
 import astropy.units as u
 from astropy.coordinates import EarthLocation
 
@@ -92,10 +94,20 @@ def cartesian_to_geographic_coordinate_system(antxyz):
     antll = np.vstack((lon.value, lat.value, height.value)).T
     return antll
 
+def antenna_positions_to_baselines(antxyz):
+    # from itertools import combinations
+    # baselines = [(a1-a2) for a1,a2 in tqdm(combinations(antxyz, 2))]
+    from itertools import permutations
+    baselines = np.array([(a1-a2) for a1,a2 in tqdm(permutations(antxyz, 2))])
+    try: 
+        return baselines*antxyz.unit
+    except:
+        return baselines
+
 def get_SKA_Low_layout(subarray_type="AA4"):
     if subarray_type.upper()=="AA4":
         filename = 'input_data/skalow_AA4_layout.txt'
-    elif subarray_type.upper()=="AASTAR":
+    elif subarray_type.upper() in ["AASTAR", "AA*"]:
         filename = 'input_data/skalow_AAstar_layout.txt'
     elif subarray_type.upper()=="AA2":
         filename = 'input_data/skalow_AA2_layout.txt'
@@ -105,9 +117,10 @@ def get_SKA_Low_layout(subarray_type="AA4"):
         filename = 'input_data/skalow_AA0.5_layout.txt'
     else:
         filename = 'input_data/skalow1_layout.txt'
+
     # path_to_file = pkg_resources.resource_filename('tools21cm', filename)
-    with importlib.resources.path('tools21cm', filename) as path_to_file:
-        antxyz = np.loadtxt(path_to_file)
+    path_to_file = str(files('tools21cm')/filename)
+    antxyz = np.loadtxt(path_to_file)
     N_ant = antxyz.shape[0]
     print(f'{subarray_type} contains {N_ant} antennae.')
     return antxyz*u.m
