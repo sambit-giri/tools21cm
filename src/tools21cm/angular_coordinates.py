@@ -47,7 +47,7 @@ def physical_lightcone_to_observational(physical_lightcone, input_z_low, output_
             and crop lower redshift slices
         - 'full', 'extend': Same as 'pad'
         - 'valid': Same as 'crop'
-            
+
     Returns
     -------
     tuple
@@ -57,13 +57,6 @@ def physical_lightcone_to_observational(physical_lightcone, input_z_low, output_
         output_freqs : numpy.ndarray
             Array of output frequencies in MHz corresponding to the slices 
             along the line-of-sight
-                
-    Notes
-    -----
-    - The function assumes the input lightcone is in comoving coordinates
-    - The angular reprojection conserves surface brightness
-    - Frequency binning is done using the cosmological relationship 
-        between redshift and frequency
     '''
     assert mode.lower() in ['pad', 'full', 'extend', 'crop', 'valid'], "Accepted input for mode: 'pad', 'full', 'extend', 'crop', 'valid'."
 
