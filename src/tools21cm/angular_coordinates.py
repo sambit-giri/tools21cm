@@ -16,9 +16,8 @@ from tqdm import tqdm
 
 def physical_lightcone_to_observational(physical_lightcone, input_z_low, output_dnu, output_dtheta, input_box_size_mpc=None, verbose=True, order=2, mode='pad'):
     '''
-    Interpolate a lightcone volume from physical (length) units to observational 
-    (angle/frequency) units.
-    
+    Interpolate a lightcone volume from physical (length) units to observational (angle/frequency) units.
+
     Parameters:
         physical_lightcone (numpy.ndarray): 
             The input lightcone volume in physical coordinates with shape 
@@ -42,24 +41,24 @@ def physical_lightcone_to_observational(physical_lightcone, input_z_low, output_
         mode (str, optional): 
             How to handle the field of view at different redshifts:
             - 'pad' (default): Fix FoV at lowest redshift (largest angular size)
-              and pad higher redshift slices
+                and pad higher redshift slices
             - 'crop': Fix FoV at highest redshift (smallest angular size) 
-              and crop lower redshift slices
+                and crop lower redshift slices
             - 'full', 'extend': Same as 'pad'
             - 'valid': Same as 'crop'
             
     Returns:
         tuple: 
             - output_volume (numpy.ndarray): The transformed lightcone in 
-              observational coordinates with shape (N_theta, N_theta, N_nu)
+                observational coordinates with shape (N_theta, N_theta, N_nu)
             - output_freqs (numpy.ndarray): Array of output frequencies in MHz 
-              corresponding to the slices along the line-of-sight
-              
+                corresponding to the slices along the line-of-sight
+                
     Notes:
         - The function assumes the input lightcone is in comoving coordinates
         - The angular reprojection conserves surface brightness
         - Frequency binning is done using the cosmological relationship 
-          between redshift and frequency
+            between redshift and frequency
     '''
     assert mode.lower() in ['pad', 'full', 'extend', 'crop', 'valid'], "Accepted input for mode: 'pad', 'full', 'extend', 'crop', 'valid'."
 
@@ -77,7 +76,7 @@ def physical_lightcone_to_observational(physical_lightcone, input_z_low, output_
     hf.print_msg('Making observational lightcone...')
     hf.print_msg('Binning in frequency...')
     lightcone_freq, output_freqs = bin_lightcone_in_frequency(physical_lightcone,\
-                                                         input_z_low, input_box_size_mpc, output_dnu)
+                                                            input_z_low, input_box_size_mpc, output_dnu)
 
     #Calculate the FoV in degrees at lowest z (largest one)
     fov_deg_low  = cm.angular_size_comoving(input_box_size_mpc, input_z_low)
