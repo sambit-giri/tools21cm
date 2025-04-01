@@ -16,28 +16,53 @@ from tqdm import tqdm
 
 def physical_lightcone_to_observational(physical_lightcone, input_z_low, output_dnu, output_dtheta, input_box_size_mpc=None, verbose=True, order=2, mode='pad'):
     '''
-    Interpolate a lightcone volume from physical (length) units
-    to observational (angle/frequency) units.
+    Interpolate a lightcone volume from physical (length) units to observational 
+    (angle/frequency) units.
     
     Parameters:
-        physical_lightcone (numpy array): the lightcone volume
-        input_z_low (float): the lowest redshift of the input lightcone
-        output_dnu (float): the frequency resolution of the output volume in MHz
-        output_dtheta (float): the angular resolution of the output in arcmin
-        input_box_size_mpc (float): the size of the input FoV in Mpc.
-            If None (default), this will be set to conv.LB
-        verbose (bool): show progress bar
-        order (int): The order of the spline interpolation, default is 2. 
-            The order has to be in the range 0-5.
+        physical_lightcone (numpy.ndarray): 
+            The input lightcone volume in physical coordinates with shape 
+            (N, N, M) where N is the number of cells per side in angular 
+            direction and M is the number of cells along the line-of-sight
+        input_z_low (float or array-like): 
+            The lowest redshift of the input lightcone. If array-like, should 
+            contain redshifts for each slice along the line-of-sight
+        output_dnu (float): 
+            The frequency resolution of the output volume in MHz
+        output_dtheta (float): 
+            The angular resolution of the output in arcmin
+        input_box_size_mpc (float, optional): 
+            The size of the input field of view in Mpc. If None (default), 
+            uses the value from conv.LB
+        verbose (bool, optional): 
+            Whether to show progress messages (default: True)
+        order (int, optional): 
+            The order of the spline interpolation (0-5). Default is 2. 
             Use order=0 for ionization fraction data.
-        mode (str): The mode used while modelling the signal in angular direction. 
-            Default is 'pad', which will fix the FoV at the lowest redshift and pad pixels at higher redhsifts. 
-            Other option is 'crop', which will fix the FoV at the highest redshift and crop pixels at lower redshifts. 
+        mode (str, optional): 
+            How to handle the field of view at different redshifts:
+            - 'pad' (default): Fix FoV at lowest redshift (largest angular size)
+              and pad higher redshift slices
+            - 'crop': Fix FoV at highest redshift (smallest angular size) 
+              and crop lower redshift slices
+            - 'full', 'extend': Same as 'pad'
+            - 'valid': Same as 'crop'
             
     Returns:
-        * The output volume as a numpy array
-        * The output frequencies in MHz as an array of floats
+        tuple: 
+            - output_volume (numpy.ndarray): The transformed lightcone in 
+              observational coordinates with shape (N_theta, N_theta, N_nu)
+            - output_freqs (numpy.ndarray): Array of output frequencies in MHz 
+              corresponding to the slices along the line-of-sight
+              
+    Notes:
+        - The function assumes the input lightcone is in comoving coordinates
+        - The angular reprojection conserves surface brightness
+        - Frequency binning is done using the cosmological relationship 
+          between redshift and frequency
     '''
+    assert mode.lower() in ['pad', 'full', 'extend', 'crop', 'valid'], "Accepted input for mode: 'pad', 'full', 'extend', 'crop', 'valid'."
+
     if input_box_size_mpc == None:
         input_box_size_mpc = conv.LB
 
@@ -47,31 +72,37 @@ def physical_lightcone_to_observational(physical_lightcone, input_z_low, output_
         input_z_high = cm.cdist_to_z(distances).max()
     else:
         input_z_low, input_z_high = input_z_low.min(), input_z_low.max()
-    
+
     #For each output redshift: average the corresponding slices
     hf.print_msg('Making observational lightcone...')
     hf.print_msg('Binning in frequency...')
     lightcone_freq, output_freqs = bin_lightcone_in_frequency(physical_lightcone,\
                                                          input_z_low, input_box_size_mpc, output_dnu)
+
     #Calculate the FoV in degrees at lowest z (largest one)
-    if mode.lower() in ['pad', 'full', 'extend']:
-        fov_deg = cm.angular_size_comoving(input_box_size_mpc, input_z_low)
-    elif mode.lower() in ['crop', 'valid']:
-        fov_deg = cm.angular_size_comoving(input_box_size_mpc, input_z_high)
-    else:
-        assert mode.lower() in ['pad', 'full', 'extend', 'crop', 'valid']
+    fov_deg_low  = cm.angular_size_comoving(input_box_size_mpc, input_z_low)
+    fov_deg_high = cm.angular_size_comoving(input_box_size_mpc, input_z_high)
 
     #Calculate dimensions of output volume
-    n_cells_theta = int(fov_deg*60./output_dtheta)
+    n_cells_theta  = int(fov_deg_low*60./output_dtheta)
     n_cells_nu = len(output_freqs)
+
     #Go through each slice and make angular slices for each one
     hf.print_msg('Binning in angle...')
     output_volume = np.zeros((n_cells_theta, n_cells_theta, n_cells_nu))
     for i in tqdm(range(n_cells_nu), disable=not verbose):
         z = cm.nu_to_z(output_freqs[i])
         output_volume[:,:,i] = physical_slice_to_angular(lightcone_freq[:,:,i], z, \
-                                        slice_size_mpc=input_box_size_mpc, fov_deg=fov_deg,\
+                                        slice_size_mpc=input_box_size_mpc, fov_deg=fov_deg_low,\
                                         dtheta=output_dtheta, order=order)
+        
+    if mode.lower() in ['pad', 'full', 'extend']:
+        pass
+    elif mode.lower() in ['crop', 'valid']:
+        n_cells_theta_out = int(fov_deg_high*60./output_dtheta)
+        output_volume = output_volume[(n_cells_theta-n_cells_theta_out)//2:(n_cells_theta+n_cells_theta_out)//2,(n_cells_theta-n_cells_theta_out)//2:(n_cells_theta+n_cells_theta_out)//2,:]
+    else:
+        print(f"mode={mode} is not implemented")
         
     return output_volume, output_freqs
 
