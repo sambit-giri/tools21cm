@@ -17,7 +17,7 @@ from tqdm import tqdm
 def physical_lightcone_to_observational(physical_lightcone, input_z_low, output_dnu, output_dtheta, input_box_size_mpc=None, verbose=True, order=2, mode='pad'):
     '''
     Interpolate a lightcone volume from physical (length) units to observational (angle/frequency) units.
-
+    
     Parameters
     ----------
     physical_lightcone : numpy.ndarray
@@ -358,10 +358,3 @@ def padding_lightcone(lc, padded_n=None, mode='wrap', verbose=True):
     for i in tqdm(range(lc.shape[2]), disable=not verbose):
         out_lc[:,:,i] = np.pad(lc[:,:,i], padded_n, mode=mode)
     return out_lc
-
-
-
-
-
-
-
