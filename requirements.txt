@@ -9,5 +9,5 @@ tqdm
 joblib
 pandas
 pytest
-torch==2.1.0
-numba
+# torch==2.1.0
+# numba
