@@ -41,10 +41,11 @@ def physical_lightcone_to_observational(physical_lightcone, input_z_low, output_
         Use order=0 for ionization fraction data.
     mode : str, optional
         How to handle the field of view at different redshifts:
+        
         - 'pad' (default): Fix FoV at lowest redshift (largest angular size)
-            and pad higher redshift slices
+          and pad higher redshift slices
         - 'crop': Fix FoV at highest redshift (smallest angular size) 
-            and crop lower redshift slices
+          and crop lower redshift slices
         - 'full', 'extend': Same as 'pad'
         - 'valid': Same as 'crop'
 
