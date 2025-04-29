@@ -1,4 +1,5 @@
 import numpy as np
+from time import time 
 
 def _is_py21cmfast_installed():
     try:
@@ -19,7 +20,7 @@ def run_21cmfast_init(
                     **global_kwargs):
     p21c = _is_py21cmfast_installed()
     if p21c is None: return None
-
+    tstart = time()
     if verbose: print('Creating initial conditions...')
     ic = p21c.initial_conditions(
                     user_params=user_params,
@@ -29,7 +30,7 @@ def run_21cmfast_init(
                     random_seed=random_seed,
                     regenerate=regenerate,
                     **global_kwargs)
-    if verbose: print('...done')
+    if verbose: print(f'...done in {time()-tstart:.1f} s')
     return ic 
     
 def run_21cmfast_matter(redshift,
@@ -44,7 +45,7 @@ def run_21cmfast_matter(redshift,
                         **global_kwargs):
     p21c = _is_py21cmfast_installed()
     if p21c is None: return None
-
+    tstart = time()
     if init_box is None:
         if verbose: print('Creating initial conditions...')
         init_box = p21c.initial_conditions(
@@ -55,12 +56,12 @@ def run_21cmfast_matter(redshift,
                         random_seed=random_seed,
                         regenerate=regenerate,
                         **global_kwargs)
-        if verbose: print('...done')
+        if verbose: print(f'...done in {time()-tstart:.1f} s')
     if verbose: print('Creating matter distribution...')
     fieldz = lambda z: p21c.perturb_field(redshift=z,
                         init_boxes=init_box,
                         **global_kwargs)
-    if verbose: print('...done')
+    if verbose: print(f'...done in {time()-tstart:.1f} s')
     out = {zi: fieldz(zi) for ii,zi in enumerate(redshift)}
     return out
 
@@ -81,7 +82,7 @@ def run_21cmfast_coeval(redshift,
                         **global_kwargs):
     p21c = _is_py21cmfast_installed()
     if p21c is None: return None
-
+    tstart = time()
     if isinstance(redshift,(int,float)): redshift = [float(redshift)]
     if isinstance(redshift,(np.ndarray)): redshift = list(redshift)
     if verbose: print('Modelling reionization...')
@@ -99,7 +100,7 @@ def run_21cmfast_coeval(redshift,
                         pt_halos=pt_halos,
                         random_seed=random_seed,
                         **global_kwargs)
-    if verbose: print('...done')
+    if verbose: print(f'...done in {time()-tstart:.1f} s')
     out = {zi: coevals[ii] for ii,zi in enumerate(redshift)}
     return out
 
