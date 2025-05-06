@@ -9,7 +9,7 @@ from scipy import ndimage
 import os,sys
 import datetime, time
 from . import mfp_np, spa_np, conv, morph 
-from scipy.interpolate import interp1d
+from .scipy_func import *
 from tqdm import tqdm
 from joblib import Parallel, delayed
 from .usefuls import loading_msg
@@ -50,111 +50,6 @@ def fof(data, xth=0.5, connectivity=1):
 
 	return out_map, size_list
 
-
-#def zahn(data, xth=0.5, boxsize=100, nscales=20, upper_lim=False):
-	"""
-	Determines the sizes using the friends-of-friends approach.
-	It assumes the length of the grid as the linking length.
-	
-	Parameters:
-		data (ndarray): The array containing the input data
-		xth (float): The threshold value (Default: 0.5)
-
-	Returns:
-		* numpy array with each regions of interest label
-		* list of all sizes
-	"""
-#	"""
-#	ZAHN bubble
-#	
-#	Parameter
-#	---------
-#	input     : 3D array of ionization fraction.
-#	xth       : The threshold value (Default: 0.5).
-#	boxsize   : The boxsize in cMpc can be given (Default: 100).
-#	nscales   : The number of different radii to consider (Default: 20).
-#	upper_lim : It decides if the threshold is the upper limit or the lower limit (Default: True).
-#
-#	Output
-#	------
-#	The output is a tuple containing three values: r, rdp/dr(ion), rdp/dr(neut).
-#	"""
-#	t1 = datetime.datetime.now()
-#	if (upper_lim): 
-#		data = -1.*data
-#		xth  = -1.*xth
-#
-#	zahnbubble.zahn(data, xth, boxsize*0.7, nscales)
-#
-#	f1 = open('dummy_output_of_zahn.dat')
-#	names1 = [l1.strip() for l1 in f1.readlines()]
-#	f1.close()
-#	os.remove('dummy_output_of_zahn.dat')
-#
-#	f2 = open('center_zahn.dat')
-#	names2 = [l2.strip() for l2 in f2.readlines()]
-#	f2.close()
-#	os.remove('center_zahn.dat')
-#
-#	os.remove('rhoHI.asci')
-#	os.remove('sizes.asci')
-#
-#	radius    = []
-#	num_ion   = []
-#	num_neut  = []
-#	inbin     = []
-#	filternum = []
-#
-#	radius2   = []
-#	avg_ion   = []
-#
-#	for i in range(len(names1)):
-#		row = np.array(names1[i].split())
-#		row.astype(np.float)
-#		radius.append(row[0])
-#		num_ion.append(row[1])
-#		num_neut.append(row[2])
-#		inbin.append(row[3])
-#		filternum.append(row[4])
-#
-#	for i in range(len(names2)):
-#		row = np.array(names2[i].split())
-#		row.astype(np.float)
-#		radius2.append(row[0])
-#		avg_ion.append(row[1])
-#
-#	t2 = datetime.datetime.now()
-#	runtime = (t2-t1).total_seconds()/60
-#
-#	print "Program runtime: %f minutes." %runtime
-#	print "The output is a tuple containing three values: r, rdp/dr(ion), rdp/dr(neut)."
-#	print "The curve has been normalized."
-#
-#	return np.array(radius).astype(float), np.array(num_ion).astype(float), np.array(num_neut).astype(float)
-#
-#def spa(data, xth=0.95, boxsize=100, nscales=30, upper_lim=False):
-#	"""
-#	Spherical-Averege (SPA) bubble
-#	
-#	Parameter
-#	---------
-#	input     : 3D array of ionization fraction.
-#	xth       : The threshold value (Default: 0.5).
-#	boxsize   : The boxsize in cMpc can be given (Default: 100).
-#	nscales   : The number of different radii to consider (Default: 20).
-#	upper_lim : It decides if the threshold is the upper limit or the lower limit (Default: True).
-#
-#	Output
-#	------
-#	The output is a tuple containing three values: r, rdp/dr(ion), rdp/dr(neut).
-#	"""
-#	rr,ni,nn = zahn(data, xth=xth, boxsize=boxsize, nscales=nscales, upper_lim=upper_lim)
-#	r_min = boxsize/data.shape[0]
-#	rr_   = rr[rr>=r_min]
-#	ni_   = ni[rr>=r_min]
-#	nn_   = nn[rr>=r_min]
-#	return rr_, ni_*ni.sum()/ni_.sum(), nn_*nn.sum()/nn_.sum()
-
 def spa(data, xth=0.95, boxsize=None, nscales=20, upper_lim=False, binning='log'):
 	"""
 	Determines the sizes using the Spherical-Averege (SPA) approach.
@@ -189,7 +84,7 @@ def spa(data, xth=0.95, boxsize=None, nscales=20, upper_lim=False, binning='log'
 	return rs_, ni_
 
 
-def mfp(data, xth=0.5, boxsize=None, iterations = 10000000, verbose=True, upper_lim=False, bins=None, r_min=None, r_max=None):
+def mfp(data, xth=0.5, boxsize=None, iterations=10000000, verbose=True, upper_lim=False, bins=None, r_min=None, r_max=None):
 	"""
 	Determines the sizes using the Mean-Free-Path (MFP) approach.
 	
@@ -201,8 +96,8 @@ def mfp(data, xth=0.5, boxsize=None, iterations = 10000000, verbose=True, upper_
 		The threshold value (Default: 0.5).
 	boxsize   : float
 		The boxsize in cMpc can be given (Default: conv.LB).
-	iterations: float
-		Number of iterations (Default: 1e7).
+	iterations: int
+		Number of iterations (Default: 10_000_000).
 	verbose   : bool
 		It prints the progress of the program (Default: True).
 	upper_lim : bool
@@ -221,6 +116,7 @@ def mfp(data, xth=0.5, boxsize=None, iterations = 10000000, verbose=True, upper_
 	dn : ndarray
 		probability of finding the corresponding size 
 	"""
+	iterations = int(iterations)
 	if boxsize is None:
 		boxsize = conv.LB
 		print('Boxsize is set to %.2f Mpc.'%boxsize) 
@@ -261,8 +157,98 @@ def mfp(data, xth=0.5, boxsize=None, iterations = 10000000, verbose=True, upper_
 	if bins is not None: r0,p0 = rebin_bsd(r0, p0, bins=bins, r_min=r_min, r_max=r_max)
 	return r0, p0
 
+def averaged_mfp(data, xth=0.5, boxsize=None, iterations=10000000, rays_per_point=10, verbose=True, upper_lim=False, bins=None, r_min=None, r_max=None, n_jobs=-1):
+	"""
+	Determines the sizes using the averaged Mean-Free-Path (MFP) approach.
+	
+	Parameters
+	----------
+	input     : ndarray
+		2D/3D array of ionization fraction/brightness temperature.
+	xth       : float
+		The threshold value (Default: 0.5).
+	boxsize   : float
+		The boxsize in cMpc can be given (Default: conv.LB).
+	iterations: int
+		Number of iterations (Default: 10_000_000).
+	iterations: int
+		Number of iterations (Default: 10).
+	verbose   : bool
+		It prints the progress of the program (Default: True).
+	upper_lim : bool
+		It decides if the threshold is the upper limit or the lower limit (Default: False).
+	bins      : int
+		Give number of bins or an array of sizes to re-bin into (Default: None).
+	r_min     : float
+		Minimum size after rebinning (Default: None).
+	r_max     : float
+		Maximum size after rebinning (Default: None).
 
-def mfp_from_point(data, point, xth=0.5, boxsize=None, iterations = 10000000, verbose=True, upper_lim=False, bins=None, r_min=None, r_max=None):
+	Returns
+	-------
+	r  : ndarray
+		sizes of the regions
+	dn : ndarray
+		probability of finding the corresponding size 
+	"""
+	iterations = int(iterations)
+	rays_per_point = int(rays_per_point)
+	if boxsize is None:
+		boxsize = conv.LB
+		print('Boxsize is set to %.2f Mpc.'%boxsize) 
+	dim = len(data.shape)
+	t1 = datetime.datetime.now()
+	if (upper_lim): 
+		data = -1.*data
+		xth  = -1.*xth
+	check_box = (data>=xth).sum()
+	if check_box==0:
+		data = np.ones(data.shape)
+		iterations = 3
+	if dim == 3:
+		ar = np.zeros_like(data)
+		ar[data >= xth] = 1
+		loc = np.argwhere(ar == 1)
+		rand_loc = np.random.randint(0, high=loc.shape[0], size=iterations)
+		xs, ys, zs = loc[rand_loc, 0], loc[rand_loc, 1], loc[rand_loc, 2]
+
+		print("MFP method applied on 3D data")
+		def compute_ray_length(j):
+			point = [xs[j], ys[j], zs[j]]
+			num_szj, size_pxj = mfp_np.mfp3d(data, xth, iterations=rays_per_point, verbose=False, point=point)
+			return np.sum(num_szj * size_pxj) / np.sum(num_szj)
+		ray_list = Parallel(n_jobs=n_jobs)(delayed(compute_ray_length)(j) for j in tqdm(range(iterations), disable=not verbose))
+		ray_list = np.array(ray_list)
+
+		size_px, num_sz = np.unique(ray_list, return_counts=1)
+		out = [num_sz, size_px]
+	else:
+		print("The data doesn't have the correct dimension")
+		return 0
+	if out is None: return None
+
+	# nn = out[0]/iterations
+	# rr = out[1]
+	ht = np.histogram(np.log(ray_list[ray_list>0]), density=True, bins=50)
+	nn, rr = ht[0], np.exp(ht[1][1:]/2+ht[1][:-1]/2)
+	t2 = datetime.datetime.now()
+	runtime = (t2-t1).total_seconds()/60
+
+	print("Program runtime: %f minutes." %runtime)
+	if check_box==0:
+		print("There is no ROI in the data. Therefore, the number density of all the sizes are zero.")
+		# return rr*boxsize/data.shape[0], np.zeros(rr.shape)
+		nn = np.zeros(rr.shape)
+	print("The output contains a tuple with three values: r, rdP/dr")
+	print("The curve has been normalized.")
+
+	# Return radii (in physical units) and fraction of side lines which
+	# have this side line. This is different from a bubble size distribution!
+	r0,p0 = rr*boxsize/data.shape[0], nn #rr[nn.argmax()]*boxsize/data.shape[0]
+	if bins is not None: r0,p0 = rebin_bsd(r0, p0, bins=bins, r_min=r_min, r_max=r_max)
+	return r0, p0
+
+def mfp_from_point(data, point, xth=0.5, boxsize=None, iterations=10000000, verbose=True, upper_lim=False, bins=None, r_min=None, r_max=None):
 	"""
 	Determines the sizes using the Mean-Free-Path (MFP) approach.
 	
@@ -309,10 +295,10 @@ def mfp_from_point(data, point, xth=0.5, boxsize=None, iterations = 10000000, ve
 		data = np.ones(data.shape)
 		iterations = 3
 	if dim == 2:
-		print("MFP method applied on 2D data (ver 1.0)")
+		print("MFP method applied on 2D data")
 		out = mfp_np.mfp2d(data, xth, iterations=iterations, verbose=verbose, point=point)
 	elif dim == 3:
-		print("MFP method applied on 3D data (ver 1.0)")
+		print("MFP method applied on 3D data")
 		out = mfp_np.mfp3d(data, xth, iterations=iterations, verbose=verbose, point=point)
 	else:
 		print("The data doesn't have the correct dimension")
@@ -337,7 +323,6 @@ def mfp_from_point(data, point, xth=0.5, boxsize=None, iterations = 10000000, ve
 	r0,p0 = rr*boxsize/data.shape[0], nn #rr[nn.argmax()]*boxsize/data.shape[0]
 	if bins is not None: r0,p0 = rebin_bsd(r0, p0, bins=bins, r_min=r_min, r_max=r_max)
 	return r0, p0
-
 
 
 def rebin_bsd(rr, pp, bins=10, r_min=None, r_max=None):
