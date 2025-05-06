@@ -16,10 +16,11 @@ import scipy
 from glob import glob
 from time import time, sleep
 import pickle
+import astropy.units as u
 from joblib import Parallel, delayed
 from tqdm import tqdm
 
-def noise_map(ncells, z, depth_mhz, obs_time=1000, filename=None, boxsize=None, total_int_time=6., int_time=10., declination=-30., uv_map=None, N_ant=None, verbose=True, fft_wrap=False):
+def noise_map(ncells, z, depth_mhz, obs_time=1000, subarray_type="AA4", boxsize=None, total_int_time=6., int_time=10., declination=-30., uv_map=None, N_ant=None, fft_wrap=False):
 	"""
 	It creates a noise map by simulating the radio observation strategy (1801.06550).
 
@@ -44,27 +45,24 @@ def noise_map(ncells, z, depth_mhz, obs_time=1000, filename=None, boxsize=None, 
 		will be simulated
 	N_ant: int
 		Number of antennae
-	filename: str
-		The path to the file containing the telescope configuration.
-
-			- As a default, it takes the SKA-Low configuration from Sept 2016
-			- It is not used if uv_map and N_ant is provided
+	subarray_type: str
+		The name of the SKA-Low layout configuration.
 	boxsize: float
 		Boxsize in Mpc
-	verbose: bool
-		If True, verbose is shown
 	
 	Returns
 	-------
 	noise_map: ndarray
 		A 2D slice of the interferometric noise at that frequency (in muJy).
 	"""
-	if filename is None: N_ant = SKA1_LowConfig_Sept2016().shape[0]
-	elif isinstance(filename, np.ndarray): N_ant = filename.shape[0]
-	else: pass
-	if uv_map is None: uv_map, N_ant  = get_uv_map(ncells, z, filename=filename, total_int_time=total_int_time, int_time=int_time, boxsize=boxsize, declination=declination)
-	if N_ant is None: N_ant = np.loadtxt(filename, dtype=str).shape[0]
-	sigma, rms_noi = sigma_noise_radio(z, uv_map, depth_mhz, obs_time, int_time, N_ant=N_ant, verbose=False)
+	antxyz, N_ant = subarray_type_to_antxyz(subarray_type)
+
+	if uv_map is None: 
+		uv_map, N_ant = get_uv_map(ncells, z, subarray_type=antxyz, total_int_time=total_int_time, int_time=int_time, boxsize=boxsize, declination=declination)
+	if N_ant is None: 
+		N_ant = antxyz.shape[0]
+
+	sigma, rms_noi = sigma_noise_radio(z, depth_mhz, obs_time, int_time, uv_map=uv_map, N_ant=N_ant, verbose=False)
 	noise_real = np.random.normal(loc=0.0, scale=rms_noi, size=(ncells, ncells))
 	noise_imag = np.random.normal(loc=0.0, scale=rms_noi, size=(ncells, ncells))
 	noise_arr  = noise_real + 1.j*noise_imag
@@ -109,7 +107,7 @@ def apply_uv_response_on_image(array, uv_map):
 	img_map  = np.fft.ifft2(img_arr)
 	return np.real(img_map)
 
-def get_uv_map(ncells, z, filename=None, total_int_time=6., int_time=10., boxsize=None, declination=-30., verbose=True):
+def get_uv_map(ncells, z, subarray_type="AA4", total_int_time=6., int_time=10., boxsize=None, declination=-30., verbose=True):
 	"""
 	It creates the uv map at a given redshift (z).
 
@@ -125,11 +123,8 @@ def get_uv_map(ncells, z, filename=None, total_int_time=6., int_time=10., boxsiz
 		Intergration time in seconds
 	declination: float
 		Declination angle in deg
-	filename: str
-		The path to the file containing the telescope configuration.
-
-			- As a default, it takes the SKA-Low configuration from Sept 2016
-			- It is not used if uv_map and N_ant is provided
+	subarray_type: str
+		The name of the SKA-Low layout configuration.
 	boxsize: float
 		Boxsize in Mpc	
 	verbose: bool
@@ -142,13 +137,11 @@ def get_uv_map(ncells, z, filename=None, total_int_time=6., int_time=10., boxsiz
 	N_ant: int
 		Number of antennae
 	"""
-	if filename is None: N_ant = SKA1_LowConfig_Sept2016().shape[0]
-	elif isinstance(filename, np.ndarray): N_ant = filename.shape[0]
-	else: pass
-	uv_map, N_ant  = get_uv_daily_observation(ncells, z, filename, total_int_time=total_int_time, int_time=int_time, boxsize=boxsize, declination=declination, verbose=verbose)
+	antxyz, N_ant = subarray_type_to_antxyz(subarray_type)
+	uv_map, N_ant  = get_uv_daily_observation(ncells, z, antxyz, total_int_time=total_int_time, int_time=int_time, boxsize=boxsize, declination=declination, verbose=verbose)
 	return uv_map, N_ant
 
-def make_uv_map_lightcone(ncells, zs, filename=None, total_int_time=6., int_time=10., boxsize=None, declination=-30., verbose=True):
+def make_uv_map_lightcone(ncells, zs, subarray_type="AA4", total_int_time=6., int_time=10., boxsize=None, declination=-30., verbose=True):
 	"""
 	It creates uv maps at every redshift of the lightcone.
 
@@ -164,11 +157,8 @@ def make_uv_map_lightcone(ncells, zs, filename=None, total_int_time=6., int_time
 		Intergration time in seconds
 	declination: float
 		Declination angle in deg
-	filename: str
-		The path to the file containing the telescope configuration.
-
-			- As a default, it takes the SKA-Low configuration from Sept 2016
-			- It is not used if uv_map and N_ant is provided
+	subarray_type: str
+		The name of the SKA-Low layout configuration.
 	boxsize: float
 		Boxsize in Mpc	
 	verbose: bool
@@ -185,20 +175,16 @@ def make_uv_map_lightcone(ncells, zs, filename=None, total_int_time=6., int_time
 	percc = np.round(100./zs.shape[0],decimals=2)
 	for i in range(zs.shape[0]):
 		z = zs[i]
-		uv_map, N_ant = get_uv_map(ncells, z, filename=filename, total_int_time=total_int_time, int_time=int_time, boxsize=boxsize, declination=declination, verbose=verbose)
+		uv_map, N_ant = get_uv_map(ncells, z, subarray_type=subarray_type, total_int_time=total_int_time, int_time=int_time, boxsize=boxsize, declination=declination, verbose=verbose)
 		uv_lc[:,:,i] = uv_map
 		print("\nThe lightcone has been constructed upto %.1f per cent." %(i*percc))
 	return uv_lc, N_ant
 
-def apply_uv_response_on_coeval(array, z, depth_mhz=None, obs_time=1000, filename=None, boxsize=None, total_int_time=6., int_time=10., declination=-30., uv_map=None, N_ant=None):
+def apply_uv_response_on_coeval(array, z, subarray_type="AA4", boxsize=None, total_int_time=6., int_time=10., declination=-30., uv_map=None, N_ant=None):
 	ncells = array.shape[-1]
-	if filename is None: N_ant = SKA1_LowConfig_Sept2016().shape[0]
-	elif isinstance(filename, np.ndarray): N_ant = filename.shape[0]
-	else: pass
 	if boxsize is None: boxsize = conv.LB
-	if depth_mhz is None: depth_mhz = (cm.z_to_nu(cm.cdist_to_z(cm.z_to_cdist(z)-boxsize/2))-cm.z_to_nu(cm.cdist_to_z(cm.z_to_cdist(z)+boxsize/2)))/ncells
-	if uv_map is None: uv_map, N_ant  = get_uv_map(ncells, z, filename=filename, total_int_time=total_int_time, int_time=int_time, boxsize=boxsize, declination=declination)
-	if N_ant is None: N_ant = np.loadtxt(filename, dtype=str).shape[0]
+	if uv_map is None: 
+		uv_map, N_ant  = get_uv_map(ncells, z, subarray_type=subarray_type, total_int_time=total_int_time, int_time=int_time, boxsize=boxsize, declination=declination)
 	data3d = np.zeros(array.shape)
 	print("Creating the noise cube")
 	for k in range(ncells):
@@ -206,7 +192,7 @@ def apply_uv_response_on_coeval(array, z, depth_mhz=None, obs_time=1000, filenam
 		data3d[:,:,k] = data2d
 	return data3d
 
-def noise_cube_coeval(ncells, z, depth_mhz=None, obs_time=1000, filename=None, boxsize=None, total_int_time=6., int_time=10., declination=-30., uv_map=None, N_ant=None, verbose=True, fft_wrap=False):
+def noise_cube_coeval(ncells, z, depth_mhz=None, obs_time=1000, subarray_type="AA4", boxsize=None, total_int_time=6., int_time=10., declination=-30., uv_map=None, N_ant=None, verbose=True, fft_wrap=False):
 	"""
 	It creates a noise coeval cube by simulating the radio observation strategy (1801.06550).
 
@@ -231,11 +217,8 @@ def noise_cube_coeval(ncells, z, depth_mhz=None, obs_time=1000, filename=None, b
 		will be simulated
 	N_ant: int
 		Number of antennae
-	filename: str
-		The path to the file containing the telescope configuration.
-
-			- As a default, it takes the SKA-Low configuration from Sept 2016
-			- It is not used if uv_map and N_ant is provided
+	subarray_type: str
+		The name of the SKA-Low layout configuration.
 	boxsize: float
 		Boxsize in Mpc
 	verbose: bool
@@ -247,27 +230,28 @@ def noise_cube_coeval(ncells, z, depth_mhz=None, obs_time=1000, filename=None, b
 		A 3D cube of the interferometric noise (in mK).
 		The frequency is assumed to be the same along the assumed frequency (last) axis.	
 	"""
-	if filename is None: N_ant = SKA1_LowConfig_Sept2016().shape[0]
-	elif isinstance(filename, np.ndarray): N_ant = filename.shape[0]
-	else: pass
-	if boxsize is None: boxsize = conv.LB
-	if depth_mhz is None: depth_mhz = (cm.z_to_nu(cm.cdist_to_z(cm.z_to_cdist(z)-boxsize/2))-cm.z_to_nu(cm.cdist_to_z(cm.z_to_cdist(z)+boxsize/2)))/ncells
-	if uv_map is None: uv_map, N_ant  = get_uv_map(ncells, z, filename=filename, total_int_time=total_int_time, int_time=int_time, boxsize=boxsize, declination=declination)
-	if N_ant is None: N_ant = np.loadtxt(filename, dtype=str).shape[0]
+	antxyz, N_ant = subarray_type_to_antxyz(subarray_type)
+
+	if boxsize is None: 
+		boxsize = conv.LB
+	if depth_mhz is None: 
+		depth_mhz = (cm.z_to_nu(cm.cdist_to_z(cm.z_to_cdist(z)-boxsize/2))-cm.z_to_nu(cm.cdist_to_z(cm.z_to_cdist(z)+boxsize/2)))/ncells
+	if uv_map is None: 
+		uv_map, N_ant  = get_uv_map(ncells, z, subarray_type=antxyz, total_int_time=total_int_time, int_time=int_time, boxsize=boxsize, declination=declination)
+
 	# ncells = int(ncells); print(ncells)
 	noise3d = np.zeros((ncells,ncells,ncells))
-	if verbose: print("Creating the noise cube...")
+	if verbose: 
+		print("Creating the noise cube...")
 	sleep(1)
-	for k in tqdm(range(ncells), disable=False if verbose else True):
-		noise2d = noise_map(ncells, z, depth_mhz, obs_time=obs_time, filename=filename, boxsize=boxsize, total_int_time=total_int_time, int_time=int_time, declination=declination, uv_map=uv_map, N_ant=N_ant, verbose=verbose, fft_wrap=fft_wrap)
+	for k in tqdm(range(ncells), disable=not verbose):
+		noise2d = noise_map(ncells, z, depth_mhz, obs_time=obs_time, subarray_type=antxyz, boxsize=boxsize, total_int_time=total_int_time, int_time=int_time, declination=declination, uv_map=uv_map, N_ant=N_ant, fft_wrap=fft_wrap)
 		noise3d[:,:,k] = noise2d
-		verbose = False
-		# perc = np.round((k+1)*100/ncells, decimals=1) 
-		# loading_verbose(str(perc)+'%')
-	if verbose: print("...noise cube created.")
+	if verbose: 
+		print("...noise cube created.")
 	return jansky_2_kelvin(noise3d, z, boxsize=boxsize)
 
-def noise_cube_lightcone(ncells, z, obs_time=1000, filename=None, boxsize=None, save_uvmap=None, total_int_time=6., int_time=10., declination=-30., N_ant=None, fft_wrap=False, verbose=True, n_jobs=4, checkpoint=64):
+def noise_cube_lightcone(ncells, z, obs_time=1000, subarray_type="AA4", boxsize=None, save_uvmap=None, total_int_time=6., int_time=10., declination=-30., N_ant=None, fft_wrap=False, verbose=True, n_jobs=4, checkpoint=64):
 	"""
 	It creates a noise cube by simulating the radio observation strategy (1801.06550)
 	considerng the input redshift (z) as the central slice of the cube.
@@ -291,11 +275,8 @@ def noise_cube_lightcone(ncells, z, obs_time=1000, filename=None, boxsize=None, 
 		Declination angle in deg
 	N_ant: int
 		Number of antennae
-	filename: str
-		The path to the file containing the telescope configuration.
-
-			- As a default, it takes the SKA-Low configuration from Sept 2016
-			- It is not used if uv_map and N_ant is provided
+	subarray_type: str
+		The name of the SKA-Low layout configuration.
 	boxsize: float
 		Boxsize in Mpc
 	verbose: bool
@@ -317,14 +298,13 @@ def noise_cube_lightcone(ncells, z, obs_time=1000, filename=None, boxsize=None, 
 	noise_lightcone: A 3D cubical lightcone of the interferometric noise with frequency varying 
 	along last axis(in mK).	
 	"""
-	if filename is None: N_ant = SKA1_LowConfig_Sept2016().shape[0]
-	elif isinstance(filename, np.ndarray): N_ant = filename.shape[0]
-	else: pass
-	if boxsize is None: boxsize = conv.LB
+	antxyz, N_ant = subarray_type_to_antxyz(subarray_type)
+
+	if boxsize is None: 
+		boxsize = conv.LB
 	zs = cm.cdist_to_z(np.linspace(cm.z_to_cdist(z)-boxsize/2, cm.z_to_cdist(z)+boxsize/2, ncells))
-	if N_ant is None: N_ant = np.loadtxt(filename, dtype=str).shape[0]
 	noise3d = np.zeros((ncells,ncells,ncells))
-	
+
 	if save_uvmap is not None:
 		if save_uvmap[-4:]!='.pkl': save_uvmap += '.pkl'
 		if len(glob(save_uvmap)):
@@ -345,16 +325,16 @@ def noise_cube_lightcone(ncells, z, obs_time=1000, filename=None, boxsize=None, 
 		for k,zi in enumerate(zs):
 			print(f'{k+1}/{len(zs)} | z={zi:.3f}')
 			if '{:.3f}'.format(zi) not in uvs.keys():
-				uv_map, N_ant  = get_uv_map(ncells, zi, filename=filename, total_int_time=total_int_time, int_time=int_time, boxsize=boxsize, declination=declination, verbose=verbose)
+				uv_map, N_ant  = get_uv_map(ncells, zi, subarray_type=antxyz, total_int_time=total_int_time, int_time=int_time, boxsize=boxsize, declination=declination, verbose=verbose)
 				uvs['{:.3f}'.format(zi)] = uv_map
 				uvs['Nant'] = N_ant
 				pickle.dump(uvs, open(save_uvmap, 'wb'))
 			tend = time()
 			# print('\nz = {:.3f} | {:.2f} % completed | Elapsed time: {:.2f} mins'.format(zi,100*(k+1)/zs.size,(tend-tstart)/60))
 	else:
-		Nbase, N_ant = from_antenna_config(filename, zs[0])
+		Nbase, N_ant = from_antenna_config(antxyz, zs[0])
 		uvs['Nant'] = N_ant
-		_uvmap = lambda zi: get_uv_map(ncells, zi, filename=filename, total_int_time=total_int_time, int_time=int_time, boxsize=boxsize, declination=declination, verbose=False)[0] 
+		_uvmap = lambda zi: get_uv_map(ncells, zi, subarray_type=antxyz, total_int_time=total_int_time, int_time=int_time, boxsize=boxsize, declination=declination, verbose=False)[0] 
 		if checkpoint<2*n_jobs:
 			checkpoint = 4*n_jobs
 			print('checkpoint value should be more than 4*n_jobs. checkpoint set to 4*n_jobs.')
@@ -386,14 +366,14 @@ def noise_cube_lightcone(ncells, z, obs_time=1000, filename=None, boxsize=None, 
 		if k+1<zs.size: depth_mhz = np.abs(cm.z_to_nu(zs[k+1])-cm.z_to_nu(zs[k]))
 		else: depth_mhz = np.abs(cm.z_to_nu(zs[k])-cm.z_to_nu(zs[k-1]))
 		uv_map, N_ant  = uvs['{:.3f}'.format(zi)], uvs['Nant']
-		noise2d = noise_map(ncells, zi, depth_mhz, obs_time=obs_time, filename=filename, boxsize=boxsize, total_int_time=total_int_time, int_time=int_time, declination=declination, uv_map=uv_map, N_ant=N_ant, verbose=verbose, fft_wrap=fft_wrap)
+		noise2d = noise_map(ncells, zi, depth_mhz, obs_time=obs_time, subarray_type=antxyz, boxsize=boxsize, total_int_time=total_int_time, int_time=int_time, declination=declination, uv_map=uv_map, N_ant=N_ant, verbose=verbose, fft_wrap=fft_wrap)
 		noise3d[:,:,k] = jansky_2_kelvin(noise2d, zi, boxsize=boxsize)
 		verbose = False
 		print('z = {:.3f} | {:.2f} % completed'.format(zi,100*(k+1)/zs.size))
 	return jansky_2_kelvin(noise3d, z, boxsize=boxsize)
 
 
-def noise_lightcone(ncells, zs, obs_time=1000, filename=None, boxsize=None, save_uvmap=None, total_int_time=6., int_time=10., declination=-30., N_ant=None, fft_wrap=False, verbose=True, n_jobs=4, checkpoint=64):
+def noise_lightcone(ncells, zs, obs_time=1000, subarray_type="AA4", boxsize=None, save_uvmap=None, total_int_time=6., int_time=10., declination=-30., N_ant=None, fft_wrap=False, verbose=True, n_jobs=4, checkpoint=64):
 	"""
 	It creates a noise lightcone by simulating the radio observation strategy (1801.06550).
 	We assume the third axis to be along the line-of-sight and therefore 
@@ -415,11 +395,8 @@ def noise_lightcone(ncells, zs, obs_time=1000, filename=None, boxsize=None, save
 		Declination angle in deg
 	N_ant: int
 		Number of antennae
-	filename: str
-		The path to the file containing the telescope configuration.
-
-			- As a default, it takes the SKA-Low configuration from Sept 2016
-			- It is not used if uv_map and N_ant is provided
+	subarray_type: str
+		The name of the SKA-Low layout configuration.
 	boxsize: float
 		Boxsize in Mpc
 	verbose: bool
@@ -441,12 +418,12 @@ def noise_lightcone(ncells, zs, obs_time=1000, filename=None, boxsize=None, save
 	noise_lightcone: A 3D lightcone of the interferometric noise with frequency varying 
 	along last axis(in mK).	
 	"""
-	if filename is None: N_ant = SKA1_LowConfig_Sept2016().shape[0]
-	elif isinstance(filename, np.ndarray): N_ant = filename.shape[0]
-	else: pass
-	if boxsize is None: boxsize = conv.LB
-	if isinstance(zs, list): zs = np.array(zs)
-	if N_ant is None: N_ant = np.loadtxt(filename, dtype=str).shape[0]
+	antxyz, N_ant = subarray_type_to_antxyz(subarray_type)
+
+	if boxsize is None: 
+		boxsize = conv.LB
+	if isinstance(zs, list): 
+		zs = np.array(zs)
 	noise3d = np.zeros((ncells,ncells,zs.size))
 
 	if save_uvmap is not None:
@@ -469,16 +446,16 @@ def noise_lightcone(ncells, zs, obs_time=1000, filename=None, boxsize=None, save
 		for k,zi in enumerate(zs):
 			print(f'{k+1}/{len(zs)} | z={zi:.3f}')
 			if '{:.3f}'.format(zi) not in uvs.keys():
-				uv_map, N_ant  = get_uv_map(ncells, zi, filename=filename, total_int_time=total_int_time, int_time=int_time, boxsize=boxsize, declination=declination)
+				uv_map, N_ant  = get_uv_map(ncells, zi, subarray_type=antxyz, total_int_time=total_int_time, int_time=int_time, boxsize=boxsize, declination=declination)
 				uvs['{:.3f}'.format(zi)] = uv_map
 				uvs['Nant'] = N_ant
 				if save_uvmap is not None: pickle.dump(uvs, open(save_uvmap, 'wb'))
 			tend = time()
 			# print('\nz = {:.3f} | {:.2f} % completed | Elapsed time: {:.2f} mins'.format(zi,100*(k+1)/zs.size,(tend-tstart)/60))
 	else:
-		Nbase, N_ant = from_antenna_config(filename, zs[0])
+		Nbase, N_ant = from_antenna_config(antxyz, zs[0])
 		uvs['Nant'] = N_ant
-		_uvmap = lambda zi: get_uv_map(ncells, zi, filename=filename, total_int_time=total_int_time, int_time=int_time, boxsize=boxsize, declination=declination, verbose=False)[0] 
+		_uvmap = lambda zi: get_uv_map(ncells, zi, subarray_type=antxyz, total_int_time=total_int_time, int_time=int_time, boxsize=boxsize, declination=declination, verbose=False)[0] 
 		if checkpoint<2*n_jobs:
 			checkpoint = 4*n_jobs
 			print('checkpoint value should be more than 4*n_jobs. checkpoint set to 4*n_jobs.')
@@ -509,7 +486,7 @@ def noise_lightcone(ncells, zs, obs_time=1000, filename=None, boxsize=None, save
 		if k+1<zs.size: depth_mhz = np.abs(cm.z_to_nu(zs[k+1])-cm.z_to_nu(zs[k]))
 		else: depth_mhz = np.abs(cm.z_to_nu(zs[k])-cm.z_to_nu(zs[k-1]))
 		uv_map, N_ant  = uvs['{:.3f}'.format(zi)], uvs['Nant']
-		noise2d = noise_map(ncells, zi, depth_mhz, obs_time=obs_time, filename=filename, boxsize=boxsize, total_int_time=total_int_time, int_time=int_time, declination=declination, uv_map=uv_map, N_ant=N_ant, verbose=verbose, fft_wrap=fft_wrap)
+		noise2d = noise_map(ncells, zi, depth_mhz, obs_time=obs_time, subarray_type=antxyz, boxsize=boxsize, total_int_time=total_int_time, int_time=int_time, declination=declination, uv_map=uv_map, N_ant=N_ant, verbose=verbose, fft_wrap=fft_wrap)
 		noise3d[:,:,k] = jansky_2_kelvin(noise2d, zi, boxsize=boxsize)
 		print('\nz = {:.3f} | {:.2f} % completed'.format(zi,100*(k+1)/zs.size))
 	return noise3d
@@ -551,6 +528,3 @@ def smooth_gauss_3d(array, fwhm):
 	gg = gauss_kernel_3d(array.shape[0],fwhm=fwhm)
 	out = scipy.signal.fftconvolve(array, gg)
 	return out
-
-
-
