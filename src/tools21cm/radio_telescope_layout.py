@@ -1,10 +1,228 @@
 import numpy as np
 import os, pickle
+import itertools
 from tqdm import tqdm
 # import pkg_resources
+from . import cosmo as cm
+from . import conv
+from .const import KB_SI, c_light_cgs, c_light_SI, janskytowatt
 from importlib.resources import files
 import astropy.units as u
 from astropy.coordinates import EarthLocation
+
+def subarray_type_to_antxyz(subarray_type):
+    if isinstance(subarray_type, str):
+        antxyz = get_SKA_Low_layout(subarray_type=subarray_type)
+    elif isinstance(subarray_type, np.ndarray): 
+        antxyz = subarray_type
+    else:
+        antll  = SKA1_LowConfig_Sept2016()
+        antxyz = geographic_to_cartesian_coordinate_system(antll)*u.m
+    N_ant = antxyz.shape[0]
+    return antxyz, N_ant
+
+def from_antenna_config(antxyz, z, nu=None):
+    """
+    The function reads the antenna positions (N_ant antennas) from the file given.
+
+    Parameters
+    ----------
+    antxyz: ndarray
+        The radio telescope antenna configuration.
+    z       : float
+        Redhsift of the slice observed.
+    nu      : float
+        The frequency observed by the telescope.
+
+    Returns
+    -------
+    Nbase   : ndarray
+        Numpy array (N_ant(N_ant-1)/2 x 3) containing the (ux,uy,uz) values derived 
+                from the antenna positions.
+    N_ant   : int
+        Number of antennas.
+    """
+    z = float(z)
+    if antxyz is None: 
+        antll  = SKA1_LowConfig_Sept2016()
+        antll  = antll[:,-2:].astype(float)
+        antxyz = geographic_to_cartesian_coordinate_system(antll)
+    else:
+        antxyz = antxyz.to('m').value
+    if not nu: 
+        nu = cm.z_to_nu(z)                           # MHz
+
+    N_ant = antxyz.shape[0]
+    pair_comb = itertools.combinations(range(N_ant), 2)
+    pair_comb = list(pair_comb)	
+    lam = c_light_cgs/(nu*1e6)/1e2 			            # in m
+    Nbase = []
+    for ii,jj in list(pair_comb):
+        ux = (antxyz[ii,0]-antxyz[jj,0])/lam
+        uy = (antxyz[ii,1]-antxyz[jj,1])/lam
+        uz = (antxyz[ii,2]-antxyz[jj,2])/lam
+        if ux==0: print(ii,jj)
+        Nbase.append([ux,uy,uz])
+    Nbase = np.array(Nbase)	
+    return Nbase, N_ant
+
+def earth_rotation_effect(Nbase, slice_nums, int_time, declination=-30.):
+    """
+    Computes the effect of Earth's rotation over observation times, adjusting the measured 
+    sky coordinates for each antenna configuration at specified time slices.
+
+    Parameters
+    ----------
+    Nbase       : ndarray
+        Array containing the initial ux, uy, uz values of the antenna configuration.
+    slice_nums  : ndarray or int
+        Array of observed slice numbers corresponding to each integration time, 
+        or a single integer slice number if only one is required.
+    int_time    : float
+        Integration time after which the signal is recorded (in seconds).
+    declination : float, optional
+        Declination angle (latitude) where the telescope is located (in degrees).
+        Default is -30 degrees.
+
+    Returns
+    -------
+    new_Nbase   : ndarray
+        Adjusted Nbase values for each time slice, with shape (len(slice_nums), N, 3).
+    """
+    # Convert to radians
+    p = np.pi / 180.
+    delta = p * declination
+    
+    # Ensure slice_nums is an array for vectorized handling of multiple slices
+    slice_nums = np.atleast_1d(slice_nums)
+    
+    # Compute hour angles (HA) for each slice_num in vectorized manner
+    HA = -15.0 * p * (slice_nums - 1) * int_time / 3600. - np.pi / 2 + 2 * np.pi
+
+    # Rotation matrices for each HA and declination delta
+    cos_HA, sin_HA = np.cos(HA), np.sin(HA)
+    cos_delta, sin_delta = np.cos(delta), np.sin(delta)
+
+    # Pre-allocate new_Nbase for each time slice
+    new_Nbase = np.empty((len(slice_nums), *Nbase.shape))
+    
+    # Apply rotation transformations
+    new_Nbase[:, :, 0] = sin_HA[:, None] * Nbase[:, 0] + cos_HA[:, None] * Nbase[:, 1]
+    new_Nbase[:, :, 1] = (-sin_delta * cos_HA[:, None] * Nbase[:, 0] +
+                          sin_delta * sin_HA[:, None] * Nbase[:, 1] + cos_delta * Nbase[:, 2])
+    new_Nbase[:, :, 2] = (cos_delta * cos_HA[:, None] * Nbase[:, 0] -
+                          cos_delta * sin_HA[:, None] * Nbase[:, 1] + sin_delta * Nbase[:, 2])
+    
+    return new_Nbase.squeeze() if len(slice_nums) == 1 else new_Nbase
+
+def get_uv_daily_observation(ncells, z, antxyz=None, total_int_time=4., int_time=10., boxsize=None, declination=-30., include_mirror_baselines=False, verbose=True):
+    """
+    Simulates daily radio observations and generates a uv map based on antenna configurations.
+
+    Parameters
+    ----------
+    ncells         : int
+        Number of cells in the image grid.
+    z              : float
+        Redshift of the observed slice.
+    antxyz         : ndarray
+        The radio telescope antenna configuration.
+    total_int_time : float
+        Total observation time per day in hours.
+    int_time       : float
+        Integration time per observation in seconds.
+    boxsize        : float, optional
+        Comoving size of the sky observed.
+    declination    : float
+        Declination angle of the SKA in degrees.
+    include_mirror_baselines : bool, optional
+        If True, includes mirrored baselines on the grid.
+    verbose        : bool, optional
+        If True, prints progress information.
+
+    Returns
+    -------
+    uv_map : ndarray
+        ncells x ncells array of baseline counts per pixel, averaged over total observations.
+    N_ant  : int
+        Number of antennas.
+    """
+    # Load antenna configurations and initialize parameters
+    Nbase, N_ant = from_antenna_config(antxyz, z)
+    uv_map = np.zeros((ncells, ncells), dtype=np.float32)
+    total_observations = int((total_int_time * 3600) / int_time)
+    
+    if verbose: 
+        print("Generating uv map from daily observations...")
+    
+    # Vectorize the observation loop by calculating all rotations at once
+    time_indices = np.arange(total_observations) + 1
+    all_rotated_Nbase = (earth_rotation_effect(Nbase, i, int_time, declination) for i in time_indices)
+    
+    # Grid uv tracks for each observation without individual loops
+    for rotated_Nbase in tqdm(all_rotated_Nbase, disable=not verbose, desc="Gridding uv tracks"):
+        uv_map += grid_uv_tracks(rotated_Nbase, z, ncells, boxsize=boxsize, include_mirror_baselines=include_mirror_baselines)
+    
+    uv_map /= total_observations  # Normalize by the total number of observations
+    
+    if verbose:
+        print("...done")
+
+    return uv_map, N_ant
+
+def grid_uv_tracks(Nbase, z, ncells, boxsize=None, include_mirror_baselines=False):
+    """
+    Places uv tracks on a grid.
+
+    Parameters
+    ----------
+    Nbase   : ndarray
+        Array containing ux, uy, uz values of the antenna configuration.
+    z       : float
+        Redshift of the slice observed.
+    ncells  : int
+        Number of cells in the image.
+    boxsize : float, optional
+        Comoving size of the sky observed. Default: determined by simulation constants.
+    include_mirror_baselines : bool, optional
+        If True, includes mirrored baselines on the grid.
+
+    Returns
+    -------
+    uv_map  : ndarray
+        ncells x ncells array of baseline counts per pixel.
+    """
+    z = float(z)
+    if not boxsize: 
+        boxsize = conv.LB  # Assuming conv.LB is defined elsewhere in your code
+
+    uv_map = np.zeros((ncells, ncells), dtype=np.int32)  # Using int32 for faster summing operations
+    theta_max = boxsize / cm.z_to_cdist(z)
+    
+    # Scale and round the coordinates in a single operation for efficiency
+    Nb = np.round(Nbase * theta_max).astype(int)
+
+    # Vectorized conditionals to select points within grid bounds, skipping for-loops
+    mask = (
+        (Nb[:, 0] < ncells / 2) & (Nb[:, 0] >= -ncells / 2) &
+        (Nb[:, 1] < ncells / 2) & (Nb[:, 1] >= -ncells / 2)
+    )
+    Nb = Nb[mask]
+    
+    # Convert from negative to positive indexing within the grid and use broadcasting
+    xx = (Nb[:, 0] + ncells // 2).astype(int)
+    yy = (Nb[:, 1] + ncells // 2).astype(int)
+    
+    # Fast counting using numpy's bincount and reshaping
+    uv_map_flat = np.bincount(xx * ncells + yy, minlength=ncells * ncells)
+    uv_map = uv_map_flat.reshape(ncells, ncells)
+
+    # Include mirrored baselines if requested
+    if include_mirror_baselines:
+        uv_map += np.flip(np.flip(uv_map, axis=0), axis=1)  # Flip along both axes for mirror effect
+        uv_map /= 2  # Average with mirrored baselines
+    
+    return np.fft.fftshift(uv_map)
 
 def geographic_to_cartesian_coordinate_system(antll):
     """
@@ -104,7 +322,7 @@ def antenna_positions_to_baselines(antxyz):
     except:
         return baselines
 
-def get_SKA_Low_layout(subarray_type="AA4"):
+def get_SKA_Low_layout(subarray_type="AA4", unit='m'):
     if subarray_type.upper()=="AA4":
         filename = 'input_data/skalow_AA4_layout.txt'
     elif subarray_type.upper() in ["AASTAR", "AA*"]:
@@ -118,12 +336,38 @@ def get_SKA_Low_layout(subarray_type="AA4"):
     else:
         filename = 'input_data/skalow1_layout.txt'
 
+    # Load lat, lon, height from file
+    lon, lat, height = np.loadtxt(str(files('tools21cm')/'input_data/central_geographic_position.txt'))
+    # Create EarthLocation
+    core = EarthLocation(lat=lat * u.deg, lon=lon * u.deg, height=height * u.m)
+    # Rotation matrix from ENU to ECEF at the core location
+    lat_rad = core.lat.to(u.rad).value
+    lon_rad = core.lon.to(u.rad).value
+
+    R = np.array([
+                [-np.sin(lon_rad),                 np.cos(lon_rad),                                0],
+                [-np.sin(lat_rad)*np.cos(lon_rad), -np.sin(lat_rad)*np.sin(lon_rad), np.cos(lat_rad)],
+                [np.cos(lat_rad)*np.cos(lon_rad),  np.cos(lat_rad)*np.sin(lon_rad),  np.sin(lat_rad)]
+            ])
+
     # path_to_file = pkg_resources.resource_filename('tools21cm', filename)
     path_to_file = str(files('tools21cm')/filename)
     antxyz = np.loadtxt(path_to_file)
     N_ant = antxyz.shape[0]
     print(f'{subarray_type} contains {N_ant} antennae.')
-    return antxyz*u.m
+
+    # Apply rotation and shift to get absolute ECEF positions
+    ecef_antennas = antxyz @ R.T + np.array([core.x.value, core.y.value, core.z.value])
+    if unit.lower() in ['m', 'meter', 'metre', 'meters', 'metres']:
+        antxyz = ecef_antennas*u.m
+    else:
+        # Convert to EarthLocation
+        antxyz = EarthLocation.from_geocentric(ecef_antennas[:,0], ecef_antennas[:,1], ecef_antennas[:,2], unit=u.m)
+        # Get lat/lon/height
+        lat = antxyz.lat.deg
+        lon = antxyz.lon.deg
+        height = antxyz.height.to(u.m).value
+    return antxyz
      
 
 def get_latest_SKA_Low_layout(

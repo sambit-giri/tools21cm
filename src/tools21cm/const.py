@@ -9,10 +9,16 @@ import numpy as np
 # Various useful physical constants
 abu_he = 0.074
 abu_h = 1.0-abu_he
-c = 3.0e5 # km/s
-pc=  3.086e18 #1 pc in cm
+c   = 3.0e5 # km/s
+pc  =  3.086e18 #1 pc in cm
 Mpc = 1e6*pc
 G_grav = 6.6732e-8
+
+c_light_cgs = 2.99792458e+10  #in cm/s
+c_light_SI  = 2.99792458e+8   #in m/s
+KB_SI = 1.380649e-23  # Boltzmann constant in SI units
+janskytowatt = 1e-26  # Conversion factor from Jansky to Watts
+
 m_p = 1.672661e-24 #g
 mean_molecular = abu_h+4.0*abu_he
 abu_he_mass = 0.2486 
