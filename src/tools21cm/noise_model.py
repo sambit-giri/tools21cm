@@ -270,7 +270,8 @@ def noise_cube_coeval(ncells, z, depth_mhz=None, obs_time=1000, filename=None, b
 def noise_cube_lightcone(ncells, z, obs_time=1000, filename=None, boxsize=None, save_uvmap=None, total_int_time=6., int_time=10., declination=-30., N_ant=None, fft_wrap=False, verbose=True, n_jobs=4, checkpoint=64):
 	"""
 	It creates a noise cube by simulating the radio observation strategy (1801.06550)
-	considerng the input redshift (z) as the centre.
+	considerng the input redshift (z) as the central slice of the cube.
+	This function is ideal for single redshift studies (observations with narrow bandwidth).
 	We assume the third axis to be along the line-of-sight and therefore 
 	each each will correspond to a different redshift.
 
@@ -395,6 +396,8 @@ def noise_cube_lightcone(ncells, z, obs_time=1000, filename=None, boxsize=None, 
 def noise_lightcone(ncells, zs, obs_time=1000, filename=None, boxsize=None, save_uvmap=None, total_int_time=6., int_time=10., declination=-30., N_ant=None, fft_wrap=False, verbose=True, n_jobs=4, checkpoint=64):
 	"""
 	It creates a noise lightcone by simulating the radio observation strategy (1801.06550).
+	We assume the third axis to be along the line-of-sight and therefore 
+	each each will correspond to a different redshift.
 
 	Parameters
 	----------
