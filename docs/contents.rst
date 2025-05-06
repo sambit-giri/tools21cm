@@ -7,6 +7,11 @@ Angular coordinates
 .. automodule:: tools21cm.angular_coordinates
     :members:
 
+Useful Conversion Functions
+---------------------------
+.. automodule:: tools21cm.astro_tools
+    :members:
+
 Bubble Statistics
 -----------------
 .. automodule:: tools21cm.bubble_stats
@@ -14,7 +19,7 @@ Bubble Statistics
 
 Cosmological calculators
 ------------------------
-.. automodule:: tools21cm.cosmology
+.. automodule:: tools21cm.cosmo
     :members:
 
 Foreground model
@@ -32,19 +37,22 @@ Lightcone
 .. automodule:: tools21cm.lightcone
     :members:
 
-Telescope noise
----------------
-.. automodule:: tools21cm.noise_model
+N-Body Tools 
+------------
+.. automodule:: tools21cm.nbody_tools
+    :members:
+    
+.. automodule:: tools21cm.nbody_file
     :members:
 
-.. automodule:: tools21cm.telescope_functions
+Point statistics
+----------------
+.. automodule:: tools21cm.statistics
     :members:
 
 Power spectrum
 --------------
 .. automodule:: tools21cm.power_spectrum
-    :members:
-.. automodule:: tools21cm.power_spect_fast
     :members:
 
 Primary beam
@@ -57,19 +65,32 @@ Reading simuation outputs
 .. automodule:: tools21cm.read_files
     :members:
 
+Redshift space distortion
+-------------------------
+.. automodule:: tools21cm.pv_mpm
+    :members:
+
 Smoothing
 ---------
 .. automodule:: tools21cm.smoothing
     :members:
 
-Point statistics
-----------------
-.. automodule:: tools21cm.statistics
+Telescope noise
+---------------
+.. automodule:: tools21cm.noise_model
+    :members:
+
+.. automodule:: tools21cm.telescope_functions
     :members:
 
 Temperature
 -----------
 .. automodule:: tools21cm.temperature
+    :members:
+
+Thompson Optical Depth
+----------------------
+.. automodule:: tools21cm.tau
     :members:
 
 Topology

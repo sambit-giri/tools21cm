@@ -1,13 +1,13 @@
+cython
 numpy
 scipy
 matplotlib
 astropy
-pyfftw
 scikit-learn
 scikit-image
-## pyfits
 tqdm
 joblib
-
-## cosmospectra  # cosmospectra@git+https://github.com/sambit-giri/cosmospectra.git
+pandas
 pytest
+# torch==2.1.0
+# numba

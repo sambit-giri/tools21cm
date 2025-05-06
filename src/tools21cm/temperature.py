@@ -4,9 +4,49 @@ Methods to estimate the brightness temperature.
 
 import numpy as np
 from . import const, conv
-from . import cosmology
+from . import cosmo
 from .helper_functions import print_msg, read_cbin, \
 	get_data_and_type, determine_redshift_from_filename
+from astropy import constants, units
+from astropy.cosmology import Planck18
+
+def calc_dt_halo(mhalo, box_dim, z, Y_p=0.249, cosmo=None):
+	'''
+	Calculate the differential brightness temperature assuming T_s >> T_CMB
+
+	Parameters:
+		mhalo (numpy array): the ionization fraction
+		box_dim (float): Length of the simulation box in each direction.
+		z (float): The redshift.
+		Y_p = 0.249 (float): Helium abundance mass factor.
+		cosmo : astropy.cosmology.Cosmology, optional
+        Cosmology object. If None, assumes Planck18 cosmology.
+		
+	Returns:
+		The differential brightness temperature (in mK) as a numpy array with
+		the same dimensions as xfrac.
+	'''
+	if cosmo is None:
+		print('Assuming Planck18 cosmology.')
+		cosmo = Planck18
+		
+	if isinstance(mhalo, units.quantity.Quantity):
+		mhalo = mhalo.to('Msun')
+	else:
+		print('The provided halo mass is assumed to be in Msun units.')
+		mhalo = mhalo*units.Msun
+
+	if not isinstance(box_dim, units.quantity.Quantity):
+		box_dim = box_dim*units.Mpc
+	
+	mu = 1/(1-Y_p)
+	Vcell = (box_dim/mhalo.shape[0])**3
+	nHI = (mhalo/Vcell/mu/constants.m_p).to('1/cm^3')
+	nH  = (cosmo.Ob0*cosmo.critical_density0/mu/constants.m_p).to('1/cm^3')
+	xHI = (nHI/nH).to('')
+	Cdt = mean_dt(z)
+	dt = Cdt*xHI
+	return dt
 
 def calc_dt(xfrac, dens, z = -1):
 	'''
@@ -104,9 +144,9 @@ def calc_dt_lightcone(xfrac, dens, lowest_z, los_axis = 2):
 	dens = dens.astype('float64')
 		
 	cell_size = conv.LB/xfrac.shape[(los_axis+1)%3]
-	cdist_low = cosmology.z_to_cdist(lowest_z)
+	cdist_low = cosmo.z_to_cdist(lowest_z)
 	cdist = np.arange(xfrac.shape[los_axis])*cell_size + cdist_low
-	z = cosmology.cdist_to_z(cdist)
+	z = cosmo.cdist_to_z(cdist)
 	return _dt(dens, xfrac, z)
 
 def calc_dt_full_lightcone(xfrac, temp, dens, lowest_z, los_axis = 2, correct=True):
@@ -147,9 +187,9 @@ def calc_dt_full_lightcone(xfrac, temp, dens, lowest_z, los_axis = 2, correct=Tr
 	dens = dens.astype('float64')
 		
 	cell_size = conv.LB/xfrac.shape[(los_axis+1)%3]
-	cdist_low = cosmology.z_to_cdist(lowest_z)
+	cdist_low = cosmo.z_to_cdist(lowest_z)
 	cdist = np.arange(xfrac.shape[los_axis])*cell_size + cdist_low
-	z = cosmology.cdist_to_z(cdist)
+	z = cosmo.cdist_to_z(cdist)
 	print("Redshift: ", str(z))
 	return _dt_full(dens, xfrac,temp, z, correct)
 
@@ -174,7 +214,7 @@ def mean_dt(z):
 
 def _dt(rho, xi, z):
 		
-	rho_mean = const.rho_crit_0*const.OmegaB
+	rho_mean = const.rho_crit_0*const.OmegaB if rho.min()>=0 else 1
 
 	Cdt = mean_dt(z)
 	dt = Cdt*(1.0-xi)*rho/rho_mean

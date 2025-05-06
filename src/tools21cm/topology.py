@@ -1,12 +1,12 @@
 import numpy as np
-import sys
+import sys, scipy
+from time import time
 from sklearn.neighbors import BallTree, KDTree
 from sklearn.neighbors import NearestNeighbors
-import scipy
 from .bubble_stats import fof
 from skimage.measure import label
 
-def EulerCharacteristic(data, thres=0.5, neighbors=6, use_numba=False):
+def EulerCharacteristic(data, thres=0.5, neighbors=6, speed_up='numba', verbose=True):
 	"""
 	Parameters
 	----------
@@ -17,27 +17,36 @@ def EulerCharacteristic(data, thres=0.5, neighbors=6, use_numba=False):
 		Ignore this parameter if data is already a binary field.
 	neighbors: int
 		Define the connectivity to the neighbors (Default: 6).
-	use_numba: bool
-		If True, numba package is used to speed up calculation.
+	speed_up: str
+		Method used to speed up calculation.
+	verbose: bool
+		If True, verbose is printed.
 
 	Returns
 	-------
 	Euler characteristics value.
 	"""
-	A = 1*(data>thres)
-	#if 'numba' in sys.modules: 
-	#	print('Using numba to speed up.')
-	#	from . import ViteBetti_numba as VB
-	#else: from . import ViteBetti as VB
-	if use_numba: 
-		# print('Using numba to speed up.')
-		from . import ViteBetti_numba as VB
+	tstart = time()
+	A = (data>thres).astype(int)
+	if speed_up is None: speed_up = 'numpy'
+	if speed_up.lower()=='cython': 
+		try:
+			from . import ViteBetti_cython as VB
+		except:
+			print('Cython module not found. Using the python module that might be slow...')
+			from . import ViteBetti as VB
+	elif speed_up.lower()=='numba': 
+		try:
+			from . import ViteBetti_numba as VB
+		except:
+			print('Numba module not found. Using the python module that might be slow...')
+			from . import ViteBetti as VB
 	else: 
 		from . import ViteBetti as VB
+	if verbose: print(f'Creating CubeMap...')
 	if neighbors==6 or neighbors==4: C = VB.CubeMap(A)
 	else: C = VB.CubeMap(1-A)
-	#D = VB.CubeMap(1-A)
-        #E = VB.EulerCharacteristic_seq(C)/2. + VB.EulerCharacteristic_seq(D)/2.
+	if verbose: print(f'...done in {(time()-tstart)/60:.2f} mins')
 	elem, count = np.unique(C, return_counts=1)
 	V = count[elem==1] if len(count[elem==1])!=0 else 0
 	E = count[elem==2] if len(count[elem==2])!=0 else 0
@@ -87,7 +96,7 @@ def betti2(data, thres=0.5, neighbors=6):
 	else: b2 = label(1-A, return_num=1, connectivity=2)[1]
 	return b2
 
-def betti1(data, thres=0.5, neighbors=6, b0=None, b2=None, chi=None, use_numba=False):
+def betti1(data, thres=0.5, neighbors=6, b0=None, b2=None, chi=None, speed_up='numba', verbose=True):
 	"""
 	Parameters
 	----------
@@ -105,7 +114,7 @@ def betti1(data, thres=0.5, neighbors=6, b0=None, b2=None, chi=None, use_numba=F
 	-------
 	Betti 1
 	"""
-	if chi is None: chi = EulerCharacteristic(data, thres=thres, neighbors=neighbors)
+	if chi is None: chi = EulerCharacteristic(data, thres=thres, neighbors=neighbors, speed_up=speed_up, verbose=verbose)
 	if b0 is None: b0  = betti0(data, thres=thres, neighbors=neighbors)
 	if b2 is None: b2  = betti2(data, thres=thres, neighbors=neighbors)
 	return b0 + b2 - chi

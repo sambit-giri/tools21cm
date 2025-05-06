@@ -1,0 +1,13 @@
+name: tools21cm
+channels:
+  - defaults
+  - conda-forge
+dependencies:
+  - python=3.11
+  - numpy
+  - scipy
+  - matplotlib
+  - pytest
+  - pip
+  - pip:
+    - -r requirements.txt  # This ensures any additional pip packages are installed

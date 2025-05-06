@@ -3,6 +3,6 @@ build
 dist
 *.egg-info
 tests/__pycache__*
-
-
-
+__pycache__*
+*.lock
+src/tools21cm/*.cpp

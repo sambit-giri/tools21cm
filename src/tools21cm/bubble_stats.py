@@ -230,16 +230,16 @@ def mfp(data, xth=0.5, boxsize=None, iterations = 10000000, verbose=True, upper_
 		data = -1.*data
 		xth  = -1.*xth
 	check_box = (data>=xth).sum()
+	if verbose:
+		print(f'{check_box}/{data.size} cells are marked as region of interest (ROI).')
 	if check_box==0:
 		data = np.ones(data.shape)
 		iterations = 3
 	if dim == 2:
-		if verbose: print("MFP method applied on 2D data (ver 1.0)")
-		#out = mfp2d(data, xth, iterations=iterations, verbose=verbose)
+		if verbose: print("MFP method applied on 2D data.")
 		out = mfp_np.mfp2d(data, xth, iterations=iterations, verbose=verbose)
 	elif dim == 3:
-		if verbose: print("MFP method applied on 3D data (ver 1.0)")
-		#out = mfp3d(data, xth, iterations=iterations, verbose=verbose)
+		if verbose: print("MFP method applied on 3D data.")
 		out = mfp_np.mfp3d(data, xth, iterations=iterations, verbose=verbose)
 	else:
 		if verbose: print("The data doesn't have the correct dimension")
@@ -249,10 +249,11 @@ def mfp(data, xth=0.5, boxsize=None, iterations = 10000000, verbose=True, upper_
 	t2 = datetime.datetime.now()
 	runtime = (t2-t1).total_seconds()/60
 
-	if verbose: print("\nProgram runtime: %f minutes." %runtime)
+	if verbose: print("\nProgram runtime: %.2f minutes." %runtime)
 	if check_box==0:
-		if verbose: print("There is no ROI in the data. Therefore, the BSD is zero everywhere.")
-		return rr*boxsize/data.shape[0], np.zeros(rr.shape)
+		if verbose: print("There is no ROI in the data. Therefore, the number density of all the sizes are zero.")
+		# return rr*boxsize/data.shape[0], np.zeros(rr.shape)
+		nn = np.zeros(rr.shape)
 	if verbose: print("The output contains a tuple with three values: r, rdP/dr")
 	if verbose: print("The curve has been normalized.")
 
@@ -325,13 +326,14 @@ def mfp_from_point(data, point, xth=0.5, boxsize=None, iterations = 10000000, ve
 
 	print("Program runtime: %f minutes." %runtime)
 	if check_box==0:
-		print("There is no ROI in the data. Therefore, the BSD is zero everywhere.")
-		return rr*boxsize/data.shape[0], np.zeros(rr.shape)
+		print("There is no ROI in the data. Therefore, the number density of all the sizes are zero.")
+		# return rr*boxsize/data.shape[0], np.zeros(rr.shape)
+		nn = np.zeros(rr.shape)
 	print("The output contains a tuple with three values: r, rdP/dr")
 	print("The curve has been normalized.")
 
-        # Return radii (in physical units) and fraction of side lines which
-        # have this side line. This is different from a bubble size distribution!
+	# Return radii (in physical units) and fraction of side lines which
+	# have this side line. This is different from a bubble size distribution!
 	r0,p0 = rr*boxsize/data.shape[0], nn #rr[nn.argmax()]*boxsize/data.shape[0]
 	if bins is not None: r0,p0 = rebin_bsd(r0, p0, bins=bins, r_min=r_min, r_max=r_max)
 	return r0, p0

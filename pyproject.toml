@@ -1,0 +1,42 @@
+[build-system]
+requires = [
+    "setuptools>=42",
+    "wheel",
+    "Cython",
+    "numpy"
+]
+build-backend = "setuptools.build_meta"
+
+[tool.poetry]
+name = "tools21cm"
+version = "2.2.8"
+description = "A package providing tools to analyse cosmological simulations of reionization"
+authors = ["Sambit Giri <sambit.giri@gmail.com>"]
+license = "MIT"
+readme = "README.md"
+packages = [
+    { include = "tools21cm", from = "src" }
+]
+include = ["src/tools21cm/input_data/*"]
+
+[tool.poetry.dependencies]
+python = ">=3.8"
+numpy = "^1.21"
+cython = "^0.29"
+scipy = "^1.7"
+matplotlib = "^3.4"
+astropy = "^4.0"
+scikit-learn = "^0.24"
+scikit-image = "^0.18"
+tqdm = "^4.60"
+joblib = "^1.0"
+pandas = "^1.3"
+pytest = "^6.2"
+torch = "^2.1.0"
+numba = "^0.57.1"
+
+[tool.poetry.dev-dependencies]
+pytest = "^6.2"  # If you want pytest to be part of development dependencies, but you already have it above too.
+
+[tool.poetry.publish]
+  repository = "pypi"

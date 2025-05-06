@@ -5,7 +5,8 @@ from scipy import interpolate, stats
 #from astropy.stats import histogram 
 from tqdm import tqdm
 
-from . import smoothing, cosmology, const 
+from . import cosmo, smoothing, const 
+from .scipy_func import numpy_product
 
 def power_spect_nd(input_array, box_dims, verbose=True):
 	''' 
@@ -35,9 +36,9 @@ def power_spect_nd(input_array, box_dims, verbose=True):
 
 	# scale
 	#print(box_dims)
-	boxvol = np.product(box_dims)
+	boxvol = numpy_product(box_dims)
 	#print(boxvol)
-	pixelsize = boxvol/(np.product(input_array.shape))
+	pixelsize = boxvol/(numpy_product(input_array.shape))
 	power_spectrum *= pixelsize**2/boxvol
 	
 	return power_spectrum
@@ -342,7 +343,7 @@ def horizon_wedge_equation(z, fov_deg=90.0):
 		A lambda function k_parallel(k_perpendicular).
 	'''
 	f_kpar = lambda kper: kper*np.sin(fov_deg*np.pi/180)/(1+z)*\
-							smoothing.hubble_parameter(z)/const.c*cosmology.z_to_cdist(z)
+							smoothing.hubble_parameter(z)/const.c*cosmo.z_to_cdist(z)
 	return f_kpar
 
 # def plot_2d_power(ps, xticks, yticks, xlabel, ylabel):

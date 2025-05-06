@@ -1,7 +1,7 @@
 import numpy as np
 from numba import jit, prange
 from .usefuls import *
-from . import cosmology as cm
+from . import cosmo as cm
 from . import conv
 import itertools
 
@@ -86,7 +86,7 @@ def from_antenna_config(filename, z, nu=None):
 	"""
 	z = float(z)
 	if filename is None:
-		from .telescope_functions import SKA1_LowConfig_Sept2016
+		from .radio_telescope_sensitivity import SKA1_LowConfig_Sept2016
 		antll  = SKA1_LowConfig_Sept2016()
 	else: antll  = np.loadtxt(filename, dtype=str)
 	antll  = antll[:,-2:].astype(float)

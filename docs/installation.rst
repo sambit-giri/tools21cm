@@ -4,9 +4,13 @@ Installation
 
 We highly recommend the use of a virtual environement. It helps to keep dependencies required by different projects separate. Few example tools to create virtual environments are `anaconda <https://www.anaconda.com/distribution/>`_, `virtualenv <https://virtualenv.pypa.io/en/latest/>`_ and `venv <https://docs.python.org/3/library/venv.html>`_.
 
-The dependencies should be installed automatically during the installation process. If they fail for some reason, you can install them manually before installing `tools21cm <https://github.com/sambit-giri/tools21cm>`_. The list of required packages can be found in the *requirements.txt* file present in the root directory.
+Before installing this package, please make sure that `cython <https://cython.org/>`_ and `numpy <https://numpy.org/>`_ are installed. The other dependencies should be installed automatically during the installation process. If they fail for some reason, you can install them manually before installing `tools21cm <https://github.com/sambit-giri/tools21cm>`_. The list of required packages can be found in the *requirements.txt* file present in the root directory.
 
-For a standard non-editable installation use::
+To install tools21cm from the official Python Package Index (PyPI) simply do::
+
+    pip install tools21cm
+
+For a standard non-editable installation use of the latest version in github do::
 
     pip install git+https://github.com/sambit-giri/tools21cm.git [--user]
 

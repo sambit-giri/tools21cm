@@ -1,0 +1,70 @@
+name: CI
+
+on:
+  push:
+    branches:
+      - master  # Trigger the workflow on push to the master branch
+  pull_request:
+    branches:
+      - master  # Trigger the workflow on pull requests to the master branch
+
+jobs:
+  test:
+    timeout-minutes: 60  # Set a 60-minute timeout for the entire job
+
+    runs-on: ubuntu-latest  # Use only Ubuntu
+
+    strategy:
+      matrix:
+        python-version: [3.11]  # Test specifically with Python 3.11
+
+    steps:
+      - name: Check out repository code
+        uses: actions/checkout@v3
+
+      - name: Set up Miniconda
+        uses: conda-incubator/setup-miniconda@v2
+        with:
+          miniconda-version: "latest"  # Ensure Miniconda is installed
+          python-version: ${{ matrix.python-version }}
+          auto-update-conda: true
+          environment-file: environment.yml
+          activate-environment: tools21cm
+
+      - name: Initialize Conda
+        run: |
+          # Initialize Conda and source the bash configuration
+          conda init bash
+          source ~/.bashrc
+        shell: bash
+
+      - name: Verify Conda Installation
+        run: |
+          # Print Conda info to verify installation
+          conda info
+        shell: bash
+
+      - name: Update Python version in Conda environment
+        run: |
+          # Activate the Conda environment and update Python
+          source ~/.bashrc
+          conda activate tools21cm
+          conda install python=3.11 --update-deps  # Specify exact Python version
+        shell: bash
+
+      - name: Install additional dependencies
+        run: |
+          # Install additional dependencies
+          source ~/.bashrc
+          conda activate tools21cm
+          conda install -y pip
+          pip install .
+        shell: bash
+
+      - name: Run tests
+        run: |
+          # Run tests using the activated Conda environment
+          source ~/.bashrc
+          conda activate tools21cm
+          pytest
+        shell: bash

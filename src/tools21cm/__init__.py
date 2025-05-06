@@ -20,6 +20,7 @@ from .beam_convolve import *
 from .density_file import *
 from .irate_file import *
 from .nbody_file import *
+from .nbody_tools import *
 from .xfrac_file import *
 from .temper_file import *
 from .vel_file import *
@@ -32,7 +33,7 @@ from .lightcone import *
 from .pv_mpm import *
 from .temperature import *
 from .helper_functions import *
-from .cosmology import *
+from .cosmo import *
 from .plotting import *
 from .power_legendre import *
 from .deprecated import *
@@ -41,18 +42,22 @@ from .smoothing import *
 from .power_spectrum_noise import *
 from .gaussian_random_field import *
 from .corr_function import *
-from . import power_spect_fast
+# from . import power_spect_fast
 
-### Tools21cm
+from .line_intensity import *
+from .lyman_alpha_transmission import *
+
 from .bubble_stats import *
-#from zahnbubble import zahn
-#from c2raytools import *
+
 from .foreground_model import *
-from .telescope_functions import *
+from .radio_telescope_sensitivity import *
+from .radio_telescope_layout import *
+from .radio_data_calibration import *
+
 #if 'numba' in sys.modules: 
 #from numba_functions import *
 from .usefuls import *
-from .noise_model import *
+from .radio_telescope_noise import *
 from .superpixels import *
 try: from . import segmentation #from .segmentation import *
 except: pass 
@@ -63,10 +68,19 @@ from .topology import *
 from .box_counting import *
 from .fitting_methods import *
 from .percolation import *
+from .compare_constraints import *
+from .astro_tools import *
 
-from .power_spect_fast import *
+# from .power_spect_fast import *
 ### Cosmospectra
 # from cosmospectra import * 
+
+from .bispectrum import *
+from .position_dependent_power_spectrum import *
+from .test_case import *
+
+# Interface to simulation codes
+from . import model_21cmfast
 
 #Suppress warnings from zero-divisions and nans
 import numpy

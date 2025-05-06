@@ -3,7 +3,7 @@ Methods to simulate the primary beam of radio telescope
 '''
 
 import numpy as np
-from . import cosmology as cm
+from . import cosmo as cm
 from glob import glob
 from . import conv
 
