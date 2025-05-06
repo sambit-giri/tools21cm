@@ -50,14 +50,14 @@ from .lyman_alpha_transmission import *
 from .bubble_stats import *
 
 from .foreground_model import *
-from .telescope_functions import *
+from .radio_telescope_sensitivity import *
 from .radio_telescope_layout import *
 from .radio_data_calibration import *
 
 #if 'numba' in sys.modules: 
 #from numba_functions import *
 from .usefuls import *
-from .noise_model import *
+from .radio_telescope_noise import *
 from .superpixels import *
 try: from . import segmentation #from .segmentation import *
 except: pass 

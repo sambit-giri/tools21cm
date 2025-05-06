@@ -7,7 +7,7 @@ Methods:
 
 import numpy as np
 import sys
-from .telescope_functions import *
+from .radio_telescope_sensitivity import *
 from .usefuls import *
 from . import conv
 from . import cosmo as cm
