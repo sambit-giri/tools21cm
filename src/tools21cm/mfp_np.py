@@ -4,98 +4,12 @@ import sys
 from time import time, sleep
 from tqdm import tqdm
 
-# def mfp3d(arr, xth=0.5, iterations=10000000, verbose=True, point='random'):
-# 	#3D interpolation is required
-# 	#RegularGridInterpolator in scipy(>0.14) is used to do the interpolation
+def _ray3d(ar, xs, ys, zs, ls, ms, ns, verbose):
 
-# 	iterations = int(iterations)
-
-# 	if verbose: print('Initialising random rays...', end=' ')
-	
-# 	info = arr.shape
-# 	longest = max(arr.shape)
-# 	num_sz  = np.zeros(longest)
-
-# 	ar  = np.zeros(arr.shape)
-# 	ar[arr >= xth] = 1
-
-# 	thetas   = np.random.randint(0, 360, size=iterations)
-# 	phis     = np.random.randint(0, 360, size=iterations)
-# 	ls       = np.sin(thetas*np.pi/180)*np.cos(phis*np.pi/180)
-# 	ms       = np.sin(thetas*np.pi/180)*np.sin(phis*np.pi/180)
-# 	ns       = np.cos(thetas*np.pi/180)
-# 	if point=='random':
-# 		loc = np.argwhere(ar == 1)
-# 		rand_loc = np.random.randint(0, high=loc.shape[0], size=iterations)
-# 		xs,ys,zs = loc[rand_loc,0],loc[rand_loc,1],loc[rand_loc,2]
-# 	else:
-# 		xs,ys,zs = point
-# 		if ar[xs,ys,zs]==0:
-# 			print('Given point is outside the structure.')
-# 			return None
-# 		xs,ys,zs = xs*np.ones(iterations), ys*np.ones(iterations), zs*np.ones(iterations)
-	
-# 	interp_func = RegularGridInterpolator((np.arange(info[0]), np.arange(info[1]), np.arange(info[2])), ar, bounds_error=False, fill_value=0)
-
-# 	if verbose:
-# 		print('done')
-# 		print('Estimating ray lengths...')
-	
-# 	sleep(0.01)
-# 	total_iterations = longest
-# 	with tqdm(total=total_iterations, dynamic_ncols=False, disable=not verbose) as pbar:
-# 		for rr in range(longest):
-# 			xs, ys, zs = xs + ls, ys + ms, zs + ns
-# 			pts = np.vstack((xs, ys, zs)).T
-# 			vals = interp_func(pts)
-# 			check = np.argwhere(vals <= 0.5)
-# 			num_sz[rr] = check.shape[0]
-# 			xs, ys, zs = np.delete(xs, check), np.delete(ys, check), np.delete(zs, check)
-# 			ls, ms, ns = np.delete(ls, check), np.delete(ms, check), np.delete(ns, check)
-# 			pbar.update(1)  # Increment the progress bar
-# 			if not xs.size:
-# 				break
-# 		pbar.set_postfix({'Completion': '100%'})
-
-# 	size_px = np.arange(longest)
-# 	return num_sz, size_px
-
-def mfp3d(arr, xth=0.5, iterations=10000000, verbose=True, point='random'):
-    iterations = int(iterations)
-
-    if verbose: print('Initialising random rays...', end=' ')
-    
-    info = arr.shape
+    info = ar.shape
     longest = max(info)
     num_sz  = np.zeros(longest)
 
-    ar = np.zeros(info, dtype=np.float64)
-    ar[arr >= xth] = 1
-
-    thetas = np.random.randint(0, 360, size=iterations)
-    phis   = np.random.randint(0, 360, size=iterations)
-    
-    # Precompute trigonometric values
-    sin_thetas = np.sin(np.radians(thetas))
-    cos_thetas = np.cos(np.radians(thetas))
-    cos_phis   = np.cos(np.radians(phis))
-    sin_phis   = np.sin(np.radians(phis))
-    
-    ls = sin_thetas * cos_phis
-    ms = sin_thetas * sin_phis
-    ns = cos_thetas
-
-    if point == 'random':
-        loc = np.argwhere(ar == 1)
-        rand_loc = np.random.randint(0, high=loc.shape[0], size=iterations)
-        xs, ys, zs = loc[rand_loc, 0], loc[rand_loc, 1], loc[rand_loc, 2]
-    else:
-        xs, ys, zs = point
-        if ar[xs, ys, zs] == 0:
-            print('Given point is outside the structure.')
-            return None
-        xs, ys, zs = np.full(iterations, xs, dtype=np.float64), np.full(iterations, ys, dtype=np.float64), np.full(iterations, zs, dtype=np.float64)
-    
     # Ensure coordinates are of type float64 for compatibility with interpolation
     xs, ys, zs = xs.astype(np.float64), ys.astype(np.float64), zs.astype(np.float64)
 
@@ -107,7 +21,6 @@ def mfp3d(arr, xth=0.5, iterations=10000000, verbose=True, point='random'):
     )
 
     if verbose:
-        print('done')
         print('Estimating ray lengths...')
     
     sleep(0.01)
@@ -136,6 +49,46 @@ def mfp3d(arr, xth=0.5, iterations=10000000, verbose=True, point='random'):
         # pbar.set_postfix({'Completion': '100%'})
 
     size_px = np.arange(longest)
+    return num_sz, size_px
+
+def mfp3d(arr, xth=0.5, iterations=10000000, verbose=True, point='random'):
+    iterations = int(iterations)
+
+    if verbose: 
+        print('Initialising random rays...', end=' ')
+    
+    info = arr.shape
+
+    ar = np.zeros(info, dtype=np.float64)
+    ar[arr >= xth] = 1
+
+    thetas = np.random.randint(0, 360, size=iterations)
+    phis   = np.random.randint(0, 360, size=iterations)
+    
+    # Precompute trigonometric values
+    sin_thetas = np.sin(np.radians(thetas))
+    cos_thetas = np.cos(np.radians(thetas))
+    cos_phis   = np.cos(np.radians(phis))
+    sin_phis   = np.sin(np.radians(phis))
+    
+    ls = sin_thetas * cos_phis
+    ms = sin_thetas * sin_phis
+    ns = cos_thetas
+
+    if point == 'random':
+        loc = np.argwhere(ar == 1)
+        rand_loc = np.random.randint(0, high=loc.shape[0], size=iterations)
+        xs, ys, zs = loc[rand_loc, 0], loc[rand_loc, 1], loc[rand_loc, 2]
+    else:
+        xs, ys, zs = point
+        if isinstance(xs, (int,float)):
+            if ar[xs, ys, zs] == 0:
+                print('Given point is outside the structure.')
+                return None
+            xs, ys, zs = np.full(iterations, xs, dtype=np.float64), np.full(iterations, ys, dtype=np.float64), np.full(iterations, zs, dtype=np.float64)
+    if verbose:
+        print('done')
+    num_sz, size_px = _ray3d(ar, xs, ys, zs, ls, ms, ns, verbose)
     return num_sz, size_px
 
 def mfp2d(arr, xth=0.5, iterations=1000000, verbose=True, point='random'):

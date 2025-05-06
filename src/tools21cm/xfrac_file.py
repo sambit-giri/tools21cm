@@ -15,7 +15,7 @@ class XfracFile:
 		z (float): the redshift of the file (-1 if it couldn't be determined from the file name)
 	
 	'''
-	def __init__(self, filename = None, old_format=False):
+	def __init__(self, filename = None, old_format=False, neutral=False, binary_format=False):
 		'''
 		Initialize the file. If filename is given, read data. Otherwise,
 		do nothing.
@@ -28,18 +28,28 @@ class XfracFile:
 			Nothing
 		'''
 		if filename:
-			self.read_from_file(filename, old_format)
+			self.read_from_file(filename, old_format, neutral=neutral, binary_format=binary_format)
 
-	def read_from_file(self, filename, old_format=False, neutral=False,
-                           binary_format=False):
-
+	def read_from_file(self, filename, old_format=False, neutral=False, binary_format=False):
+		'''
+		Read data from file.
+		
+		Parameters:
+			filename (string): the file to read from.
+			old_format = False (bool): whether to use the old-style (32 bits)
+				file format.
+                        neutral = False (bool): whether the content is the neutral or ionized fraction
+                        binary_format = False (bool): whether the file is in Fortran unformatted or binary (no record separators) format 
+		Returns:
+			Nothing
+		'''
 		print_msg('Reading xfrac file:%s...' % filename)
 		self.filename = filename
 
 		f = open(filename, 'rb')
 		if binary_format:
 			temp_mesh = np.fromfile(f, count=3, dtype='int32')
-			self.mesh_x, self.mesh_y, self.mesh_z = temp_mesh[0:2]
+			self.mesh_x, self.mesh_y, self.mesh_z = temp_mesh #[0:2]
 		else:
 			temp_mesh = np.fromfile(f, count=6, dtype='int32')
 			self.mesh_x, self.mesh_y, self.mesh_z = temp_mesh[1:4]
