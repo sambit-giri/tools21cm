@@ -20,15 +20,15 @@ from joblib import cpu_count, Parallel, delayed
 from tqdm import tqdm
 
 
-def from_antenna_config_with_gains(filename, z, nu=None, 
+def from_antenna_config_with_gains(antxyz, z, nu=None, 
                 gain_model={'name': 'random_uniform', 'min': 0.5, 'max': 1.1}):
     """
     The function reads the antenna positions (N_ant antennas) from the file given.
 
     Parameters
     ----------
-    filename: str
-        Name of the file containing the antenna configurations (text file).
+    antxyz: ndarray
+        The radio telescope antenna configuration.
     z       : float
         Redhsift of the slice observed.
     nu      : float
@@ -43,11 +43,16 @@ def from_antenna_config_with_gains(filename, z, nu=None,
         Number of antennas.
     """
     z = float(z)
-    if filename is None: antll  = SKA1_LowConfig_Sept2016()
-    else: antll  = np.loadtxt(filename, dtype=str) if isinstance(filename, str) else filename
-    antll  = antll[:,-2:].astype(float)
-    N_ant  = antll.shape[0]
+    if antxyz is None: 
+        antll  = SKA1_LowConfig_Sept2016()
+        antll  = antll[:,-2:].astype(float)
+        antxyz = geographic_to_cartesian_coordinate_system(antll)
+    else:
+        antxyz = antxyz.to('m').value
+    if not nu: 
+        nu = cm.z_to_nu(z)                           # MHz
 
+    N_ant = antxyz.shape[0]
     if isinstance(gain_model, dict):
         if 'name' in gain_model.keys():
             if gain_model['name'].lower() == 'random_gaussian':
@@ -72,18 +77,9 @@ def from_antenna_config_with_gains(filename, z, nu=None,
     else:
         all_gains_r, all_gains_i = gain_model[:,0], gain_model[:,1]
     
-    Re     = 6.371e6                                        # in m
-    pp     = np.pi/180
-    if not nu: nu = cm.z_to_nu(z)                           # MHz
-    
-    antxyz = np.zeros((antll.shape[0],3))		            # in m
-    antxyz[:,0] = Re*np.cos(antll[:,1]*pp)*np.cos(antll[:,0]*pp)
-    antxyz[:,1] = Re*np.cos(antll[:,1]*pp)*np.sin(antll[:,0]*pp)
-    antxyz[:,2] = Re*np.sin(antll[:,1]*pp)	
-    del pp, antll
     pair_comb = itertools.combinations(range(N_ant), 2)
     pair_comb = list(pair_comb)	
-    lam = c_light/(nu*1e6)/1e2 			            # in m
+    lam = c_light_cgs/(nu*1e6)/1e2 			            # in m
     Nbase_with_gains = []
     for ii,jj in list(pair_comb):
         # print(ii,jj,len(Nbase_with_gains))
@@ -103,7 +99,7 @@ def from_antenna_config_with_gains(filename, z, nu=None,
 def get_uv_map_with_gains(ncells, z, 
                           gain_model={'real': lambda n: np.random.normal(1,0.5,n), 'imag': lambda n: np.random.normal(1,0.5,n)}, 
                           gain_timescale=[10,60],
-                          filename=None, total_int_time=6., int_time=10., boxsize=None, declination=-30., 
+                          subarray_type="AA4", total_int_time=6., int_time=10., boxsize=None, declination=-30., 
                           include_mirror_baselines=False, verbose=True):
     """
     Create the gain and uv maps with individual gain values for each baseline stored per pixel.
@@ -118,8 +114,8 @@ def get_uv_map_with_gains(ncells, z,
         Gain model parameters or a custom function that returns random gain values.
     gain_timescale : list
         Timescale after which gain values will evolve.
-    filename : str
-        Path to the file with telescope configuration.
+    subarray_type: str
+		The name of the SKA-Low layout configuration.
     total_int_time : float
         Total observation time per day (in hours).
     int_time : float
@@ -150,6 +146,8 @@ def get_uv_map_with_gains(ncells, z,
 
     # Initialize uv_map for storing accumulated gain information
     gain_uv_map = np.zeros((ncells, ncells, 5))
+
+    antxyz, N_ant = subarray_type_to_antxyz(subarray_type)
     
     if verbose: 
         print("Starting UV map generation...")
@@ -157,7 +155,7 @@ def get_uv_map_with_gains(ncells, z,
     # Iterate through time slices, performing incremental rotation and gridding
     for time_idx in tqdm(range(total_observations), disable=not verbose, desc="Gridding uv tracks"):
         if np.any([not time_idx*int_time%tt for tt in gain_timescale]):
-            Nbase, N_ant = from_antenna_config_with_gains(filename, z, gain_model=gain_model)
+            Nbase, N_ant = from_antenna_config_with_gains(antxyz, z, gain_model=gain_model)
 
         # Apply incremental rotation for the time step
         rotated_Nbase = earth_rotation_effect(Nbase[:,:3], time_idx, int_time, declination)
@@ -261,14 +259,14 @@ def apply_uv_with_gains_response_on_image(array, gain_uv_map, verbose=True):
     # Return the real part of the transformed image
     return np.real(img_map)
 
-def from_antenna_config_with_antenna_stamp(filename, z, nu=None):
+def from_antenna_config_with_antenna_stamp(antxyz, z, nu=None):
     """
     The function reads the antenna positions (N_ant antennas) from the file given.
 
     Parameters
     ----------
-    filename: str
-        Name of the file containing the antenna configurations (text file).
+    subarray_type: str
+		The name of the SKA-Low layout configuration.
     z       : float
         Redhsift of the slice observed.
     nu      : float
@@ -283,21 +281,19 @@ def from_antenna_config_with_antenna_stamp(filename, z, nu=None):
         Number of antennas.
     """
     z = float(z)
-    if filename is None: antll  = SKA1_LowConfig_Sept2016()
-    else: antll  = np.loadtxt(filename, dtype=str) if isinstance(filename, str) else filename
-    antll  = antll[:,-2:].astype(float)
-    Re     = 6.371e6                                        # in m
-    pp     = np.pi/180
-    if not nu: nu = cm.z_to_nu(z)                           # MHz
-    antxyz = np.zeros((antll.shape[0],3))		            # in m
-    antxyz[:,0] = Re*np.cos(antll[:,1]*pp)*np.cos(antll[:,0]*pp)
-    antxyz[:,1] = Re*np.cos(antll[:,1]*pp)*np.sin(antll[:,0]*pp)
-    antxyz[:,2] = Re*np.sin(antll[:,1]*pp)	
-    del pp, antll
+    if antxyz is None: 
+        antll  = SKA1_LowConfig_Sept2016()
+        antll  = antll[:,-2:].astype(float)
+        antxyz = geographic_to_cartesian_coordinate_system(antll)
+    else:
+        antxyz = antxyz.to('m').value
+    if not nu: 
+        nu = cm.z_to_nu(z)                                 # MHz
+
     N_ant = antxyz.shape[0]
     pair_comb = itertools.combinations(range(N_ant), 2)
     pair_comb = list(pair_comb)	
-    lam = c_light/(nu*1e6)/1e2 			            # in m
+    lam = c_light_cgs/(nu*1e6)/1e2 			            # in m
     all_ant_tags = np.arange(N_ant)+1
     Nbase_with_gains = []
     for ii,jj in list(pair_comb):
@@ -362,7 +358,7 @@ def process_chunk_get_full_uv_map_with_antenna_stamp(chunk_start, chunk_end, nce
 
     return ant_tag_uv_map_chunk
 
-def get_full_uv_map_with_antenna_stamp(ncells, z, filename=None, total_int_time=6., int_time=10., boxsize=None, declination=-30.,
+def get_full_uv_map_with_antenna_stamp(ncells, z, subarray_type="AA4", total_int_time=6., int_time=10., boxsize=None, declination=-30.,
                                        include_mirror_baselines=False, verbose=True, n_jobs=-1):
     """
     Create the gain and uv maps with individual gain values for each baseline stored per pixel.
@@ -373,8 +369,8 @@ def get_full_uv_map_with_antenna_stamp(ncells, z, filename=None, total_int_time=
         Number of cells in each dimension of the grid.
     z : float
         Redshift.
-    filename : str
-        Path to the file with telescope configuration.
+    subarray_type: str
+		The name of the SKA-Low layout configuration.
     total_int_time : float
         Total observation time per day (in hours).
     int_time : float
@@ -397,13 +393,15 @@ def get_full_uv_map_with_antenna_stamp(ncells, z, filename=None, total_int_time=
     N_ant : int
         Number of antennas.
     """
+    antxyz, N_ant = subarray_type_to_antxyz(subarray_type)
+
     total_observations = int(3600. * total_int_time / int_time)
     if total_observations*ncells**2>6e6:
         print('CAUTION: This setup will create a huge array that the memory might struggle to handle.')
 
     if verbose:
         print("Loading antenna configuration with antenna stamps...")
-    Nbase, N_ant = from_antenna_config_with_antenna_stamp(filename, z)
+    Nbase, N_ant = from_antenna_config_with_antenna_stamp(antxyz, z)
 
     if n_jobs == -1:
         n_jobs = cpu_count()
