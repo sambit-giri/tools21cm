@@ -20,7 +20,7 @@ import astropy.units as u
 from joblib import Parallel, delayed
 from tqdm import tqdm
 
-def noise_map(ncells, z, depth_mhz, obs_time=1000, subarray_type="AA4", boxsize=None, total_int_time=6., int_time=10., declination=-30., uv_map=None, N_ant=None, fft_wrap=False):
+def noise_map(ncells, z, depth_mhz, obs_time=1000, subarray_type="AA4", boxsize=None, total_int_time=6., int_time=10., declination=-30., uv_map=None, N_ant=None, uv_weighting='natural', fft_wrap=False):
 	"""
 	It creates a noise map by simulating the radio observation strategy (1801.06550).
 
@@ -66,18 +66,53 @@ def noise_map(ncells, z, depth_mhz, obs_time=1000, subarray_type="AA4", boxsize=
 	noise_real = np.random.normal(loc=0.0, scale=rms_noi, size=(ncells, ncells))
 	noise_imag = np.random.normal(loc=0.0, scale=rms_noi, size=(ncells, ncells))
 	noise_arr  = noise_real + 1.j*noise_imag
-	noise_four = apply_uv_response_noise(noise_arr, uv_map)
+	noise_four = apply_uv_response_noise(noise_arr, uv_map, uv_weighting=uv_weighting)
+	# noise_four = apply_uv_response_noise_briggs(noise_arr, uv_map, robust=2.0, epsilon=1e-6)
 	if fft_wrap: noise_map  = ifft2_wrap(noise_four)*np.sqrt(int_time/3600./obs_time)
 	else: noise_map  = np.fft.ifft2(noise_four)*np.sqrt(int_time/3600./obs_time)
 	return np.real(noise_map)
 
-def apply_uv_response_noise(noise, uv_map):
+def apply_uv_response_noise(noise, uv_map, uv_weighting='natural'):
 	'''
 	Apply the effect of uv coverage on the noise array.
 	'''
-	out = noise/np.sqrt(uv_map)
+	if uv_weighting.lower() in ['nat', 'natural', 'natural_weighting']:
+		out = noise/np.sqrt(uv_map)
+	elif uv_weighting.lower() in ['uni', 'uniform', 'uniform_weighting']:
+		out = noise
+	else:
+		print(f'{uv_weighting} scheme is not known or implemented')
 	out[uv_map==0] = 0.
 	return out
+
+def apply_uv_response_noise_briggs(noise, uv_map, robust=2.0, epsilon=1e-6):
+    """
+    Apply the effect of uv coverage on the noise array using Briggs weighting.
+
+    Parameters
+    ----------
+    noise : ndarray
+        2D array of base noise values (assumed uniform before weighting).
+    uv_map : ndarray
+        2D array containing number of observations per pixel (natural weights).
+    robust : float
+        Briggs robustness parameter (-2 to +2).
+    epsilon : float
+        Small value to avoid division by zero.
+
+    Returns
+    -------
+    weighted_noise : ndarray
+        Noise map after applying Briggs weighting.
+    """
+    w_nat = uv_map
+    w_mean = np.mean(w_nat[w_nat > 0]) + epsilon
+
+    briggs_weight = w_nat / (1 + (w_nat / w_mean)**2 * 10**(2 * robust))
+    noise_out = noise / np.sqrt(briggs_weight + epsilon)
+    noise_out[w_nat == 0] = 0.0
+
+    return noise_out
 
 def ifft2_wrap(nn1):
 	assert nn1.ndim==2
@@ -192,7 +227,7 @@ def apply_uv_response_on_coeval(array, z, subarray_type="AA4", boxsize=None, tot
 		data3d[:,:,k] = data2d
 	return data3d
 
-def noise_cube_coeval(ncells, z, depth_mhz=None, obs_time=1000, subarray_type="AA4", boxsize=None, total_int_time=6., int_time=10., declination=-30., uv_map=None, N_ant=None, verbose=True, fft_wrap=False):
+def noise_cube_coeval(ncells, z, depth_mhz=None, obs_time=1000, subarray_type="AA4", boxsize=None, total_int_time=6., int_time=10., declination=-30., uv_map=None, N_ant=None, uv_weighting='natural', verbose=True, fft_wrap=False):
 	"""
 	It creates a noise coeval cube by simulating the radio observation strategy (1801.06550).
 
@@ -245,13 +280,13 @@ def noise_cube_coeval(ncells, z, depth_mhz=None, obs_time=1000, subarray_type="A
 		print("Creating the noise cube...")
 	sleep(1)
 	for k in tqdm(range(ncells), disable=not verbose):
-		noise2d = noise_map(ncells, z, depth_mhz, obs_time=obs_time, subarray_type=antxyz, boxsize=boxsize, total_int_time=total_int_time, int_time=int_time, declination=declination, uv_map=uv_map, N_ant=N_ant, fft_wrap=fft_wrap)
+		noise2d = noise_map(ncells, z, depth_mhz, obs_time=obs_time, subarray_type=antxyz, boxsize=boxsize, total_int_time=total_int_time, int_time=int_time, declination=declination, uv_map=uv_map, N_ant=N_ant, uv_weighting=uv_weighting, fft_wrap=fft_wrap)
 		noise3d[:,:,k] = noise2d
 	if verbose: 
 		print("...noise cube created.")
 	return jansky_2_kelvin(noise3d, z, boxsize=boxsize)
 
-def noise_cube_lightcone(ncells, z, obs_time=1000, subarray_type="AA4", boxsize=None, save_uvmap=None, total_int_time=6., int_time=10., declination=-30., N_ant=None, fft_wrap=False, verbose=True, n_jobs=4, checkpoint=64):
+def noise_cube_lightcone(ncells, z, obs_time=1000, subarray_type="AA4", boxsize=None, save_uvmap=None, total_int_time=6., int_time=10., declination=-30., N_ant=None, uv_weighting='natural', fft_wrap=False, verbose=True, n_jobs=4, checkpoint=64):
 	"""
 	It creates a noise cube by simulating the radio observation strategy (1801.06550)
 	considerng the input redshift (z) as the central slice of the cube.
@@ -366,14 +401,14 @@ def noise_cube_lightcone(ncells, z, obs_time=1000, subarray_type="AA4", boxsize=
 		if k+1<zs.size: depth_mhz = np.abs(cm.z_to_nu(zs[k+1])-cm.z_to_nu(zs[k]))
 		else: depth_mhz = np.abs(cm.z_to_nu(zs[k])-cm.z_to_nu(zs[k-1]))
 		uv_map, N_ant  = uvs['{:.3f}'.format(zi)], uvs['Nant']
-		noise2d = noise_map(ncells, zi, depth_mhz, obs_time=obs_time, subarray_type=antxyz, boxsize=boxsize, total_int_time=total_int_time, int_time=int_time, declination=declination, uv_map=uv_map, N_ant=N_ant, verbose=verbose, fft_wrap=fft_wrap)
+		noise2d = noise_map(ncells, zi, depth_mhz, obs_time=obs_time, subarray_type=antxyz, boxsize=boxsize, total_int_time=total_int_time, int_time=int_time, declination=declination, uv_map=uv_map, N_ant=N_ant, uv_weighting=uv_weighting, verbose=verbose, fft_wrap=fft_wrap)
 		noise3d[:,:,k] = jansky_2_kelvin(noise2d, zi, boxsize=boxsize)
 		verbose = False
 		print('z = {:.3f} | {:.2f} % completed'.format(zi,100*(k+1)/zs.size))
 	return jansky_2_kelvin(noise3d, z, boxsize=boxsize)
 
 
-def noise_lightcone(ncells, zs, obs_time=1000, subarray_type="AA4", boxsize=None, save_uvmap=None, total_int_time=6., int_time=10., declination=-30., N_ant=None, fft_wrap=False, verbose=True, n_jobs=4, checkpoint=64):
+def noise_lightcone(ncells, zs, obs_time=1000, subarray_type="AA4", boxsize=None, save_uvmap=None, total_int_time=6., int_time=10., declination=-30., N_ant=None, uv_weighting='natural', fft_wrap=False, verbose=True, n_jobs=4, checkpoint=64):
 	"""
 	It creates a noise lightcone by simulating the radio observation strategy (1801.06550).
 	We assume the third axis to be along the line-of-sight and therefore 
@@ -486,7 +521,7 @@ def noise_lightcone(ncells, zs, obs_time=1000, subarray_type="AA4", boxsize=None
 		if k+1<zs.size: depth_mhz = np.abs(cm.z_to_nu(zs[k+1])-cm.z_to_nu(zs[k]))
 		else: depth_mhz = np.abs(cm.z_to_nu(zs[k])-cm.z_to_nu(zs[k-1]))
 		uv_map, N_ant  = uvs['{:.3f}'.format(zi)], uvs['Nant']
-		noise2d = noise_map(ncells, zi, depth_mhz, obs_time=obs_time, subarray_type=antxyz, boxsize=boxsize, total_int_time=total_int_time, int_time=int_time, declination=declination, uv_map=uv_map, N_ant=N_ant, verbose=verbose, fft_wrap=fft_wrap)
+		noise2d = noise_map(ncells, zi, depth_mhz, obs_time=obs_time, subarray_type=antxyz, boxsize=boxsize, total_int_time=total_int_time, int_time=int_time, declination=declination, uv_map=uv_map, N_ant=N_ant, uv_weighting=uv_weighting, verbose=verbose, fft_wrap=fft_wrap)
 		noise3d[:,:,k] = jansky_2_kelvin(noise2d, zi, boxsize=boxsize)
 		print('\nz = {:.3f} | {:.2f} % completed'.format(zi,100*(k+1)/zs.size))
 	return noise3d
