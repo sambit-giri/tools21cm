@@ -1,6 +1,6 @@
 # Tools21cm
 
-[![License](https://img.shields.io/github/license/sambit-giri/tools21cm.svg)](https://github.com/sambit-giri/tools21cm/blob/main/LICENSE)
+[![License](https://img.shields.io/github/license/sambit-giri/tools21cm.svg)](https://github.com/sambit-giri/tools21cm/blob/main/LICENSE.md)
 [![DOI](https://joss.theoj.org/papers/10.21105/joss.02363/status.svg)](https://doi.org/10.21105/joss.02363)
 [![GitHub Repository](https://img.shields.io/github/repo-size/sambit-giri/tools21cm)](https://github.com/sambit-giri/tools21cm)
 [![CI status](https://github.com/sambit-giri/tools21cm/actions/workflows/ci.yml/badge.svg)](https://github.com/sambit-giri/tools21cm/actions/workflows/ci.yml)
