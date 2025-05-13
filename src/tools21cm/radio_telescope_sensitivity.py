@@ -2,6 +2,7 @@ import numpy as np
 import itertools
 import sys
 from .usefuls import *
+from .scipy_func import *
 from . import cosmo as cm
 from . import conv
 from .const import KB_SI, c_light_cgs, c_light_SI, janskytowatt
@@ -9,7 +10,7 @@ from .radio_telescope_layout import *
 from tqdm import tqdm
 import time
 
-def get_SEFD(nu_obs, T_sys=None):
+def get_SEFD(nu_obs, T_sys=None, sefd_data=None, nu_data=None):
 	"""
 	Compute the System Equivalent Flux Density (SEFD) of radio antenna.
 
@@ -25,6 +26,10 @@ def get_SEFD(nu_obs, T_sys=None):
 	sefd : float
 		System Equivalent Flux Density in Jy.
 	"""
+	if sefd_data is not None:
+		log10_sefd_fct = interp1d(nu_data, np.log10(sefd_data), fill_value='extrapolate')
+		return 10**log10_sefd_fct(nu_obs)
+
 	nu_obs = np.atleast_1d(nu_obs)
 
 	# Default system temperature model
@@ -47,7 +52,7 @@ def get_SEFD(nu_obs, T_sys=None):
 	sefd = 2 * KB_SI * T_sys_val / A_eff / janskytowatt  # Jy
 	return sefd
 
-def sigma_noise_radio(z, depth_mhz, obs_time, int_time, uv_map=None, N_ant=512, verbose=True, T_sys=None):
+def sigma_noise_radio(z, depth_mhz, obs_time, int_time, uv_map=None, N_ant=512, verbose=True, T_sys=None, sefd_data=None, nu_data=None):
 	"""
 	Calculate the rms of the noise added by radio interferometers.
 
@@ -81,7 +86,7 @@ def sigma_noise_radio(z, depth_mhz, obs_time, int_time, uv_map=None, N_ant=512, 
 	nuso = 1420.0 / (1.0 + z)
 
 	# Compute SEFD
-	sefd = get_SEFD(nuso, T_sys)  # Jy
+	sefd = get_SEFD(nuso, T_sys, sefd_data=sefd_data, nu_data=nu_data)  # Jy
 
 	# RMS noise per visibility (converted to µJy)
 	rms_noise = 1e6 * sefd / np.sqrt(2 * depth_mhz * 1e6 * int_time)  # µJy

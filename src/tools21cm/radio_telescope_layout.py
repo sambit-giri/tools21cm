@@ -10,9 +10,9 @@ from importlib.resources import files
 import astropy.units as u
 from astropy.coordinates import EarthLocation
 
-def subarray_type_to_antxyz(subarray_type):
+def subarray_type_to_antxyz(subarray_type, verbose=True):
     if isinstance(subarray_type, str):
-        antxyz = get_SKA_Low_layout(subarray_type=subarray_type)
+        antxyz = get_SKA_Low_layout(subarray_type=subarray_type, verbose=verbose)
     elif isinstance(subarray_type, np.ndarray): 
         antxyz = subarray_type
     else:
@@ -332,7 +332,7 @@ def antenna_positions_to_baselines(antxyz):
     except:
         return baselines
 
-def get_SKA_Low_layout(subarray_type="AA4", unit='m'):
+def get_SKA_Low_layout(subarray_type="AA4", unit='m', verbose=True):
     if subarray_type.upper()=="AA4":
         filename = 'input_data/skalow_AA4_layout.txt'
     elif subarray_type.upper() in ["AASTAR", "AA*"]:
@@ -364,7 +364,8 @@ def get_SKA_Low_layout(subarray_type="AA4", unit='m'):
     path_to_file = str(files('tools21cm')/filename)
     antxyz = np.loadtxt(path_to_file)
     N_ant = antxyz.shape[0]
-    print(f'{subarray_type} contains {N_ant} antennae.')
+    if verbose:
+        print(f'{subarray_type} contains {N_ant} antennae.')
 
     # Apply rotation and shift to get absolute ECEF positions
     ecef_antennas = antxyz @ R.T + np.array([core.x.value, core.y.value, core.z.value])
