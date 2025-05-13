@@ -66,7 +66,7 @@ def from_antenna_config(antxyz, z, nu=None):
     Nbase = np.array(Nbase)	
     return Nbase, N_ant
 
-def earth_rotation_effect(Nbase, slice_nums, int_time, declination=-30.):
+def earth_rotation_effect(Nbase, slice_nums, int_time, total_int_time, declination=-30.):
     """
     Computes the effect of Earth's rotation over observation times, adjusting the measured 
     sky coordinates for each antenna configuration at specified time slices.
@@ -95,9 +95,17 @@ def earth_rotation_effect(Nbase, slice_nums, int_time, declination=-30.):
     
     # Ensure slice_nums is an array for vectorized handling of multiple slices
     slice_nums = np.atleast_1d(slice_nums)
-    
-    # Compute hour angles (HA) for each slice_num in vectorized manner
-    HA = -15.0 * p * (slice_nums - 1) * int_time / 3600. - np.pi / 2 + 2 * np.pi
+
+    # # Total number of integration steps
+    # n_steps = int((total_int_time * 3600) / int_time)
+
+    # Center observation around meridian: HA ranges from -ΔHA to +ΔHA
+    # HA = - (total_time / 2) + slice_index * int_time
+    HA = -0.5 * total_int_time + slice_nums * int_time
+    HA = 15.0 * p * HA / 3600.  - np.pi / 2 + 2 * np.pi # Convert to radians (15 deg/hour)
+
+    # # Compute hour angles (HA) for each slice_num in vectorized manner
+    # HA = -15.0 * p * (slice_nums - 1) * int_time / 3600. - np.pi / 2 + 2 * np.pi
 
     # Rotation matrices for each HA and declination delta
     cos_HA, sin_HA = np.cos(HA), np.sin(HA)
@@ -157,10 +165,10 @@ def get_uv_daily_observation(ncells, z, antxyz=None, total_int_time=4., int_time
     
     # Vectorize the observation loop by calculating all rotations at once
     time_indices = np.arange(total_observations) + 1
-    all_rotated_Nbase = (earth_rotation_effect(Nbase, i, int_time, declination) for i in time_indices)
+    all_rotated_Nbase = (earth_rotation_effect(Nbase, i, int_time, total_int_time, declination) for i in time_indices)
     
     # Grid uv tracks for each observation without individual loops
-    for rotated_Nbase in tqdm(all_rotated_Nbase, disable=not verbose, desc="Gridding uv tracks"):
+    for rotated_Nbase in tqdm(all_rotated_Nbase, total=total_observations, disable=not verbose, desc="Gridding uv tracks"):
         uv_map += grid_uv_tracks(rotated_Nbase, z, ncells, boxsize=boxsize, include_mirror_baselines=include_mirror_baselines)
     
     uv_map /= total_observations  # Normalize by the total number of observations
