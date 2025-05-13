@@ -80,6 +80,8 @@ def earth_rotation_effect(Nbase, slice_nums, int_time, total_int_time, declinati
         or a single integer slice number if only one is required.
     int_time    : float
         Integration time after which the signal is recorded (in seconds).
+    total_int_time : float
+        Total observation time per day in hours.
     declination : float, optional
         Declination angle (latitude) where the telescope is located (in degrees).
         Default is -30 degrees.
@@ -165,10 +167,10 @@ def get_uv_daily_observation(ncells, z, antxyz=None, total_int_time=4., int_time
     
     # Vectorize the observation loop by calculating all rotations at once
     time_indices = np.arange(total_observations) + 1
-    all_rotated_Nbase = (earth_rotation_effect(Nbase, i, int_time, declination) for i in time_indices)
+    all_rotated_Nbase = (earth_rotation_effect(Nbase, i, int_time, total_int_time, declination) for i in time_indices)
     
     # Grid uv tracks for each observation without individual loops
-    for rotated_Nbase in tqdm(all_rotated_Nbase, disable=not verbose, desc="Gridding uv tracks"):
+    for rotated_Nbase in tqdm(all_rotated_Nbase, total=total_observations, disable=not verbose, desc="Gridding uv tracks"):
         uv_map += grid_uv_tracks(rotated_Nbase, z, ncells, boxsize=boxsize, include_mirror_baselines=include_mirror_baselines)
     
     uv_map /= total_observations  # Normalize by the total number of observations

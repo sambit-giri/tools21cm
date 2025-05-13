@@ -36,7 +36,7 @@ extensions = [
 
 setup(
     name='tools21cm',
-    version='2.3.1',
+    version='2.3.2',
     author='Sambit Giri',
     author_email='sambit.giri@gmail.com',
     packages=find_packages(where="src"),
