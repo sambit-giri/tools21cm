@@ -12,7 +12,7 @@ from astropy.coordinates import EarthLocation
 
 def subarray_type_to_antxyz(subarray_type, verbose=True):
     if isinstance(subarray_type, str):
-        antxyz = get_SKA_Low_layout(subarray_type=subarray_type, verbose=verbose)
+        antxyz = get_SKA_Low_layout(subarray_type=subarray_type, unit='xyz', verbose=verbose)
     elif isinstance(subarray_type, np.ndarray): 
         antxyz = subarray_type
     else:
@@ -92,8 +92,7 @@ def earth_rotation_effect(Nbase, slice_nums, int_time, total_int_time, declinati
         Adjusted Nbase values for each time slice, with shape (len(slice_nums), N, 3).
     """
     # Convert to radians
-    p = np.pi / 180.
-    delta = p * declination
+    delta = np.deg2rad(declination)
     
     # Ensure slice_nums is an array for vectorized handling of multiple slices
     slice_nums = np.atleast_1d(slice_nums)
@@ -102,9 +101,8 @@ def earth_rotation_effect(Nbase, slice_nums, int_time, total_int_time, declinati
     # n_steps = int((total_int_time * 3600) / int_time)
 
     # Center observation around meridian: HA ranges from -ΔHA to +ΔHA
-    # HA = - (total_time / 2) + slice_index * int_time
-    HA = -0.5 * total_int_time + slice_nums * int_time
-    HA = 15.0 * p * HA / 3600.  - np.pi / 2 + 2 * np.pi # Convert to radians (15 deg/hour)
+    HA0 = -0.5 * total_int_time*3600 + slice_nums * int_time
+    HA  = np.deg2rad(15.0 * HA0 / 3600.)  #- np.pi / 2 + 2 * np.pi # Convert to radians (15 deg/hour)
 
     # # Compute hour angles (HA) for each slice_num in vectorized manner
     # HA = -15.0 * p * (slice_nums - 1) * int_time / 3600. - np.pi / 2 + 2 * np.pi
@@ -230,7 +228,7 @@ def grid_uv_tracks(Nbase, z, ncells, boxsize=None, include_mirror_baselines=Fals
     # Include mirrored baselines if requested
     if include_mirror_baselines:
         uv_map += np.flip(np.flip(uv_map, axis=0), axis=1)  # Flip along both axes for mirror effect
-        uv_map /= 2  # Average with mirrored baselines
+        uv_map = uv_map/2.  # Average with mirrored baselines
     
     return np.fft.fftshift(uv_map)
 
@@ -259,7 +257,7 @@ def geographic_to_cartesian_coordinate_system(antll):
     - The Earth's radius (mean radius) is assumed to be 6,371 km.
     - Astropy is used to ensure unit consistency.
     """
-    Re = 6371 * u.km  # Earth's radius
+    Re = 6371. * u.km  # Earth's radius
     if not isinstance(antll, u.quantity.Quantity):
         antll *= u.deg
     lon = antll[:, 0] 
@@ -301,7 +299,7 @@ def cartesian_to_geographic_coordinate_system(antxyz):
     - The Earth's radius (mean radius) is assumed to be 6,371 km.
     - Astropy is used to ensure unit consistency.
     """
-    Re = 6371 * u.km  # Earth's radius
+    Re = 6371. * u.km  # Earth's radius
 
     # Extract Cartesian coordinates and attach units
     if isinstance(antxyz, u.quantity.Quantity):
@@ -331,55 +329,118 @@ def antenna_positions_to_baselines(antxyz):
         return baselines*antxyz.unit
     except:
         return baselines
+    
+def enu_to_ecef(enu, lat_deg, lon_deg, origin_ecef):
+    lat = np.deg2rad(lat_deg)
+    lon = np.deg2rad(lon_deg)
 
-def get_SKA_Low_layout(subarray_type="AA4", unit='m', verbose=True):
-    if subarray_type.upper()=="AA4":
+    R = np.array([
+        [-np.sin(lon), -np.sin(lat)*np.cos(lon),  np.cos(lat)*np.cos(lon)],
+        [ np.cos(lon), -np.sin(lat)*np.sin(lon),  np.cos(lat)*np.sin(lon)],
+        [          0,              np.cos(lat),              np.sin(lat)]
+    ])
+    
+    ecef_local = enu @ R.T
+    return ecef_local + origin_ecef
+
+def ecef_to_xyz(ecef, lon_deg, origin_ecef):
+    """
+    Convert ECEF coordinates to interferometric XYZ coordinates.
+    
+    Parameters
+    ----------
+    ecef : ndarray
+        Antenna positions in ECEF coordinates (N, 3), in meters.
+    lon_deg : float
+        Longitude of the array center in degrees.
+    origin_ecef : ndarray
+        ECEF position of the array center (3,), in meters.
+        
+    Returns
+    -------
+    xyz : ndarray
+        Antenna positions in interferometric XYZ coordinates (N, 3), in meters.
+    """
+    lon_rad = np.deg2rad(lon_deg)
+    R = np.array([
+        [ np.cos(lon_rad),  np.sin(lon_rad), 0],
+        [-np.sin(lon_rad),  np.cos(lon_rad), 0],
+        [0,                 0,               1]
+    ])
+    
+    local = ecef - origin_ecef
+    return local @ R.T + origin_ecef
+
+def get_SKA_Low_layout(subarray_type="AA4", unit='ecef', verbose=True):
+    """
+    Load SKA Low antenna layout and return antenna positions in the specified coordinate system.
+
+    Parameters
+    ----------
+    subarray_type : str
+        One of {"AA4", "AA2", "AA1", "AA0.5", "AASTAR", "AA*"} or default.
+    unit : str
+        One of {'ecef', 'enu', 'xyz'}:
+            - 'ecef': Return positions in Earth-Centered Earth-Fixed coordinates (Quantity in meters)
+            - 'enu': Return positions in local East-North-Up frame (Quantity in meters)
+            - 'xyz': Return positions in ECEF as raw numpy array (no units)
+    verbose : bool
+        If True, print info about the layout.
+
+    Returns
+    -------
+    antxyz : Quantity or ndarray
+        Antenna positions as (N, 3) array in requested frame.
+    """
+    if subarray_type.upper() == "AA4":
         filename = 'input_data/skalow_AA4_layout.txt'
     elif subarray_type.upper() in ["AASTAR", "AA*"]:
         filename = 'input_data/skalow_AAstar_layout.txt'
-    elif subarray_type.upper()=="AA2":
+    elif subarray_type.upper() == "AA2":
         filename = 'input_data/skalow_AA2_layout.txt'
-    elif subarray_type.upper()=="AA1":
+    elif subarray_type.upper() == "AA1":
         filename = 'input_data/skalow_AA1_layout.txt'
-    elif subarray_type.upper()=="AA0.5":
+    elif subarray_type.upper() == "AA0.5":
         filename = 'input_data/skalow_AA0.5_layout.txt'
     else:
         filename = 'input_data/skalow1_layout.txt'
 
     # Load lat, lon, height from file
-    lon, lat, height = np.loadtxt(str(files('tools21cm')/'input_data/central_geographic_position.txt'))
-    # Create EarthLocation
+    lon, lat, height = np.loadtxt(str(files('tools21cm') / 'input_data/central_geographic_position.txt'))
+    
+    # EarthLocation of the array center
     core = EarthLocation(lat=lat * u.deg, lon=lon * u.deg, height=height * u.m)
-    # Rotation matrix from ENU to ECEF at the core location
-    lat_rad = core.lat.to(u.rad).value
-    lon_rad = core.lon.to(u.rad).value
+    origin_ecef = np.array([core.x.value, core.y.value, core.z.value])  # in meters
 
-    R = np.array([
-                [-np.sin(lon_rad),                 np.cos(lon_rad),                                0],
-                [-np.sin(lat_rad)*np.cos(lon_rad), -np.sin(lat_rad)*np.sin(lon_rad), np.cos(lat_rad)],
-                [np.cos(lat_rad)*np.cos(lon_rad),  np.cos(lat_rad)*np.sin(lon_rad),  np.sin(lat_rad)]
-            ])
+    # Load ENU antenna positions
+    path_to_file = str(files('tools21cm') / filename)
+    ant_enu = np.loadtxt(path_to_file)  # shape (N_ant, 3)
 
-    # path_to_file = pkg_resources.resource_filename('tools21cm', filename)
-    path_to_file = str(files('tools21cm')/filename)
-    antxyz = np.loadtxt(path_to_file)
-    N_ant = antxyz.shape[0]
     if verbose:
-        print(f'{subarray_type} contains {N_ant} antennae.')
+        print(f'{subarray_type} contains {ant_enu.shape[0]} antennae.')
 
-    # Apply rotation and shift to get absolute ECEF positions
-    ecef_antennas = antxyz @ R.T + np.array([core.x.value, core.y.value, core.z.value])
-    if unit.lower() in ['m', 'meter', 'metre', 'meters', 'metres']:
-        antxyz = ecef_antennas*u.m
+    # Handle coordinate transformations
+    if unit.lower() == 'enu':
+        # local ENU positions
+        return ant_enu * u.m  
+    elif unit.lower() == 'ecef':
+        # Convert ENU to ECEF
+        if verbose:
+            print('ENU -> ECEF')
+        ant_ecef = enu_to_ecef(ant_enu, lat, lon, origin_ecef)
+        return ant_ecef * u.m
+    elif unit.lower() == 'xyz':
+        # Convert ENU to ECEF to XYZ
+        if verbose:
+            print('ENU -> ECEF -> XYZ')
+        ant_ecef = enu_to_ecef(ant_enu, lat, lon, origin_ecef)
+        ant_xyz = ecef_to_xyz(ant_ecef, lon, origin_ecef)
+        return ant_xyz * u.m
+    elif unit in ['latlon', 'geodetic']:
+        locations = EarthLocation.from_geocentric(ant_ecef[:, 0], ant_ecef[:, 1], ant_ecef[:, 2], unit=u.m)
+        return locations.lat.deg, locations.lon.deg, locations.height.to(u.m).value
     else:
-        # Convert to EarthLocation
-        antxyz = EarthLocation.from_geocentric(ecef_antennas[:,0], ecef_antennas[:,1], ecef_antennas[:,2], unit=u.m)
-        # Get lat/lon/height
-        lat = antxyz.lat.deg
-        lon = antxyz.lon.deg
-        height = antxyz.height.to(u.m).value
-    return antxyz
-     
+        raise ValueError(f"Unsupported unit '{unit}'. Must be one of 'enu', 'ecef', or 'xyz'.")
 
 def get_latest_SKA_Low_layout(
                 subarray_type='AA*',

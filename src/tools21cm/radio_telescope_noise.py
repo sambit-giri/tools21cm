@@ -142,7 +142,7 @@ def apply_uv_response_on_image(array, uv_map):
 	img_map  = np.fft.ifft2(img_arr)
 	return np.real(img_map)
 
-def get_uv_map(ncells, z, subarray_type="AA4", total_int_time=6., int_time=10., boxsize=None, declination=-30., verbose=True):
+def get_uv_map(ncells, z, subarray_type="AA4", total_int_time=6., int_time=10., boxsize=None, declination=-30., include_mirror_baselines=True, verbose=True):
 	"""
 	It creates the uv map at a given redshift (z).
 
@@ -162,6 +162,8 @@ def get_uv_map(ncells, z, subarray_type="AA4", total_int_time=6., int_time=10., 
 		The name of the SKA-Low layout configuration.
 	boxsize: float
 		Boxsize in Mpc	
+	include_mirror_baselines : bool, optional
+        If True, includes mirrored baselines on the grid.
 	verbose: bool
 		If True, verbose is shown
 	
@@ -173,7 +175,7 @@ def get_uv_map(ncells, z, subarray_type="AA4", total_int_time=6., int_time=10., 
 		Number of antennae
 	"""
 	antxyz, N_ant = subarray_type_to_antxyz(subarray_type, verbose=verbose)
-	uv_map, N_ant  = get_uv_daily_observation(ncells, z, antxyz, total_int_time=total_int_time, int_time=int_time, boxsize=boxsize, declination=declination, verbose=verbose)
+	uv_map, N_ant  = get_uv_daily_observation(ncells, z, antxyz, total_int_time=total_int_time, int_time=int_time, boxsize=boxsize, declination=declination, include_mirror_baselines=include_mirror_baselines, verbose=verbose)
 	return uv_map, N_ant
 
 def make_uv_map_lightcone(ncells, zs, subarray_type="AA4", total_int_time=6., int_time=10., boxsize=None, declination=-30., verbose=True):
