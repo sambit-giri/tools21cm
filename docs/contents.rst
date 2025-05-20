@@ -75,12 +75,9 @@ Smoothing
 .. automodule:: tools21cm.smoothing
     :members:
 
-Telescope noise
+Radio telescope
 ---------------
-.. automodule:: tools21cm.noise_model
-    :members:
-
-.. automodule:: tools21cm.telescope_functions
+.. automodule:: tools21cm.radio_telescope_noise
     :members:
 
 Temperature
