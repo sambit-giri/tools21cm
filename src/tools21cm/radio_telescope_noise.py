@@ -142,7 +142,14 @@ def apply_uv_response_on_image(array, uv_map):
 	img_map  = np.fft.ifft2(img_arr)
 	return np.real(img_map)
 
-def get_uv_map(ncells, z, subarray_type="AA4", total_int_time=6., int_time=10., boxsize=None, declination=-30., include_mirror_baselines=True, verbose=True):
+def max_baseline_to_max_k(redshift, max_baseline):
+	if not isinstance(max_baseline, (u.Quantity)):
+		max_baseline *= u.km
+	lcut = (1 + redshift) * (21 * u.cm / max_baseline).to('') * cm.z_to_cdist(redshift)
+	kcut = np.pi / lcut
+	return kcut
+
+def get_uv_map(ncells, z, subarray_type="AA4", total_int_time=6., int_time=10., boxsize=None, declination=-30., include_mirror_baselines=True, verbose=True, max_baseline=None):
 	"""
 	It creates the uv map at a given redshift (z).
 
@@ -166,6 +173,8 @@ def get_uv_map(ncells, z, subarray_type="AA4", total_int_time=6., int_time=10., 
         If True, includes mirrored baselines on the grid.
 	verbose: bool
 		If True, verbose is shown
+	max_baseline : float 
+		The maximun baseline of the telescope in km. Baseline beyond this are ignored.
 	
 	Returns
 	-------
@@ -174,8 +183,18 @@ def get_uv_map(ncells, z, subarray_type="AA4", total_int_time=6., int_time=10., 
 	N_ant: int
 		Number of antennae
 	"""
+	if boxsize is None: 
+		boxsize = conv.LB  
 	antxyz, N_ant = subarray_type_to_antxyz(subarray_type, verbose=verbose)
 	uv_map, N_ant  = get_uv_daily_observation(ncells, z, antxyz, total_int_time=total_int_time, int_time=int_time, boxsize=boxsize, declination=declination, include_mirror_baselines=include_mirror_baselines, verbose=verbose)
+	if max_baseline is not None:
+		kcut = max_baseline_to_max_k(z, max_baseline)
+		kk = np.linspace(-ncells/2, ncells/2, ncells) * np.pi / boxsize
+		kx, ky = np.meshgrid(kk, kk)
+		ksq = kx**2 + ky**2
+		uv_map_shift = np.fft.fftshift(uv_map)
+		uv_map_shift[ksq>kcut**2] = 0.0
+		uv_map = np.fft.fftshift(uv_map_shift)
 	return uv_map, N_ant
 
 def make_uv_map_lightcone(ncells, zs, subarray_type="AA4", total_int_time=6., int_time=10., boxsize=None, declination=-30., verbose=True):
