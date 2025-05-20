@@ -77,6 +77,12 @@ Smoothing
 
 Radio telescope
 ---------------
+.. automodule:: tools21cm.radio_telescope_layout
+    :members:
+
+.. automodule:: tools21cm.radio_telescope_sensitivity
+    :members:
+
 .. automodule:: tools21cm.radio_telescope_noise
     :members:
 
