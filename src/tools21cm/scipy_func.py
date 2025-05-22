@@ -8,8 +8,9 @@ except:
 
 from scipy.interpolate import splrep, splev, interp1d
 from scipy.special import gamma, erf
-from scipy.signal import savgol_filter
+from scipy.signal import savgol_filter, windows
 from scipy.optimize import fsolve
+from scipy.ndimage import gaussian_filter
 
 import numpy as np
 

@@ -12,7 +12,9 @@ from .usefuls import *
 from . import conv
 from . import cosmo as cm
 from . import smoothing as sm
+from .power_spectrum import radial_average, _get_k, _get_dims
 import scipy
+from .scipy_func import *
 from glob import glob
 from time import time, sleep
 import pickle
@@ -20,16 +22,114 @@ import astropy.units as u
 from joblib import Parallel, delayed
 from tqdm import tqdm
 
+def signal_window(ncells, method, ndim=1, extra_param=30):
+    if method.lower() in ['blackmanharris', 'blackman-harris']:
+        win = windows.blackmanharris(ncells)
+    elif method.lower() in ['blackman']:
+        win = windows.blackman(ncells)
+    elif method.lower() in ['barthann']:
+        win = windows.barthann(ncells)
+    elif method.lower() in ['bartlett']:
+        win = windows.bartlett(ncells)
+    elif method.lower() in ['gaussian']:
+        win = windows.gaussian(ncells, extra_param)
+    elif method.lower() in ['hamming']:
+        win = windows.hamming(ncells)
+    elif method.lower() in ['hann']:
+        win = windows.hann(ncells)
+    elif method.lower() in ['kaiser']:
+        win = windows.kaiser(ncells, extra_param)
+    else:
+        print(f'{method} window function is not implemented')
+        return None
+    if ndim==1:
+        pass
+    elif ndim==2:
+        win = (win[:,None] @ win[None,:])
+    elif ndim==3:
+        win = (win[:,None] @ win[None,:])[:,:,None] @ win[None,:]
+    else:
+        print(f'window dimension = {ndim} is not supported yet')
+        return None 
+    return win
+
+def noise_coeval_power_spectrum_1d(ncells, z, depth_mhz, obs_time=1000, subarray_type="AA4", kbins=10, boxsize=None, binning='log', return_n_modes=False, total_int_time=6., int_time=10., declination=-30., uv_map=None, N_ant=None, uv_weighting='natural', sefd_data=None, nu_data=None, fft_wrap=False, verbose=True):
+	"""
+	It creates a noise map by simulating the radio observation strategy (1801.06550).
+
+	Parameters
+	----------
+	ncells: int
+		The grid size.
+	z: float
+		Redshift.
+	depth_mhz: float
+		The bandwidth in MHz.
+	obs_time: float
+		The observation time in hours.
+	total_int_time: float
+		Total observation per day time in hours
+	int_time: float
+		Intergration time in seconds
+	declination: float
+		Declination angle in deg
+	uv_map: ndarray
+		numpy array containing gridded uv coverage. If nothing given, then the uv map 
+		will be simulated
+	N_ant: int
+		Number of antennae
+	subarray_type: str
+		The name of the SKA-Low layout configuration.
+	boxsize: float
+		Boxsize in Mpc
+	
+	Returns
+	-------
+	noise_map: ndarray
+		A 2D slice of the interferometric noise at that frequency (in muJy).
+	"""
+	if boxsize is None:
+		boxsize = conv.LB
+
+	antxyz, N_ant = subarray_type_to_antxyz(subarray_type, verbose=verbose)
+
+	if uv_map is None: 
+		uv_map, N_ant = get_uv_map(ncells, z, subarray_type=antxyz, total_int_time=total_int_time, int_time=int_time, boxsize=boxsize, declination=declination)
+	if N_ant is None: 
+		N_ant = antxyz.shape[0]
+
+	sigma, rms_noi = sigma_noise_radio(z, depth_mhz, obs_time, int_time, uv_map=uv_map, N_ant=N_ant, verbose=False, sefd_data=sefd_data, nu_data=nu_data)
+	box_dims = _get_dims(boxsize, uv_map.shape)
+	k_nq = np.pi/boxsize*min(uv_map.shape)
+
+	if uv_weighting.lower() in ['nat', 'natural', 'natural_weighting']:
+		out = rms_noi/np.sqrt(uv_map)
+	elif uv_weighting.lower() in ['uni', 'uniform', 'uniform_weighting']:
+		out = rms_noi
+	else:
+		print(f'{uv_weighting} scheme is not known or implemented')
+
+	power = np.fft.fftshift(out**2)
+	# scale
+	boxvol = numpy_product(box_dims)
+	pixelsize = boxvol/(numpy_product(uv_map.shape))
+	power *= pixelsize**2/boxvol
+	pn, kn, n_modes = radial_average(power, box_dims, kbins=kbins, binning=binning)
+
+	if return_n_modes:
+		return pn, kn, n_modes
+	return pn, kn
+
 def noise_map(ncells, z, depth_mhz, obs_time=1000, subarray_type="AA4", boxsize=None, total_int_time=6., int_time=10., declination=-30., uv_map=None, N_ant=None, uv_weighting='natural', sefd_data=None, nu_data=None, fft_wrap=False, verbose=True):
 	"""
 	It creates a noise map by simulating the radio observation strategy (1801.06550).
 
 	Parameters
 	----------
-	z: float
-		Redshift.
 	ncells: int
 		The grid size.
+	z: float
+		Redshift.
 	depth_mhz: float
 		The bandwidth in MHz.
 	obs_time: float
@@ -66,23 +166,42 @@ def noise_map(ncells, z, depth_mhz, obs_time=1000, subarray_type="AA4", boxsize=
 	noise_real = np.random.normal(loc=0.0, scale=rms_noi, size=(ncells, ncells))
 	noise_imag = np.random.normal(loc=0.0, scale=rms_noi, size=(ncells, ncells))
 	noise_arr  = noise_real + 1.j*noise_imag
-	noise_four = apply_uv_response_noise(noise_arr, uv_map, uv_weighting=uv_weighting)
+	noise_four = apply_uv_response_noise(noise_arr, uv_map, boxsize=boxsize, uv_weighting=uv_weighting)
 	# noise_four = apply_uv_response_noise_briggs(noise_arr, uv_map, robust=2.0, epsilon=1e-6)
+	win_2d = signal_window(ncells, 'blackmanharris', ndim=2)
+	noise_four = noise_four*np.fft.fftshift(win_2d)
 	if fft_wrap: noise_map  = ifft2_wrap(noise_four)*np.sqrt(int_time/3600./obs_time)
 	else: noise_map  = np.fft.ifft2(noise_four)*np.sqrt(int_time/3600./obs_time)
 	return np.real(noise_map)
 
-def apply_uv_response_noise(noise, uv_map, uv_weighting='natural'):
+def _suppress_sharp_features_uv_map(uv_map, boxsize=None, method='gaussian', filter_param=5.):
+	if method.lower()=='gaussian':
+		uv_map_smooth = np.sqrt(gaussian_filter(uv_map, filter_param))
+		uv_map_smooth *= uv_map.max()/uv_map_smooth.max()
+	elif method.lower() in ['binned', 'bin']:
+		assert boxsize is not None
+		box_dims = [boxsize,boxsize]
+		k_nq = np.pi/boxsize*min(uv_map.shape)
+		uv_rad_avg, k_rad_avg, n_modes = radial_average(np.fft.fftshift(uv_map), box_dims, kbins=filter_param, binning='log')
+		k_comp, k_mag = _get_k(uv_map, [boxsize,boxsize])
+		xx, yy = np.log10(k_rad_avg[k_rad_avg<k_nq/2]), np.log10(uv_rad_avg[k_rad_avg<k_nq/2])
+		uv_map_smooth = np.fft.fftshift(10**interp1d(xx[np.isfinite(yy)], yy[np.isfinite(yy)], fill_value='extrapolate')(np.log10(k_mag)))
+	else:
+		print(f'{method} to suppress sharp features in the uv maps is not supported. Choose from "gaussian", "binned".')
+	return uv_map_smooth
+
+def apply_uv_response_noise(noise, uv_map, boxsize=None, uv_weighting='natural', uv_map_min=0.01):
 	'''
 	Apply the effect of uv coverage on the noise array.
 	'''
 	if uv_weighting.lower() in ['nat', 'natural', 'natural_weighting']:
-		out = noise/np.sqrt(uv_map)
+		uv_map_smooth = _suppress_sharp_features_uv_map(uv_map, boxsize=boxsize, method='binned', filter_param=15)
+		out = noise/np.sqrt(uv_map_smooth)
 	elif uv_weighting.lower() in ['uni', 'uniform', 'uniform_weighting']:
 		out = noise
 	else:
 		print(f'{uv_weighting} scheme is not known or implemented')
-	out[uv_map==0] = 0.
+	out[uv_map<uv_map_min] = 0.
 	return out
 
 def apply_uv_response_noise_briggs(noise, uv_map, robust=2.0, epsilon=1e-6):

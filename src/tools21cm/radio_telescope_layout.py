@@ -207,6 +207,10 @@ def grid_uv_tracks(Nbase, z, ncells, boxsize=None, include_mirror_baselines=Fals
     uv_map = np.zeros((ncells, ncells), dtype=np.int32)  # Using int32 for faster summing operations
     theta_max = boxsize / cm.z_to_cdist(z)
     
+    # Include mirrored baselines if requested
+    if include_mirror_baselines:
+        Nbase = np.vstack([Nbase, -Nbase])
+
     # Scale and round the coordinates in a single operation for efficiency
     Nb = np.round(Nbase * theta_max).astype(int)
 
@@ -227,7 +231,7 @@ def grid_uv_tracks(Nbase, z, ncells, boxsize=None, include_mirror_baselines=Fals
 
     # Include mirrored baselines if requested
     if include_mirror_baselines:
-        uv_map += np.flip(np.flip(uv_map, axis=0), axis=1)  # Flip along both axes for mirror effect
+        # uv_map += np.flip(np.flip(uv_map, axis=0), axis=1)  # Flip along both axes for mirror effect
         uv_map = uv_map/2.  # Average with mirrored baselines
     
     return np.fft.fftshift(uv_map)
