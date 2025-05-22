@@ -621,7 +621,7 @@ def noise_lightcone(ncells, zs, obs_time=1000, subarray_type="AA4", boxsize=None
 		for k,zi in enumerate(zs):
 			print(f'{k+1}/{len(zs)} | z={zi:.3f}')
 			if '{:.3f}'.format(zi) not in uvs.keys():
-				uv_map, N_ant  = get_uv_map(ncells, zi, subarray_type=antxyz, total_int_time=total_int_time, int_time=int_time, boxsize=boxsize, declination=declination)
+				uv_map, N_ant  = get_uv_map(ncells, zi, subarray_type=antxyz, total_int_time=total_int_time, int_time=int_time, boxsize=boxsize, declination=declination, verbose=verbose)
 				uvs['{:.3f}'.format(zi)] = uv_map
 				uvs['Nant'] = N_ant
 				if save_uvmap is not None: pickle.dump(uvs, open(save_uvmap, 'wb'))
