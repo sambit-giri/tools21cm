@@ -531,7 +531,8 @@ def noise_cube_lightcone(ncells, z, obs_time=1000, subarray_type="AA4", boxsize=
 				if save_uvmap is not None: 
 					# pickle.dump(uvs, open(save_uvmap, 'wb'))
 					write_dictionary_data(uvs, save_uvmap)
-				print('{:.2f} % completed'.format(100*(len(uvs.keys())-1)/zs.size))
+				if verbose:
+					print('{:.2f} % completed'.format(100*(len(uvs.keys())-1)/zs.size))
 		else:
 			fla = Parallel(n_jobs=n_jobs,verbose=20)(delayed(_uvmap)(i) for i in z_run)
 			for jj,zi in enumerate(z_run):
@@ -551,7 +552,8 @@ def noise_cube_lightcone(ncells, z, obs_time=1000, subarray_type="AA4", boxsize=
 		noise2d = noise_map(ncells, zi, depth_mhz, obs_time=obs_time, subarray_type=antxyz, boxsize=boxsize, total_int_time=total_int_time, int_time=int_time, declination=declination, uv_map=uv_map, N_ant=N_ant, uv_weighting=uv_weighting, verbose=verbose, fft_wrap=fft_wrap, sefd_data=sefd_data, nu_data=nu_data)
 		noise3d[:,:,k] = jansky_2_kelvin(noise2d, zi, boxsize=boxsize)
 		verbose = False
-		print('z = {:.3f} | {:.2f} % completed'.format(zi,100*(k+1)/zs.size))
+		if verbose:
+			print('z = {:.3f} | {:.2f} % completed'.format(zi,100*(k+1)/zs.size))
 	return jansky_2_kelvin(noise3d, z, boxsize=boxsize)
 
 def noise_lightcone(ncells, zs, obs_time=1000, subarray_type="AA4", boxsize=None, save_uvmap=None, total_int_time=6., int_time=10., declination=-30., N_ant=None, uv_weighting='natural', fft_wrap=False, verbose=True, n_jobs=4, checkpoint=64, sefd_data=None, nu_data=None):
@@ -658,7 +660,8 @@ def noise_lightcone(ncells, zs, obs_time=1000, subarray_type="AA4", boxsize=None
 				if save_uvmap is not None: 
 					# pickle.dump(uvs, open(save_uvmap, 'wb'))
 					write_dictionary_data(uvs, save_uvmap)
-				print('{:.2f} % completed'.format(100*(len(uvs.keys())-1)/zs.size))
+				if verbose:
+					print('{:.2f} % completed'.format(100*(len(uvs.keys())-1)/zs.size))
 		else:
 			fla = Parallel(n_jobs=n_jobs,verbose=20)(delayed(_uvmap)(i) for i in z_run)
 			for jj,zi in enumerate(z_run):
@@ -678,7 +681,8 @@ def noise_lightcone(ncells, zs, obs_time=1000, subarray_type="AA4", boxsize=None
 		uv_map, N_ant  = uvs['{:.3f}'.format(zi)], uvs['Nant']
 		noise2d = noise_map(ncells, zi, depth_mhz, obs_time=obs_time, subarray_type=antxyz, boxsize=boxsize, total_int_time=total_int_time, int_time=int_time, declination=declination, uv_map=uv_map, N_ant=N_ant, uv_weighting=uv_weighting, verbose=verbose, fft_wrap=fft_wrap, sefd_data=sefd_data, nu_data=nu_data)
 		noise3d[:,:,k] = jansky_2_kelvin(noise2d, zi, boxsize=boxsize)
-		print('\nz = {:.3f} | {:.2f} % completed'.format(zi,100*(k+1)/zs.size))
+		if verbose:
+			print('\nz = {:.3f} | {:.2f} % completed'.format(zi,100*(k+1)/zs.size))
 	return noise3d
 
 def gauss_kernel_3d(size, sigma=1.0, fwhm=None):
