@@ -7,7 +7,7 @@ import glob
 from .xfrac_file import XfracFile
 from . import helper_functions, density_file, vel_file, lightcone
 from . import temperature as tm
-import sys
+import sys, os
 
 def _load_binary_data(filename, dtype=np.float32): 
 	""" 
@@ -161,3 +161,133 @@ def coeval_dens_c2ray(dens_dir, z):
 	return dens.astype(np.float64)
 
 	
+def read_dictionary_data(filename, format=None):
+	"""
+	Reads a dictionary from various file formats.
+	Supported formats: pickle, json, yaml, hdf5, npz, netcdf (xarray), csv, xlsx
+	"""
+	if format is None:
+		ext = os.path.splitext(filename)[1].lower()
+		format = ext.lstrip('.')
+
+	format = format.lower()
+
+	if format in ['pickle', 'pkl']:
+		import pickle
+		with open(filename, 'rb') as f:
+			return pickle.load(f)
+
+	elif format in ['json']:
+		import json
+		with open(filename, 'r') as f:
+			return json.load(f)
+
+	elif format in ['yaml', 'yml']:
+		import yaml
+		with open(filename, 'r') as f:
+			return yaml.safe_load(f)
+
+	elif format in ['hdf5', 'h5']:
+		import h5py
+		data = {}
+		with h5py.File(filename, 'r') as f:
+			def recursively_load(group, out):
+				for key, val in group.items():
+					if isinstance(val, h5py.Group):
+						out[key] = {}
+						recursively_load(val, out[key])
+					else:
+						out[key] = val[()]
+			recursively_load(f, data)
+		return data
+
+	elif format in ['npz']:
+		npzfile = np.load(filename, allow_pickle=True)
+		return dict(npzfile)
+
+	elif format in ['nc', 'netcdf']:
+		import xarray as xr
+		ds = xr.open_dataset(filename)
+		return ds.to_dict(data=True)
+
+	elif format == 'csv':
+		import pandas as pd
+		df = pd.read_csv(filename)
+		return df.to_dict(orient='list')
+	
+	elif format == 'parquet':
+		import pandas as pd
+		df = pd.read_parquet(filename)
+		return df.to_dict(orient='list')
+
+	elif format == 'xlsx':
+		import pandas as pd
+		df = pd.read_excel(filename)
+		return df.to_dict(orient='list')
+
+	else:
+		raise ValueError(f"Unsupported format: {format}")
+	
+def write_dictionary_data(data_dict, filename, format=None):
+	"""
+	Writes a dictionary to various file formats.
+	Supports: pickle, json, yaml, hdf5, npz, netcdf (xarray), csv, xlsx
+	"""
+	if format is None:
+		format = os.path.splitext(filename)[1].lstrip('.').lower()
+
+	if format in ['pickle', 'pkl']:
+		import pickle
+		with open(filename, 'wb') as f:
+			pickle.dump(data_dict, f)
+
+	elif format == 'json':
+		import json
+		with open(filename, 'w') as f:
+			json.dump(data_dict, f, indent=4)
+
+	elif format in ['yaml', 'yml']:
+		import yaml
+		with open(filename, 'w') as f:
+			yaml.safe_dump(data_dict, f)
+
+	elif format in ['hdf5', 'h5']:
+		import h5py
+		with h5py.File(filename, 'w') as f:
+			def recursive_save(h5obj, d):
+				for k, v in d.items():
+					if isinstance(v, dict):
+						grp = h5obj.create_group(k)
+						recursive_save(grp, v)
+					else:
+						h5obj.create_dataset(k, data=v)
+			recursive_save(f, data_dict)
+
+	elif format == 'npz':
+		np.savez(filename, **data_dict)
+
+	elif format in ['nc', 'netcdf']:
+		import xarray as xr
+		try:
+			ds = xr.Dataset.from_dict(data_dict)
+		except Exception as e:
+			raise ValueError(f"Failed to convert dictionary to xarray.Dataset: {e}")
+		ds.to_netcdf(filename)
+
+	elif format == 'csv':
+		import pandas as pd
+		df = pd.DataFrame(data_dict)
+		df.to_csv(filename, index=False)
+
+	elif format == 'parquet':
+		import pandas as pd
+		df = pd.DataFrame(data_dict)
+		df.to_parquet(filename, index=False)
+
+	elif format == 'xlsx':
+		import pandas as pd
+		df = pd.DataFrame(data_dict)
+		df.to_excel(filename, index=False)
+
+	else:
+		raise ValueError(f"Unsupported format: {format}")
