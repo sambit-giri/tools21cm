@@ -209,6 +209,11 @@ def read_dictionary_data(filename, format=None):
 		import xarray as xr
 		ds = xr.open_dataset(filename)
 		return ds.to_dict(data=True)
+	
+	elif format == 'zarr':
+		import xarray as xr
+		ds = xr.open_zarr(filename)
+		return ds.to_dict(data=True)
 
 	elif format == 'csv':
 		import pandas as pd
@@ -273,6 +278,14 @@ def write_dictionary_data(data_dict, filename, format=None):
 		except Exception as e:
 			raise ValueError(f"Failed to convert dictionary to xarray.Dataset: {e}")
 		ds.to_netcdf(filename)
+
+	elif format == 'zarr':
+		import xarray as xr
+		try:
+			ds = xr.Dataset.from_dict(data_dict)
+			ds.to_zarr(filename, mode='w')
+		except Exception as e:
+			raise ValueError(f"Failed to convert dictionary to xarray.Dataset for Zarr: {e}")
 
 	elif format == 'csv':
 		import pandas as pd
