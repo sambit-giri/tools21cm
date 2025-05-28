@@ -4,7 +4,7 @@ from scipy.signal import fftconvolve, convolve
 from skimage import morphology
 from tqdm import tqdm
 
-def spa_np(data, xth=0.95, nscales=30, binning='log', verbose=True, fftconvolve=True):
+def spa_np(data, xth=0.95, nscales=30, binning='log', verbose=True, use_fftconvolve=True):
 	"""
 	@Zahn et al. (2007)
 	"""
@@ -18,7 +18,7 @@ def spa_np(data, xth=0.95, nscales=30, binning='log', verbose=True, fftconvolve=
 		ra = Rs_[i]
 		#kernel = put_sphere(np.zeros((Rmx,Rmx,Rmx)), [Rmx/2.,Rmx/2.,Rmx/2.], ra, label=1.)
 		kernel = morphology.ball(ra)
-		smooth = fftconvolve(data, kernel/kernel.sum(), mode='same') if fftconvolve else convolve(data, kernel/kernel.sum(), mode='same')
+		smooth = fftconvolve(data, kernel/kernel.sum(), mode='same') if use_fftconvolve else convolve(data, kernel/kernel.sum(), mode='same')
 		rad[smooth>=xth] = ra
 		#print("Comepleted {0:.1f} %".format(100*(i+1)/nscales))
 	
