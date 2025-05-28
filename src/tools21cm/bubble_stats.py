@@ -68,7 +68,7 @@ def spa(data, xth=0.95, boxsize=None, nscales=20, upper_lim=False, binning='log'
 		It decides if the threshold is the upper limit or the lower limit (Default: True).
 	verbose : bool
 		Print verbose (Default: True).
-	fftconvolve : bool
+	use_fftconvolve : bool
 		Use FFT-based convolution (Default: True).
 
 	Returns
