@@ -50,7 +50,7 @@ def fof(data, xth=0.5, connectivity=1):
 
 	return out_map, size_list
 
-def spa(data, xth=0.95, boxsize=None, nscales=20, upper_lim=False, binning='log', verbose=True, fftconvolve=True):
+def spa(data, xth=0.95, boxsize=None, nscales=20, upper_lim=False, binning='log', verbose=True, use_fftconvolve=True):
 	"""
 	Determines the sizes using the Spherical-Averege (SPA) approach.
 	
@@ -82,7 +82,7 @@ def spa(data, xth=0.95, boxsize=None, nscales=20, upper_lim=False, binning='log'
 	if (upper_lim): 
 		data = -1.*data
 		xth  = -1.*xth
-	rs, ni = spa_np.spa_np(data, xth=xth, binning=binning, nscales=nscales, verbose=verbose, fftconvolve=fftconvolve)
+	rs, ni = spa_np.spa_np(data, xth=xth, binning=binning, nscales=nscales, verbose=verbose, use_fftconvolve=use_fftconvolve)
 	rs_ = rs*boxsize/data.shape[0]
 	ni_ = ni/np.sum(ni)
 	return rs_, ni_
