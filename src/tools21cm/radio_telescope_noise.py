@@ -554,7 +554,7 @@ def noise_cube_lightcone(ncells, z, obs_time=1000, subarray_type="AA4", boxsize=
 		verbose = False
 		if verbose:
 			print('z = {:.3f} | {:.2f} % completed'.format(zi,100*(k+1)/zs.size))
-	return jansky_2_kelvin(noise3d, z, boxsize=boxsize)
+	return noise3d
 
 def noise_lightcone(ncells, zs, obs_time=1000, subarray_type="AA4", boxsize=None, save_uvmap=None, total_int_time=6., int_time=10., declination=-30., N_ant=None, uv_weighting='natural', fft_wrap=False, verbose=True, n_jobs=4, checkpoint=64, sefd_data=None, nu_data=None):
 	"""
