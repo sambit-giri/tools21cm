@@ -5,6 +5,7 @@ Contains functions to create test cases.
 import numpy as np
 from tqdm import tqdm
 from skimage.morphology import ball
+from scipy import ndimage
 
 def paint_kernel(cube, positions, kernel):
     '''
@@ -27,10 +28,10 @@ def paint_kernel(cube, positions, kernel):
         
         # Roll it back to the original position
         cube += np.roll(rolled_cube, shift=pos - kernel_radius, axis=(0, 1, 2))
-
+    
     return None
             
-def spherical_bubble_model(n_cells, x_ion, r=10, source_distribution='Poisson', **kwargs):
+def spherical_bubble_model(n_cells, x_ion, r=10, source_distribution='Poisson', batch_size=1, max_iter=1000, cube=None):
     """
     Create a 3D cube with randomly placed spherical bubbles, filling a target ionization fraction.
     
@@ -47,16 +48,13 @@ def spherical_bubble_model(n_cells, x_ion, r=10, source_distribution='Poisson', 
     np.ndarray: 3D array representing the cube filled with bubbles, or None if conditions are not met.
     """
     # Validate source_distribution
-    valid_distributions = ['Poisson']
-    if source_distribution not in valid_distributions:
-        print(f"Error: '{source_distribution}' is not implemented. Available options: {valid_distributions}")
-        return None
+    valid_distributions = ['poisson', 'uniform-random', 
+                           'anticlustered', 'anti-clustered', 'non-overlapping', 'nonoverlapping']
+    assert source_distribution.lower() in valid_distributions, f"{source_distribution}' is not implemented. Available options: {valid_distributions}"
+    print(f'Source or bubble centre distribution = {source_distribution}')
+    if batch_size>1:
+        print('Warning: fields created batch_size>1 could contain wrong pixels.')
     
-    # Parameters
-    batch_size = kwargs.get('batch_size', 1)
-    max_iter = kwargs.get('max_iter', 1000)
-    
-    cube = kwargs.get('cube')
     if cube is None:
         print('Cube initialized to zeros...')
         cube = np.zeros((n_cells, n_cells, n_cells), dtype=float)
@@ -82,11 +80,21 @@ def spherical_bubble_model(n_cells, x_ion, r=10, source_distribution='Poisson', 
     current_fraction = cube.mean()
     
     for _ in range(max_iter):
+        if cube.min()<0 or cube.max()>1:
+            print(f'Warning: the cube contains pixels with values = {np.unique(cube)}')
         # Select positions based on source_distribution
-        if source_distribution == 'Poisson':
+        if source_distribution.lower() in ['poisson', 'uniform-random']:
             # positions = np.random.randint(0, n_cells, (batch_size, 3))
             arg_zero = np.argwhere(cube==0)
             positions = arg_zero[np.random.randint(0, arg_zero.shape[0], batch_size)]
+        elif source_distribution.lower() in ['anticlustered', 'anti-clustered', 'non-overlapping', 'nonoverlapping']:
+            edt = ndimage.distance_transform_edt(1-cube, return_indices=False)
+            arg_zero = np.argwhere(edt>r)
+            if len(arg_zero)==0:
+                print('No empty space fill spheres.')
+                break
+            else:
+                positions = arg_zero[np.random.randint(0, arg_zero.shape[0], batch_size)]
         
         # Apply the kernel at selected positions
         paint_kernel(cube, positions, kernel)
@@ -109,5 +117,6 @@ def spherical_bubble_model(n_cells, x_ion, r=10, source_distribution='Poisson', 
     pbar.close()  # Close the progress bar
     
     cube[cube>1.] = 1.
+    cube[cube<0.] = 0.
     print(f'min={cube.min():.2f}, mean={cube.mean():.2f}, max={cube.max():.2f} | Cube filling complete.')
     return cube
