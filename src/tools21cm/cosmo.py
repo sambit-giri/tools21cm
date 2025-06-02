@@ -320,6 +320,12 @@ def p_to_c(pdist, z):
     
     return pdist*(1+z)
 
+def hubble_parameter(z):
+        """
+        It calculates the Hubble parameter at any redshift in flat LCDM cosmology.
+        """
+        part = np.sqrt(const.Omega0*(1.+z)**3+const.lam)
+        return const.H0 * part
 
 def Tvir_to_M(Tvir, z):
     '''

@@ -357,14 +357,21 @@ def smooth_lightcone(lightcone, z_array, box_size_mpc=False, max_baseline=2., ra
         if isinstance(max_baseline,u.Quantity):
                max_baseline = max_baseline.to('km').value
 
+        # Make sure that the redshifts are in ascending order
+        decreasing_redshifts = (input_redshifts[1]-input_redshifts[0])<0
+        if decreasing_redshifts:
+               input_redshifts = np.flip(input_redshifts)
+               lightcone = np.flip(lightcone, axis=2)
+
         output_dtheta  = (1+input_redshifts)*21e-5/max_baseline
         output_ang_res = output_dtheta*cm.z_to_cdist(input_redshifts)
-        output_dz      = ratio*output_ang_res/const.c
-        for i in range(len(output_dz)):
-                output_dz[i] = output_dz[i] * hubble_parameter(input_redshifts[i])
+        output_dz      = ratio*output_ang_res/const.c * cm.hubble_parameter(input_redshifts)
         output_lightcone = smooth_lightcone_tophat(lightcone, input_redshifts, output_dz)
         output_lightcone = smooth_lightcone_gauss(output_lightcone, output_ang_res*lightcone.shape[0]/box_size_mpc)
-        return output_lightcone, input_redshifts
+        if decreasing_redshifts:
+               return np.flip(output_lightcone, axis=2), np.flip(input_redshifts)
+        else:
+               return output_lightcone, input_redshifts
 
 def smooth_coeval(cube, z, box_size_mpc=False, max_baseline=2., ratio=1., nu_axis=2, verbose=True):
         """
@@ -494,16 +501,6 @@ def smooth_lightcone_uv_threshold(lightcone, uv_box, threshold=0.0):
         lightcone[uv_bool] = 0.0
 
         return np.real(np.fft.ifft2(lightcone, axes = (0, 1)))
-
-def hubble_parameter(z):
-        """
-        It calculates the Hubble parameter at any redshift.
-        """
-        part = np.sqrt(const.Omega0*(1.+z)**3+const.lam)
-        return const.H0 * part
-
-
-
 
 def remove_baselines_from_uvmap(uv_map, z, max_baseline=2, box_size_mpc=False):
         if (not box_size_mpc): 
