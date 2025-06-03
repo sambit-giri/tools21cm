@@ -627,8 +627,9 @@ def noise_lightcone(ncells, zs, obs_time=1000, subarray_type="AA4", boxsize=None
 	print('Creating the uv maps.')
 	if n_jobs<=1:
 		tstart = time()
-		for k,zi in enumerate(zs):
-			print(f'{k+1}/{len(zs)} | z={zi:.3f}', end='')
+		for k,zi in tqdm(enumerate(zs), disable=verbose):
+			if not verbose:
+				print(f'{k+1}/{len(zs)} | z={zi:.3f}', end='')
 			if '{:.3f}'.format(zi) not in uvs.keys():
 				uv_map, N_ant  = get_uv_map(ncells, zi, subarray_type=antxyz, total_int_time=total_int_time, int_time=int_time, boxsize=boxsize, declination=declination, verbose=verbose)
 				uvs['{:.3f}'.format(zi)] = uv_map
