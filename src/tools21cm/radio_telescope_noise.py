@@ -627,7 +627,7 @@ def noise_lightcone(ncells, zs, obs_time=1000, subarray_type="AA4", boxsize=None
 	print('Creating the uv maps.')
 	if n_jobs<=1:
 		tstart = time()
-		for k,zi in tqdm(enumerate(zs), disable=verbose):
+		for k,zi in tqdm(enumerate(zs), disable=verbose, total=len(zs)):
 			if verbose:
 				print(f'{k+1}/{len(zs)} | z={zi:.3f}', end='')
 			if '{:.3f}'.format(zi) not in uvs.keys():
