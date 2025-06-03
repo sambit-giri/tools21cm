@@ -628,7 +628,7 @@ def noise_lightcone(ncells, zs, obs_time=1000, subarray_type="AA4", boxsize=None
 	if n_jobs<=1:
 		tstart = time()
 		for k,zi in tqdm(enumerate(zs), disable=verbose):
-			if not verbose:
+			if verbose:
 				print(f'{k+1}/{len(zs)} | z={zi:.3f}', end='')
 			if '{:.3f}'.format(zi) not in uvs.keys():
 				uv_map, N_ant  = get_uv_map(ncells, zi, subarray_type=antxyz, total_int_time=total_int_time, int_time=int_time, boxsize=boxsize, declination=declination, verbose=verbose)
@@ -637,7 +637,8 @@ def noise_lightcone(ncells, zs, obs_time=1000, subarray_type="AA4", boxsize=None
 				if save_uvmap is not None: 
 					write_dictionary_data(uvs, save_uvmap)
 			tend = time()
-			print(f'...time elapsed = {(tend-tstart)/60:.2f} mins')
+			if verbose:
+				print(f'...time elapsed = {(tend-tstart)/60:.2f} mins')
 	else:
 		# Nbase, N_ant = from_antenna_config(antxyz, zs[0])
 		uvs['Nant'] = N_ant
