@@ -74,6 +74,7 @@ class VelocityFile:
 		
 		Parameters:
 			filename (string): the file to write to.
+			raw_velocity (numpy array): the velocity in simulation units
 				
 		Returns:
 			Nothing
