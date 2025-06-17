@@ -124,7 +124,7 @@ class DensityFile:
 
 		except Exception as e:
 			print_msg(f"Error writing density file: {e}")
-
+			
 
 class ClumpingFile:
 	'''
