@@ -7,7 +7,7 @@
 [![PyPI version](https://badge.fury.io/py/tools21cm.svg)](https://badge.fury.io/py/tools21cm)
 [![Read the Docs](https://readthedocs.org/projects/tools21cm/badge/?version=latest)](https://tools21cm.readthedocs.io/)
 
-A python package for analysing simulated 21-cm signals from the Epoch of Reionization (EoR) and Cosmic Dawn (CD). Full documentation (with examples, installation instructions and complete module description) can be found at [readthedocs](https://tools21cm.readthedocs.io/).
+A python package for analysing simulated 21-cm signal during the Epoch of Reionization (EoR) and Cosmic Dawn (CD). Full documentation (with examples, installation instructions and complete module description) can be found at [readthedocs](https://tools21cm.readthedocs.io/).
 
 ## Package details
 
@@ -86,6 +86,27 @@ For testing, one can use [pytest](https://docs.pytest.org/en/stable/) or [nosete
     python -m pytest tests
     
 	nosetests -v
+
+## 📖 Citation
+
+If you use `tools21cm` in your work, please cite the following paper:
+
+> Giri, S., Mellema, G., \& Jensen, H. (2020). Tools21cm: A python package to analyse the large-scale 21-cm signal from the Epoch of Reionization and Cosmic Dawn. Journal of Open Source Software, 5(52), 2363.   
+> [https://doi.org/10.21105/joss.02363](https://doi.org/10.21105/joss.02363)
+
+BibTeX:
+```bibtex
+@article{giri2020tools21cm,
+  title={Tools21cm: A python package to analyse the large-scale 21-cm signal from the Epoch of Reionization and Cosmic Dawn},
+  author={Giri, Sambit and Mellema, Garrelt and Jensen, Hannes},
+  journal={Journal of Open Source Software},
+  volume={5},
+  number={52},
+  pages={2363},
+  year={2020},
+  publisher={Open Journals}
+}
+```
 
 ## CONTRIBUTING
 
