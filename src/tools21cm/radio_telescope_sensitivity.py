@@ -1,14 +1,10 @@
 import numpy as np
-import itertools
-import sys
 from .usefuls import *
 from .scipy_func import *
 from . import cosmo as cm
 from . import conv
 from .const import KB_SI, c_light_cgs, c_light_SI, janskytowatt
 from .radio_telescope_layout import *
-from tqdm import tqdm
-import time
 
 def get_SEFD(nu_obs, T_sys=None, sefd_data=None, nu_data=None):
 	"""
