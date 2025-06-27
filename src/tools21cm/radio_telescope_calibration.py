@@ -306,57 +306,7 @@ def from_antenna_config_with_antenna_stamp(antxyz, z, nu=None):
     Nbase = np.array(Nbase_with_gains)	
     return Nbase, N_ant
 
-
-def process_chunk_get_full_uv_map_with_antenna_stamp(chunk_start, chunk_end, ncells, z, Nbase, int_time, declination, boxsize, include_mirror_baselines, verbose, show_progress):
-    """
-    Process a chunk of time slices.
-
-    Parameters
-    ----------
-    chunk_start : int
-        Start index of the chunk.
-    chunk_end : int
-        End index of the chunk.
-    ncells : int
-        Number of cells in each dimension of the grid.
-    z : float
-        Redshift.
-    Nbase : ndarray
-        Array containing ux, uy, uz values of the antenna configuration.
-    int_time : float
-        Integration time (in seconds).
-    declination : float
-        Declination angle in degrees.
-    boxsize : float
-        Size of the observed sky area in Mpc.
-    include_mirror_baselines : bool
-        Whether to include mirror baselines.
-    verbose : bool
-        If True, enables verbose output.
-    show_progress : bool
-        If True, shows the progress bar.
-
-    Returns
-    -------
-    ant_tag_uv_map_chunk : ndarray
-        Array of lists, each containing gain values for the pixel for the chunk.
-    """
-    ant_tag_uv_map_chunk = np.empty((chunk_end - chunk_start, ncells, ncells), dtype=object)
-    for t in range(chunk_start, chunk_end):
-        for x in range(ncells):
-            for y in range(ncells):
-                ant_tag_uv_map_chunk[t - chunk_start, x, y] = []
-
-    time_indices = range(chunk_start, chunk_end)
-    if show_progress:
-        time_indices = tqdm(time_indices, desc="Gridding uv tracks", disable=not verbose)
-
-    for time_idx in time_indices:
-        rotated_Nbase = earth_rotation_effect(Nbase[:, :3], time_idx, int_time, declination)
-        grid_uv_tracks_with_antenna_stamp(rotated_Nbase, Nbase[:, 3:], ant_tag_uv_map_chunk, z, ncells, time_idx - chunk_start,
-                                          boxsize=boxsize, include_mirror_baselines=include_mirror_baselines)
-
-    return ant_tag_uv_map_chunk
+## antenna stamps in uv space ##
 
 def get_full_uv_map_with_antenna_stamp(ncells, z, subarray_type="AA4", total_int_time=6., int_time=10., boxsize=None, declination=-30.,
                                        include_mirror_baselines=False, verbose=True, n_jobs=-1):
@@ -428,6 +378,57 @@ def get_full_uv_map_with_antenna_stamp(ncells, z, subarray_type="AA4", total_int
 
     return ant_tag_uv_map, N_ant
 
+def process_chunk_get_full_uv_map_with_antenna_stamp(chunk_start, chunk_end, ncells, z, Nbase, int_time, declination, boxsize, include_mirror_baselines, verbose, show_progress):
+    """
+    Process a chunk of time slices.
+
+    Parameters
+    ----------
+    chunk_start : int
+        Start index of the chunk.
+    chunk_end : int
+        End index of the chunk.
+    ncells : int
+        Number of cells in each dimension of the grid.
+    z : float
+        Redshift.
+    Nbase : ndarray
+        Array containing ux, uy, uz values of the antenna configuration.
+    int_time : float
+        Integration time (in seconds).
+    declination : float
+        Declination angle in degrees.
+    boxsize : float
+        Size of the observed sky area in Mpc.
+    include_mirror_baselines : bool
+        Whether to include mirror baselines.
+    verbose : bool
+        If True, enables verbose output.
+    show_progress : bool
+        If True, shows the progress bar.
+
+    Returns
+    -------
+    ant_tag_uv_map_chunk : ndarray
+        Array of lists, each containing gain values for the pixel for the chunk.
+    """
+    ant_tag_uv_map_chunk = np.empty((chunk_end - chunk_start, ncells, ncells), dtype=object)
+    for t in range(chunk_start, chunk_end):
+        for x in range(ncells):
+            for y in range(ncells):
+                ant_tag_uv_map_chunk[t - chunk_start, x, y] = []
+
+    time_indices = range(chunk_start, chunk_end)
+    if show_progress:
+        time_indices = tqdm(time_indices, desc="Gridding uv tracks", disable=not verbose)
+
+    for time_idx in time_indices:
+        rotated_Nbase = earth_rotation_effect(Nbase[:, :3], time_idx, int_time, declination)
+        grid_uv_tracks_with_antenna_stamp(rotated_Nbase, Nbase[:, 3:], ant_tag_uv_map_chunk, z, ncells, time_idx - chunk_start,
+                                          boxsize=boxsize, include_mirror_baselines=include_mirror_baselines)
+
+    return ant_tag_uv_map_chunk
+
 def grid_uv_tracks_with_antenna_stamp(Nbase, ant_tag, ant_tag_uv_map, z, ncells, time_idx,
                                       boxsize=None, include_mirror_baselines=False, verbose=True):
     """
@@ -479,3 +480,201 @@ def full_uv_map_with_antenna_stamp_to_uv_map(ant_tag_uv_map, verbose=True):
     for (i, j), gains in tqdm(np.ndenumerate(uv_map), total=uv_map.size, disable=not verbose):
         uv_map[i, j] = np.array([np.array(val).shape[0] for val in ant_tag_uv_map[:,i,j]]).sum()
     return uv_map.astype(int)
+
+### uv locations for every antenna stamp combination (Lagrangian space) ###
+
+def get_full_uv_lagrangian_with_antenna_stamp(ncells, z, subarray_type="AA4", total_int_time=6., int_time=10., boxsize=None, declination=-30.,
+                                       include_mirror_baselines=False, verbose=True, n_jobs=-1):
+    """
+    Creates a time-ordered map of gridded UV coordinates for each baseline.
+
+    This function simulates radio interferometer observations by calculating the
+    UV tracks for each antenna baseline over a specified total observation time.
+    It parallelizes the computation over the time steps and returns a 3D array
+    mapping each baseline to its integer (x, y) grid coordinate at each
+    time step, along with the list of antenna pairs.
+
+    Parameters
+    ----------
+    ncells : int
+        Number of cells in each dimension of the simulation grid.
+    z : float
+        Redshift of the observation.
+    subarray_type : str, optional
+        The name of the SKA-Low layout configuration (e.g., "AA4").
+    total_int_time : float, optional
+        Total observation time per day, in hours.
+    int_time : float, optional
+        Integration time for each snapshot, in seconds.
+    boxsize : float, optional
+        Comoving size of the observed sky area, in Mpc. If None, a default
+        is used.
+    declination : float, optional
+        Declination of the pointing center, in degrees.
+    include_mirror_baselines : bool, optional
+        Whether to include mirror baselines (u,v) -> (-u,-v).
+    verbose : bool, optional
+        If True, enables progress bars and informational messages.
+    n_jobs : int, optional
+        Number of parallel jobs to run. -1 uses all available CPUs.
+
+    Returns
+    -------
+    ant_tag_uv_lagr : numpy.ndarray
+        A 3D array of shape `(n_observations, n_baselines, 2)` containing the
+        integer grid coordinates `(x, y)` for each baseline at each time step.
+        Values can be NaN if a baseline falls outside the grid.
+    ant_pairs : numpy.ndarray
+        A 2D array of shape `(n_baselines, 2)` where each row contains the
+        integer tags of the two antennas forming the corresponding baseline.
+    """
+    antxyz, N_ant = subarray_type_to_antxyz(subarray_type)
+
+    total_observations = int(3600. * total_int_time / int_time)
+    if total_observations*ncells**2>6e6:
+        print('CAUTION: This setup will create a huge array that the memory might struggle to handle.')
+
+    if verbose:
+        print("Loading antenna configuration with antenna stamps...")
+    Nbase, N_ant = from_antenna_config_with_antenna_stamp(antxyz, z)
+
+    if n_jobs == -1:
+        n_jobs = cpu_count()
+
+    if verbose:
+        print(f"Starting UV map generation on {n_jobs} CPUs...")
+
+    # Split the workload into chunks
+    chunk_size = total_observations // n_jobs
+    chunks = [(i, min(i + chunk_size, total_observations)) for i in range(0, total_observations, chunk_size)]
+
+    # Parallel processing with progress bar for the first chunk
+    results = Parallel(n_jobs=n_jobs)(
+        delayed(process_chunk_get_full_uv_lagrangian_with_antenna_stamp)(
+            chunk_start, chunk_end, ncells, z, Nbase, int_time, declination, boxsize, include_mirror_baselines, verbose, show_progress=(i == 0))
+            for i, (chunk_start, chunk_end) in enumerate(chunks)
+    )
+
+    # Combine the results
+    ant_tag_uv_lagr = np.concatenate(results, axis=0)
+
+    if verbose:
+        print("UV position generation complete.")
+
+    ant_pairs = Nbase[:,-2:]
+    return ant_tag_uv_lagr, ant_pairs
+
+def process_chunk_get_full_uv_lagrangian_with_antenna_stamp(chunk_start, chunk_end, ncells, z, Nbase, int_time, declination, boxsize, include_mirror_baselines, verbose, show_progress):
+    """
+    Processes a chunk of observation time slices for parallel computation.
+
+    This is a worker function for `get_full_uv_lagrangian_with_antenna_stamp`.
+    It iterates through a specified range of time steps, applies Earth rotation
+    to the baseline coordinates, and grids the resulting UV tracks.
+
+    Parameters
+    ----------
+    chunk_start : int
+        The starting time index for this chunk.
+    chunk_end : int
+        The ending time index (exclusive) for this chunk.
+    ncells : int
+        Number of cells in each dimension of the simulation grid.
+    z : float
+        Redshift of the observation.
+    Nbase : numpy.ndarray
+        Array containing initial baseline vectors (ux, uy, uz) and antenna tags.
+    int_time : float, optional
+        Integration time for each snapshot, in seconds.
+    declination : float, optional
+        Declination of the pointing center, in degrees.
+    boxsize : float, optional
+        Comoving size of the observed sky area, in Mpc.
+    include_mirror_baselines : bool, optional
+        Whether to include mirror baselines.
+    verbose : bool, optional
+        If True, enables progress bars and informational messages.
+    show_progress : bool
+        If True, shows a tqdm progress bar for this chunk.
+
+    Returns
+    -------
+    ant_tag_uv_map_chunk : numpy.ndarray
+        The portion of the UV coordinate map for the processed time chunk.
+        A 3D array of shape `(chunk_end - chunk_start, n_baselines, 2)`.
+    """
+    ant_tag_uv_map_chunk = np.full((chunk_end - chunk_start, Nbase.shape[0], 2), np.nan)
+
+    time_indices = range(chunk_start, chunk_end)
+    if show_progress:
+        time_indices = tqdm(time_indices, desc="Gridding uv tracks", disable=not verbose)
+
+    for time_idx in time_indices:
+        rotated_Nbase = earth_rotation_effect(Nbase[:, :3], time_idx, int_time, declination)
+        grid_uv_lagrangian_tracks_with_antenna_stamp(rotated_Nbase, Nbase[:, 3:], ant_tag_uv_map_chunk, z, ncells, time_idx - chunk_start,
+                                          boxsize=boxsize, include_mirror_baselines=include_mirror_baselines)
+
+    return ant_tag_uv_map_chunk
+
+def grid_uv_lagrangian_tracks_with_antenna_stamp(Nbase, ant_tag, ant_tag_uv_map, z, ncells, time_idx,
+                                      boxsize=None, include_mirror_baselines=False, verbose=True):
+    """
+    Grids UV tracks for a single time snapshot onto an integer grid.
+
+    This function takes the rotated baseline coordinates for a single moment,
+    projects them onto a 2D grid, filters out baselines that fall outside the
+    grid boundaries, and stores the resulting integer (x, y) coordinates in the
+    output array `ant_tag_uv_map`.
+
+    Parameters
+    ----------
+    Nbase : numpy.ndarray
+        Array of shape `(n_baselines, 3)` containing the rotated (u, v, w)
+        baseline coordinates for a single time step.
+    ant_tag : numpy.ndarray
+        Array of shape `(n_baselines, 2)` containing the integer tags for
+        each antenna pair.
+    ant_tag_uv_map : numpy.ndarray
+        The 3D output array of shape `(n_timesteps, n_baselines, 2)` that is
+        populated by this function. It is modified in-place.
+    z : float
+        Redshift of the observation slice.
+    ncells : int
+        Number of cells in one dimension of the target grid.
+    time_idx : int
+        The time index within the `ant_tag_uv_map` to populate.
+    boxsize : float, optional
+        Comoving size of the sky observed in Mpc. Defaults to a predefined
+        constant if None.
+    include_mirror_baselines : bool, optional
+        If True, includes mirror baselines. (Note: Not yet implemented).
+    verbose : bool, optional
+        Enables verbose output. (Note: Currently unused in this function).
+
+    Returns
+    -------
+    None
+        Modifies `ant_tag_uv_map` in-place.
+    """
+    if boxsize is None:
+        boxsize = conv.LB  # Default boxsize (assumed defined globally or elsewhere)
+    
+    # Calculate theta_max and normalize baseline positions
+    theta_max = boxsize / cm.z_to_cdist(z)  # Using predefined comoving distance function
+    Nb = np.round(Nbase * theta_max)
+    
+    # Filter baselines within bounds
+    in_bounds = (
+        (Nb[:, 0] < ncells / 2) & (Nb[:, 1] < ncells / 2) &
+        (Nb[:, 0] >= -ncells / 2) & (Nb[:, 1] >= -ncells / 2)
+    )
+    ant_tag1, ant_tag2 = ant_tag[:,0], ant_tag[:,1]
+    Nb, ant_tag1, ant_tag2 = Nb[in_bounds], ant_tag1[in_bounds], ant_tag2[in_bounds]
+    
+    count = 0
+    for (x, y), ant1, ant2 in zip(Nb[:, :2].astype(int), ant_tag1.astype(int), ant_tag2.astype(int)):
+        ant_tag_uv_map[time_idx, count, 0] = x
+        ant_tag_uv_map[time_idx, count, 1] = y
+        count += 1
+        if include_mirror_baselines:
+            print('include_mirror_baselines is not implemented yet.')
