@@ -12,35 +12,42 @@ from .usefuls import *
 from . import conv
 from . import cosmo as cm
 from . import smoothing as sm
-import scipy
 from glob import glob
 from time import time, sleep
 import pickle
 from joblib import cpu_count, Parallel, delayed
 from tqdm import tqdm
 
-
 def from_antenna_config_with_gains(antxyz, z, nu=None, 
                 gain_model={'name': 'random_uniform', 'min': 0.5, 'max': 1.1}):
     """
-    The function reads the antenna positions (N_ant antennas) from the file given.
+    Calculates baselines and complex gain products for an antenna array.
+
+    This function takes antenna positions, generates complex gain values for each
+    antenna based on a specified model, and then computes the baseline vectors
+    (u,v,w). For each baseline, it also calculates the four products of the
+    complex gains (g_i * g_j*) which are g_r*g_r, g_i*g_i, g_r*g_i, g_i*g_r.
 
     Parameters
     ----------
-    antxyz: ndarray
-        The radio telescope antenna configuration.
-    z       : float
-        Redhsift of the slice observed.
-    nu      : float
-        The frequency observed by the telescope.
+    antxyz: astropy.Quantity
+        An object with antenna positions, expected to have a `.to('m').value` method.
+    z : float
+        Redshift of the slice observed.
+    nu : float, optional
+        The frequency observed by the telescope in MHz. If None, it's calculated from z.
+    gain_model : dict or numpy.ndarray, optional
+        Specifies how to generate antenna gains. Can be a dict defining a
+        distribution ('random_gaussian' or 'random_uniform') or a pre-computed
+        array of complex gains.
 
     Returns
     -------
-    Nbase   : ndarray
-        Numpy array (N_ant(N_ant-1)/2 x 3) containing the (ux,uy,uz) values derived 
-                from the antenna positions.
-    N_ant   : int
-        Number of antennas.
+    Nbase : numpy.ndarray
+        Array of shape `(n_baselines, 7)` containing `(u,v,w)` and the four
+        gain product components for each baseline.
+    N_ant : int
+        The total number of antennas in the configuration.
     """
     z = float(z)
     if antxyz is None: 
@@ -102,41 +109,48 @@ def get_uv_map_with_gains(ncells, z,
                           subarray_type="AA4", total_int_time=6., int_time=10., boxsize=None, declination=-30., 
                           include_mirror_baselines=False, verbose=True):
     """
-    Create the gain and uv maps with individual gain values for each baseline stored per pixel.
+    Creates a UV map where each grid cell accumulates complex gain information.
+
+    This function simulates a radio observation over time, accounting for
+    evolving instrumental gains. It iterates through time steps, periodically
+    re-calculating antenna gains, applying Earth rotation, and gridding the
+    resulting baseline tracks. The output map stores the number of hits and the
+    sum of four gain products for each UV cell.
 
     Parameters
     ----------
     ncells : int
         Number of cells in each dimension of the grid.
     z : float
-        Redshift.
+        Redshift of the observation.
     gain_model : dict or function
-        Gain model parameters or a custom function that returns random gain values.
-    gain_timescale : list
-        Timescale after which gain values will evolve.
-    subarray_type: str
-		The name of the SKA-Low layout configuration.
+        Model for generating antenna gains. Passed to `from_antenna_config_with_gains`.
+    gain_timescale : list of int
+        Timescales (in seconds) at which gain values are re-calculated.
+    subarray_type : str
+        The name of the telescope layout configuration (e.g., "AA4").
     total_int_time : float
-        Total observation time per day (in hours).
+        Total observation time, in hours.
     int_time : float
-        Integration time (in seconds).
+        Integration time per snapshot, in seconds.
     declination : float
-        Declination angle in degrees.
-    boxsize : float
-        Size of the observed sky area in Mpc.
+        Declination of the pointing center, in degrees.
+    boxsize : float, optional
+        Comoving size of the observed sky area, in Mpc.
     include_mirror_baselines : bool
-        Whether to include mirror baselines.
+        If True, grids both (u,v) and (-u,-v) tracks.
     verbose : bool
-        If True, enables verbose output.
+        If True, enables progress bars and informational messages.
 
     Returns
     -------
-    uv_map : ndarray
-        Array of lists, each containing gain values for the pixel.
+    gain_uv_map : numpy.ndarray
+        A 3D array of shape `(ncells, ncells, 5)`. For each UV cell (i,j),
+        `gain_uv_map[i,j,0]` is the hit count, and the other 4 channels are
+        the accumulated sums of the gain products.
     N_ant : int
-        Number of antennas.
+        The total number of antennas.
     """
-
     # Load the antenna configuration with gains only once
     if verbose: 
         print("Loading antenna configuration with gains...")
@@ -161,7 +175,7 @@ def get_uv_map_with_gains(ncells, z,
         rotated_Nbase = earth_rotation_effect(Nbase[:,:3], time_idx, int_time, declination)
 
         # Grid the rotated baselines with gain values
-        grid_uv_tracks_with_gains(rotated_Nbase, Nbase[:,3:], gain_uv_map, z, ncells,
+        _grid_uv_tracks_with_gains(rotated_Nbase, Nbase[:,3:], gain_uv_map, z, ncells,
                                   boxsize=boxsize, include_mirror_baselines=include_mirror_baselines)
 
     if verbose:
@@ -169,30 +183,35 @@ def get_uv_map_with_gains(ncells, z,
 
     return gain_uv_map, N_ant
 
-def grid_uv_tracks_with_gains(Nbase, gain_vals, gain_uv_map, z, ncells, boxsize=None, include_mirror_baselines=False, verbose=True):
+def _grid_uv_tracks_with_gains(Nbase, gain_vals, gain_uv_map, z, ncells, boxsize=None, include_mirror_baselines=False, verbose=True):
     """
-    Grid uv tracks with gain values on a grid, storing individual gain values for each baseline at each pixel.
+    Grids UV tracks and accumulates gain values for a single time snapshot.
+
+    This function projects rotated baseline coordinates onto a 2D grid. For each
+    grid cell, it increments a hit counter and adds the four gain product
+    components of any baseline that falls into that cell.
 
     Parameters
     ----------
-    Nbase : ndarray
-        Array containing ux, uy, uz values of the antenna configuration.
-    gain_vals : ndarray
-        Array containing gain values for each baseline.
-    uv_map : ndarray
-        2D array of lists, each containing gain values for the respective grid pixel.
+    Nbase : numpy.ndarray
+        Array `(n_baselines, 3)` of rotated (u, v, w) coordinates.
+    gain_vals : numpy.ndarray
+        Array `(n_baselines, 4)` of gain products for each baseline.
+    gain_uv_map : numpy.ndarray
+        The 3D output array `(ncells, ncells, 5)` to be modified in-place.
     z : float
-        Redshift of the slice observed.
+        Redshift of the observation slice.
     ncells : int
-        Number of cells in the grid.
+        Number of cells in one dimension of the target grid.
     boxsize : float, optional
-        Comoving size of the sky observed. Defaults to a predefined constant if None.
+        Comoving size of the sky observed in Mpc.
     include_mirror_baselines : bool, optional
-        If True, includes mirror baselines.
+        If True, also grids the hermitian conjugate baselines at (-u, -v).
 
     Returns
     -------
-    None : Modifies uv_map in-place to store gain values.
+    None
+        Modifies `gain_uv_map` in-place.
     """
     if boxsize is None:
         boxsize = conv.LB  # Default boxsize (assumed defined globally or elsewhere)
@@ -229,21 +248,26 @@ def gain_uv_map_to_uv_map(gain_uv_map):
 
 def apply_uv_with_gains_response_on_image(array, gain_uv_map, verbose=True):
     """
-    Apply the effect of radio observation strategy with varied antenna/baseline gains on an image.
-    
+    Applies the instrumental response, including gains, to a sky image.
+
+    This function simulates the effect of observing a true sky image with an
+    interferometer that has complex antenna gains. It operates in the Fourier
+    domain by multiplying the Fourier transform of the sky by an effective
+    complex gain derived from the simulated observation.
+
     Parameters
     ----------
-    array : ndarray
-        The input image array.
-    gain_uv_map : ndarray of lists
-        The uv_map, where each entry is a list of gain values for that pixel.
+    array : numpy.ndarray
+        The 2D input sky image.
+    gain_uv_map : numpy.ndarray
+        The 3D UV map `(ncells, ncells, 5)` from `get_uv_map_with_gains`.
     verbose : bool, optional
-        If True, enables verbose progress output using tqdm.
-        
+        (Currently unused).
+
     Returns
     -------
-    img_map : ndarray
-        The resulting radio image after applying the uv_map with gains in the Fourier domain.
+    img_map : numpy.ndarray
+        The resulting 2D "dirty" image after applying the instrumental response.
     """
     assert array.shape == gain_uv_map[:,:,0].shape, "Array and uv_map must have the same shape"
     
@@ -261,24 +285,26 @@ def apply_uv_with_gains_response_on_image(array, gain_uv_map, verbose=True):
 
 def from_antenna_config_with_antenna_stamp(antxyz, z, nu=None):
     """
-    The function reads the antenna positions (N_ant antennas) from the file given.
+    Calculates baselines and attaches unique integer tags for each antenna.
+
+    This function converts antenna positions into baseline vectors (u,v,w) and,
+    for each baseline, stores the integer tags of the two antennas that form it.
 
     Parameters
     ----------
-    subarray_type: str
-		The name of the SKA-Low layout configuration.
-    z       : float
-        Redhsift of the slice observed.
-    nu      : float
-        The frequency observed by the telescope.
+    antxyz: astropy.Quantity
+        An object with antenna positions, expected to have a `.to('m').value` method.
+    z : float
+        Redshift of the slice observed.
+    nu : float, optional
+        The frequency observed by the telescope in MHz. If None, it's calculated from z.
 
     Returns
     -------
-    Nbase   : ndarray
-        Numpy array (N_ant(N_ant-1)/2 x 3) containing the (ux,uy,uz) values derived 
-                from the antenna positions.
-    N_ant   : int
-        Number of antennas.
+    Nbase : numpy.ndarray
+        Array `(n_baselines, 5)` containing `(u,v,w, ant_tag1, ant_tag2)`.
+    N_ant : int
+        The total number of antennas.
     """
     z = float(z)
     if antxyz is None: 
@@ -320,7 +346,7 @@ def get_full_uv_map_with_antenna_stamp(ncells, z, subarray_type="AA4", total_int
     z : float
         Redshift.
     subarray_type: str
-		The name of the SKA-Low layout configuration.
+        The name of the SKA-Low layout configuration.
     total_int_time : float
         Total observation time per day (in hours).
     int_time : float
@@ -365,7 +391,7 @@ def get_full_uv_map_with_antenna_stamp(ncells, z, subarray_type="AA4", total_int
 
     # Parallel processing with progress bar for the first chunk
     results = Parallel(n_jobs=n_jobs)(
-        delayed(process_chunk_get_full_uv_map_with_antenna_stamp)(
+        delayed(_process_chunk_get_full_uv_map_with_antenna_stamp)(
             chunk_start, chunk_end, ncells, z, Nbase, int_time, declination, boxsize, include_mirror_baselines, verbose, show_progress=(i == 0))
             for i, (chunk_start, chunk_end) in enumerate(chunks)
     )
@@ -378,7 +404,7 @@ def get_full_uv_map_with_antenna_stamp(ncells, z, subarray_type="AA4", total_int
 
     return ant_tag_uv_map, N_ant
 
-def process_chunk_get_full_uv_map_with_antenna_stamp(chunk_start, chunk_end, ncells, z, Nbase, int_time, declination, boxsize, include_mirror_baselines, verbose, show_progress):
+def _process_chunk_get_full_uv_map_with_antenna_stamp(chunk_start, chunk_end, ncells, z, Nbase, int_time, declination, boxsize, include_mirror_baselines, verbose, show_progress):
     """
     Process a chunk of time slices.
 
@@ -424,36 +450,50 @@ def process_chunk_get_full_uv_map_with_antenna_stamp(chunk_start, chunk_end, nce
 
     for time_idx in time_indices:
         rotated_Nbase = earth_rotation_effect(Nbase[:, :3], time_idx, int_time, declination)
-        grid_uv_tracks_with_antenna_stamp(rotated_Nbase, Nbase[:, 3:], ant_tag_uv_map_chunk, z, ncells, time_idx - chunk_start,
+        _grid_uv_tracks_with_antenna_stamp(rotated_Nbase, Nbase[:, 3:], ant_tag_uv_map_chunk, z, ncells, time_idx - chunk_start,
                                           boxsize=boxsize, include_mirror_baselines=include_mirror_baselines)
 
     return ant_tag_uv_map_chunk
 
-def grid_uv_tracks_with_antenna_stamp(Nbase, ant_tag, ant_tag_uv_map, z, ncells, time_idx,
+def _grid_uv_tracks_with_antenna_stamp(Nbase, ant_tag, ant_tag_uv_map, z, ncells, time_idx,
                                       boxsize=None, include_mirror_baselines=False, verbose=True):
     """
-    Grid uv tracks with gain values on a grid, storing individual gain values for each baseline at each pixel.
+    Grids UV tracks with antenna tags onto a 2D grid for a single time snapshot.
+
+    This function takes the rotated baseline coordinates for a single moment,
+    projects them onto a 2D grid, and for each grid cell (pixel), it appends
+    the antenna pair tags of all baselines that fall into that cell.
 
     Parameters
     ----------
-    Nbase : ndarray
-        Array containing ux, uy, uz values of the antenna configuration.
-    gain_vals : ndarray
-        Array containing gain values for each baseline.
-    uv_map : ndarray
-        2D array of lists, each containing gain values for the respective grid pixel.
+    Nbase : numpy.ndarray
+        Array of shape `(n_baselines, 3)` containing the rotated (u, v, w)
+        baseline coordinates for a single time step.
+    ant_tag : numpy.ndarray
+        Array of shape `(n_baselines, 2)` containing the integer tags for
+        each antenna pair.
+    ant_tag_uv_map : numpy.ndarray
+        The 3D output array of shape `(n_timesteps, ncells, ncells)` where each
+        element is a list. This function appends `[ant1, ant2]` pairs to these
+        lists. It is modified in-place.
     z : float
-        Redshift of the slice observed.
+        Redshift of the observation slice.
     ncells : int
-        Number of cells in the grid.
+        Number of cells in one dimension of the target grid.
+    time_idx : int
+        The time index within the `ant_tag_uv_map` to populate.
     boxsize : float, optional
-        Comoving size of the sky observed. Defaults to a predefined constant if None.
+        Comoving size of the sky observed in Mpc. Defaults to a predefined
+        constant if None.
     include_mirror_baselines : bool, optional
-        If True, includes mirror baselines.
+        If True, includes mirror baselines. (Note: Not yet implemented).
+    verbose : bool, optional
+        Enables verbose output. (Note: Currently unused in this function).
 
     Returns
     -------
-    None : Modifies uv_map in-place to store gain values.
+    None
+        Modifies `ant_tag_uv_map` in-place.
     """
     if boxsize is None:
         boxsize = conv.LB  # Default boxsize (assumed defined globally or elsewhere)
@@ -550,7 +590,7 @@ def get_full_uv_lagrangian_with_antenna_stamp(ncells, z, subarray_type="AA4", to
 
     # Parallel processing with progress bar for the first chunk
     results = Parallel(n_jobs=n_jobs)(
-        delayed(process_chunk_get_full_uv_lagrangian_with_antenna_stamp)(
+        delayed(_process_chunk_get_full_uv_lagrangian_with_antenna_stamp)(
             chunk_start, chunk_end, ncells, z, Nbase, int_time, declination, boxsize, include_mirror_baselines, verbose, show_progress=(i == 0))
             for i, (chunk_start, chunk_end) in enumerate(chunks)
     )
@@ -564,7 +604,7 @@ def get_full_uv_lagrangian_with_antenna_stamp(ncells, z, subarray_type="AA4", to
     ant_pairs = Nbase[:,-2:]
     return ant_tag_uv_lagr, ant_pairs
 
-def process_chunk_get_full_uv_lagrangian_with_antenna_stamp(chunk_start, chunk_end, ncells, z, Nbase, int_time, declination, boxsize, include_mirror_baselines, verbose, show_progress):
+def _process_chunk_get_full_uv_lagrangian_with_antenna_stamp(chunk_start, chunk_end, ncells, z, Nbase, int_time, declination, boxsize, include_mirror_baselines, verbose, show_progress):
     """
     Processes a chunk of observation time slices for parallel computation.
 
@@ -611,12 +651,12 @@ def process_chunk_get_full_uv_lagrangian_with_antenna_stamp(chunk_start, chunk_e
 
     for time_idx in time_indices:
         rotated_Nbase = earth_rotation_effect(Nbase[:, :3], time_idx, int_time, declination)
-        grid_uv_lagrangian_tracks_with_antenna_stamp(rotated_Nbase, Nbase[:, 3:], ant_tag_uv_map_chunk, z, ncells, time_idx - chunk_start,
+        _grid_uv_lagrangian_tracks_with_antenna_stamp(rotated_Nbase, Nbase[:, 3:], ant_tag_uv_map_chunk, z, ncells, time_idx - chunk_start,
                                           boxsize=boxsize, include_mirror_baselines=include_mirror_baselines)
 
     return ant_tag_uv_map_chunk
 
-def grid_uv_lagrangian_tracks_with_antenna_stamp(Nbase, ant_tag, ant_tag_uv_map, z, ncells, time_idx,
+def _grid_uv_lagrangian_tracks_with_antenna_stamp(Nbase, ant_tag, ant_tag_uv_map, z, ncells, time_idx,
                                       boxsize=None, include_mirror_baselines=False, verbose=True):
     """
     Grids UV tracks for a single time snapshot onto an integer grid.

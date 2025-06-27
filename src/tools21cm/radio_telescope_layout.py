@@ -2,7 +2,6 @@ import numpy as np
 import os, pickle
 import itertools
 from tqdm import tqdm
-# import pkg_resources
 from . import cosmo as cm
 from . import conv
 from .const import KB_SI, c_light_cgs, c_light_SI, janskytowatt
@@ -11,6 +10,25 @@ import astropy.units as u
 from astropy.coordinates import EarthLocation
 
 def subarray_type_to_antxyz(subarray_type, verbose=True):
+    """
+    Resolves antenna configuration from various input types.
+
+    Parameters
+    ----------
+    subarray_type : str or np.ndarray
+        If string, loads a pre-defined SKA-Low layout (e.g., "AA4").
+        If numpy array, it's used directly as the antenna positions.
+        Otherwise, loads a default SKA1-Low configuration.
+    verbose : bool, optional
+        If True, enables verbose output during layout loading.
+
+    Returns
+    -------
+    antxyz : astropy.units.Quantity
+        A 2D array of antenna (x, y, z) positions with units of meters.
+    N_ant : int
+        The total number of antennas in the configuration.
+    """
     if isinstance(subarray_type, str):
         antxyz = get_SKA_Low_layout(subarray_type=subarray_type, unit='xyz', verbose=verbose)
     elif isinstance(subarray_type, np.ndarray): 
@@ -23,24 +41,26 @@ def subarray_type_to_antxyz(subarray_type, verbose=True):
 
 def from_antenna_config(antxyz, z, nu=None):
     """
-    The function reads the antenna positions (N_ant antennas) from the file given.
+    Calculates baseline vectors (u,v,w) from antenna XYZ positions.
+
+    The function converts physical antenna separations into baseline coordinates
+    in units of wavelength.
 
     Parameters
     ----------
-    antxyz: ndarray
-        The radio telescope antenna configuration.
-    z       : float
-        Redhsift of the slice observed.
-    nu      : float
-        The frequency observed by the telescope.
+    antxyz: astropy.units.Quantity or np.ndarray
+        The radio telescope antenna configuration in meters.
+    z : float
+        Redhsift of the slice observed, used to calculate frequency.
+    nu : float, optional
+        The frequency of observation in MHz. If None, it is calculated from z.
 
     Returns
     -------
-    Nbase   : ndarray
-        Numpy array (N_ant(N_ant-1)/2 x 3) containing the (ux,uy,uz) values derived 
-                from the antenna positions.
-    N_ant   : int
-        Number of antennas.
+    Nbase : np.ndarray
+        Numpy array of shape (N_baselines, 3) containing the (u,v,w) values.
+    N_ant : int
+        The total number of antennas.
     """
     z = float(z)
     if antxyz is None: 
@@ -68,28 +88,30 @@ def from_antenna_config(antxyz, z, nu=None):
 
 def earth_rotation_effect(Nbase, slice_nums, int_time, total_int_time, declination=-30.):
     """
-    Computes the effect of Earth's rotation over observation times, adjusting the measured 
-    sky coordinates for each antenna configuration at specified time slices.
+    Applies Earth's rotation to baseline vectors for given time slices.
+
+    This function simulates the change in projected baseline coordinates (u,v,w)
+    over the course of an observation due to the Earth's rotation.
 
     Parameters
     ----------
-    Nbase       : ndarray
-        Array containing the initial ux, uy, uz values of the antenna configuration.
-    slice_nums  : ndarray or int
-        Array of observed slice numbers corresponding to each integration time, 
-        or a single integer slice number if only one is required.
-    int_time    : float
-        Integration time after which the signal is recorded (in seconds).
+    Nbase : np.ndarray
+        Array of initial (u,v,w) baseline coordinates.
+    slice_nums : int or np.ndarray
+        The index or indices of the time slice(s) to compute.
+    int_time : float
+        Integration time per slice in seconds.
     total_int_time : float
-        Total observation time per day in hours.
+        Total duration of the observation in hours.
     declination : float, optional
-        Declination angle (latitude) where the telescope is located (in degrees).
-        Default is -30 degrees.
+        The declination of the pointing center in degrees. Default is -30.
 
     Returns
     -------
-    new_Nbase   : ndarray
-        Adjusted Nbase values for each time slice, with shape (len(slice_nums), N, 3).
+    new_Nbase : np.ndarray
+        The rotated (u,v,w) coordinates. The shape will be (N_baselines, 3)
+        if slice_nums is a single integer, or (N_slices, N_baselines, 3)
+        if slice_nums is an array.
     """
     # Convert to radians
     delta = np.deg2rad(declination)
@@ -125,35 +147,39 @@ def earth_rotation_effect(Nbase, slice_nums, int_time, total_int_time, declinati
 
 def get_uv_daily_observation(ncells, z, antxyz=None, total_int_time=4., int_time=10., boxsize=None, declination=-30., include_mirror_baselines=False, verbose=True):
     """
-    Simulates daily radio observations and generates a uv map based on antenna configurations.
+    Simulates a full observation to generate a UV coverage map.
+
+    This function combines baseline calculation, Earth rotation simulation, and
+    UV track gridding to produce a final 2D UV coverage map, representing the
+    density of measurements in the Fourier plane.
 
     Parameters
     ----------
-    ncells         : int
-        Number of cells in the image grid.
-    z              : float
+    ncells : int
+        Number of cells in each dimension of the output grid.
+    z : float
         Redshift of the observed slice.
-    antxyz         : ndarray
-        The radio telescope antenna configuration.
+    antxyz : np.ndarray, optional
+        The radio telescope antenna configuration. If None, a default is loaded.
     total_int_time : float
         Total observation time per day in hours.
-    int_time       : float
+    int_time : float
         Integration time per observation in seconds.
-    boxsize        : float, optional
-        Comoving size of the sky observed.
-    declination    : float
-        Declination angle of the SKA in degrees.
+    boxsize : float, optional
+        Comoving size of the observed sky area in Mpc.
+    declination : float
+        Declination of the telescope pointing in degrees.
     include_mirror_baselines : bool, optional
-        If True, includes mirrored baselines on the grid.
-    verbose        : bool, optional
+        If True, includes mirrored baselines for hermitian conjugation.
+    verbose : bool, optional
         If True, prints progress information.
 
     Returns
     -------
-    uv_map : ndarray
-        ncells x ncells array of baseline counts per pixel, averaged over total observations.
-    N_ant  : int
-        Number of antennas.
+    uv_map : np.ndarray
+        2D array `(ncells, ncells)` of baseline counts per pixel.
+    N_ant : int
+        The total number of antennas.
     """
     # Load antenna configurations and initialize parameters
     Nbase, N_ant = from_antenna_config(antxyz, z)
@@ -180,25 +206,30 @@ def get_uv_daily_observation(ncells, z, antxyz=None, total_int_time=4., int_time
 
 def grid_uv_tracks(Nbase, z, ncells, boxsize=None, include_mirror_baselines=False):
     """
-    Places uv tracks on a grid.
+    Grids baseline (u,v) tracks onto a 2D map for a single time snapshot.
+
+    This function takes a set of (u,v,w) coordinates, projects them onto a 2D
+    grid corresponding to the field of view, and counts how many baselines
+    fall into each grid cell.
 
     Parameters
     ----------
-    Nbase   : ndarray
-        Array containing ux, uy, uz values of the antenna configuration.
-    z       : float
+    Nbase : np.ndarray
+        Array containing (u,v,w) values for the antenna baselines.
+    z : float
         Redshift of the slice observed.
-    ncells  : int
-        Number of cells in the image.
+    ncells : int
+        Number of cells in each dimension of the output grid.
     boxsize : float, optional
-        Comoving size of the sky observed. Default: determined by simulation constants.
+        Comoving size of the sky observed. Uses a default if None.
     include_mirror_baselines : bool, optional
-        If True, includes mirrored baselines on the grid.
+        If True, also grids the hermitian conjugate baselines at (-u, -v).
 
     Returns
     -------
-    uv_map  : ndarray
-        ncells x ncells array of baseline counts per pixel.
+    uv_map : np.ndarray
+        A 2D array `(ncells, ncells)` of baseline counts per pixel, shifted
+        so the zero-frequency is at the center.
     """
     z = float(z)
     if not boxsize: 
@@ -325,6 +356,19 @@ def cartesian_to_geographic_coordinate_system(antxyz):
     return antll
 
 def antenna_positions_to_baselines(antxyz):
+    """
+    Calculates all possible baseline vectors from a set of antenna positions.
+
+    Parameters
+    ----------
+    antxyz : np.ndarray or astropy.units.Quantity
+        An array `(N_ant, 3)` of antenna positions.
+
+    Returns
+    -------
+    np.ndarray or astropy.units.Quantity
+        An array `(N_ant * (N_ant - 1), 3)` of baseline vectors.
+    """
     # from itertools import combinations
     # baselines = [(a1-a2) for a1,a2 in tqdm(combinations(antxyz, 2))]
     from itertools import permutations
@@ -335,6 +379,25 @@ def antenna_positions_to_baselines(antxyz):
         return baselines
     
 def enu_to_ecef(enu, lat_deg, lon_deg, origin_ecef):
+    """
+    Converts local East-North-Up (ENU) coordinates to ECEF.
+
+    Parameters
+    ----------
+    enu : np.ndarray
+        Positions `(N, 3)` in the local ENU frame (meters).
+    lat_deg : float
+        Latitude of the local frame's origin in degrees.
+    lon_deg : float
+        Longitude of the local frame's origin in degrees.
+    origin_ecef : np.ndarray
+        ECEF position `(3,)` of the local frame's origin (meters).
+
+    Returns
+    -------
+    np.ndarray
+        Positions `(N, 3)` in the ECEF frame (meters).
+    """
     lat = np.deg2rad(lat_deg)
     lon = np.deg2rad(lon_deg)
 
@@ -349,21 +412,24 @@ def enu_to_ecef(enu, lat_deg, lon_deg, origin_ecef):
 
 def ecef_to_xyz(ecef, lon_deg, origin_ecef):
     """
-    Convert ECEF coordinates to interferometric XYZ coordinates.
+    Converts ECEF coordinates to a local interferometric XYZ frame.
+
+    The XYZ frame is defined with X pointing to local East, Y to local North,
+    and Z aligned with the ECEF Z-axis at the array center.
     
     Parameters
     ----------
-    ecef : ndarray
-        Antenna positions in ECEF coordinates (N, 3), in meters.
+    ecef : np.ndarray
+        Antenna positions `(N, 3)` in ECEF coordinates (meters).
     lon_deg : float
         Longitude of the array center in degrees.
-    origin_ecef : ndarray
-        ECEF position of the array center (3,), in meters.
+    origin_ecef : np.ndarray
+        ECEF position `(3,)` of the array center (meters).
         
     Returns
     -------
-    xyz : ndarray
-        Antenna positions in interferometric XYZ coordinates (N, 3), in meters.
+    np.ndarray
+        Antenna positions `(N, 3)` in the local XYZ frame (meters).
     """
     lon_rad = np.deg2rad(lon_deg)
     R = np.array([
@@ -377,24 +443,21 @@ def ecef_to_xyz(ecef, lon_deg, origin_ecef):
 
 def get_SKA_Low_layout(subarray_type="AA4", unit='ecef', verbose=True):
     """
-    Load SKA Low antenna layout and return antenna positions in the specified coordinate system.
+    Loads SKA Low antenna layout data from pre-defined configuration files.
 
     Parameters
     ----------
-    subarray_type : str
-        One of {"AA4", "AA2", "AA1", "AA0.5", "AASTAR", "AA*"} or default.
-    unit : str
-        One of {'ecef', 'enu', 'xyz'}:
-            - 'ecef': Return positions in Earth-Centered Earth-Fixed coordinates (Quantity in meters)
-            - 'enu': Return positions in local East-North-Up frame (Quantity in meters)
-            - 'xyz': Return positions in ECEF as raw numpy array (no units)
-    verbose : bool
-        If True, print info about the layout.
+    subarray_type : str, optional
+        The name of the SKA Low subarray, e.g., "AA4", "AA2", "AASTAR".
+    unit : str, optional
+        The desired output coordinate system: 'ecef', 'enu', or 'xyz'.
+    verbose : bool, optional
+        If True, prints information about the loaded layout.
 
     Returns
     -------
-    antxyz : Quantity or ndarray
-        Antenna positions as (N, 3) array in requested frame.
+    astropy.units.Quantity
+        An `(N_ant, 3)` array of antenna positions in the specified `unit`.
     """
     if subarray_type.upper() == "AA4":
         filename = 'input_data/skalow_AA4_layout.txt'
@@ -453,6 +516,31 @@ def get_latest_SKA_Low_layout(
                 exclude_stations=None,
                 external_telescopes=None,
             ):
+    """
+    Retrieves the latest SKA Low layout using the official ska-ost-array-config tool.
+
+    This function acts as a wrapper for the SKAO library, providing a convenient
+    way to access up-to-date and standardized array configurations.
+
+    Parameters
+    ----------
+    subarray_type : str, optional
+        Name of the subarray configuration.
+    custom_stations : list, optional
+        A list of station names to create a custom subarray.
+    add_stations : list, optional
+        A list of station names to add to the specified subarray.
+    exclude_stations : list, optional
+        A list of station names to exclude from the specified subarray.
+    external_telescopes : list, optional
+        A list of external telescope configurations to include.
+
+    Returns
+    -------
+    ska_ost_array_config.array_config.LowSubArray or None
+        An object representing the SKA Low subarray configuration, or None if
+        the required `ska_ost_array_config` library is not installed.
+    """
     try:
         from ska_ost_array_config.array_config import LowSubArray, filter_array_by_distance
     except:
