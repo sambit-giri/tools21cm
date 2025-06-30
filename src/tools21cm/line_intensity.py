@@ -2,7 +2,7 @@ import numpy as np
 from glob import glob
 import astropy
 from astropy import constants, units
-from astropy.cosmology import Planck18
+from astropy import cosmology
 
 from .nbody_file import halo_list_to_grid
 
@@ -39,7 +39,7 @@ def M_HI_on_grid(z, mass, pos_xyz, box_dim, n_grid, cosmo=None,
     assert recipe.lower() in ['padmanabhan2017']
     if cosmo is None:
         print('Assuming Planck18 cosmology.')
-        cosmo = Planck18
+        cosmo = cosmology.Planck18
     Ob = cosmo.Ob0
     Om = cosmo.Om0 
     hlittle = cosmo.h
@@ -109,7 +109,7 @@ def L_CII_on_grid(z, mass, pos_xyz, box_dim, n_grid, SFR=None, cosmo=None,
     assert recipe.lower() in ['silva2015m1', 'silva2015m2', 'silva2015m3', 'silva2015m4']
     if cosmo is None:
         print('Assuming Planck18 cosmology.')
-        cosmo = Planck18
+        cosmo = cosmology.Planck18
     Ob = cosmo.Ob0
     Om = cosmo.Om0 
     hlittle = cosmo.h

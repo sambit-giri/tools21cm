@@ -8,7 +8,7 @@ from . import cosmo
 from .helper_functions import print_msg, read_cbin, \
 	get_data_and_type, determine_redshift_from_filename
 from astropy import constants, units
-from astropy.cosmology import Planck18
+from astropy import cosmology
 
 def calc_dt_halo(mhalo, box_dim, z, Y_p=0.249, cosmo=None):
 	'''
@@ -28,7 +28,7 @@ def calc_dt_halo(mhalo, box_dim, z, Y_p=0.249, cosmo=None):
 	'''
 	if cosmo is None:
 		print('Assuming Planck18 cosmology.')
-		cosmo = Planck18
+		cosmo = cosmology.Planck18
 		
 	if isinstance(mhalo, units.quantity.Quantity):
 		mhalo = mhalo.to('Msun')
