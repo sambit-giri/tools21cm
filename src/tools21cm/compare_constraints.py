@@ -3,26 +3,6 @@ import matplotlib.pyplot as plt
 import os, sys 
 from .read_files import get_package_resource_path
 
-class EscapeFractionLymanAlpha:
-    def __init__(self, verbose=True):
-        self.verbose = verbose
-        if self.verbose:
-            print('--- Lyman-alpha Escape Fraction ---')
-        self._load_constraints()
-    
-    def _load_constraints(self):
-        import pandas as pd
-
-        self.fesc_LymanAlpha_constraints = {}
-        filename = get_package_resource_path('tools21cm', 'input_data/fesc_LyA_constraints.xlsx')
-
-        name = 'Napolitano+2024'
-        df = pd.read_excel(filename, sheet_name=name, engine='openpyxl')
-        self.fesc_LymanAlpha_constraints[name] = df
-
-        if self.verbose:
-            print(f'Lyman-alpha escapse fraction references:\n{list(self.fesc_LymanAlpha_constraints.keys())}')
-
 class ReionizationHistory:
     def __init__(self, verbose=True):
         self.verbose = verbose
@@ -305,6 +285,27 @@ class ReionizationHistory:
 
         if self.verbose:
             print(f'Theory:\n{list(self.neutral_fraction_constraints.keys())}')
+
+class EscapeFractionLymanAlpha:
+    def __init__(self, verbose=True):
+        self.verbose = verbose
+        if self.verbose:
+            print('--- Lyman-alpha Escape Fraction ---')
+        self._load_constraints()
+    
+    def _load_constraints(self):
+        import pandas as pd
+
+        self.fesc_LymanAlpha_constraints = {}
+        filename = get_package_resource_path('tools21cm', 'input_data/fesc_LyA_constraints.xlsx')
+
+        name = 'Napolitano+2024'
+        df = pd.read_excel(filename, sheet_name=name, engine='openpyxl')
+        self.fesc_LymanAlpha_constraints[name] = df
+
+        if self.verbose:
+            print(f'Lyman-alpha escapse fraction references:\n{list(self.fesc_LymanAlpha_constraints.keys())}')
+
 
 if __name__ == "__main__":
     import matplotlib.pyplot as plt
