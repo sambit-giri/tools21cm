@@ -108,7 +108,7 @@ class segunet21cm:
 
     def load_model(self):
         import tensorflow as tf
-        import importlib.resources as pkg_resources
+        from .read_files import get_package_resource_path
 
         METRICS = {
             'balanced_cross_entropy': balanced_cross_entropy,
@@ -118,7 +118,7 @@ class segunet21cm:
             'recall': recall
         }
 
-        MODEL_NAME = pkg_resources.resource_filename('tools21cm', 'input_data/segunet_03-11T12-02-05_128slice_ep35.h5')
+        MODEL_NAME = get_package_resource_path('tools21cm', 'input_data/segunet_03-11T12-02-05_128slice_ep35.h5')
         self.MODEL_LOADED = tf.keras.models.load_model(MODEL_NAME, custom_objects=METRICS)
         print('Loaded model: %s' % MODEL_NAME)
 

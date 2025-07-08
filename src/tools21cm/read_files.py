@@ -304,3 +304,67 @@ def write_dictionary_data(data_dict, filename, format=None):
 
 	else:
 		raise ValueError(f"Unsupported format: {format}")
+	
+def get_package_resource_path(package_name, resource_path):
+    """
+    Get the path to a resource file within a package, with automatic fallback
+    for older Python versions.
+    
+    Parameters
+    ----------
+    package_name : str
+        Name of the package (e.g., 'tools21cm')
+    resource_path : str
+        Path to the resource relative to the package root
+        (e.g., 'input_data/central_geographic_position.txt')
+    
+    Returns
+    -------
+    str or Path
+        Path to the resource file that can be used with file reading functions
+    
+    Examples
+    --------
+    >>> path = get_package_resource_path('tools21cm', 'input_data/central_geographic_position.txt')
+    >>> data = np.loadtxt(path)
+    """
+    
+    # Try importlib.resources first (Python 3.9+)
+    try:
+        from importlib.resources import files
+        resource_file = files(package_name) / resource_path
+        return str(resource_file)
+    
+    except ImportError:
+        # Fall back to importlib_resources (Python 3.6-3.8)
+        try:
+            from importlib_resources import files
+            resource_file = files(package_name) / resource_path
+            return str(resource_file)
+        
+        except ImportError:
+            # Fall back to pkg_resources (older versions)
+            try:
+                import pkg_resources
+                return pkg_resources.resource_filename(package_name, resource_path)
+            
+            except ImportError:
+                # Last resort: try relative path (development mode)
+                import os
+                from pathlib import Path
+                try:
+                    # Get the package's location
+                    package = __import__(package_name)
+                    package_dir = Path(package.__file__).parent
+                    resource_file = package_dir / resource_path
+                    
+                    if resource_file.exists():
+                        return str(resource_file)
+                    else:
+                        raise FileNotFoundError(f"Resource not found: {resource_path}")
+                        
+                except Exception as e:
+                    raise ImportError(
+                        f"Could not locate resource '{resource_path}' in package '{package_name}'. "
+                        f"Please install 'importlib_resources' for Python < 3.9 or ensure the package is properly installed."
+                    ) from e

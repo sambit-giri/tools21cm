@@ -5,7 +5,7 @@ from tqdm import tqdm
 from . import cosmo as cm
 from . import conv
 from .const import KB_SI, c_light_cgs, c_light_SI, janskytowatt
-from importlib.resources import files
+from .read_files import get_package_resource_path
 import astropy.units as u
 from astropy.coordinates import EarthLocation
 
@@ -473,14 +473,14 @@ def get_SKA_Low_layout(subarray_type="AA4", unit='ecef', verbose=True):
         filename = 'input_data/skalow1_layout.txt'
 
     # Load lat, lon, height from file
-    lon, lat, height = np.loadtxt(str(files('tools21cm') / 'input_data/central_geographic_position.txt'))
+    lon, lat, height = np.loadtxt(get_package_resource_path('tools21cm', 'input_data/central_geographic_position.txt'))
     
     # EarthLocation of the array center
     core = EarthLocation(lat=lat * u.deg, lon=lon * u.deg, height=height * u.m)
     origin_ecef = np.array([core.x.value, core.y.value, core.z.value])  # in meters
 
     # Load ENU antenna positions
-    path_to_file = str(files('tools21cm') / filename)
+    path_to_file = get_package_resource_path('tools21cm', filename)
     ant_enu = np.loadtxt(path_to_file)  # shape (N_ant, 3)
 
     if verbose:

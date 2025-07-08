@@ -8,6 +8,7 @@ scikit-image
 tqdm
 joblib
 pandas
+openpyxl
 pytest
 # torch==2.1.0
 # numba

@@ -1,9 +1,33 @@
 import numpy as np
 import matplotlib.pyplot as plt 
 import os, sys 
+from .read_files import get_package_resource_path
+
+class EscapeFractionLymanAlpha:
+    def __init__(self, verbose=True):
+        self.verbose = verbose
+        if self.verbose:
+            print('--- Lyman-alpha Escape Fraction ---')
+        self._load_constraints()
+    
+    def _load_constraints(self):
+        import pandas as pd
+
+        self.fesc_LymanAlpha_constraints = {}
+        filename = get_package_resource_path('tools21cm', 'input_data/fesc_LyA_constraints.xlsx')
+
+        name = 'Napolitano+2024'
+        df = pd.read_excel(filename, sheet_name=name, engine='openpyxl')
+        self.fesc_LymanAlpha_constraints[name] = df
+
+        if self.verbose:
+            print(f'Lyman-alpha escapse fraction references:\n{list(self.fesc_LymanAlpha_constraints.keys())}')
 
 class ReionizationHistory:
-    def __init__(self):
+    def __init__(self, verbose=True):
+        self.verbose = verbose
+        if self.verbose:
+            print('--- Reionization History ---')
         self._load_constraints() 
         self._load_models()
 
@@ -175,6 +199,9 @@ class ReionizationHistory:
                 {"redshift": 6.6, "redshift_error": [-0.0,0.0], "value": 0.21, "error": [-0.14,0.19], "type": "measurement", "method": method},
             ]
         
+        if self.verbose:
+            print(f'Observations:\n{list(self.neutral_fraction_constraints.keys())}')
+        
     def _load_models(self):
         self.neutral_fraction_models = {}
         method = 'pyC2Ray'
@@ -275,6 +302,9 @@ class ReionizationHistory:
                                     7.09302702e-06, 7.24973943e-06, 6.48938603e-06, 6.76115185e-06]), 
                                     "method": method, "name": "Evolving IMF"},
         ]
+
+        if self.verbose:
+            print(f'Theory:\n{list(self.neutral_fraction_constraints.keys())}')
 
 if __name__ == "__main__":
     import matplotlib.pyplot as plt
