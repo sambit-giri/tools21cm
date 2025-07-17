@@ -1,12 +1,13 @@
 import numpy as np
-import sys, scipy
+import sys, scipy, os
 from time import time
 from sklearn.neighbors import BallTree, KDTree
 from sklearn.neighbors import NearestNeighbors
 from .bubble_stats import fof
 from skimage.measure import label
+from . import ViteBetti as VB
 
-def EulerCharacteristic(data, thres=0.5, neighbors=6, speed_up='numba', verbose=True):
+def EulerCharacteristic(data, thres=0.5, neighbors=6, speed_up='cython', verbose=True, n_jobs=None):
 	"""
 	Parameters
 	----------
@@ -18,7 +19,7 @@ def EulerCharacteristic(data, thres=0.5, neighbors=6, speed_up='numba', verbose=
 	neighbors: int
 		Define the connectivity to the neighbors (Default: 6).
 	speed_up: str
-		Method used to speed up calculation.
+		Method used to speed up calculation (Default: cython).
 	verbose: bool
 		If True, verbose is printed.
 
@@ -27,32 +28,44 @@ def EulerCharacteristic(data, thres=0.5, neighbors=6, speed_up='numba', verbose=
 	Euler characteristics value.
 	"""
 	tstart = time()
-	A = (data>thres).astype(int)
-	if speed_up is None: speed_up = 'numpy'
-	if speed_up.lower()=='cython': 
-		try:
-			from . import ViteBetti_cython as VB
-		except:
-			print('Cython module not found. Using the python module that might be slow...')
-			from . import ViteBetti as VB
-	elif speed_up.lower()=='numba': 
-		try:
-			from . import ViteBetti_numba as VB
-		except:
-			print('Numba module not found. Using the python module that might be slow...')
-			from . import ViteBetti as VB
-	else: 
-		from . import ViteBetti as VB
-	if verbose: print(f'Creating CubeMap...')
-	if neighbors==6 or neighbors==4: C = VB.CubeMap(A)
-	else: C = VB.CubeMap(1-A)
-	if verbose: print(f'...done in {(time()-tstart)/60:.2f} mins')
-	elem, count = np.unique(C, return_counts=1)
-	V = count[elem==1] if len(count[elem==1])!=0 else 0
-	E = count[elem==2] if len(count[elem==2])!=0 else 0
-	F = count[elem==3] if len(count[elem==3])!=0 else 0
-	C = count[elem==4] if len(count[elem==4])!=0 else 0
-	return float(V-E+F-C)
+	A = (data > thres).astype(np.int32)
+
+	# Invert data for the 'holes' calculation based on connectivity
+	if not (neighbors == 6 or neighbors == 4):
+		A = 1 - A
+
+	if verbose:
+		print(f"Using '{speed_up}' backend to create CubeMap...", end="")
+
+	# --- Function Dispatcher ---
+	if speed_up.lower() == 'cython' and VB.cython_available:
+		C = VB.CubeMap_cython(A)
+	elif speed_up.lower() == 'numba' and VB.numba_available:
+		C = VB.CubeMap_numba(A)
+	else:
+		if speed_up.lower() not in ['numpy', 'python']:
+			print(f"Warning: '{speed_up}' backend not found. Falling back to pure Python.", file=sys.stderr)
+		if n_jobs==-1:
+			n_jobs = os.cpu_count()
+		if n_jobs is None or n_jobs==1 or not VB.joblib_available:
+			C = VB.CubeMap(A)
+		else:
+			if verbose:
+				print(f'Parallelised on {n_jobs} processors...', end="")
+			C = VB.CubeMap_joblib(A, n_jobs=n_jobs)
+
+	if verbose:
+		print(f'done in {(time() - tstart):.2f} seconds')
+		
+	elem, count = np.unique(C, return_counts=True)
+	counts_dict = dict(zip(elem, count))
+
+	V = counts_dict.get(1, 0) # Vertices
+	E = counts_dict.get(2, 0) # Edges
+	F = counts_dict.get(3, 0) # Faces
+	C = counts_dict.get(4, 0) # Cubes
+
+	return float(V - E + F - C)
 
 def betti0(data, thres=0.5, neighbors=6):
 	"""
@@ -96,7 +109,7 @@ def betti2(data, thres=0.5, neighbors=6):
 	else: b2 = label(1-A, return_num=1, connectivity=2)[1]
 	return b2
 
-def betti1(data, thres=0.5, neighbors=6, b0=None, b2=None, chi=None, speed_up='numba', verbose=True):
+def betti1(data, thres=0.5, neighbors=6, b0=None, b2=None, chi=None, speed_up='cython', verbose=True, n_jobs=None):
 	"""
 	Parameters
 	----------
@@ -107,14 +120,16 @@ def betti1(data, thres=0.5, neighbors=6, b0=None, b2=None, chi=None, speed_up='n
 		Ignore this parameter if data is already a binary field.
 	neighbors: int
 		Define the connectivity to the neighbors (Default: 6).
-	use_numba: bool
-		If True, numba package is used to speed up calculation.
+	speed_up: str
+		Method used to speed up calculation (Default: cython).
+	verbose: bool
+		If True, verbose is printed.
 
 	Returns
 	-------
 	Betti 1
 	"""
-	if chi is None: chi = EulerCharacteristic(data, thres=thres, neighbors=neighbors, speed_up=speed_up, verbose=verbose)
+	if chi is None: chi = EulerCharacteristic(data, thres=thres, neighbors=neighbors, speed_up=speed_up, verbose=verbose, n_jobs=n_jobs)
 	if b0 is None: b0  = betti0(data, thres=thres, neighbors=neighbors)
 	if b2 is None: b2  = betti2(data, thres=thres, neighbors=neighbors)
 	return b0 + b2 - chi

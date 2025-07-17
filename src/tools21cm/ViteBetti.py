@@ -1,147 +1,195 @@
+# ViteBetti.py
+
 import numpy as np
+import os
 
-def CubeMap_torch(arr, multi_marker=True):
-	import torch
+# --- Optional Numba Support ---
+try:
+    from numba import jit
+    numba_available = True
+except ImportError:
+    numba_available = False
+    # Define a dummy decorator if numba is not available
+    def jit(func, *args, **kwargs):
+        return func
 
-	# Check if GPU is available and choose the device
-	device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
+# --- Optional Cython Support ---
+try:
+    from .ViteBetti_cython import CubeMap as cython_CubeMap
+    cython_available = True
+except ImportError:
+    cython_CubeMap = None
+    cython_available = False
 
-	# Convert the input array to a PyTorch tensor and move it to the selected device
-	arr_tensor = torch.tensor(arr, dtype=torch.int32, device=device)
+# --- Optional Joblib Support ---
+try:
+    from joblib import Parallel, delayed
+    from multiprocessing import shared_memory
+    joblib_available = True
+except ImportError:
+    joblib_available = False
+    Parallel, delayed, shared_memory = None, None, None
 
-	nx, ny, nz = arr_tensor.shape
-	Nx, Ny, Nz = 2*nx, 2*ny, 2*nz
-	cubemap = torch.zeros((Nx, Ny, Nz), dtype=torch.int32, device=device)
-
-	# Define markers
-	markers = (1, 1, 1, 1)
-	if multi_marker:
-		markers = (1, 2, 3, 4)
-
-	# Set the vertices
-	cubemap[2*arr_tensor.bool()] = markers[0]
-
-	# Convert indices for easier manipulation
-	i_indices = torch.arange(Nx, device=device)
-	j_indices = torch.arange(Ny, device=device)
-	k_indices = torch.arange(Nz, device=device)
-
-	i_indices, j_indices, k_indices = torch.meshgrid(i_indices, j_indices, k_indices, indexing='ij')
-
-	# Define a mask to select non-zero values
-	mask = cubemap == 0
-
-	# Edges
-	edge_mask_1 = (cubemap[(i_indices-1) % Nx, j_indices, k_indices] == markers[0]) & (cubemap[(i_indices+1) % Nx, j_indices, k_indices] == markers[0])
-	edge_mask_2 = (cubemap[i_indices, (j_indices-1) % Ny, k_indices] == markers[0]) & (cubemap[i_indices, (j_indices+1) % Ny, k_indices] == markers[0])
-	edge_mask_3 = (cubemap[i_indices, j_indices, (k_indices-1) % Nz] == markers[0]) & (cubemap[i_indices, j_indices, (k_indices+1) % Nz] == markers[0])
-
-	cubemap[mask & (edge_mask_1 | edge_mask_2 | edge_mask_3)] = markers[1]
-
-	# Faces
-	face_mask_1 = (cubemap[(i_indices-1) % Nx, j_indices, k_indices] == markers[1]) & (cubemap[(i_indices+1) % Nx, j_indices, k_indices] == markers[1]) & \
-					(cubemap[i_indices, (j_indices-1) % Ny, k_indices] == markers[1]) & (cubemap[i_indices, (j_indices+1) % Ny, k_indices] == markers[1])
-	face_mask_2 = (cubemap[i_indices, (j_indices-1) % Ny, k_indices] == markers[1]) & (cubemap[i_indices, (j_indices+1) % Ny, k_indices] == markers[1]) & \
-					(cubemap[i_indices, j_indices, (k_indices-1) % Nz] == markers[1]) & (cubemap[i_indices, j_indices, (k_indices+1) % Nz] == markers[1])
-	face_mask_3 = (cubemap[i_indices, j_indices, (k_indices-1) % Nz] == markers[1]) & (cubemap[i_indices, j_indices, (k_indices+1) % Nz] == markers[1]) & \
-					(cubemap[(i_indices-1) % Nx, j_indices, k_indices] == markers[1]) & (cubemap[(i_indices+1) % Nx, j_indices, k_indices] == markers[1])
-
-	cubemap[mask & (face_mask_1 | face_mask_2 | face_mask_3)] = markers[2]
-
-	# Cubes
-	cube_mask = (cubemap[(i_indices-1) % Nx, j_indices, k_indices] == markers[2]) & (cubemap[(i_indices+1) % Nx, j_indices, k_indices] == markers[2]) & \
-				(cubemap[i_indices, (j_indices-1) % Ny, k_indices] == markers[2]) & (cubemap[i_indices, (j_indices+1) % Ny, k_indices] == markers[2]) & \
-				(cubemap[i_indices, j_indices, (k_indices-1) % Nz] == markers[2]) & (cubemap[i_indices, j_indices, (k_indices+1) % Nz] == markers[2])
-
-	cubemap[mask & cube_mask] = markers[3]
-
-	# Move the result back to the CPU and convert to numpy array
-	return cubemap.cpu().numpy()
-
+# --- Core Algorithm (Pure Python) ---
 def CubeMap(arr, multi_marker=True):
-	nx, ny, nz = arr.shape
-	Nx, Ny, Nz = 2*nx,2*ny,2*nz#2*nx-1,2*ny-1,2*nz-1
-	cubemap    = np.zeros((Nx,Ny,Nz))
-	markers    = 1, 1, 1, 1
-	if multi_marker: markers = 1, 2, 3, 4
-	## Vertices
-	for i in range(nx):
-		for j in range(ny):
-			for k in range(nz):
-				if arr[i,j,k]: cubemap[i*2,j*2,k*2] = markers[0]
-
-	## Edges 
-	for i in range(Nx):
-		for j in range(Ny):
-			for k in range(Nz):
-				if cubemap[i,j,k] == 0:
-					if cubemap[(i-1),j,k]==markers[0] and cubemap[(i+1)%Nx,j,k]==markers[0]: cubemap[i,j,k] = markers[1]
-					elif cubemap[i,(j-1),k]==markers[0] and cubemap[i,(j+1)%Ny,k]==markers[0]: cubemap[i,j,k] = markers[1]
-					elif cubemap[i,j,(k-1)]==markers[0] and cubemap[i,j,(k+1)%Nz]==markers[0]: cubemap[i,j,k] = markers[1]
-
-	## Faces 
-	for i in range(Nx):
-		for j in range(Ny):
-			for k in range(Nz):
-				if cubemap[i,j,k] == 0:
-					if cubemap[(i-1),j,k]==markers[1] and cubemap[(i+1)%Nx,j,k]==markers[1] and cubemap[i,(j-1),k]==markers[1] and cubemap[i,(j+1)%Ny,k]==markers[1]: cubemap[i,j,k] = markers[2]
-					elif cubemap[i,(j-1),k]==markers[1] and cubemap[i,(j+1)%Ny,k]==markers[1] and cubemap[i,j,(k-1)]==markers[1] and cubemap[i,j,(k+1)%Nz]==markers[1]: cubemap[i,j,k] = markers[2]
-					elif cubemap[i,j,(k-1)]==markers[1] and cubemap[i,j,(k+1)%Nz]==markers[1] and cubemap[(i-1),j,k]==markers[1] and cubemap[(i+1)%Nx,j,k]==markers[1]: cubemap[i,j,k] = markers[2]
-	
-	## Cubes
-	for i in range(Nx):
-		for j in range(Ny):
-			for k in range(Nz):
-				if cubemap[i,j,k] == 0:
-					if cubemap[(i-1),j,k]==markers[2] and cubemap[(i+1)%Nx,j,k]==markers[2]: 
-						if cubemap[i,(j-1),k]==markers[2] and cubemap[i,(j+1)%Ny,k]==markers[2]: 
-							if cubemap[i,j,(k-1)]==markers[2] and cubemap[i,j,(k+1)%Nz]==markers[2]: cubemap[i,j,k] = markers[3]
-
-	return cubemap	
-
-def EulerCharacteristic_seq(A):
-	chi = 0
-	nx,ny,nz = A.shape
-	for x in range(nx):
-		for y in range(ny):
-			for z in range(nz):
-				if(A[x,y,z] == 1):
-					if (x+y+z)%2 == 0: chi += 1
-					else: chi -= 1
-	return chi 
-
-
-import jax
-import jax.numpy as jnp
-
-@jax.jit
-def CubeMap_jax(arr, multi_marker=True):
+    """
+    Generates a cubical complex map from a binary 3D array.
+    This is the pure Python implementation which serves as a fallback.
+    """
+    nx, ny, nz = arr.shape
+    Nx, Ny, Nz = 2 * nx, 2 * ny, 2 * nz
+    cubemap = np.zeros((Nx, Ny, Nz), dtype=np.int32)
+    
     markers = (1, 1, 1, 1)
     if multi_marker:
         markers = (1, 2, 3, 4)
 
-    nx, ny, nz = arr.shape
-    Nx, Ny, Nz = 2*nx, 2*ny, 2*nz
-    cubemap = jnp.zeros((Nx, Ny, Nz), dtype=jnp.int32)
+    # Vertices (1)
+    for i in range(nx):
+        for j in range(ny):
+            for k in range(nz):
+                if arr[i, j, k]:
+                    cubemap[i * 2, j * 2, k * 2] = markers[0]
 
-    # Step 1: Vertices
-    coords = jnp.argwhere(arr == 1)
-    vert_indices = coords * 2
-    cubemap = cubemap.at[tuple(vert_indices.T)].set(markers[0])
+    # Edges (2)
+    for i in range(Nx):
+        for j in range(Ny):
+            for k in range(Nz):
+                if cubemap[i, j, k] == 0:
+                    # Check for neighbors along each axis using explicit periodic boundaries
+                    if cubemap[(i - 1) % Nx, j, k] == markers[0] and cubemap[(i + 1) % Nx, j, k] == markers[0]:
+                        cubemap[i, j, k] = markers[1]
+                    elif cubemap[i, (j - 1) % Ny, k] == markers[0] and cubemap[i, (j + 1) % Ny, k] == markers[0]:
+                        cubemap[i, j, k] = markers[1]
+                    elif cubemap[i, j, (k - 1) % Nz] == markers[0] and cubemap[i, j, (k + 1) % Nz] == markers[0]:
+                        cubemap[i, j, k] = markers[1]
 
-    # Step 2: Edges (use jnp.roll for periodic neighbor checking)
-    mask = cubemap == 0
-    m0 = markers[0]
-    m1 = markers[1]
-
-    def edge_mask_axis(cmap, axis):
-        left = jnp.roll(cmap, 1, axis=axis)
-        right = jnp.roll(cmap, -1, axis=axis)
-        return (left == m0) & (right == m0)
-
-    edge_mask = edge_mask_axis(cubemap, 0) | edge_mask_axis(cubemap, 1) | edge_mask_axis(cubemap, 2)
-    cubemap = jnp.where(mask & edge_mask, m1, cubemap)
-
-    # Further steps: similar idea, but masks get more complex
+    # Faces (3)
+    for i in range(Nx):
+        for j in range(Ny):
+            for k in range(Nz):
+                if cubemap[i, j, k] == 0:
+                    if (cubemap[(i - 1) % Nx, j, k] == markers[1] and cubemap[(i + 1) % Nx, j, k] == markers[1] and
+                        cubemap[i, (j - 1) % Ny, k] == markers[1] and cubemap[i, (j + 1) % Ny, k] == markers[1]):
+                        cubemap[i, j, k] = markers[2]
+                    elif (cubemap[i, (j - 1) % Ny, k] == markers[1] and cubemap[i, (j + 1) % Ny, k] == markers[1] and
+                          cubemap[i, j, (k - 1) % Nz] == markers[1] and cubemap[i, j, (k + 1) % Nz] == markers[1]):
+                        cubemap[i, j, k] = markers[2]
+                    elif (cubemap[i, j, (k - 1) % Nz] == markers[1] and cubemap[i, j, (k + 1) % Nz] == markers[1] and
+                          cubemap[(i - 1) % Nx, j, k] == markers[1] and cubemap[(i + 1) % Nx, j, k] == markers[1]):
+                        cubemap[i, j, k] = markers[2]
+    
+    # Cubes (4)
+    for i in range(Nx):
+        for j in range(Ny):
+            for k in range(Nz):
+                if cubemap[i, j, k] == 0:
+                    if (cubemap[(i - 1) % Nx, j, k] == markers[2] and cubemap[(i + 1) % Nx, j, k] == markers[2] and
+                        cubemap[i, (j - 1) % Ny, k] == markers[2] and cubemap[i, (j + 1) % Ny, k] == markers[2] and
+                        cubemap[i, j, (k - 1) % Nz] == markers[2] and cubemap[i, j, (k + 1) % Nz] == markers[2]):
+                        cubemap[i, j, k] = markers[3]
 
     return cubemap
+
+# --- Accelerated Versions ---
+CubeMap_numba = jit(CubeMap, nopython=True) if numba_available else None
+CubeMap_cython = cython_CubeMap # Assigned from the import attempt above
+
+# --- Joblib Parallel Implementation ---
+def _CubeMap_joblib_worker(shm_name, arr_shape, i_start, i_end, arr_for_vertices, markers, stage):
+    """Worker function for joblib with the complete and correct logic."""
+    existing_shm = shared_memory.SharedMemory(name=shm_name)
+    cubemap = np.ndarray(arr_shape, dtype=np.int32, buffer=existing_shm.buf)
+    
+    Nx, Ny, Nz = arr_shape
+    nx, ny, nz = arr_for_vertices.shape
+
+    if stage == 'vertices':
+        for i in range(i_start, i_end):
+            for j in range(ny):
+                for k in range(nz):
+                    if arr_for_vertices[i, j, k]:
+                        cubemap[i * 2, j * 2, k * 2] = markers[0]
+
+    elif stage == 'edges':
+        for i in range(i_start, i_end):
+            for j in range(Ny):
+                for k in range(Nz):
+                    if cubemap[i, j, k] == 0:
+                        # **FIX**: Added all elif branches
+                        if cubemap[(i - 1) % Nx, j, k] == markers[0] and cubemap[(i + 1) % Nx, j, k] == markers[0]:
+                            cubemap[i, j, k] = markers[1]
+                        elif cubemap[i, (j - 1) % Ny, k] == markers[0] and cubemap[i, (j + 1) % Ny, k] == markers[0]:
+                            cubemap[i, j, k] = markers[1]
+                        elif cubemap[i, j, (k - 1) % Nz] == markers[0] and cubemap[i, j, (k + 1) % Nz] == markers[0]:
+                            cubemap[i, j, k] = markers[1]
+
+    elif stage == 'faces':
+        for i in range(i_start, i_end):
+            for j in range(Ny):
+                for k in range(Nz):
+                    if cubemap[i, j, k] == 0:
+                        # **FIX**: Added all elif branches
+                        if (cubemap[(i - 1) % Nx, j, k] == markers[1] and cubemap[(i + 1) % Nx, j, k] == markers[1] and
+                            cubemap[i, (j - 1) % Ny, k] == markers[1] and cubemap[i, (j + 1) % Ny, k] == markers[1]):
+                            cubemap[i, j, k] = markers[2]
+                        elif (cubemap[i, (j - 1) % Ny, k] == markers[1] and cubemap[i, (j + 1) % Ny, k] == markers[1] and
+                              cubemap[i, j, (k - 1) % Nz] == markers[1] and cubemap[i, j, (k + 1) % Nz] == markers[1]):
+                            cubemap[i, j, k] = markers[2]
+                        elif (cubemap[i, j, (k - 1) % Nz] == markers[1] and cubemap[i, j, (k + 1) % Nz] == markers[1] and
+                              cubemap[(i - 1) % Nx, j, k] == markers[1] and cubemap[(i + 1) % Nx, j, k] == markers[1]):
+                            cubemap[i, j, k] = markers[2]
+    
+    elif stage == 'cubes':
+        for i in range(i_start, i_end):
+            for j in range(Ny):
+                for k in range(Nz):
+                    if cubemap[i, j, k] == 0:
+                        # **FIX**: This was already complete
+                        if (cubemap[(i - 1) % Nx, j, k] == markers[2] and cubemap[(i + 1) % Nx, j, k] == markers[2] and
+                            cubemap[i, (j - 1) % Ny, k] == markers[2] and cubemap[i, (j + 1) % Ny, k] == markers[2] and
+                            cubemap[i, j, (k - 1) % Nz] == markers[2] and cubemap[i, j, (k + 1) % Nz] == markers[2]):
+                            cubemap[i, j, k] = markers[3]
+
+    existing_shm.close()
+
+
+def CubeMap_joblib(arr, multi_marker=True, n_jobs=-1):
+    """
+    Generates a cubical complex map from a binary 3D array using joblib for parallelism.
+    """
+    if not joblib_available:
+        raise ImportError("Joblib or its dependencies are not installed. Cannot use 'joblib' backend.")
+
+    nx, ny, nz = arr.shape
+    Nx, Ny, Nz = 2 * nx, 2 * ny, 2 * nz
+    cubemap_shape = (Nx, Ny, Nz)
+    markers = (1, 2, 3, 4) if multi_marker else (1, 1, 1, 1)
+
+    shm = shared_memory.SharedMemory(create=True, size=np.dtype(np.int32).itemsize * Nx * Ny * Nz)
+    shared_cubemap = np.ndarray(cubemap_shape, dtype=np.int32, buffer=shm.buf)
+    shared_cubemap[:] = 0
+
+    if n_jobs == -1:
+        n_jobs = os.cpu_count()
+
+    try:
+        for stage_name, domain_size in [('vertices', nx), ('edges', Nx), ('faces', Nx), ('cubes', Nx)]:
+            chunk_size = (domain_size + n_jobs - 1) // n_jobs
+            tasks = [
+                delayed(_CubeMap_joblib_worker)(
+                    shm.name, cubemap_shape, i * chunk_size, 
+                    min((i + 1) * chunk_size, domain_size), 
+                    arr, markers, stage_name
+                )
+                for i in range(n_jobs)
+            ]
+            Parallel(n_jobs=n_jobs)(tasks)
+        
+        result_cubemap = np.copy(shared_cubemap)
+
+    finally:
+        shm.close()
+        shm.unlink()
+
+    return result_cubemap
