@@ -161,7 +161,8 @@ def noise_coeval_power_spectrum_1d(ncells, z, depth_mhz, obs_time=1000, subarray
 		return pn, kn, n_modes
 	return pn, kn
 
-def get_uv_map_lightcone(ncells, zs, subarray_type="AA4", total_int_time=6., int_time=10., boxsize=None, declination=-30., save_uvmap=None, n_jobs=4, verbose=True):
+def get_uv_map_lightcone(ncells, zs, subarray_type="AA4", total_int_time=6., int_time=10., boxsize=None, declination=-30., 
+    save_uvmap=None, n_jobs=4, verbose=True, checkpoint=16):
     """
     Generates or loads a lightcone of UV coverage maps, one for each redshift.
 
@@ -184,6 +185,9 @@ def get_uv_map_lightcone(ncells, zs, subarray_type="AA4", total_int_time=6., int
         Number of CPUs for parallel generation of UV maps.
     verbose : bool, optional
         If True, enables progress bars and informational messages.
+    checkpoint : int, optional
+        If provided, the number of redshifts to process before saving the results
+        to `save_uvmap`. This is useful for long runs to prevent data loss.
 
     Returns
     -------
@@ -198,6 +202,7 @@ def get_uv_map_lightcone(ncells, zs, subarray_type="AA4", total_int_time=6., int
 
     # Attempt to load existing UV maps or initialize a new dictionary
     if save_uvmap and os.path.exists(save_uvmap):
+        if verbose: print(f"Loading existing UV maps from {save_uvmap}")
         uvs = read_dictionary_data(save_uvmap)
     else:
         uvs = {'ncells': ncells, 'boxsize': boxsize, 'total_int_time': total_int_time, 'int_time': int_time, 'declination': declination}
@@ -206,21 +211,61 @@ def get_uv_map_lightcone(ncells, zs, subarray_type="AA4", total_int_time=6., int
     z_to_run = [zi for zi in zs if '{:.3f}'.format(zi) not in uvs]
 
     if z_to_run:
-        print(f'Generating {len(z_to_run)} new UV maps...')
+        if verbose: print(f'Found {len(z_to_run)} new redshifts to generate UV maps for.')
+        
+        # Define the worker function for a single redshift
         _uvmap_worker = lambda zi: get_uv_map(ncells, zi, subarray_type=antxyz, total_int_time=total_int_time, int_time=int_time, boxsize=boxsize, declination=declination, verbose=False)[0]
         
-        if n_jobs > 1:
-            results = Parallel(n_jobs=n_jobs, verbose=10)(delayed(_uvmap_worker)(i) for i in z_to_run)
-            for zi, uv_map in zip(z_to_run, results):
-                uvs['{:.3f}'.format(zi)] = uv_map
-        else:
-            for zi in tqdm(z_to_run, desc="Generating UV maps sequentially"):
-                uvs['{:.3f}'.format(zi)] = _uvmap_worker(zi)
+        # Condition for using chunked parallel processing with checkpoints
+        use_chunked_parallel = n_jobs > 1 and checkpoint is not None and checkpoint > 0
+
+        if use_chunked_parallel:
+            num_chunks = (len(z_to_run) + checkpoint - 1) // checkpoint
+            if verbose: print(f"Processing in {num_chunks} chunks of size up to {checkpoint}...")
+
+            for i in tqdm(range(0, len(z_to_run), checkpoint), desc="Processing Chunks", disable=not verbose):
+                z_chunk = z_to_run[i:i + checkpoint]
+                
+                # Run the parallel job on the current chunk
+                # Set inner verbose to 0 to avoid clutter; outer tqdm handles progress
+                results_chunk = Parallel(n_jobs=n_jobs, verbose=0)(delayed(_uvmap_worker)(zi) for zi in z_chunk)
+                
+                # Update the main dictionary with the results from the chunk
+                for zi, uv_map in zip(z_chunk, results_chunk):
+                    uvs['{:.3f}'.format(zi)] = uv_map
+                
+                # Save after processing the chunk
+                if save_uvmap:
+                    if verbose: print(f"\nCheckpoint: Saving results to {save_uvmap}")
+                    write_dictionary_data(uvs, save_uvmap)
+
+        else: # Original behavior: either sequential or parallel without checkpoints
+            if n_jobs > 1:
+                # Parallel processing for all z's at once
+                if verbose: print(f"Generating all {len(z_to_run)} maps in parallel...")
+                results = Parallel(n_jobs=n_jobs, verbose=10 if verbose else 0)(delayed(_uvmap_worker)(i) for i in z_to_run)
+                for zi, uv_map in zip(z_to_run, results):
+                    uvs['{:.3f}'.format(zi)] = uv_map
+            else:
+                # Sequential processing
+                iterator = tqdm(z_to_run, desc="Generating UV maps sequentially", disable=not verbose)
+                for i, zi in enumerate(iterator):
+                    uvs['{:.3f}'.format(zi)] = _uvmap_worker(zi)
+                    # Checkpoint logic for sequential mode
+                    is_checkpoint_step = checkpoint and (i + 1) % checkpoint == 0
+                    is_not_last_step = (i + 1) < len(z_to_run)
+                    if save_uvmap and is_checkpoint_step and is_not_last_step:
+                        if verbose: print(f"\nCheckpoint: Saving results to {save_uvmap}")
+                        write_dictionary_data(uvs, save_uvmap)
         
         uvs['Nant'] = N_ant
+        # Final save to ensure the last chunk or the full result is written
         if save_uvmap:
-            print(f"Saving updated UV maps to {save_uvmap}")
+            if verbose: print(f"Saving final updated UV maps to {save_uvmap}")
             write_dictionary_data(uvs, save_uvmap)
+            
+    elif verbose:
+        print("All requested redshift UV maps are already present.")
             
     return uvs
 
@@ -643,7 +688,7 @@ def noise_cube_lightcone(ncells, z, obs_time=1000, subarray_type="AA4", boxsize=
 	# This function body is very similar to `noise_lightcone`. Consider refactoring.
 	return noise_lightcone(ncells, zs, obs_time, subarray_type, boxsize, save_uvmap, total_int_time, int_time, declination, N_ant, uv_weighting, fft_wrap, verbose, n_jobs, checkpoint, sefd_data, nu_data, suppress_sharp_features_uv_map)
 
-def noise_lightcone(ncells, zs, obs_time=1000, subarray_type="AA4", boxsize=None, save_uvmap=None, total_int_time=6., int_time=10., declination=-30., uv_weighting='natural', fft_wrap=False, verbose=True, n_jobs=4, sefd_data=None, nu_data=None, suppress_sharp_features_uv_map=False):
+def noise_lightcone(ncells, zs, obs_time=1000, subarray_type="AA4", boxsize=None, save_uvmap=None, total_int_time=6., int_time=10., declination=-30., uv_weighting='natural', fft_wrap=False, verbose=True, n_jobs=4, checkpoint=16, sefd_data=None, nu_data=None, suppress_sharp_features_uv_map=False):
     """
     Generates a 3D lightcone of instrumental noise over a list of redshifts.
 
@@ -654,20 +699,58 @@ def noise_lightcone(ncells, zs, obs_time=1000, subarray_type="AA4", boxsize=None
     Parameters
     ----------
     ncells : int
-        The grid size.
+        The number of grid cells along each spatial dimension.
     zs : np.ndarray or list
-        An array or list of redshift values for each slice of the lightcone.
-    obs_time, subarray_type, etc. : various
-        Observational parameters.
+        An array of redshift values defining the slices of the lightcone.
+    obs_time : float, optional
+        Total observation time in hours. Default is 1000.
+    subarray_type : str, optional
+        The type of telescope subarray (e.g., "AA4"). Default is "AA4".
+    boxsize : float, optional
+        The comoving size of the simulation box in Mpc. If None, a default
+        cosmological value is used.
     save_uvmap : str, optional
-        File path passed to `get_uv_map_lightcone` for caching UV maps.
+        File path to save or load the UV coverage maps. Caching these maps can
+        significantly speed up subsequent runs.
+    total_int_time : float, optional
+        Total integration time in hours used for generating the UV coverage.
+        Default is 6.
+    int_time : float, optional
+        The integration time for a single visibility measurement in seconds.
+        Default is 10.
+    declination : float, optional
+        The pointing declination of the telescope in degrees. Default is -30.
+    uv_weighting : str, optional
+        The UV weighting scheme to use (e.g., 'natural', 'uniform').
+        Default is 'natural'.
+    fft_wrap : bool, optional
+        If True, use `pyfft_wrap` for FFTs, which can be faster. Default is False.
+    verbose : bool, optional
+        If True, print progress bars and status messages. Default is True.
     n_jobs : int, optional
-        Number of CPUs for parallel processing of UV maps.
-    
+        The number of CPU cores to use for parallel generation of UV maps.
+        Default is 4.
+    checkpoint : int, optional
+        Number of redshift slices to process before saving the UV maps to a
+        checkpoint file. Useful for long runs. Default is 16.
+    sefd_data : str, optional
+        Path to a file containing System Equivalent Flux Density (SEFD) data.
+    nu_data : str, optional
+        Path to a file containing frequencies corresponding to the SEFD data.
+    suppress_sharp_features_uv_map : bool, optional
+        If True, applies a suppression filter to the UV map to mitigate sharp
+        features. Default is False.
+
     Returns
     -------
     np.ndarray
-        A 3D `(ncells, ncells, len(zs))` lightcone of noise in mK.
+        A 3D array of shape `(ncells, ncells, len(zs))` representing the
+        noise lightcone in units of mK.
+
+    See Also
+    --------
+    get_uv_map_lightcone : Generates the underlying UV coverage maps.
+    noise_map : Generates a 2D noise map for a single redshift.
     """
     if isinstance(zs, list): zs = np.array(zs)
     
@@ -675,7 +758,7 @@ def noise_lightcone(ncells, zs, obs_time=1000, subarray_type="AA4", boxsize=None
     uvs = get_uv_map_lightcone(
         ncells, zs, subarray_type=subarray_type, total_int_time=total_int_time, 
         int_time=int_time, boxsize=boxsize, declination=declination, 
-        save_uvmap=save_uvmap, n_jobs=n_jobs, verbose=verbose
+        save_uvmap=save_uvmap, n_jobs=n_jobs, verbose=verbose, checkpoint=checkpoint,
     )
     N_ant = uvs.get('Nant')
 
