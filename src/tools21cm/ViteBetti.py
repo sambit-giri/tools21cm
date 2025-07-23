@@ -30,6 +30,14 @@ except ImportError:
     joblib_available = False
     Parallel, delayed, shared_memory = None, None, None
 
+# --- Optional PyTorch (GPU) Support ---
+try:
+    import torch
+    torch_available = True
+except ImportError:
+    torch_available = False
+    torch = None
+
 # --- Core Algorithm (Pure Python) ---
 def CubeMap(arr, multi_marker=True):
     """
@@ -193,3 +201,60 @@ def CubeMap_joblib(arr, multi_marker=True, n_jobs=-1):
         shm.unlink()
 
     return result_cubemap
+
+# --- PyTorch GPU Implementation ---
+def CubeMap_torch(arr, multi_marker=True):
+    """
+    Generates a cubical complex map using PyTorch for GPU acceleration.
+    """
+    if not torch_available:
+        raise ImportError("PyTorch is not installed. Cannot use 'torch' backend.")
+
+    device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
+    print(f"Using PyTorch on device: {device}")
+
+    arr_tensor = torch.tensor(arr, dtype=torch.int32, device=device)
+    nx, ny, nz = arr_tensor.shape
+    Nx, Ny, Nz = 2 * nx, 2 * ny, 2 * nz
+    cubemap = torch.zeros((Nx, Ny, Nz), dtype=torch.int32, device=device)
+
+    markers = (1, 1, 1, 1)
+    if multi_marker:
+        markers = (1, 2, 3, 4)
+
+    # Vertices
+    coords = torch.nonzero(arr_tensor, as_tuple=False)
+    if coords.shape[0] > 0:
+        cubemap[coords[:, 0] * 2, coords[:, 1] * 2, coords[:, 2] * 2] = markers[0]
+
+    # Edges
+    mask = cubemap == 0
+    edge_mask = (
+        (cubemap.roll(1, 0) == markers[0]) & (cubemap.roll(-1, 0) == markers[0]) |
+        (cubemap.roll(1, 1) == markers[0]) & (cubemap.roll(-1, 1) == markers[0]) |
+        (cubemap.roll(1, 2) == markers[0]) & (cubemap.roll(-1, 2) == markers[0])
+    )
+    cubemap[mask & edge_mask] = markers[1]
+
+    # Faces
+    mask = cubemap == 0
+    face_mask = (
+        (cubemap.roll(1, 0) == markers[1]) & (cubemap.roll(-1, 0) == markers[1]) &
+        (cubemap.roll(1, 1) == markers[1]) & (cubemap.roll(-1, 1) == markers[1]) |
+        (cubemap.roll(1, 1) == markers[1]) & (cubemap.roll(-1, 1) == markers[1]) &
+        (cubemap.roll(1, 2) == markers[1]) & (cubemap.roll(-1, 2) == markers[1]) |
+        (cubemap.roll(1, 2) == markers[1]) & (cubemap.roll(-1, 2) == markers[1]) &
+        (cubemap.roll(1, 0) == markers[1]) & (cubemap.roll(-1, 0) == markers[1])
+    )
+    cubemap[mask & face_mask] = markers[2]
+
+    # Cubes
+    mask = cubemap == 0
+    cube_mask = (
+        (cubemap.roll(1, 0) == markers[2]) & (cubemap.roll(-1, 0) == markers[2]) &
+        (cubemap.roll(1, 1) == markers[2]) & (cubemap.roll(-1, 1) == markers[2]) &
+        (cubemap.roll(1, 2) == markers[2]) & (cubemap.roll(-1, 2) == markers[2])
+    )
+    cubemap[mask & cube_mask] = markers[3]
+
+    return cubemap.cpu().numpy()
