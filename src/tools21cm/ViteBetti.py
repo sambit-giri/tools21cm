@@ -34,6 +34,7 @@ except ImportError:
 try:
     import torch
     torch_available = True
+    torch_device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
 except ImportError:
     torch_available = False
     torch = None
@@ -203,20 +204,17 @@ def CubeMap_joblib(arr, multi_marker=True, n_jobs=-1):
     return result_cubemap
 
 # --- PyTorch GPU Implementation ---
-def CubeMap_torch(arr, multi_marker=True):
+def CubeMap_torch(arr, multi_marker=True, verbose=False):
     """
     Generates a cubical complex map using PyTorch for GPU acceleration.
     """
     if not torch_available:
         raise ImportError("PyTorch is not installed. Cannot use 'torch' backend.")
 
-    device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
-    print(f"Using PyTorch on device: {device}")
-
-    arr_tensor = torch.tensor(arr, dtype=torch.int32, device=device)
+    arr_tensor = torch.tensor(arr, dtype=torch.int32, device=torch_device)
     nx, ny, nz = arr_tensor.shape
     Nx, Ny, Nz = 2 * nx, 2 * ny, 2 * nz
-    cubemap = torch.zeros((Nx, Ny, Nz), dtype=torch.int32, device=device)
+    cubemap = torch.zeros((Nx, Ny, Nz), dtype=torch.int32, device=torch_device)
 
     markers = (1, 1, 1, 1)
     if multi_marker:

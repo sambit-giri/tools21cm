@@ -44,6 +44,8 @@ def EulerCharacteristic(data, thres=0.5, neighbors=6, speed_up='cython', verbose
 	elif speed_up.lower() == 'numba' and VB.numba_available:
 		C = VB.CubeMap_numba(A)
 	elif speed_up.lower() == 'torch' and VB.torch_available:
+		if verbose:
+			print(f"device={VB.torch_device}...", end="")
 		C = VB.CubeMap_torch(A)
 	else:
 		if speed_up.lower() not in ['numpy', 'python']:
