@@ -19,7 +19,8 @@ def EulerCharacteristic(data, thres=0.5, neighbors=6, speed_up='cython', verbose
 	neighbors: int
 		Define the connectivity to the neighbors (Default: 6).
 	speed_up: str
-		Method used to speed up calculation (Default: cython).
+		Method used to speed up calculation (Default: cython). 
+		Options are cython, numba, torch and numpy.
 	verbose: bool
 		If True, verbose is printed.
 
