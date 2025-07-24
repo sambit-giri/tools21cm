@@ -21,7 +21,7 @@ def EulerCharacteristic(data, thres=0.5, neighbors=6, speed_up='cython', verbose
 	speed_up: str
 		Method used to speed up calculation (Default: cython). 
 		Options are cython, numba, torch and numpy.
-		The caclulation with torch uses GPUs if available on the device.
+		The calculation with torch uses GPUs if available on the device.
 	verbose: bool
 		If True, verbose is printed.
 

@@ -34,7 +34,12 @@ except ImportError:
 try:
     import torch
     torch_available = True
-    torch_device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
+    if torch.cuda.is_available():
+        torch_device = torch.device('cuda')
+    elif torch.backends.mps.is_available():
+        torch_device = torch.device('mps')
+    else:
+        torch_device = torch.device('cpu')
 except ImportError:
     torch_available = False
     torch = None
