@@ -163,111 +163,140 @@ def noise_coeval_power_spectrum_1d(ncells, z, depth_mhz, obs_time=1000, subarray
 
 def get_uv_map_lightcone(ncells, zs, subarray_type="AA4", total_int_time=6., int_time=10., boxsize=None, declination=-30., 
     save_uvmap=None, n_jobs=4, verbose=True, checkpoint=16):
-    """
-    Generates or loads a lightcone of UV coverage maps, one for each redshift.
+	"""
+	Generates or loads a lightcone of UV coverage maps, one for each redshift.
 
-    This function handles the creation of UV maps across a range of redshifts,
-    using parallel processing for efficiency and providing an option to cache
-    the results to a file to speed up subsequent runs.
+	This function handles the creation of UV maps across a range of redshifts,
+	using parallel processing for efficiency and providing an option to cache
+	the results to a file to speed up subsequent runs.
 
-    Parameters
-    ----------
-    ncells : int
-        The number of grid cells.
-    zs : np.ndarray or list
-        An array or list of redshift values for the lightcone.
-    subarray_type, total_int_time, etc. : various, optional
-        Observational parameters passed to `get_uv_map`.
-    save_uvmap : str, optional
-        File path to save or load the UV map dictionary. If the file exists,
-        maps are loaded; otherwise, they are generated and saved.
-    n_jobs : int, optional
-        Number of CPUs for parallel generation of UV maps.
-    verbose : bool, optional
-        If True, enables progress bars and informational messages.
-    checkpoint : int, optional
-        If provided, the number of redshifts to process before saving the results
-        to `save_uvmap`. This is useful for long runs to prevent data loss.
+	Parameters
+	----------
+	ncells : int
+		The number of grid cells.
+	zs : np.ndarray or list
+		An array or list of redshift values for the lightcone.
+	subarray_type, total_int_time, etc. : various, optional
+		Observational parameters passed to `get_uv_map`.
+	save_uvmap : str, optional
+		File path to save or load the UV map dictionary. If the file exists,
+		maps are loaded; otherwise, they are generated and saved.
+	n_jobs : int, optional
+		Number of CPUs for parallel generation of UV maps.
+	verbose : bool, optional
+		If True, enables progress bars and informational messages.
+	checkpoint : int, optional
+		If provided, the number of redshifts to process before saving the results
+		to `save_uvmap`. This is useful for long runs to prevent data loss.
 
-    Returns
-    -------
-    dict
-        A dictionary containing the UV maps for each redshift, keyed by the
-        redshift value formatted to three decimal places, along with metadata
-        about the simulation parameters.
-    """
-    antxyz, N_ant = subarray_type_to_antxyz(subarray_type, verbose=verbose)
-    if boxsize is None: boxsize = conv.LB
-    if isinstance(zs, list): zs = np.array(zs)
+	Returns
+	-------
+	dict
+		A dictionary containing the UV maps for each redshift, keyed by the
+		redshift value formatted to three decimal places, along with metadata
+		about the simulation parameters.
+	"""
+	antxyz, N_ant = subarray_type_to_antxyz(subarray_type, verbose=verbose)
+	if boxsize is None: boxsize = conv.LB
+	if isinstance(zs, list): zs = np.array(zs)
 
-    # Attempt to load existing UV maps or initialize a new dictionary
-    if save_uvmap and os.path.exists(save_uvmap):
-        if verbose: print(f"Loading existing UV maps from {save_uvmap}")
-        uvs = read_dictionary_data(save_uvmap)
-    else:
-        uvs = {'ncells': ncells, 'boxsize': boxsize, 'total_int_time': total_int_time, 'int_time': int_time, 'declination': declination}
-    
-    # Identify which redshifts need a UV map to be generated
-    z_to_run = [zi for zi in zs if '{:.3f}'.format(zi) not in uvs]
+	# Define a dictionary of simulation parameters 
+	params = {
+		'ncells': ncells,
+		'boxsize': boxsize,
+		'total_int_time': total_int_time,
+		'int_time': int_time,
+		'declination': declination,
+		'subarray_type': subarray_type,
+		'N_ant': N_ant,
+	}
 
-    if z_to_run:
-        if verbose: print(f'Found {len(z_to_run)} new redshifts to generate UV maps for.')
-        
-        # Define the worker function for a single redshift
-        _uvmap_worker = lambda zi: get_uv_map(ncells, zi, subarray_type=antxyz, total_int_time=total_int_time, int_time=int_time, boxsize=boxsize, declination=declination, verbose=False)[0]
-        
-        # Condition for using chunked parallel processing with checkpoints
-        use_chunked_parallel = n_jobs > 1 and checkpoint is not None and checkpoint > 0
+	# Attempt to load existing UV maps
+	if save_uvmap and os.path.exists(save_uvmap):
+		if verbose: print(f"Loading existing UV maps from {save_uvmap}")
+		uvs = read_dictionary_data(save_uvmap)
 
-        if use_chunked_parallel:
-            num_chunks = (len(z_to_run) + checkpoint - 1) // checkpoint
-            if verbose: print(f"Processing in {num_chunks} chunks of size up to {checkpoint}...")
+		# Validate using the params dictionary
+		mismatches = []
+		for key, current_val in params.items():
+			cached_val = uvs.get(key)
+			# Check for a mismatch
+			if cached_val is not None and cached_val != current_val:
+				# Add the error message to a list instead of raising immediately
+				mismatch_msg = f"  - '{key}': Cached value is '{cached_val}', but current call requested '{current_val}'."
+				mismatches.append(mismatch_msg)
 
-            for i in tqdm(range(0, len(z_to_run), checkpoint), desc="Processing Chunks", disable=not verbose):
-                z_chunk = z_to_run[i:i + checkpoint]
-                
-                # Run the parallel job on the current chunk
-                # Set inner verbose to 0 to avoid clutter; outer tqdm handles progress
-                results_chunk = Parallel(n_jobs=n_jobs, verbose=0)(delayed(_uvmap_worker)(zi) for zi in z_chunk)
-                
-                # Update the main dictionary with the results from the chunk
-                for zi, uv_map in zip(z_chunk, results_chunk):
-                    uvs['{:.3f}'.format(zi)] = uv_map
-                
-                # Save after processing the chunk
-                if save_uvmap:
-                    if verbose: print(f"\nCheckpoint: Saving results to {save_uvmap}")
-                    write_dictionary_data(uvs, save_uvmap)
+		if mismatches:
+			all_errors = "\n".join(mismatches)
+			raise ValueError(
+				f"Parameter mismatches found in cached file '{save_uvmap}':\n"
+				f"{all_errors}\n"
+				f"Please use a different save_uvmap path or delete the old file."
+			)
+	else:
+		# Initialize from the defined dictionary
+		uvs = params.copy()
 
-        else: # Original behavior: either sequential or parallel without checkpoints
-            if n_jobs > 1:
-                # Parallel processing for all z's at once
-                if verbose: print(f"Generating all {len(z_to_run)} maps in parallel...")
-                results = Parallel(n_jobs=n_jobs, verbose=10 if verbose else 0)(delayed(_uvmap_worker)(i) for i in z_to_run)
-                for zi, uv_map in zip(z_to_run, results):
-                    uvs['{:.3f}'.format(zi)] = uv_map
-            else:
-                # Sequential processing
-                iterator = tqdm(z_to_run, desc="Generating UV maps sequentially", disable=not verbose)
-                for i, zi in enumerate(iterator):
-                    uvs['{:.3f}'.format(zi)] = _uvmap_worker(zi)
-                    # Checkpoint logic for sequential mode
-                    is_checkpoint_step = checkpoint and (i + 1) % checkpoint == 0
-                    is_not_last_step = (i + 1) < len(z_to_run)
-                    if save_uvmap and is_checkpoint_step and is_not_last_step:
-                        if verbose: print(f"\nCheckpoint: Saving results to {save_uvmap}")
-                        write_dictionary_data(uvs, save_uvmap)
-        
-        uvs['Nant'] = N_ant
-        # Final save to ensure the last chunk or the full result is written
-        if save_uvmap:
-            if verbose: print(f"Saving final updated UV maps to {save_uvmap}")
-            write_dictionary_data(uvs, save_uvmap)
-            
-    elif verbose:
-        print("All requested redshift UV maps are already present.")
-            
-    return uvs
+	# Identify which redshifts need a UV map to be generated
+	z_to_run = [zi for zi in zs if '{:.3f}'.format(zi) not in uvs]
+
+	if z_to_run:
+		if verbose: print(f'Found {len(z_to_run)} new redshifts to generate UV maps for.')
+		
+		# Define the worker function for a single redshift
+		_uvmap_worker = lambda zi: get_uv_map(ncells, zi, subarray_type=antxyz, total_int_time=total_int_time, int_time=int_time, boxsize=boxsize, declination=declination, verbose=False)[0]
+		
+		# Condition for using chunked parallel processing with checkpoints
+		use_chunked_parallel = n_jobs > 1 and checkpoint is not None and checkpoint > 0
+
+		if use_chunked_parallel:
+			num_chunks = (len(z_to_run) + checkpoint - 1) // checkpoint
+			if verbose: print(f"Processing in {num_chunks} chunks of size up to {checkpoint}...")
+
+			for i in tqdm(range(0, len(z_to_run), checkpoint), desc="Processing Chunks", disable=not verbose):
+				z_chunk = z_to_run[i:i + checkpoint]
+				
+				# Run the parallel job on the current chunk
+				# Set inner verbose to 0 to avoid clutter; outer tqdm handles progress
+				results_chunk = Parallel(n_jobs=n_jobs, verbose=0)(delayed(_uvmap_worker)(zi) for zi in z_chunk)
+				
+				# Update the main dictionary with the results from the chunk
+				for zi, uv_map in zip(z_chunk, results_chunk):
+					uvs['{:.3f}'.format(zi)] = uv_map
+				
+				# Save after processing the chunk
+				if save_uvmap:
+					if verbose: print(f"\nCheckpoint: Saving results to {save_uvmap}")
+					write_dictionary_data(uvs, save_uvmap)
+
+		else: # Original behavior: either sequential or parallel without checkpoints
+			if n_jobs > 1:
+				# Parallel processing for all z's at once
+				if verbose: print(f"Generating all {len(z_to_run)} maps in parallel...")
+				results = Parallel(n_jobs=n_jobs, verbose=10 if verbose else 0)(delayed(_uvmap_worker)(i) for i in z_to_run)
+				for zi, uv_map in zip(z_to_run, results):
+					uvs['{:.3f}'.format(zi)] = uv_map
+			else:
+				# Sequential processing
+				iterator = tqdm(z_to_run, desc="Generating UV maps sequentially", disable=not verbose)
+				for i, zi in enumerate(iterator):
+					uvs['{:.3f}'.format(zi)] = _uvmap_worker(zi)
+					# Checkpoint logic for sequential mode
+					is_checkpoint_step = checkpoint and (i + 1) % checkpoint == 0
+					is_not_last_step = (i + 1) < len(z_to_run)
+					if save_uvmap and is_checkpoint_step and is_not_last_step:
+						if verbose: print(f"\nCheckpoint: Saving results to {save_uvmap}")
+						write_dictionary_data(uvs, save_uvmap)
+		
+		# Final save to ensure the last chunk or the full result is written
+		if save_uvmap:
+			if verbose: print(f"Saving final updated UV maps to {save_uvmap}")
+			write_dictionary_data(uvs, save_uvmap)
+			
+	elif verbose:
+		print("All requested redshift UV maps are already present.")
+			
+	return uvs
 
 def noise_map(ncells, z, depth_mhz, obs_time=1000, subarray_type="AA4", boxsize=None, total_int_time=6., int_time=10., declination=-30., uv_map=None, N_ant=None, uv_weighting='natural', sefd_data=None, nu_data=None, fft_wrap=False, verbose=True, suppress_sharp_features_uv_map=False):
 	"""
