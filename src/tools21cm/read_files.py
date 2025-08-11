@@ -197,7 +197,12 @@ def read_dictionary_data(filename, format=None):
 						out[key] = {}
 						recursively_load(val, out[key])
 					else:
-						out[key] = val[()]
+						# Read the dataset value
+						value = val[()]
+						# If the loaded value is bytes, decode it to a string
+						if isinstance(value, bytes):
+							value = value.decode('utf-8')
+						out[key] = value
 			recursively_load(f, data)
 		return data
 
@@ -265,7 +270,12 @@ def write_dictionary_data(data_dict, filename, format=None):
 						grp = h5obj.create_group(k)
 						recursive_save(grp, v)
 					else:
-						h5obj.create_dataset(k, data=v)
+						# Explicitly handle string data to avoid bytes conversion
+						if isinstance(v, str):
+							h5obj.create_dataset(k, data=v, dtype=h5py.string_dtype(encoding='utf-8'))
+						else:
+							# Default behavior for numbers, arrays, etc.
+							h5obj.create_dataset(k, data=v)
 			recursive_save(f, data_dict)
 
 	elif format == 'npz':
