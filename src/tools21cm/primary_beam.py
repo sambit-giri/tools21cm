@@ -80,7 +80,7 @@ def circular_beam(ncells, z, D=40., beam_func='Gaussian', boxsize=None):
         sigma = fwhm / 2.355 
         beam  = np.exp(-rr**2 / (2. * sigma**2))
     elif beam_func.lower() == 'bessel':
-        r_null = l_null / 2.0   # The radius of the first null is half the diameter
+        r_null = l_null         # The variable l_null is the radius of the first null.
         # Calculate the scaling factor alpha for the Airy disk formula
         alpha = 3.8317 / r_null # The first zero of J1(x) is at x approx 3.8317
         argument = alpha * rr   # The argument for the Bessel function
