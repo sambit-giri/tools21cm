@@ -10,7 +10,7 @@ from astropy import units
 from . import cosmo as cm
 from . import conv
 
-def primary_beam(array, z, nu_axis=2, beam_func='Gaussian', boxsize=None, D=40.):
+def primary_beam(array, z, nu_axis=2, beam_func='Gaussian', boxsize=None, D_station=40.):
 	"""
 	array    : ndarray
 		The array of brightness temperature.
@@ -25,38 +25,38 @@ def primary_beam(array, z, nu_axis=2, beam_func='Gaussian', boxsize=None, D=40.)
 		'sigmoid' and 'step'. Default: 'gaussian'
 	boxsize  : float
 		Size of the box in physical units (cMpc). Default: From set simulation constants.
-	D        : float
-		Diameter of the dish in metres. Default: 40.
+	D_station: float
+		Diameter of the station in metres. Default: 40.
 	"""
 	assert array.ndim > 1
 	if boxsize is None: 
 		boxsize = conv.LB
 	beam = np.zeros(array.shape)
 	if array.ndim==2: 
-		beamed = array*circular_beam(array.shape[0], z, D=D, beam_func=beam_func, boxsize=boxsize)
+		beamed = array*circular_beam(array.shape[0], z, D_station=D_station, beam_func=beam_func, boxsize=boxsize)
 	else:
 		if nu_axis!=2: 
 			array = np.swapaxes(array, nu_axis, 2)
 		if np.array(z).size==1: 
 			z = z*np.ones(array.shape[2])
 		for i in tqdm(range(z.size)): 
-			beam[:,:,i] = circular_beam(array.shape[0], z[i], D=D, beam_func=beam_func, boxsize=boxsize)
+			beam[:,:,i] = circular_beam(array.shape[0], z[i], D_station=D_station, beam_func=beam_func, boxsize=boxsize)
 		beamed = array*beam
 		if nu_axis!=2: 
 			beamed = np.swapaxes(beamed, 2, nu_axis)
 	return beamed
 
-def primary_beam_null(z, D=40.):
+def primary_beam_null(z, D_station=40.):
     """
     Calculates the physical diameter of the first null of an Airy disk
     projected on the sky at redshift z.
     """
-    if isinstance(D,units.Quantity):
-        D = D.to('m').value
-    l_null = cm.z_to_cdist(z)*cm.nu_to_wavel(cm.z_to_nu(z))/D*1.22
+    if isinstance(D_station,units.Quantity):
+        D_station = D_station.to('m').value
+    l_null = cm.z_to_cdist(z)*cm.nu_to_wavel(cm.z_to_nu(z))/D_station*1.22
     return l_null 
 
-def circular_beam(ncells, z, D=40., beam_func='Gaussian', boxsize=None):
+def circular_beam(ncells, z, D_station=40., beam_func='Gaussian', boxsize=None):
     """
     Generates a 2D circular beam pattern.
     """
@@ -64,7 +64,7 @@ def circular_beam(ncells, z, D=40., beam_func='Gaussian', boxsize=None):
         boxsize = conv.LB
         
     # Get the diameter of the first null in cMpc
-    l_null = primary_beam_null(z, D=D)
+    l_null = primary_beam_null(z, D_station=D_station)
     
 	# Create a grid of distances from the center
     xx, yy = np.mgrid[-ncells/2:ncells/2,-ncells/2:ncells/2]*boxsize/ncells

@@ -75,7 +75,9 @@ def signal_window(ncells, method, ndim=1, extra_param=30):
 		return None 
 	return win
 
-def noise_coeval_power_spectrum_1d(ncells, z, depth_mhz, obs_time=1000, subarray_type="AA4", kbins=10, boxsize=None, binning='log', return_n_modes=False, total_int_time=6., int_time=10., declination=-30., uv_map=None, N_ant=None, uv_weighting='natural', sefd_data=None, nu_data=None, fft_wrap=False, verbose=True):
+def noise_coeval_power_spectrum_1d(ncells, z, depth_mhz, obs_time=1000, subarray_type="AA4", kbins=10, boxsize=None, binning='log', return_n_modes=False, 
+								   total_int_time=6., int_time=10., declination=-30., uv_map=None, N_ant=None, uv_weighting='natural', 
+								   T_sys=None, sefd_data=None, nu_data=None, D_station=40., ep_aperture=None, fft_wrap=False, verbose=True):
 	"""
 	Computes the 1D power spectrum of instrumental noise for a coeval observation.
 
@@ -115,8 +117,23 @@ def noise_coeval_power_spectrum_1d(ncells, z, depth_mhz, obs_time=1000, subarray
 		The number of antennas. If None, it will be determined.
 	uv_weighting : {'natural', 'uniform'}, optional
 		The weighting scheme to apply in the UV plane.
-	sefd_data, nu_data : various, optional
-		Data for SEFD calculation (passed to `sigma_noise_radio`).
+	T_sys : float, callable, or None, optional
+        System temperature in Kelvin. Can be a single float value or a
+        callable function of frequency in MHz. If `None`, a default model
+        approximating the SKA-Low sky temperature plus a receiver
+        temperature is used. Default is `None`.
+    sefd_data : np.ndarray or None, optional
+        An array of known SEFD values for interpolation. If this is provided,
+        `nu_data` must also be given. Default is `None`.
+    nu_data : np.ndarray or None, optional
+        An array of frequencies in MHz corresponding to `sefd_data`.
+        Default is `None`.
+    D_station : float, optional
+        Diameter of the antenna station in meters. Default is 40.0.
+    ep_aperture : float, callable, or None, optional
+        Aperture efficiency. Can be a single float value or a callable
+        function of frequency in MHz. If `None`, a default frequency-dependent
+        model is used. Default is `None`.
 	verbose : bool, optional
 		If True, enables verbose output.
 
@@ -139,7 +156,8 @@ def noise_coeval_power_spectrum_1d(ncells, z, depth_mhz, obs_time=1000, subarray
 	if N_ant is None: 
 		N_ant = antxyz.shape[0]
 
-	sigma, rms_noi = sigma_noise_radio(z, depth_mhz, obs_time, int_time, uv_map=uv_map, N_ant=N_ant, verbose=False, sefd_data=sefd_data, nu_data=nu_data)
+	sigma, rms_noi = sigma_noise_radio(z, depth_mhz, obs_time, int_time, uv_map=uv_map, N_ant=N_ant, verbose=False, 
+									T_sys=T_sys, sefd_data=sefd_data, nu_data=nu_data, D_station=D_station, ep_aperture=ep_aperture)
 	box_dims = _get_dims(boxsize, uv_map.shape)
 	k_nq = np.pi/boxsize*min(uv_map.shape)
 
@@ -298,7 +316,9 @@ def get_uv_map_lightcone(ncells, zs, subarray_type="AA4", total_int_time=6., int
 			
 	return uvs
 
-def noise_map(ncells, z, depth_mhz, obs_time=1000, subarray_type="AA4", boxsize=None, total_int_time=6., int_time=10., declination=-30., uv_map=None, N_ant=None, uv_weighting='natural', sefd_data=None, nu_data=None, fft_wrap=False, verbose=True, suppress_sharp_features_uv_map=False):
+def noise_map(ncells, z, depth_mhz, obs_time=1000, subarray_type="AA4", boxsize=None, 
+			  total_int_time=6., int_time=10., declination=-30., uv_map=None, N_ant=None, uv_weighting='natural', 
+			  T_sys=None, sefd_data=None, nu_data=None, D_station=40., ep_aperture=None, fft_wrap=False, verbose=True, suppress_sharp_features_uv_map=False):
 	"""
 	Creates a 2D map of instrumental noise for a single observation slice.
 
@@ -326,8 +346,23 @@ def noise_map(ncells, z, depth_mhz, obs_time=1000, subarray_type="AA4", boxsize=
 		Pre-computed UV map and number of antennas.
 	uv_weighting : {'natural', 'uniform'}, optional
 		The weighting scheme to apply.
-	sefd_data, nu_data : various, optional
-		Data for SEFD calculation.
+	T_sys : float, callable, or None, optional
+        System temperature in Kelvin. Can be a single float value or a
+        callable function of frequency in MHz. If `None`, a default model
+        approximating the SKA-Low sky temperature plus a receiver
+        temperature is used. Default is `None`.
+    sefd_data : np.ndarray or None, optional
+        An array of known SEFD values for interpolation. If this is provided,
+        `nu_data` must also be given. Default is `None`.
+    nu_data : np.ndarray or None, optional
+        An array of frequencies in MHz corresponding to `sefd_data`.
+        Default is `None`.
+    D_station : float, optional
+        Diameter of the antenna station in meters. Default is 40.0.
+    ep_aperture : float, callable, or None, optional
+        Aperture efficiency. Can be a single float value or a callable
+        function of frequency in MHz. If `None`, a default frequency-dependent
+        model is used. Default is `None`.
 	fft_wrap : bool, optional
 		If True, use a wrapped FFT to handle periodic boundary conditions.
 	verbose : bool, optional
@@ -347,7 +382,8 @@ def noise_map(ncells, z, depth_mhz, obs_time=1000, subarray_type="AA4", boxsize=
 	if N_ant is None: 
 		N_ant = antxyz.shape[0]
 
-	sigma, rms_noi = sigma_noise_radio(z, depth_mhz, obs_time, int_time, uv_map=uv_map, N_ant=N_ant, verbose=False, sefd_data=sefd_data, nu_data=nu_data)
+	sigma, rms_noi = sigma_noise_radio(z, depth_mhz, obs_time, int_time, uv_map=uv_map, N_ant=N_ant, verbose=False,
+									T_sys=T_sys, sefd_data=sefd_data, nu_data=nu_data, D_station=D_station, ep_aperture=ep_aperture)
 	noise_real = np.random.normal(loc=0.0, scale=rms_noi, size=(ncells, ncells))
 	noise_imag = np.random.normal(loc=0.0, scale=rms_noi, size=(ncells, ncells))
 	noise_arr  = noise_real + 1.j*noise_imag
@@ -643,7 +679,9 @@ def apply_uv_response_on_coeval(array, z, subarray_type="AA4", boxsize=None, tot
 		data3d[:,:,k] = data2d
 	return data3d
 
-def noise_cube_coeval(ncells, z, depth_mhz=None, obs_time=1000, subarray_type="AA4", boxsize=None, total_int_time=6., int_time=10., declination=-30., uv_map=None, N_ant=None, uv_weighting='natural', verbose=True, fft_wrap=False, sefd_data=None, nu_data=None, suppress_sharp_features_uv_map=False):
+def noise_cube_coeval(ncells, z, depth_mhz=None, obs_time=1000, subarray_type="AA4", boxsize=None, 
+					  total_int_time=6., int_time=10., declination=-30., uv_map=None, N_ant=None, uv_weighting='natural', verbose=True, fft_wrap=False, 
+					  T_sys=None, sefd_data=None, nu_data=None, D_station=40., ep_aperture=None, suppress_sharp_features_uv_map=False):
 	"""
 	Generates a 3D coeval cube of instrumental noise.
 
@@ -677,13 +715,19 @@ def noise_cube_coeval(ncells, z, depth_mhz=None, obs_time=1000, subarray_type="A
 		print("Creating the noise cube...")
 	sleep(1)
 	for k in tqdm(range(ncells), disable=not verbose):
-		noise2d = noise_map(ncells, z, depth_mhz, obs_time=obs_time, subarray_type=antxyz, boxsize=boxsize, total_int_time=total_int_time, int_time=int_time, declination=declination, uv_map=uv_map, N_ant=N_ant, uv_weighting=uv_weighting, fft_wrap=fft_wrap, sefd_data=sefd_data, nu_data=nu_data, suppress_sharp_features_uv_map=suppress_sharp_features_uv_map)
+		noise2d = noise_map(ncells, z, depth_mhz, obs_time=obs_time, subarray_type=antxyz, boxsize=boxsize, 
+					  total_int_time=total_int_time, int_time=int_time, declination=declination, uv_map=uv_map, N_ant=N_ant, uv_weighting=uv_weighting, fft_wrap=fft_wrap, 
+					  T_sys=T_sys, sefd_data=sefd_data, nu_data=nu_data, 
+					  D_station=D_station, ep_aperture=ep_aperture,
+					  suppress_sharp_features_uv_map=suppress_sharp_features_uv_map)
 		noise3d[:,:,k] = noise2d
 	if verbose: 
 		print("...noise cube created.")
 	return jansky_2_kelvin(noise3d, z, boxsize=boxsize)
 
-def noise_cube_lightcone(ncells, z, obs_time=1000, subarray_type="AA4", boxsize=None, save_uvmap=None, total_int_time=6., int_time=10., declination=-30., N_ant=None, uv_weighting='natural', fft_wrap=False, verbose=True, n_jobs=4, checkpoint=64, sefd_data=None, nu_data=None, suppress_sharp_features_uv_map=False):
+def noise_cube_lightcone(ncells, z, obs_time=1000, subarray_type="AA4", boxsize=None, save_uvmap=None, 
+						 total_int_time=6., int_time=10., declination=-30., N_ant=None, uv_weighting='natural', fft_wrap=False, verbose=True, n_jobs=4, checkpoint=64, 
+						 T_sys=None, sefd_data=None, nu_data=None, D_station=40., ep_aperture=None, suppress_sharp_features_uv_map=False):
 	"""
 	Generates a 3D lightcone of instrumental noise around a central redshift.
 
@@ -715,9 +759,14 @@ def noise_cube_lightcone(ncells, z, obs_time=1000, subarray_type="AA4", boxsize=
 	zs = cm.cdist_to_z(np.linspace(cm.z_to_cdist(z)-boxsize/2, cm.z_to_cdist(z)+boxsize/2, ncells))
 
 	# This function body is very similar to `noise_lightcone`. Consider refactoring.
-	return noise_lightcone(ncells, zs, obs_time, subarray_type, boxsize, save_uvmap, total_int_time, int_time, declination, N_ant, uv_weighting, fft_wrap, verbose, n_jobs, checkpoint, sefd_data, nu_data, suppress_sharp_features_uv_map)
+	return noise_lightcone(ncells, zs, obs_time, subarray_type, boxsize, save_uvmap, 
+						total_int_time, int_time, declination, N_ant, uv_weighting, fft_wrap, verbose, n_jobs, checkpoint, 
+						T_sys, sefd_data, nu_data, D_station, ep_aperture,
+						suppress_sharp_features_uv_map)
 
-def noise_lightcone(ncells, zs, obs_time=1000, subarray_type="AA4", boxsize=None, save_uvmap=None, total_int_time=6., int_time=10., declination=-30., uv_weighting='natural', fft_wrap=False, verbose=True, n_jobs=4, checkpoint=16, sefd_data=None, nu_data=None, suppress_sharp_features_uv_map=False):
+def noise_lightcone(ncells, zs, obs_time=1000, subarray_type="AA4", boxsize=None, save_uvmap=None, 
+					total_int_time=6., int_time=10., declination=-30., uv_weighting='natural', fft_wrap=False, verbose=True, n_jobs=4, checkpoint=16, 
+					T_sys=None, sefd_data=None, nu_data=None, D_station=40., ep_aperture=None, suppress_sharp_features_uv_map=False):
     """
     Generates a 3D lightcone of instrumental noise over a list of redshifts.
 
@@ -808,7 +857,8 @@ def noise_lightcone(ncells, zs, obs_time=1000, subarray_type="AA4", boxsize=None
             boxsize=boxsize, total_int_time=total_int_time, int_time=int_time, 
             declination=declination, uv_map=uv_map, N_ant=N_ant, 
             uv_weighting=uv_weighting, verbose=False, fft_wrap=fft_wrap, 
-            sefd_data=sefd_data, nu_data=nu_data, 
+			T_sys=T_sys, sefd_data=sefd_data, nu_data=nu_data, 
+			D_station=D_station, ep_aperture=ep_aperture,
             suppress_sharp_features_uv_map=suppress_sharp_features_uv_map
         )
         noise3d[:,:,k] = jansky_2_kelvin(noise2d, zi, boxsize=boxsize)

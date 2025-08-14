@@ -5,24 +5,56 @@ from . import cosmo as cm
 from . import conv
 from .const import KB_SI, c_light_cgs, c_light_SI, janskytowatt
 from .radio_telescope_layout import *
+from .read_files import get_package_resource_path
 
-def get_SEFD(nu_obs, T_sys=None, sefd_data=None, nu_data=None):
-	"""
-	Compute the System Equivalent Flux Density (SEFD) of radio antenna.
+def get_SEFD(nu_obs, T_sys=None, sefd_data=None, nu_data=None, D_station=40., ep_aperture=None):
+	"""Calculates the System Equivalent Flux Density (SEFD) for a radio antenna.
+
+	This function can operate in two modes:
+	1.  **Interpolation**: If `sefd_data` and `nu_data` are provided, it
+		interpolates from the given data to find the SEFD at `nu_obs`.
+	2.  **Direct Calculation**: If `sefd_data` is not provided, it calculates
+		the SEFD from fundamental parameters like system temperature (`T_sys`),
+		station diameter (`D_station`), and aperture efficiency (`ep_aperture`).
 
 	Parameters
 	----------
-	nu_obs : float
-		Observing frequency in MHz.
-	T_sys : float or callable or None
-		System temperature in Kelvin or a function of frequency (MHz). If None, a default model is used.
+	nu_obs : float or np.ndarray
+		Observing frequency or frequencies in MHz.
+	T_sys : float, callable, or None, optional
+		System temperature in Kelvin. Can be a single float value or a
+		callable function of frequency in MHz. If `None`, a default model
+		approximating the SKA-Low sky temperature plus a receiver
+		temperature is used. Default is `None`.
+	sefd_data : np.ndarray or None, optional
+		An array of known SEFD values for interpolation. If this is provided,
+		`nu_data` must also be given. Default is `None`.
+	nu_data : np.ndarray or None, optional
+		An array of frequencies in MHz corresponding to `sefd_data`.
+		Default is `None`.
+	D_station : float, optional
+		Diameter of the antenna station in meters. Default is 40.0.
+	ep_aperture : float, callable, or None, optional
+		Aperture efficiency. Can be a single float value or a callable
+		function of frequency in MHz. If `None`, a default frequency-dependent
+		model is used. Default is `None`.
 
 	Returns
 	-------
-	sefd : float
-		System Equivalent Flux Density in Jy.
+	sefd : float or np.ndarray
+		The calculated System Equivalent Flux Density in Janskys (Jy).
+		Returns a float or array matching the shape of `nu_obs`.
 	"""
+	if isinstance(sefd_data, str):
+		if sefd_data.upper() in ['SKA1-LOW', 'SKA1', 'SKAO-TEL-0000818']:
+			sefd_filename = get_package_resource_path('tools21cm', 'input_data/SEFD_SKAO-TEL-0000818-V2_SKA1.txt')
+			table_data = np.loadtxt(sefd_filename)
+			nu_data = table_data[:,0]
+			sefd_data = table_data[:,2]
+
 	if sefd_data is not None:
+		if nu_data is None:
+			raise ValueError("If sefd_data is provided, nu_data must also be provided.")
 		log10_sefd_fct = interp1d(nu_data, np.log10(sefd_data), fill_value='extrapolate')
 		return 10**log10_sefd_fct(nu_obs)
 
@@ -34,21 +66,31 @@ def get_SEFD(nu_obs, T_sys=None, sefd_data=None, nu_data=None):
 		T_rcvr = 100.0  # K
 		T_sys = lambda nu: T_sky(nu) + T_rcvr
 
-	# If T_sys is a function, evaluate it
+	# If T_sys is a function, evaluate it; otherwise, use the provided value
 	T_sys_val = T_sys(nu_obs) if callable(T_sys) else T_sys
 
 	# Antenna effective area
-	ant_radius_ska = 35.0 / 2.0  # m
-	nu_crit = 110.0  # MHz
-	ep = np.where(nu_obs > nu_crit, (nu_crit / nu_obs) ** 2, 1.0)
-	A_eff = ep * np.pi * ant_radius_ska ** 2  # m^2
+	ant_radius_ska = D_station / 2.0  # m
+	# Default aperture efficiency model
+	if ep_aperture is None:
+		nu_crit = 110.0  # MHz
+		ep_aperture_func = lambda nu: np.where(nu > nu_crit, (nu_crit / nu) ** 2, 1.0)
+		ep_aperture_val = ep_aperture_func(nu_obs)
+	# If ep_aperture is a function, evaluate it; otherwise, use the provided value
+	elif callable(ep_aperture):
+		ep_aperture_val = ep_aperture(nu_obs)
+	else:
+		ep_aperture_val = ep_aperture
+	A_eff = ep_aperture_val * np.pi * ant_radius_ska ** 2  # m^2
 
 	# SEFD in Jy
-	janskytowatt = 1e-26
 	sefd = 2 * KB_SI * T_sys_val / A_eff / janskytowatt  # Jy
-	return sefd
 
-def sigma_noise_radio(z, depth_mhz, obs_time, int_time, uv_map=None, N_ant=512, verbose=True, T_sys=None, sefd_data=None, nu_data=None):
+	# Return a scalar if input was scalar
+	return sefd[0] if nu_obs.size == 1 else sefd
+
+def sigma_noise_radio(z, depth_mhz, obs_time, int_time, uv_map=None, N_ant=512, verbose=True, 
+					  T_sys=None, sefd_data=None, nu_data=None, D_station=40., ep_aperture=None):
 	"""
 	Calculate the rms of the noise added by radio interferometers.
 
@@ -68,8 +110,23 @@ def sigma_noise_radio(z, depth_mhz, obs_time, int_time, uv_map=None, N_ant=512, 
 		Number of antennas in SKA. Default is 564.
 	verbose : bool, optional
 		If True, print detailed information. Default is True.
-	T_sys : callable or None, optional
-		System temperature as a function of frequency. If None, a default model is used.
+	T_sys : float, callable, or None, optional
+        System temperature in Kelvin. Can be a single float value or a
+        callable function of frequency in MHz. If `None`, a default model
+        approximating the SKA-Low sky temperature plus a receiver
+        temperature is used. Default is `None`.
+    sefd_data : np.ndarray or None, optional
+        An array of known SEFD values for interpolation. If this is provided,
+        `nu_data` must also be given. Default is `None`.
+    nu_data : np.ndarray or None, optional
+        An array of frequencies in MHz corresponding to `sefd_data`.
+        Default is `None`.
+    D_station : float, optional
+        Diameter of the antenna station in meters. Default is 40.0.
+    ep_aperture : float, callable, or None, optional
+        Aperture efficiency. Can be a single float value or a callable
+        function of frequency in MHz. If `None`, a default frequency-dependent
+        model is used. Default is `None`.
 
 	Returns
 	-------
@@ -82,7 +139,7 @@ def sigma_noise_radio(z, depth_mhz, obs_time, int_time, uv_map=None, N_ant=512, 
 	nuso = 1420.0 / (1.0 + z)
 
 	# Compute SEFD
-	sefd = get_SEFD(nuso, T_sys, sefd_data=sefd_data, nu_data=nu_data)  # Jy
+	sefd = get_SEFD(nuso, T_sys, sefd_data=sefd_data, nu_data=nu_data, D_station=D_station, ep_aperture=ep_aperture)  # Jy
 
 	# RMS noise per visibility (converted to µJy)
 	rms_noise = 1e6 * sefd / np.sqrt(2 * depth_mhz * 1e6 * int_time)  # µJy
