@@ -217,6 +217,7 @@ def get_uv_map_lightcone(ncells, zs, subarray_type="AA4", total_int_time=6., int
 	antxyz, N_ant = subarray_type_to_antxyz(subarray_type, verbose=verbose)
 	if boxsize is None: boxsize = conv.LB
 	if isinstance(zs, list): zs = np.array(zs)
+	if subarray_type.upper()=='AA*': subarray_type = 'AAstar'
 
 	# Define a dictionary of simulation parameters 
 	params = {
