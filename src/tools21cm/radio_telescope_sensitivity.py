@@ -7,7 +7,7 @@ from .const import KB_SI, c_light_cgs, c_light_SI, janskytowatt
 from .radio_telescope_layout import *
 from .read_files import get_package_resource_path
 
-def get_SEFD(nu_obs, T_sys=None, sefd_data=None, nu_data=None, D_station=40., ep_aperture=None):
+def get_SEFD(nu_obs, T_sys=None, sefd_data=None, nu_data=None, D_station=40., ep_aperture=None, verbose=False):
 	"""Calculates the System Equivalent Flux Density (SEFD) for a radio antenna.
 
 	This function can operate in two modes:
@@ -38,6 +38,8 @@ def get_SEFD(nu_obs, T_sys=None, sefd_data=None, nu_data=None, D_station=40., ep
 		Aperture efficiency. Can be a single float value or a callable
 		function of frequency in MHz. If `None`, a default frequency-dependent
 		model is used. Default is `None`.
+	verbose : bool, optional
+		If True, enables progress bars and informational messages.
 
 	Returns
 	-------
@@ -51,11 +53,15 @@ def get_SEFD(nu_obs, T_sys=None, sefd_data=None, nu_data=None, D_station=40., ep
 			table_data = np.loadtxt(sefd_filename)
 			nu_data = table_data[:,0]
 			sefd_data = table_data[:,2]
+			if verbose:
+				print(f"SEFD data used from a Table in SKAO-TEL-0000818-V2_SKA1 document provided by SKAO")
 
 	if sefd_data is not None:
 		if nu_data is None:
 			raise ValueError("If sefd_data is provided, nu_data must also be provided.")
 		log10_sefd_fct = interp1d(nu_data, np.log10(sefd_data), fill_value='extrapolate')
+		if verbose:
+			print(f"SEFD is interpolated from the data provided.")
 		return 10**log10_sefd_fct(nu_obs)
 
 	nu_obs = np.atleast_1d(nu_obs)
