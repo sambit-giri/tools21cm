@@ -842,9 +842,10 @@ def noise_lightcone(ncells, zs, obs_time=1000, subarray_type="AA4", boxsize=None
     N_ant = uvs.get('Nant')
 
     # Step 2: Create the noise cube using the pre-computed UV maps.
-    print('Creating noise lightcone...')
+    if verbose:
+        print('Creating noise lightcone...')
     noise3d = np.zeros((ncells, ncells, zs.size))
-    for k, zi in enumerate(tqdm(zs, desc="Generating noise slices")):
+    for k, zi in enumerate(tqdm(zs, desc="Generating noise slices", disable=not verbose)):
         if k + 1 < zs.size: 
             depth_mhz = np.abs(cm.z_to_nu(zs[k+1]) - cm.z_to_nu(zs[k]))
         else: 

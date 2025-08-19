@@ -10,7 +10,7 @@ from astropy import units
 from . import cosmo as cm
 from . import conv
 
-def primary_beam(array, z, nu_axis=2, beam_func='Gaussian', boxsize=None, D_station=40.):
+def primary_beam(array, z, nu_axis=2, beam_func='Gaussian', boxsize=None, D_station=40., l_null=None, verbose=True):
 	"""
 	array    : ndarray
 		The array of brightness temperature.
@@ -27,6 +27,9 @@ def primary_beam(array, z, nu_axis=2, beam_func='Gaussian', boxsize=None, D_stat
 		Size of the box in physical units (cMpc). Default: From set simulation constants.
 	D_station: float
 		Diameter of the station in metres. Default: 40.
+    l_null: float
+		Length (in Mpc) of the first null. Default: None, 
+        which will use the diameter of the station to estimate this value.
 	"""
 	assert array.ndim > 1
 	if boxsize is None: 
@@ -39,8 +42,8 @@ def primary_beam(array, z, nu_axis=2, beam_func='Gaussian', boxsize=None, D_stat
 			array = np.swapaxes(array, nu_axis, 2)
 		if np.array(z).size==1: 
 			z = z*np.ones(array.shape[2])
-		for i in tqdm(range(z.size)): 
-			beam[:,:,i] = circular_beam(array.shape[0], z[i], D_station=D_station, beam_func=beam_func, boxsize=boxsize)
+		for i in tqdm(range(z.size), disable=not verbose): 
+			beam[:,:,i] = circular_beam(array.shape[0], z[i], D_station=D_station, beam_func=beam_func, boxsize=boxsize, l_null=l_null)
 		beamed = array*beam
 		if nu_axis!=2: 
 			beamed = np.swapaxes(beamed, 2, nu_axis)
@@ -56,7 +59,7 @@ def primary_beam_null(z, D_station=40.):
     l_null = cm.z_to_cdist(z)*cm.nu_to_wavel(cm.z_to_nu(z))/D_station*1.22
     return l_null 
 
-def circular_beam(ncells, z, D_station=40., beam_func='Gaussian', boxsize=None):
+def circular_beam(ncells, z, D_station=40., beam_func='Gaussian', boxsize=None, l_null=None):
     """
     Generates a 2D circular beam pattern.
     """
@@ -64,7 +67,8 @@ def circular_beam(ncells, z, D_station=40., beam_func='Gaussian', boxsize=None):
         boxsize = conv.LB
         
     # Get the diameter of the first null in cMpc
-    l_null = primary_beam_null(z, D_station=D_station)
+    if l_null is None:
+        l_null = primary_beam_null(z, D_station=D_station)
     
 	# Create a grid of distances from the center
     xx, yy = np.mgrid[-ncells/2:ncells/2,-ncells/2:ncells/2]*boxsize/ncells
