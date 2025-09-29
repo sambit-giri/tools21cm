@@ -7,7 +7,7 @@ Created on Apr 23, 2015
 import numpy as np
 from scipy import fftpack
 from .power_spectrum import _get_dims, _get_k, power_spectrum_1d
-from scipy.interpolate import interp1d, splrep, splev
+from .scipy_func import *
 
 def make_gaussian_random_field(dims, box_dims, power_spectrum, random_seed=None):
     '''
@@ -47,8 +47,8 @@ def make_gaussian_random_field(dims, box_dims, power_spectrum, random_seed=None)
     # Updated for python3: map() no longer returns a list, but an iterable
     # instead, which breaks the code. 200601/GM
     #boxvol = np.product(map(float,box_dims))
-    boxvol = np.product([float(i) for i in box_dims])
-    pixelsize = boxvol/(np.product(map_ft_real.shape))
+    boxvol = numpy_product([float(i) for i in box_dims])
+    pixelsize = boxvol/(numpy_product(map_ft_real.shape))
     scale_factor = pixelsize**2/boxvol
     
     #Scale to power spectrum
