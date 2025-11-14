@@ -1,7 +1,7 @@
 '''
 Created on Apr 23, 2015
 
-@author: Hannes Jensen
+@author: Hannes Jensen (Original Author), Sambit K. Giri (Current Maintainer)
 '''
 
 import numpy as np
@@ -41,7 +41,7 @@ def make_gaussian_random_field(dims, box_dims, power_spectrum, random_seed=None)
     box_dims = _get_dims(box_dims, map_ft_real.shape)
     assert len(box_dims) == len(dims)
     k_comp, k = _get_k(map_ft_real, box_dims)
-    #k[np.abs(k) < 1.e-6] = 1.e-6
+    k[k==0] = np.abs(k)[k!=0].min()/10
     
     #Scale factor
     # Updated for python3: map() no longer returns a list, but an iterable
@@ -100,6 +100,22 @@ def _get_ps_func_for_field(input_field, box_dims, kbins=10):
     # tckp = splrep(np.log10(k_input[n_modes>0]), np.log10(ps_input[n_modes>0]), k=1)
     # ps_k = lambda k: 10**splev(np.log10(k), tckp)
     return ps_k
+        
+def fourier_phase_shuffled(input_array, **kwargs):
+    ''' 
+    Reconstruct the input_array by removing the amplitude information.
     
+    Parameters:
+            input_array (numpy array): the array to calculate the 
+                    power spectrum of. Can be of any dimensions.
     
-    
+    Returns:
+            The amplitude and phase fields.           
+    '''
+    ft = fftpack.fftshift(fftpack.fftn(input_array.astype('float64')))
+    ft_abs = np.abs(ft)
+    ft_phi = np.angle(ft)
+    np.random.shuffle(ft_phi)
+    ft_new = ft_abs*np.exp(1j * ft_phi)
+    output_array = np.real(fftpack.ifftn(fftpack.fftshift(ft_new)))
+    return output_array
