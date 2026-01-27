@@ -674,8 +674,8 @@ def apply_uv_response_on_coeval(array, z, subarray_type="AA4", boxsize=None, tot
 	if uv_map is None: 
 		uv_map, N_ant  = get_uv_map(ncells, z, subarray_type=subarray_type, total_int_time=total_int_time, int_time=int_time, boxsize=boxsize, declination=declination)
 	data3d = np.zeros(array.shape)
-	print("Creating the noise cube")
-	for k in range(ncells):
+	print("Applying the uv tracks to the the coeval signal cube...")
+	for k in tqdm(range(ncells)):
 		data2d = apply_uv_response_on_image(array[:,:,k], uv_map=uv_map)
 		data3d[:,:,k] = data2d
 	return data3d
