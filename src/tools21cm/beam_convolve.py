@@ -3,7 +3,7 @@ from .cosmo import angular_size
 from scipy import signal
 from .helper_functions import print_msg
 from .smoothing import gauss_kernel, get_beam_w
-from .helper_functions import fftconvolve
+from .fft_functions import fftconvolve
 
 def beam_convolve(input_array, z, fov_mpc, beam_w = None, max_baseline = None, \
 				beamshape='gaussian'):

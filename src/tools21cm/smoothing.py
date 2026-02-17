@@ -13,7 +13,8 @@ from scipy.fftpack import fft, ifft, fftn, ifftn
 from numpy.fft import rfftn, irfftn
 from math import ceil, floor
 from numpy import array, asarray, roll
-from .helper_functions import fftconvolve, find_idx
+from .helper_functions import find_idx
+from .fft_functions import fftconvolve
 from tqdm import tqdm
 import astropy.units as u
 

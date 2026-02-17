@@ -191,7 +191,9 @@ def plot_triangle(samples_dict, weights_dict=None,
             )
         # Add legend
         handles = [mlines.Line2D([], [], color=(colors[n] if isinstance(colors, dict) else colors), label=n) for n in names]
-        fig.legend(handles=handles, loc='upper right', bbox_to_anchor=(0.95, 0.95))
+        bbox_to_anchor = kwargs.get('bbox_to_anchor', (0.95, 0.95))
+        legend_fontsize = kwargs.get('legend_fontsize', 14)
+        fig.legend(handles=handles, loc='upper right', bbox_to_anchor=bbox_to_anchor, fontsize=legend_fontsize)
         return fig
 
     # --- 2. GETDIST BACKEND ---
