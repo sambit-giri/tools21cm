@@ -578,60 +578,6 @@ def set_verbose(_verbose):
         global verbose
         verbose = _verbose
 
-def fftconvolve(in1, in2):
-    """Convolve two N-dimensional arrays using FFT.
-
-    This is a modified version of the scipy.signal.fftconvolve.
-    The new feature is derived from the fftconvolve algorithm used in the IDL package.
-
-    Parameters
-    ----------
-    in1 : array_like
-        First input.
-    in2 : array_like
-        Second input. Should have the same number of dimensions as `in1`;
-        if sizes of `in1` and `in2` are not equal then `in1` has to be the
-        larger array.
-
-    Returns
-    -------
-    out : array
-        An N-dimensional array containing a subset of the discrete linear
-        convolution of `in1` with `in2`.
-
-    """
-    in1 = asarray(in1)
-    in2 = asarray(in2)
-
-    #if matrix_rank(in1) == matrix_rank(in2) == 0:  # scalar inputs
-    #    return in1 * in2
-    #elif not in1.ndim == in2.ndim:
-    if not in1.ndim == in2.ndim:
-        raise ValueError("in1 and in2 should have the same rank")
-    elif in1.size == 0 or in2.size == 0:  # empty arrays
-        return array([])
-
-    s1 = np.array(in1.shape)
-    s2 = np.array(in2.shape)
-    complex_result = (np.issubdtype(in1.dtype, np.complex128) or
-                      np.issubdtype(in2.dtype, np.complex128))
-
-    fsize = s1
-
-    fslice = tuple([slice(0, int(sz)) for sz in fsize])
-    if not complex_result:
-        ret = irfftn(rfftn(in1, fsize) *
-                     rfftn(in2, fsize), fsize)[fslice].copy()
-        ret = ret.real
-    else:
-        ret = ifftn(fftn(in1, fsize) * fftn(in2, fsize))[fslice].copy()
-
-    # Shift the axes back 
-    shift = np.floor(fsize*0.5).astype(int)
-    list_of_axes = tuple(np.arange(0, shift.size))
-    ret = roll(ret, -shift, axis=list_of_axes)
-    return ret
-
 def combined_mean_variance(means, variances, sample_sizes=None):
     '''
     Estimate the combined mean and variance of multiple datasets with different means, variances, and sample sizes.
