@@ -186,14 +186,16 @@ def plot_triangle(samples_dict, weights_dict=None,
                 smooth=smooth, smooth1d=smooth1d,
                 truths=truths if i == 0 else None,
                 truth_color=truth_color,
-                plot_datapoints=False, plot_density=False, fill_contours=True,
+                plot_datapoints=False, 
+                plot_density=False, 
                 **kwargs
             )
-        # Add legend
-        handles = [mlines.Line2D([], [], color=(colors[n] if isinstance(colors, dict) else colors), label=n) for n in names]
-        bbox_to_anchor = kwargs.get('bbox_to_anchor', (0.95, 0.95))
-        legend_fontsize = kwargs.get('legend_fontsize', 14)
-        fig.legend(handles=handles, loc='upper right', bbox_to_anchor=bbox_to_anchor, fontsize=legend_fontsize)
+        if kwargs.get('show_legend', True):
+            # Add legend
+            handles = [mlines.Line2D([], [], color=(colors[n] if isinstance(colors, dict) else colors), label=n) for n in names]
+            bbox_to_anchor = kwargs.get('bbox_to_anchor', (0.95, 0.95))
+            legend_fontsize = kwargs.get('legend_fontsize', 14)
+            fig.legend(handles=handles, loc='upper right', bbox_to_anchor=bbox_to_anchor, fontsize=legend_fontsize)
         return fig
 
     # --- 2. GETDIST BACKEND ---

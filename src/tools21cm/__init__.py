@@ -11,8 +11,15 @@ For example:
 '''
 
 import sys
-### From c2raytools
-#Import sub-modules 
+import importlib.metadata
+
+try:
+    __version__ = importlib.metadata.version("BCemu")
+except importlib.metadata.PackageNotFoundError:
+    # This happens if the user just cloned the repo and imported the folder
+    # without running `pip install .` or `pip install -e .`
+    __version__ = "unknown"
+
 #import conv
 from .conv import * #set_sim_constants
 from .const import *
