@@ -14,7 +14,7 @@ import sys
 import importlib.metadata
 
 try:
-    __version__ = importlib.metadata.version("BCemu")
+    __version__ = importlib.metadata.version("tools21cm")
 except importlib.metadata.PackageNotFoundError:
     # This happens if the user just cloned the repo and imported the folder
     # without running `pip install .` or `pip install -e .`
