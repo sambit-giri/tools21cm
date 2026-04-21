@@ -18,11 +18,12 @@ The package provides tools to analyse cosmological simulations of EoR and CD. It
 Currently, `Tools21cm` supports the following simulation codes:
 
 * [CUBEP3M](https://github.com/jharno/cubep3m)
-* [C2RAY](https://github.com/garrelt/C2-Ray3Dm)
+* [C2Ray](https://github.com/garrelt/C2-Ray3Dm) or [pyC2Ray](https://github.com/cosmic-reionization/pyC2Ray)
 * [GRIZZLY](https://arxiv.org/abs/1710.09397)
 * [21cmFAST](https://21cmfast.readthedocs.io/en/latest/)
 * [Simfast21](https://github.com/mariogrs/Simfast21)
 * [sem_num](https://arxiv.org/abs/1403.0941)
+* [BEoRN](github.com/cosmic-reionization/BEoRN)
 
 ### Outputs
 

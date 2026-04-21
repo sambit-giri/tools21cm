@@ -6,3 +6,4 @@ tests/__pycache__*
 __pycache__*
 *.lock
 src/tools21cm/*.cpp
+src/tools21cm/*.so
