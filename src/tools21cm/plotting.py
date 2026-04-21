@@ -472,9 +472,12 @@ class DistributionDiagnostic(ABC):
             samples_list.append(s)
             colors.append(dist['color'] or self.fallback_colors[i % len(self.fallback_colors)])
 
+        line_args = [{'color': c} for c in colors]
+
         g = plots.get_subplot_plotter()
         g.triangle_plot(samples_list, filled=True, contour_levels=levels,
-                        colors=colors, markers=self.true_values, **kwargs)
+                        colors=colors, line_args=line_args,
+                        markers=self.true_values, **kwargs)
         return g
 
     def plot_forest(self):
