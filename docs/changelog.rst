@@ -16,7 +16,7 @@ v2.3
 ----
 * GPU-accelerated topology: Euler characteristics via PyTorch, with Apple M-chip (MPS) support.
 * Radio telescope sensitivity: SEFD tables, SKA-Low Bessel primary beam, UV mapping in Lagrangian space, uniform weighting, spectral-leakage suppression.
-* Astrophysical data: fesc LyA constraints, Qin+2025 MAP reionization model, reionization observational constraints.
+* Astrophysical data: fesc LyA constraints, reionization observational constraints.
 * Zarr file format support.
 * Noise lightcone fixes (double ``jansky_2_kelvin`` call, decreasing-redshift input).
 * ``fftconvolve`` moved to dedicated ``fft_functions.py``.
