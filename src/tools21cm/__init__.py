@@ -35,6 +35,7 @@ from .source_file import *
 from .halo_list import *
 from .statistics import *
 from .power_spectrum import *
+from .phase_spectrum import *
 from .tau import *
 from .lightcone import *
 from .pv_mpm import *
@@ -50,7 +51,6 @@ from .smoothing import *
 from .power_spectrum_noise import *
 from .gaussian_random_field import *
 from .corr_function import *
-# from . import power_spect_fast
 
 from .line_intensity import *
 from .lyman_alpha_transmission import *
@@ -79,9 +79,6 @@ from .percolation import *
 from .compare_constraints import *
 from .astro_tools import *
 
-# from .power_spect_fast import *
-### Cosmospectra
-# from cosmospectra import * 
 
 from .bispectrum import *
 from .position_dependent_power_spectrum import *

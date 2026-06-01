@@ -12,7 +12,7 @@ from . import const
 from . import conv
 from .helper_functions import print_msg, get_eval
 from .scipy_func import numpy_product
-from .power_spectrum import _get_dims, _get_k, _get_kbins, apply_window
+from .power_spectrum import _get_dims, _get_k, _get_kbins, _resolve_k_limit, apply_window
 
 def fft_nd(input_array, box_dims=None, verbose=False):
     ''' 
@@ -109,7 +109,7 @@ class Bispectrum:
                     ):
         tstart = time()
         input_array_nd = self.input_array.astype(np.float64)
-        input_array = apply_window(input_array, window)
+        input_array_nd = apply_window(input_array_nd, window)
 
         box_dims, box_dims_input  = _get_dims(box_dims, input_array_nd.shape), box_dims
         if verbose and box_dims_input is None: print(f'box_dims set to {box_dims} Mpc')
@@ -162,19 +162,29 @@ class Bispectrum:
                     verbose=True,
                     window=None,
                     n_jobs=1,
+                    k_limit=None,
                     ):
+        '''
+        k_limit = None : Upper k limit for the equilateral k bins. Options:
+                            None       — use k_mag.max()/2 (default grid-safe limit)
+                            'nyquist'  — cap at k_Nyquist = π·min(N_i/L_i), clamped to k_mag.max()/2
+                            'aliasing' — cap at k_Nyquist/2, clamped to k_mag.max()/2
+        '''
         tstart = time()
         input_array_nd = self.input_array.astype(np.float64)
-        input_array = apply_window(input_array, window)
+        input_array_nd = apply_window(input_array_nd, window)
 
         box_dims, box_dims_input  = _get_dims(box_dims, input_array_nd.shape), box_dims
         if verbose and box_dims_input is None: print(f'box_dims set to {box_dims} Mpc')
-        
+
         if verbose: print(f'Computing bispectrum with k1=k2=k3...')
         input_array_fft, k_comp, k_mag = fft_nd(input_array_nd, box_dims=box_dims, verbose=verbose)
         if verbose: print('FFT of data done')
 
-        kbins = _get_kbins(n_bins, box_dims, k_mag, binning=binning, kmax=k_mag.max()/2, kmin=None)
+        kmax_grid = k_mag.max() / 2   # equilateral triangles must close on the grid
+        kmax_limit = _resolve_k_limit(k_limit, box_dims, input_array_nd.shape)
+        kmax = kmax_grid if kmax_limit is None else min(kmax_limit, kmax_grid)
+        kbins = _get_kbins(n_bins, box_dims, k_mag, binning=binning, kmax=kmax, kmin=None)
         dk = dk*np.ones_like(kbins) if isinstance(dk,float) else dk
         
         def run_loop(i):
