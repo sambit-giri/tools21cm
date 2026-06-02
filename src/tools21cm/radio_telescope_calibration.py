@@ -172,7 +172,7 @@ def get_uv_map_with_gains(ncells, z,
             Nbase, N_ant = from_antenna_config_with_gains(antxyz, z, gain_model=gain_model)
 
         # Apply incremental rotation for the time step
-        rotated_Nbase = earth_rotation_effect(Nbase[:,:3], time_idx, int_time, declination)
+        rotated_Nbase = earth_rotation_effect(Nbase[:,:3], time_idx, int_time, total_int_time, declination)
 
         # Grid the rotated baselines with gain values
         _grid_uv_tracks_with_gains(rotated_Nbase, Nbase[:,3:], gain_uv_map, z, ncells,
@@ -392,7 +392,7 @@ def get_full_uv_map_with_antenna_stamp(ncells, z, subarray_type="AA4", total_int
     # Parallel processing with progress bar for the first chunk
     results = Parallel(n_jobs=n_jobs)(
         delayed(_process_chunk_get_full_uv_map_with_antenna_stamp)(
-            chunk_start, chunk_end, ncells, z, Nbase, int_time, declination, boxsize, include_mirror_baselines, verbose, show_progress=(i == 0))
+            chunk_start, chunk_end, ncells, z, Nbase, int_time, total_int_time, declination, boxsize, include_mirror_baselines, verbose, show_progress=(i == 0))
             for i, (chunk_start, chunk_end) in enumerate(chunks)
     )
 
@@ -404,7 +404,7 @@ def get_full_uv_map_with_antenna_stamp(ncells, z, subarray_type="AA4", total_int
 
     return ant_tag_uv_map, N_ant
 
-def _process_chunk_get_full_uv_map_with_antenna_stamp(chunk_start, chunk_end, ncells, z, Nbase, int_time, declination, boxsize, include_mirror_baselines, verbose, show_progress):
+def _process_chunk_get_full_uv_map_with_antenna_stamp(chunk_start, chunk_end, ncells, z, Nbase, int_time, total_int_time, declination, boxsize, include_mirror_baselines, verbose, show_progress):
     """
     Process a chunk of time slices.
 
@@ -449,7 +449,7 @@ def _process_chunk_get_full_uv_map_with_antenna_stamp(chunk_start, chunk_end, nc
         time_indices = tqdm(time_indices, desc="Gridding uv tracks", disable=not verbose)
 
     for time_idx in time_indices:
-        rotated_Nbase = earth_rotation_effect(Nbase[:, :3], time_idx, int_time, declination)
+        rotated_Nbase = earth_rotation_effect(Nbase[:, :3], time_idx, int_time, total_int_time, declination)
         _grid_uv_tracks_with_antenna_stamp(rotated_Nbase, Nbase[:, 3:], ant_tag_uv_map_chunk, z, ncells, time_idx - chunk_start,
                                           boxsize=boxsize, include_mirror_baselines=include_mirror_baselines)
 
@@ -591,7 +591,7 @@ def get_full_uv_lagrangian_with_antenna_stamp(ncells, z, subarray_type="AA4", to
     # Parallel processing with progress bar for the first chunk
     results = Parallel(n_jobs=n_jobs)(
         delayed(_process_chunk_get_full_uv_lagrangian_with_antenna_stamp)(
-            chunk_start, chunk_end, ncells, z, Nbase, int_time, declination, boxsize, include_mirror_baselines, verbose, show_progress=(i == 0))
+            chunk_start, chunk_end, ncells, z, Nbase, int_time, total_int_time, declination, boxsize, include_mirror_baselines, verbose, show_progress=(i == 0))
             for i, (chunk_start, chunk_end) in enumerate(chunks)
     )
 
@@ -604,7 +604,7 @@ def get_full_uv_lagrangian_with_antenna_stamp(ncells, z, subarray_type="AA4", to
     ant_pairs = Nbase[:,-2:]
     return ant_tag_uv_lagr, ant_pairs
 
-def _process_chunk_get_full_uv_lagrangian_with_antenna_stamp(chunk_start, chunk_end, ncells, z, Nbase, int_time, declination, boxsize, include_mirror_baselines, verbose, show_progress):
+def _process_chunk_get_full_uv_lagrangian_with_antenna_stamp(chunk_start, chunk_end, ncells, z, Nbase, int_time, total_int_time, declination, boxsize, include_mirror_baselines, verbose, show_progress):
     """
     Processes a chunk of observation time slices for parallel computation.
 
@@ -650,7 +650,7 @@ def _process_chunk_get_full_uv_lagrangian_with_antenna_stamp(chunk_start, chunk_
         time_indices = tqdm(time_indices, desc="Gridding uv tracks", disable=not verbose)
 
     for time_idx in time_indices:
-        rotated_Nbase = earth_rotation_effect(Nbase[:, :3], time_idx, int_time, declination)
+        rotated_Nbase = earth_rotation_effect(Nbase[:, :3], time_idx, int_time, total_int_time, declination)
         _grid_uv_lagrangian_tracks_with_antenna_stamp(rotated_Nbase, Nbase[:, 3:], ant_tag_uv_map_chunk, z, ncells, time_idx - chunk_start,
                                           boxsize=boxsize, include_mirror_baselines=include_mirror_baselines)
 
