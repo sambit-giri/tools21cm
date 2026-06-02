@@ -80,6 +80,7 @@ from .compare_constraints import *
 from .astro_tools import *
 
 
+from .polyspectrum import *
 from .bispectrum import *
 from .position_dependent_power_spectrum import *
 from .test_case import *
