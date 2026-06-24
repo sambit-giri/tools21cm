@@ -441,69 +441,73 @@ def ecef_to_xyz(ecef, lon_deg, origin_ecef):
     local = ecef - origin_ecef
     return local @ R.T + origin_ecef
 
-def get_SKA_Low_layout(subarray_type="AA4", unit='ecef', verbose=True):
+def get_SKA_Low_layout(subarray_type="AA4", unit='ecef', verbose=True, source=None):
     """
-    Loads SKA Low antenna layout data from pre-defined configuration files.
+    Loads SKA Low antenna layout data.
 
     Parameters
     ----------
     subarray_type : str, optional
-        The name of the SKA Low subarray, e.g., "AA4", "AA2", "AASTAR".
+        The name of the SKA Low subarray. Accepted values include "AA4",
+        "AA2", "AA1", "AA0.5", "AA*" (also "AASTAR"), and "SKA1".
     unit : str, optional
         The desired output coordinate system: 'ecef', 'enu', or 'xyz'.
     verbose : bool, optional
         If True, prints information about the loaded layout.
+    source : str or None, optional
+        Data source for the layout. If None (default), uses the internal
+        bundled layout files. Pass ``'ska_ost_array_config'`` to fetch the
+        layout from the official SKAO package (requires installation).
 
     Returns
     -------
     astropy.units.Quantity
         An `(N_ant, 3)` array of antenna positions in the specified `unit`.
     """
-    if subarray_type.upper() == "AA4":
-        filename = 'input_data/skalow_AA4_layout.txt'
-    elif subarray_type.upper() in ["AASTAR", "AA*"]:
-        filename = 'input_data/skalow_AAstar_layout.txt'
-    elif subarray_type.upper() == "AA2":
-        filename = 'input_data/skalow_AA2_layout.txt'
-    elif subarray_type.upper() == "AA1":
-        filename = 'input_data/skalow_AA1_layout.txt'
-    elif subarray_type.upper() == "AA0.5":
-        filename = 'input_data/skalow_AA0.5_layout.txt'
-    else:
-        filename = 'input_data/skalow1_layout.txt'
+    # Normalise AA* alias so both internal and external paths accept it
+    _subarray = "AA*" if subarray_type.upper() == "AASTAR" else subarray_type
 
-    # Load lat, lon, height from file
+    # Load array-centre coordinates (used by all coordinate transforms)
     lon, lat, height = np.loadtxt(get_package_resource_path('tools21cm', 'input_data/central_geographic_position.txt'))
-    
-    # EarthLocation of the array center
     core = EarthLocation(lat=lat * u.deg, lon=lon * u.deg, height=height * u.m)
-    origin_ecef = np.array([core.x.value, core.y.value, core.z.value])  # in meters
+    origin_ecef = np.array([core.x.value, core.y.value, core.z.value])
 
-    # Load ENU antenna positions
-    path_to_file = get_package_resource_path('tools21cm', filename)
-    ant_enu = np.loadtxt(path_to_file)  # shape (N_ant, 3)
+    if source is not None and source.lower() == 'ska_ost_array_config':
+        low = get_latest_SKA_Low_layout(subarray_type=_subarray)
+        if low is None:
+            return None
+        ant_enu = low.array_config.xyz.to_numpy()
+    else:
+        if _subarray.upper() == "AA4":
+            filename = 'input_data/skalow_AA4_layout.txt'
+        elif _subarray.upper() == "AA*":
+            filename = 'input_data/skalow_AAstar_layout.txt'
+        elif _subarray.upper() == "AA2":
+            filename = 'input_data/skalow_AA2_layout.txt'
+        elif _subarray.upper() == "AA1":
+            filename = 'input_data/skalow_AA1_layout.txt'
+        elif _subarray.upper() == "AA0.5":
+            filename = 'input_data/skalow_AA0.5_layout.txt'
+        else:
+            filename = 'input_data/skalow1_layout.txt'
+        ant_enu = np.loadtxt(get_package_resource_path('tools21cm', filename))
 
     if verbose:
         print(f'{subarray_type} contains {ant_enu.shape[0]} antennae.')
 
-    # Handle coordinate transformations
     if unit.lower() == 'enu':
-        # local ENU positions
-        return ant_enu * u.m  
+        return ant_enu * u.m
     elif unit.lower() == 'ecef':
-        # Convert ENU to ECEF
         if verbose:
             print('ENU -> ECEF')
-        ant_ecef = enu_to_ecef(ant_enu, lat, lon, origin_ecef)
-        return ant_ecef * u.m
+        return enu_to_ecef(ant_enu, lat, lon, origin_ecef) * u.m
     elif unit.lower() == 'xyz':
-        # Convert ENU to ECEF to XYZ
         if verbose:
             print('ENU -> ECEF -> XYZ')
         ant_ecef = enu_to_ecef(ant_enu, lat, lon, origin_ecef)
-        ant_xyz = ecef_to_xyz(ant_ecef, lon, origin_ecef)
-        return ant_xyz * u.m
+        return ecef_to_xyz(ant_ecef, lon, origin_ecef) * u.m
     elif unit in ['latlon', 'geodetic']:
+        ant_ecef = enu_to_ecef(ant_enu, lat, lon, origin_ecef)
         locations = EarthLocation.from_geocentric(ant_ecef[:, 0], ant_ecef[:, 1], ant_ecef[:, 2], unit=u.m)
         return locations.lat.deg, locations.lon.deg, locations.height.to(u.m).value
     else:
