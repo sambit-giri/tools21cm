@@ -8,19 +8,81 @@ from .helper_functions import print_msg, get_eval
 from .scipy_func import numpy_product
 from scipy import fftpack, stats, interpolate
 
-def apply_window(input_array, window):
+def apply_window(input_array, window, backend='numpy'):
     if window is None: return input_array
     from scipy.signal import windows
-    if window.lower()=='blackmanharris':
-            input_array *= windows.blackmanharris(input_array.shape[-1])[None,None,:]
-    elif window.lower()=='tukey':
-            input_array *= windows.tukey(input_array.shape[-1])[None,None,:]
+    if backend in (None, 'numpy'):
+        if window.lower()=='blackmanharris':
+                input_array *= windows.blackmanharris(input_array.shape[-1])[None,None,:]
+        elif window.lower()=='tukey':
+                input_array *= windows.tukey(input_array.shape[-1])[None,None,:]
+        else:
+                input_array *= window
+        return input_array
+    # Differentiable backends: out-of-place multiply, window built in numpy (static).
+    name, xp = _import_backend(backend)
+    if isinstance(window, str) and window.lower()=='blackmanharris':
+            w = windows.blackmanharris(input_array.shape[-1])[None,None,:]
+    elif isinstance(window, str) and window.lower()=='tukey':
+            w = windows.tukey(input_array.shape[-1])[None,None,:]
     else:
-            input_array *= window
-    return input_array
+            w = np.asarray(window)
+    arr = _as_backend_array(input_array, name, xp)
+    wb  = _as_backend_array(w, name, xp)
+    if name == 'torch': wb = wb.to(arr.dtype)
+    return arr * wb
 
 
-def power_spectrum_nd(input_array, box_dims=None, verbose=False, **kwargs):
+def _import_backend(backend):
+        '''
+        Resolve a backend name to (name, array module).
+        'numpy' → numpy, 'jax' → jax.numpy, 'torch' → torch.
+        Note for jax: enable jax_enable_x64 for float64 precision, otherwise
+        the jax path runs in float32 (jax default).
+        '''
+        if backend is None: return 'numpy', np
+        name = str(backend).lower()
+        if name == 'numpy':
+                return name, np
+        if name == 'jax':
+                import jax.numpy as jnp
+                return name, jnp
+        if name == 'torch':
+                import torch
+                return name, torch
+        raise ValueError("backend must be 'numpy', 'jax' or 'torch'; got %r" % (backend,))
+
+
+def _as_backend_array(input_array, name, xp):
+        '''Convert to the backend's array type without copying when already there.'''
+        if name == 'torch':
+                return input_array if xp.is_tensor(input_array) else xp.as_tensor(np.ascontiguousarray(input_array))
+        return xp.asarray(input_array)
+
+
+def _scatter_add(values, idx, n_bins, name, xp):
+        '''
+        Differentiable scatter-add: sum `values` (backend array) into `n_bins`
+        bins according to the integer numpy index array `idx`.
+        '''
+        if name == 'jax':
+                return xp.zeros(n_bins, dtype=values.dtype).at[xp.asarray(idx)].add(values)
+        if name == 'torch':
+                index = xp.as_tensor(idx, dtype=xp.long, device=values.device)
+                return xp.zeros(n_bins, dtype=values.dtype, device=values.device).index_add(0, index, values)
+        out = np.zeros(n_bins, dtype=values.dtype)
+        np.add.at(out, idx, values)
+        return out
+
+
+def _take(values, idx, name, xp):
+        '''Gather `values[idx]` for a numpy integer index array (differentiable).'''
+        if name == 'torch':
+                return values[xp.as_tensor(idx, dtype=xp.long, device=values.device)]
+        return values[idx]
+
+
+def power_spectrum_nd(input_array, box_dims=None, verbose=False, backend='numpy', **kwargs):
         ''' 
         Calculate the power spectrum of input_array and return it as an n-dimensional array.
         
@@ -32,28 +94,39 @@ def power_spectrum_nd(input_array, box_dims=None, verbose=False, **kwargs):
                         dimensions. If it is a float, this is taken as the box length
                         along all dimensions. If it is an array-like, the elements are
                         taken as the box length along each axis.
-        
+                backend = 'numpy' (string): 'numpy' (default), 'jax' or 'torch'.
+                        With 'jax'/'torch' the FFT and all array operations run in the
+                        chosen framework, so the result is differentiable (jax.grad /
+                        torch autograd) and can execute on GPU. Default path unchanged.
+
         Returns:
-                The power spectrum in the same dimensions as the input array.           
+                The power spectrum in the same dimensions as the input array.
         '''
 
         if kwargs.get('boxsize') is not None: box_dims = kwargs.get('boxsize')
         box_dims = _get_dims(box_dims, input_array.shape)
+
+        # scale
+        boxvol = numpy_product(box_dims)
+        pixelsize = boxvol/(numpy_product(input_array.shape))
+
+        if backend not in (None, 'numpy'):
+                name, xp = _import_backend(backend)
+                arr = _as_backend_array(input_array, name, xp)
+                ft = xp.fft.fftshift(xp.fft.fftn(arr))
+                return xp.abs(ft)**2 * (pixelsize**2/boxvol)
 
         if(verbose): print( 'Calculating power spectrum...')
         ft = fftpack.fftshift(fftpack.fftn(input_array.astype('float64')))
         power_spectrum = np.abs(ft)**2
         if(verbose): print( '...done')
 
-        # scale
-        boxvol = numpy_product(box_dims)
-        pixelsize = boxvol/(numpy_product(input_array.shape))
         power_spectrum *= pixelsize**2/boxvol
-        
+
         return power_spectrum
 
 
-def cross_power_spectrum_nd(input_array1, input_array2, box_dims, **kwargs):
+def cross_power_spectrum_nd(input_array1, input_array2, box_dims, backend='numpy', **kwargs):
         ''' 
         Calculate the cross power spectrum two arrays and return it as an n-dimensional array.
         
@@ -79,6 +152,17 @@ def cross_power_spectrum_nd(input_array1, input_array2, box_dims, **kwargs):
 
         if kwargs.get('boxsize') is not None: box_dims = kwargs.get('boxsize')
         box_dims = _get_dims(box_dims, input_array1.shape)
+
+        if backend not in (None, 'numpy'):
+                name, xp = _import_backend(backend)
+                a1 = _as_backend_array(input_array1, name, xp)
+                a2 = _as_backend_array(input_array2, name, xp)
+                ft1 = xp.fft.fftshift(xp.fft.fftn(a1))
+                ft2 = xp.fft.fftshift(xp.fft.fftn(a2))
+                power_spectrum = (ft1 * xp.conj(ft2)).real
+                boxvol = numpy_product(box_dims)
+                pixelsize = boxvol/(numpy_product(input_array1.shape))
+                return power_spectrum * (pixelsize**2/boxvol)
 
         print_msg( 'Calculating power spectrum...')
         ft1 = fftpack.fftshift(fftpack.fftn(input_array1.astype('float64')))
@@ -121,8 +205,58 @@ def _adaptive_bin_edges(modes, n_bins, log=True):
         return np.array(edges)
 
 
+def _radial_average_backend(power, k, box_dims, kbins, binning, kmax,
+                            fill_empty_bins, name, xp):
+        '''
+        Differentiable radial average for jax/torch backend arrays.
+
+        Bin geometry (k grid, bin edges, per-bin mode counts, empty-bin fill
+        indices) depends only on the grid shape, box_dims and the binning
+        scheme, so it is computed in numpy and is static under jax.jit /
+        torch autograd. Only the power values carry gradients; they are
+        summed per bin with a differentiable scatter-add.
+
+        Supports binning='log' and 'linear' (matches the numpy tophat path).
+        '''
+        if binning not in ('log', 'linear'):
+                raise NotImplementedError(
+                        "backend='%s' supports binning='log' or 'linear'; got %r" % (name, binning))
+        kbins_edges = _get_kbins(kbins, box_dims, k, binning=binning, kmax=kmax)
+        k_flat = k.flatten()
+        n_bins = len(kbins_edges) - 1
+        idx = np.digitize(k_flat, kbins_edges) - 1
+        idx[k_flat == kbins_edges[-1]] = n_bins - 1   # np.histogram includes the right edge
+        valid = np.flatnonzero((idx >= 0) & (idx < n_bins))
+        idx_v = idx[valid]
+        n_modes = np.bincount(idx_v, minlength=n_bins).astype(float)
+
+        pw   = _take(power.reshape(-1), valid, name, xp)
+        sums = _scatter_add(pw, idx_v, n_bins, name, xp)
+        counts = _as_backend_array(np.where(n_modes > 0, n_modes, 1.0), name, xp)
+        if name == 'torch': counts = counts.to(sums.dtype)
+        outdata = sums / counts
+
+        empty = n_modes == 0
+        if empty.any() and not empty.all():
+                if fill_empty_bins:
+                        # static nearest-neighbour gather, mirrors the numpy fill
+                        gather = np.arange(n_bins)
+                        non_empty = np.flatnonzero(~empty)
+                        for ni in np.flatnonzero(empty):
+                                gather[ni] = non_empty[np.argmin(np.abs(non_empty - ni))]
+                        outdata = _take(outdata, gather, name, xp)
+                else:
+                        nan_vec = _as_backend_array(np.where(empty, np.nan, 0.0), name, xp)
+                        if name == 'torch': nan_vec = nan_vec.to(outdata.dtype)
+                        outdata = outdata + nan_vec
+
+        dk = (kbins_edges[1:] - kbins_edges[:-1]) / 2.
+        k_mid = kbins_edges[:-1] + dk
+        return outdata, k_mid, n_modes
+
+
 def radial_average(input_array, box_dims, kbins=10, binning='log', kmax=None,
-                   fill_empty_bins=True, **kwargs):
+                   fill_empty_bins=True, backend='numpy', **kwargs):
         '''
         Radially average data. Mostly for internal use.
 
@@ -133,12 +267,21 @@ def radial_average(input_array, box_dims, kbins=10, binning='log', kmax=None,
                 binning = 'log' : binning scheme ('log', 'linear', 'adaptive', 'adaptive_linear', 'kde', 'kde_linear').
                 kmax = None (float): upper k bin edge (from _resolve_k_limit).
                 fill_empty_bins = True : fill zero-mode bins via 1D nearest-neighbour.
+                backend = 'numpy' : 'numpy' (default), 'jax' or 'torch'. Differentiable
+                        scatter-add binning for jax/torch arrays ('log'/'linear' only).
 
         Returns:
                 (data, bin_centers, n_modes)
         '''
 
         if kwargs.get('boxsize') is not None: box_dims = kwargs.get('boxsize')
+
+        if backend not in (None, 'numpy'):
+                name, xp = _import_backend(backend)
+                _, k_np = _get_k(input_array, box_dims)   # numpy k grid: uses only .shape
+                return _radial_average_backend(input_array, k_np, box_dims, kbins,
+                                               binning, kmax, fill_empty_bins, name, xp)
+
         k_comp, k = _get_k(input_array, box_dims)
 
         # ---- KDE path (log-k or linear-k) ----
@@ -196,7 +339,8 @@ def radial_average(input_array, box_dims, kbins=10, binning='log', kmax=None,
         
 
 def power_spectrum_1d(input_array_nd, kbins=100, box_dims=None, return_n_modes=False,
-                      binning='log', window=None, k_limit=None, fill_empty_bins=True, **kwargs):
+                      binning='log', window=None, k_limit=None, fill_empty_bins=True,
+                      backend='numpy', **kwargs):
         ''' Calculate the spherically averaged power spectrum of an array
         and return it as a one-dimensional array.
 
@@ -218,29 +362,95 @@ def power_spectrum_1d(input_array_nd, kbins=100, box_dims=None, return_n_modes=F
                 k_limit = None : upper k limit (None, 'nyquist', or 'aliasing').
                 fill_empty_bins = True : fill zero-mode bins via 1D nearest-neighbour
                         after tophat/adaptive binning. No effect for kde variants.
+                backend = 'numpy' : 'numpy' (default), 'jax' or 'torch'. With 'jax'/'torch'
+                        the estimator is end-to-end differentiable (jax.grad / torch
+                        autograd) and GPU-capable; binning must be 'log' or 'linear'.
+                        The numpy path is unchanged.
 
         Returns:
                 (Pk, bins) or (Pk, bins, n_modes) if return_n_modes is True.
         '''
 
-        input_array_nd = apply_window(input_array_nd, window)
+        input_array_nd = apply_window(input_array_nd, window, backend=backend)
 
         if kwargs.get('boxsize') is not None: box_dims = kwargs.get('boxsize')
         box_dims = _get_dims(box_dims, input_array_nd.shape)
 
         kmax = _resolve_k_limit(k_limit, box_dims, input_array_nd.shape)
-        input_array = power_spectrum_nd(input_array_nd, box_dims=box_dims)
+        input_array = power_spectrum_nd(input_array_nd, box_dims=box_dims, backend=backend)
 
         ps, bins, n_modes = radial_average(input_array, kbins=kbins, box_dims=box_dims,
                                            binning=binning, kmax=kmax,
-                                           fill_empty_bins=fill_empty_bins)
+                                           fill_empty_bins=fill_empty_bins, backend=backend)
         if return_n_modes:
                 return ps, bins, n_modes
         return ps, bins
 
 
+def _power_spectrum_2d_backend(power, kp, kz, kbins, binning, kmax_per, kmax_par,
+                               fill_empty_bins, return_modes, name, xp):
+        '''
+        Differentiable cylindrical (kper, kpar) binning for jax/torch backend
+        arrays. Static bin geometry in numpy, differentiable scatter-add for
+        the power values. Supports binning='log' and 'linear'.
+        '''
+        if binning not in ('log', 'linear'):
+                raise NotImplementedError(
+                        "backend='%s' supports binning='log' or 'linear'; got %r" % (name, binning))
+        if binning == 'log':
+                with np.errstate(divide='ignore'):
+                        kp_b, kz_b = np.log10(kp), np.log10(kz)
+                edges_per = np.linspace(np.log10(kp[kp != 0].min()), np.log10(kmax_per), kbins[0] + 1)
+                edges_par = np.linspace(np.log10(kz[kz != 0].min()), np.log10(kmax_par), kbins[1] + 1)
+        else:
+                kp_b, kz_b = kp, kz
+                edges_per = np.linspace(kp[kp != 0].min(), kmax_per, kbins[0] + 1)
+                edges_par = np.linspace(kz[kz != 0].min(), kmax_par, kbins[1] + 1)
+
+        n_per, n_par = kbins[0], kbins[1]
+        ip = np.digitize(kp_b.flatten(), edges_per) - 1
+        iz = np.digitize(kz_b.flatten(), edges_par) - 1
+        ip[kp_b.flatten() == edges_per[-1]] = n_per - 1
+        iz[kz_b.flatten() == edges_par[-1]] = n_par - 1
+        valid = np.flatnonzero((ip >= 0) & (ip < n_per) & (iz >= 0) & (iz < n_par))
+        flat = ip[valid] * n_par + iz[valid]
+        n_modes = np.bincount(flat, minlength=n_per * n_par).astype(float)
+
+        pw   = _take(power.reshape(-1), valid, name, xp)
+        sums = _scatter_add(pw, flat, n_per * n_par, name, xp)
+        counts = _as_backend_array(np.where(n_modes > 0, n_modes, 1.0), name, xp)
+        if name == 'torch': counts = counts.to(sums.dtype)
+        ps_flat = sums / counts
+
+        empty = n_modes == 0
+        if empty.any() and not empty.all():
+                if fill_empty_bins:
+                        from scipy.ndimage import distance_transform_edt
+                        nan_mask = empty.reshape(n_per, n_par)
+                        _, (ri, ci) = distance_transform_edt(nan_mask, return_indices=True)
+                        gather = (ri * n_par + ci).flatten()
+                        ps_flat = _take(ps_flat, gather, name, xp)
+                else:
+                        nan_vec = _as_backend_array(np.where(empty, np.nan, 0.0), name, xp)
+                        if name == 'torch': nan_vec = nan_vec.to(ps_flat.dtype)
+                        ps_flat = ps_flat + nan_vec
+        ps_out = ps_flat.reshape(n_per, n_par)
+
+        if binning == 'log':
+                kper_mid = np.power(10, 0.5 * (edges_per[:-1] + edges_per[1:]))
+                kpar_mid = np.power(10, 0.5 * (edges_par[:-1] + edges_par[1:]))
+        else:
+                kper_mid = (edges_per[:-1] + edges_per[1:]) / 2.
+                kpar_mid = (edges_par[:-1] + edges_par[1:]) / 2.
+
+        if return_modes:
+                return ps_out, kper_mid, kpar_mid, n_modes.reshape(n_per, n_par)
+        return ps_out, kper_mid, kpar_mid
+
+
 def power_spectrum_2d(input_array, kbins=10, binning='log', box_dims=244/.7, return_modes=False,
-                      nu_axis=2, window=None, k_limit=None, fill_empty_bins=True, **kwargs):
+                      nu_axis=2, window=None, k_limit=None, fill_empty_bins=True,
+                      backend='numpy', **kwargs):
         '''
         Calculate the power spectrum and bin it in kper and kpar.
 
@@ -264,11 +474,14 @@ def power_spectrum_2d(input_array, kbins=10, binning='log', box_dims=244/.7, ret
                 fill_empty_bins = True : after tophat/adaptive binning, fill any remaining
                         NaN (zero-mode) bins via 2D nearest-neighbour in index space.
                         Set False to keep NaN. Ignored for kde variants.
+                backend = 'numpy' : 'numpy' (default), 'jax' or 'torch'. With 'jax'/'torch'
+                        the estimator is differentiable and GPU-capable; binning must be
+                        'log' or 'linear'. The numpy path is unchanged.
 
         Returns:
                 (Pk, kper_mid, kpar_mid) or (Pk, kper_mid, kpar_mid, n_modes).
         '''
-        input_array = apply_window(input_array, window)
+        input_array = apply_window(input_array, window, backend=backend)
 
         if type(kbins) == list:
                 binning = None
@@ -279,7 +492,7 @@ def power_spectrum_2d(input_array, kbins=10, binning='log', box_dims=244/.7, ret
 
         if kwargs.get('boxsize') is not None: box_dims = kwargs.get('boxsize')
         box_dims = _get_dims(box_dims, input_array.shape)
-        power = power_spectrum_nd(input_array, box_dims)
+        power = power_spectrum_nd(input_array, box_dims, backend=backend)
         k_xyz, k = _get_k(input_array, box_dims)
         xy_axis = [0, 1, 2]
         xy_axis.remove(nu_axis)
@@ -308,6 +521,13 @@ def power_spectrum_2d(input_array, kbins=10, binning='log', box_dims=244/.7, ret
                 kmax_per = kp.max()
                 kmax_par = kz.max()
         del xy_axis
+
+        # ---- Differentiable backend path (jax/torch) ----
+        if backend not in (None, 'numpy'):
+                name, xp = _import_backend(backend)
+                return _power_spectrum_2d_backend(power, kp, kz, kbins, binning,
+                                                  kmax_per, kmax_par, fill_empty_bins,
+                                                  return_modes, name, xp)
 
         # ---- KDE path (log-k or linear-k) ----
         if binning in ('kde', 'kde_linear'):
@@ -393,7 +613,7 @@ def power_spectrum_2d(input_array, kbins=10, binning='log', box_dims=244/.7, ret
 
 def cross_power_spectrum_1d(input_array1_nd, input_array2_nd, kbins=100, box_dims=None,
                             return_n_modes=False, binning='log', k_limit=None,
-                            fill_empty_bins=True, **kwargs):
+                            fill_empty_bins=True, backend='numpy', **kwargs):
         ''' Calculate the spherically averaged cross power spectrum of two arrays
         and return it as a one-dimensional array.
 
@@ -406,6 +626,8 @@ def cross_power_spectrum_1d(input_array1_nd, input_array2_nd, kbins=100, box_dim
                 binning = 'log' : binning scheme ('log', 'linear', 'adaptive', 'kde').
                 k_limit = None : upper k limit (None, 'nyquist', or 'aliasing').
                 fill_empty_bins = True : fill zero-mode bins via 1D nearest-neighbour.
+                backend = 'numpy' : 'numpy' (default), 'jax' or 'torch' (differentiable,
+                        GPU-capable; binning must be 'log' or 'linear').
 
         Returns:
                 (Pk, bins) or (Pk, bins, n_modes) if return_n_modes is True.
@@ -414,11 +636,12 @@ def cross_power_spectrum_1d(input_array1_nd, input_array2_nd, kbins=100, box_dim
         box_dims = _get_dims(box_dims, input_array1_nd.shape)
 
         kmax = _resolve_k_limit(k_limit, box_dims, input_array1_nd.shape)
-        input_array = cross_power_spectrum_nd(input_array1_nd, input_array2_nd, box_dims=box_dims)
+        input_array = cross_power_spectrum_nd(input_array1_nd, input_array2_nd,
+                                              box_dims=box_dims, backend=backend)
 
         ps, bins, n_modes = radial_average(input_array, kbins=kbins, box_dims=box_dims,
                                            binning=binning, kmax=kmax,
-                                           fill_empty_bins=fill_empty_bins)
+                                           fill_empty_bins=fill_empty_bins, backend=backend)
         if return_n_modes:
                 return ps, bins, n_modes
         return ps, bins
