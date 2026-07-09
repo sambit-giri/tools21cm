@@ -317,9 +317,9 @@ def get_uv_map_lightcone(ncells, zs, subarray_type="AA4", total_int_time=6., int
 			
 	return uvs
 
-def noise_map(ncells, z, depth_mhz, obs_time=1000, subarray_type="AA4", boxsize=None, 
-			  total_int_time=6., int_time=10., declination=-30., uv_map=None, N_ant=None, uv_weighting='natural', 
-			  T_sys=None, sefd_data=None, nu_data=None, D_station=40., ep_aperture=None, fft_wrap=False, verbose=True, suppress_sharp_features_uv_map=False):
+def noise_map(ncells, z, depth_mhz, obs_time=1000, subarray_type="AA4", boxsize=None,
+			  total_int_time=6., int_time=10., declination=-30., uv_map=None, N_ant=None, uv_weighting='natural',
+			  T_sys=None, sefd_data=None, nu_data=None, D_station=40., ep_aperture=None, fft_wrap=False, verbose=True, suppress_sharp_features_uv_map=False, seed=None):
 	"""
 	Creates a 2D map of instrumental noise for a single observation slice.
 
@@ -370,12 +370,15 @@ def noise_map(ncells, z, depth_mhz, obs_time=1000, subarray_type="AA4", boxsize=
 		If True, enables verbose output.
 	suppress_sharp_features_uv_map : bool or str, optional
 		If a string, specifies a method to smooth the UV map to reduce artifacts.
+	seed : int, np.random.Generator, or None, optional
+		Seed or generator for the random noise draw. None (default) gives a
+		fresh random realisation on every call.
 
 	Returns
 	-------
 	np.ndarray
 		A 2D array representing the noise map in the image domain (in muJy).
-	"""	
+	"""
 	antxyz, N_ant = subarray_type_to_antxyz(subarray_type, verbose=verbose)
 
 	if uv_map is None: 
@@ -385,8 +388,9 @@ def noise_map(ncells, z, depth_mhz, obs_time=1000, subarray_type="AA4", boxsize=
 
 	sigma, rms_noi = sigma_noise_radio(z, depth_mhz, obs_time, int_time, uv_map=uv_map, N_ant=N_ant, verbose=False,
 									T_sys=T_sys, sefd_data=sefd_data, nu_data=nu_data, D_station=D_station, ep_aperture=ep_aperture)
-	noise_real = np.random.normal(loc=0.0, scale=rms_noi, size=(ncells, ncells))
-	noise_imag = np.random.normal(loc=0.0, scale=rms_noi, size=(ncells, ncells))
+	rng = seed if isinstance(seed, np.random.Generator) else np.random.default_rng(seed)
+	noise_real = rng.normal(loc=0.0, scale=rms_noi, size=(ncells, ncells))
+	noise_imag = rng.normal(loc=0.0, scale=rms_noi, size=(ncells, ncells))
 	noise_arr  = noise_real + 1.j*noise_imag
 	noise_four = apply_uv_response_noise(noise_arr, uv_map, boxsize=boxsize, uv_weighting=uv_weighting, suppress_sharp_features_uv_map=suppress_sharp_features_uv_map)
 	# noise_four = apply_uv_response_noise_briggs(noise_arr, uv_map, robust=2.0, epsilon=1e-6)
@@ -680,9 +684,9 @@ def apply_uv_response_on_coeval(array, z, subarray_type="AA4", boxsize=None, tot
 		data3d[:,:,k] = data2d
 	return data3d
 
-def noise_cube_coeval(ncells, z, depth_mhz=None, obs_time=1000, subarray_type="AA4", boxsize=None, 
-					  total_int_time=6., int_time=10., declination=-30., uv_map=None, N_ant=None, uv_weighting='natural', verbose=True, fft_wrap=False, 
-					  T_sys=None, sefd_data=None, nu_data=None, D_station=40., ep_aperture=None, suppress_sharp_features_uv_map=False):
+def noise_cube_coeval(ncells, z, depth_mhz=None, obs_time=1000, subarray_type="AA4", boxsize=None,
+					  total_int_time=6., int_time=10., declination=-30., uv_map=None, N_ant=None, uv_weighting='natural', verbose=True, fft_wrap=False,
+					  T_sys=None, sefd_data=None, nu_data=None, D_station=40., ep_aperture=None, suppress_sharp_features_uv_map=False, seed=None):
 	"""
 	Generates a 3D coeval cube of instrumental noise.
 
@@ -695,6 +699,9 @@ def noise_cube_coeval(ncells, z, depth_mhz=None, obs_time=1000, subarray_type="A
 		Parameters passed to `noise_map` for each slice.
 	depth_mhz : float, optional
 		The bandwidth per channel. If None, it is calculated from `boxsize`.
+	seed : int, np.random.Generator, or None, optional
+		Seed or generator for the random noise draws. The same seed reproduces
+		the same noise cube. None (default) gives a fresh random realisation.
 
 	Returns
 	-------
@@ -711,24 +718,25 @@ def noise_cube_coeval(ncells, z, depth_mhz=None, obs_time=1000, subarray_type="A
 		uv_map, N_ant  = get_uv_map(ncells, z, subarray_type=antxyz, total_int_time=total_int_time, int_time=int_time, boxsize=boxsize, declination=declination)
 
 	# ncells = int(ncells); print(ncells)
+	rng = seed if isinstance(seed, np.random.Generator) else np.random.default_rng(seed)
 	noise3d = np.zeros((ncells,ncells,ncells))
-	if verbose: 
+	if verbose:
 		print("Creating the noise cube...")
 	sleep(1)
 	for k in tqdm(range(ncells), disable=not verbose):
-		noise2d = noise_map(ncells, z, depth_mhz, obs_time=obs_time, subarray_type=antxyz, boxsize=boxsize, 
-					  total_int_time=total_int_time, int_time=int_time, declination=declination, uv_map=uv_map, N_ant=N_ant, uv_weighting=uv_weighting, fft_wrap=fft_wrap, 
-					  T_sys=T_sys, sefd_data=sefd_data, nu_data=nu_data, 
+		noise2d = noise_map(ncells, z, depth_mhz, obs_time=obs_time, subarray_type=antxyz, boxsize=boxsize,
+					  total_int_time=total_int_time, int_time=int_time, declination=declination, uv_map=uv_map, N_ant=N_ant, uv_weighting=uv_weighting, fft_wrap=fft_wrap,
+					  T_sys=T_sys, sefd_data=sefd_data, nu_data=nu_data,
 					  D_station=D_station, ep_aperture=ep_aperture,
-					  suppress_sharp_features_uv_map=suppress_sharp_features_uv_map)
+					  suppress_sharp_features_uv_map=suppress_sharp_features_uv_map, seed=rng)
 		noise3d[:,:,k] = noise2d
 	if verbose: 
 		print("...noise cube created.")
 	return jansky_2_kelvin(noise3d, z, boxsize=boxsize)
 
-def noise_cube_lightcone(ncells, z, obs_time=1000, subarray_type="AA4", boxsize=None, save_uvmap=None, 
-						 total_int_time=6., int_time=10., declination=-30., N_ant=None, uv_weighting='natural', fft_wrap=False, verbose=True, n_jobs=4, checkpoint=64, 
-						 T_sys=None, sefd_data=None, nu_data=None, D_station=40., ep_aperture=None, suppress_sharp_features_uv_map=False):
+def noise_cube_lightcone(ncells, z, obs_time=1000, subarray_type="AA4", boxsize=None, save_uvmap=None,
+						 total_int_time=6., int_time=10., declination=-30., N_ant=None, uv_weighting='natural', fft_wrap=False, verbose=True, n_jobs=4, checkpoint=64,
+						 T_sys=None, sefd_data=None, nu_data=None, D_station=40., ep_aperture=None, suppress_sharp_features_uv_map=False, seed=None):
 	"""
 	Generates a 3D lightcone of instrumental noise around a central redshift.
 
@@ -759,15 +767,16 @@ def noise_cube_lightcone(ncells, z, obs_time=1000, subarray_type="AA4", boxsize=
 		boxsize = conv.LB
 	zs = cm.cdist_to_z(np.linspace(cm.z_to_cdist(z)-boxsize/2, cm.z_to_cdist(z)+boxsize/2, ncells))
 
-	# This function body is very similar to `noise_lightcone`. Consider refactoring.
-	return noise_lightcone(ncells, zs, obs_time, subarray_type, boxsize, save_uvmap, 
-						total_int_time, int_time, declination, N_ant, uv_weighting, fft_wrap, verbose, n_jobs, checkpoint, 
-						T_sys, sefd_data, nu_data, D_station, ep_aperture,
-						suppress_sharp_features_uv_map)
+	# noise_lightcone has no N_ant parameter — forward by keyword to avoid positional shift.
+	return noise_lightcone(ncells, zs, obs_time=obs_time, subarray_type=subarray_type, boxsize=boxsize, save_uvmap=save_uvmap,
+						total_int_time=total_int_time, int_time=int_time, declination=declination, uv_weighting=uv_weighting,
+						fft_wrap=fft_wrap, verbose=verbose, n_jobs=n_jobs, checkpoint=checkpoint,
+						T_sys=T_sys, sefd_data=sefd_data, nu_data=nu_data, D_station=D_station, ep_aperture=ep_aperture,
+						suppress_sharp_features_uv_map=suppress_sharp_features_uv_map, seed=seed)
 
-def noise_lightcone(ncells, zs, obs_time=1000, subarray_type="AA4", boxsize=None, save_uvmap=None, 
-					total_int_time=6., int_time=10., declination=-30., uv_weighting='natural', fft_wrap=False, verbose=True, n_jobs=4, checkpoint=16, 
-					T_sys=None, sefd_data=None, nu_data=None, D_station=40., ep_aperture=None, suppress_sharp_features_uv_map=False):
+def noise_lightcone(ncells, zs, obs_time=1000, subarray_type="AA4", boxsize=None, save_uvmap=None,
+					total_int_time=6., int_time=10., declination=-30., uv_weighting='natural', fft_wrap=False, verbose=True, n_jobs=4, checkpoint=16,
+					T_sys=None, sefd_data=None, nu_data=None, D_station=40., ep_aperture=None, suppress_sharp_features_uv_map=False, seed=None):
     """
     Generates a 3D lightcone of instrumental noise over a list of redshifts.
 
@@ -819,6 +828,9 @@ def noise_lightcone(ncells, zs, obs_time=1000, subarray_type="AA4", boxsize=None
     suppress_sharp_features_uv_map : bool, optional
         If True, applies a suppression filter to the UV map to mitigate sharp
         features. Default is False.
+    seed : int, np.random.Generator, or None, optional
+        Seed or generator for the random noise draws. The same seed reproduces
+        the same noise lightcone. None (default) gives a fresh realisation.
 
     Returns
     -------
@@ -844,6 +856,7 @@ def noise_lightcone(ncells, zs, obs_time=1000, subarray_type="AA4", boxsize=None
     # Step 2: Create the noise cube using the pre-computed UV maps.
     if verbose:
         print('Creating noise lightcone...')
+    rng = seed if isinstance(seed, np.random.Generator) else np.random.default_rng(seed)
     noise3d = np.zeros((ncells, ncells, zs.size))
     for k, zi in enumerate(tqdm(zs, desc="Generating noise slices", disable=not verbose)):
         if k + 1 < zs.size: 
@@ -857,11 +870,11 @@ def noise_lightcone(ncells, zs, obs_time=1000, subarray_type="AA4", boxsize=None
         noise2d = noise_map(
             ncells, zi, depth_mhz, obs_time=obs_time, subarray_type=subarray_type, 
             boxsize=boxsize, total_int_time=total_int_time, int_time=int_time, 
-            declination=declination, uv_map=uv_map, N_ant=N_ant, 
-            uv_weighting=uv_weighting, verbose=False, fft_wrap=fft_wrap, 
-			T_sys=T_sys, sefd_data=sefd_data, nu_data=nu_data, 
+            declination=declination, uv_map=uv_map, N_ant=N_ant,
+            uv_weighting=uv_weighting, verbose=False, fft_wrap=fft_wrap,
+			T_sys=T_sys, sefd_data=sefd_data, nu_data=nu_data,
 			D_station=D_station, ep_aperture=ep_aperture,
-            suppress_sharp_features_uv_map=suppress_sharp_features_uv_map
+            suppress_sharp_features_uv_map=suppress_sharp_features_uv_map, seed=rng
         )
         noise3d[:,:,k] = jansky_2_kelvin(noise2d, zi, boxsize=boxsize)
         
