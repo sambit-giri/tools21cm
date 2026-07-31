@@ -28,7 +28,7 @@ def apply_window(input_array, window, backend='numpy'):
     else:
             w = np.asarray(window)
     arr = _as_backend_array(input_array, name, xp)
-    wb  = _as_backend_array(w, name, xp)
+    wb  = _as_backend_array(w, name, xp, device=arr.device if name == 'torch' else None)
     if name == 'torch': wb = wb.to(arr.dtype)
     return arr * wb
 
@@ -53,10 +53,18 @@ def _import_backend(backend):
         raise ValueError("backend must be 'numpy', 'jax' or 'torch'; got %r" % (backend,))
 
 
-def _as_backend_array(input_array, name, xp):
+def _as_backend_array(input_array, name, xp, device=None):
         '''Convert to the backend's array type without copying when already there.'''
         if name == 'torch':
-                return input_array if xp.is_tensor(input_array) else xp.as_tensor(np.ascontiguousarray(input_array))
+                if xp.is_tensor(input_array):
+                        return input_array
+                arr = np.ascontiguousarray(input_array)
+                if device is not None and getattr(device, 'type', None) == 'mps' and arr.dtype == np.float64:
+                        # MPS has no float64 support; downcast before the device move,
+                        # instead of after, so the .to(device) itself doesn't raise.
+                        arr = arr.astype(np.float32)
+                t = xp.as_tensor(arr)
+                return t.to(device) if device is not None else t
         return xp.asarray(input_array)
 
 
@@ -232,7 +240,8 @@ def _radial_average_backend(power, k, box_dims, kbins, binning, kmax,
 
         pw   = _take(power.reshape(-1), valid, name, xp)
         sums = _scatter_add(pw, idx_v, n_bins, name, xp)
-        counts = _as_backend_array(np.where(n_modes > 0, n_modes, 1.0), name, xp)
+        counts = _as_backend_array(np.where(n_modes > 0, n_modes, 1.0), name, xp,
+                                   device=sums.device if name == 'torch' else None)
         if name == 'torch': counts = counts.to(sums.dtype)
         outdata = sums / counts
 
@@ -246,7 +255,8 @@ def _radial_average_backend(power, k, box_dims, kbins, binning, kmax,
                                 gather[ni] = non_empty[np.argmin(np.abs(non_empty - ni))]
                         outdata = _take(outdata, gather, name, xp)
                 else:
-                        nan_vec = _as_backend_array(np.where(empty, np.nan, 0.0), name, xp)
+                        nan_vec = _as_backend_array(np.where(empty, np.nan, 0.0), name, xp,
+                                                    device=outdata.device if name == 'torch' else None)
                         if name == 'torch': nan_vec = nan_vec.to(outdata.dtype)
                         outdata = outdata + nan_vec
 
@@ -418,7 +428,8 @@ def _power_spectrum_2d_backend(power, kp, kz, kbins, binning, kmax_per, kmax_par
 
         pw   = _take(power.reshape(-1), valid, name, xp)
         sums = _scatter_add(pw, flat, n_per * n_par, name, xp)
-        counts = _as_backend_array(np.where(n_modes > 0, n_modes, 1.0), name, xp)
+        counts = _as_backend_array(np.where(n_modes > 0, n_modes, 1.0), name, xp,
+                                   device=sums.device if name == 'torch' else None)
         if name == 'torch': counts = counts.to(sums.dtype)
         ps_flat = sums / counts
 
@@ -431,7 +442,8 @@ def _power_spectrum_2d_backend(power, kp, kz, kbins, binning, kmax_per, kmax_par
                         gather = (ri * n_par + ci).flatten()
                         ps_flat = _take(ps_flat, gather, name, xp)
                 else:
-                        nan_vec = _as_backend_array(np.where(empty, np.nan, 0.0), name, xp)
+                        nan_vec = _as_backend_array(np.where(empty, np.nan, 0.0), name, xp,
+                                                    device=ps_flat.device if name == 'torch' else None)
                         if name == 'torch': nan_vec = nan_vec.to(ps_flat.dtype)
                         ps_flat = ps_flat + nan_vec
         ps_out = ps_flat.reshape(n_per, n_par)
