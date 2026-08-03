@@ -4,6 +4,7 @@ from scipy.spatial import cKDTree
 from tqdm import tqdm
 from .power_spectrum import power_spectrum_1d, cross_power_spectrum_1d
 from . import conv
+from .helper_functions import resolve_boxsize
 
 def ps_to_corr(ps, ks, rbins=10, box_dims=None, n_grid=None, binning='log'):
 	'''
@@ -103,7 +104,7 @@ def cross_correlation_function(input_array1_nd, input_array2_nd, rbins=10, kbins
 
 	return ps_to_corr(ps, ks, rbins=rbins, box_dims=box_dims, n_grid=input_array1_nd.shape[0], binning=binning)
 
-def landy_szalay_estimator(data, randoms=None, rbins=10, box_dims=None, binning='log', **kwargs):
+def landy_szalay_estimator(data, randoms=None, rbins=10, box_dims=None, boxsize=None, binning='log', **kwargs):
 	'''
 	Function to estimate the two-point correlation function using the Landy-Szalay estimator.
 
@@ -112,17 +113,19 @@ def landy_szalay_estimator(data, randoms=None, rbins=10, box_dims=None, binning=
 		randoms (numpy array): array of positions of random points.
 		rbins (integer or array-like): The number of radial bins or bin edges.
 			If an integer is provided, bins are logarithmically or linearly spaced.
-		box_dims (float): Length of the box in each direction in Mpc.
+		box_dims (float): Length of the box in each direction in Mpc. Deprecated, use boxsize instead.
+		boxsize (float): Length of the box in each direction in Mpc.
 		binning (string): 'log' for logarithmic binning, 'linear' for linear binning.
-		
+
 	Returns:
 		xi (numpy array): The estimated correlation function.
 		rbin_centers (numpy array): The centers of the radial bins.
 	'''
-	if box_dims is None:
-		box_dims = conv.LB 
+	defaulted = box_dims is None and boxsize is None
+	box_dims = resolve_boxsize(boxsize, box_dims, 'box_dims', conv.LB)
+	if defaulted:
 		print(f'Setting box_dims to ({box_dims},{box_dims},{box_dims}) Mpc.')
-		
+
 	if data.ndim==3:
 		data = np.argwhere(data>0)*box_dims/data.shape[0]
 		

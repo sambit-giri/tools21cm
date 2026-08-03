@@ -14,7 +14,7 @@ from scipy.signal import fftconvolve
 from tqdm import tqdm
 
 
-def physical_lightcone_to_observational(physical_lightcone, input_z_low, output_dnu, output_dtheta, input_box_size_mpc=None, verbose=True, order=2, mode='pad'):
+def physical_lightcone_to_observational(physical_lightcone, input_z_low, output_dnu, output_dtheta, input_box_size_mpc=None, boxsize=None, verbose=True, order=2, mode='pad'):
     '''
     Interpolate a lightcone volume from physical (length) units to observational (angle/frequency) units.
     
@@ -32,8 +32,10 @@ def physical_lightcone_to_observational(physical_lightcone, input_z_low, output_
     output_dtheta : float
         The angular resolution of the output in arcmin
     input_box_size_mpc : float, optional
-        The size of the input field of view in Mpc. If None (default), 
-        uses the value from conv.LB
+        The size of the input field of view in Mpc. If None (default),
+        uses the value from conv.LB. Equivalent to boxsize.
+    boxsize : float, optional
+        The size of the input field of view in Mpc. Equivalent to input_box_size_mpc.
     verbose : bool, optional
         Whether to show progress messages (default: True)
     order : int, optional
@@ -61,8 +63,7 @@ def physical_lightcone_to_observational(physical_lightcone, input_z_low, output_
     '''
     assert mode.lower() in ['pad', 'full', 'extend', 'crop', 'valid'], "Accepted input for mode: 'pad', 'full', 'extend', 'crop', 'valid'."
 
-    if input_box_size_mpc == None:
-        input_box_size_mpc = conv.LB
+    input_box_size_mpc = hf.resolve_boxsize(boxsize, input_box_size_mpc, 'input_box_size_mpc', conv.LB, warn=False)
 
     if isinstance(input_z_low,(float,int)):
         cell_size = input_box_size_mpc/physical_lightcone.shape[0]

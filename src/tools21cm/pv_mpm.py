@@ -5,15 +5,15 @@ from .helper_functions import print_msg, get_interpolated_array, read_cbin
 from . import vel_file
 from . import density_file
 
-def get_distorted_dt(dT, kms, redsh, los_axis=0, velocity_axis = 0, num_particles=10, periodic=True):
-    ''' 
+def get_distorted_dt(dT, kms, redsh, los_axis=0, velocity_axis = 0, num_particles=10, periodic=True, boxsize=None):
+    '''
     Apply peculiar velocity distortions to a differential
     temperature box, using the Mesh-Particle-Mesh method,
     as described in http://arxiv.org/abs/1303.5627
-    
+
     Parameters:
         * dT (numpy array): the differential temperature box
-        * kms (numpy array): velocity in km/s, array of dimensions 
+        * kms (numpy array): velocity in km/s, array of dimensions
             (3,mx,my,mz) where (mx,my,mz) is dimensions of dT
         * redsh (float): the redshift
         * los_axis = 0 (int): the line-of-sight axis of the output volume
@@ -24,7 +24,8 @@ def get_distorted_dt(dT, kms, redsh, los_axis=0, velocity_axis = 0, num_particle
         * periodic = True (bool): whether or not to apply periodic boundary
             conditions along the line-of-sight. If you are making a lightcone
             volume, this should be False.
-        
+        * boxsize = None (float): the box size in cMpc. If None, set to conv.LB.
+
     Returns:
         The redshift space box as a numpy array with same dimensions as dT.
         
@@ -55,11 +56,13 @@ def get_distorted_dt(dT, kms, redsh, los_axis=0, velocity_axis = 0, num_particle
     
     '''
     #Volume dimensions
+    if boxsize is None:
+        boxsize = conv.LB
     mx,my,mz = dT.shape
-    assert(mx == my or my == mz or mx == mz) #TODO: this should not be a requirement 
+    assert(mx == my or my == mz or mx == mz) #TODO: this should not be a requirement
     grid_depth = dT.shape[los_axis]
     grid_width = dT.shape[(los_axis+1)%3]
-    box_depth = grid_depth * (conv.LB/float(grid_width))
+    box_depth = grid_depth * (boxsize/float(grid_width))
 
     #Take care of different LOS axes
     assert(los_axis == 0 or los_axis == 1 or los_axis == 2)
@@ -75,7 +78,7 @@ def get_distorted_dt(dT, kms, redsh, los_axis=0, velocity_axis = 0, num_particle
 
     print_msg('Making velocity-distorted box...')
     print_msg('The (min) redshift is %.3f' % redsh[0])
-    print_msg('The box size is %.3f cMpc' % conv.LB)
+    print_msg('The box size is %.3f cMpc' % boxsize)
     
     #Figure out the apparent position shift 
     vpar = kms[velocity_axis,:,:,:]

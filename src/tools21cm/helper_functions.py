@@ -5,11 +5,42 @@ from scipy.interpolate import interp1d
 from . import const
 import glob, os, time
 import os.path
+import warnings
 from numpy import array, asarray, roll
 from numpy.linalg import matrix_rank
 from scipy.fftpack import fft, ifft, fftn, ifftn
 from numpy.fft import rfftn, irfftn
 from math import ceil, floor
+
+
+def resolve_boxsize(boxsize, legacy_value, legacy_name, default, warn=True):
+        '''
+        Resolve a box-length value from the standard `boxsize` keyword and an
+        alternately-named parameter kept for backwards compatibility. Optionally
+        warns if the alternate name was used instead of `boxsize`.
+
+        Parameters:
+                boxsize (float or None): the value passed via the new `boxsize` keyword.
+                legacy_value (float or None): the value passed via the alternate parameter.
+                legacy_name (string): the alternate parameter's name, for the warning message.
+                default (float): fallback when neither is given (normally conv.LB).
+                warn = True (bool): if True, emit a FutureWarning when `legacy_value` is
+                        used instead of `boxsize`. Set False for parameter names that are
+                        kept as permanent equal alternatives (no deprecation planned).
+
+        Returns:
+                The resolved box-length value.
+        '''
+        if boxsize is not None:
+                return boxsize
+        if legacy_value is not None and legacy_value is not False:
+                if warn:
+                        warnings.warn(
+                                "'%s' is deprecated and will be removed in a future version; "
+                                "use 'boxsize' instead." % legacy_name,
+                                FutureWarning, stacklevel=3)
+                return legacy_value
+        return default
 
 try:
         import numexpr as ne

@@ -21,11 +21,11 @@ except ImportError:
 from . import conv
 from .helper_functions import get_data_and_type
 
-def plot_slice(data, los_axis = 0, slice_num = 0, logscale = False, **kwargs):
+def plot_slice(data, los_axis = 0, slice_num = 0, logscale = False, boxsize=None, **kwargs):
     '''
     Plot a slice through a data cube. This function will produce a nicely
     formatted image plot with the correct units on the axes.
-    
+
     Parameters:
         * data (XfracFile, DensityFile, string or numpy array): the data to 
             plot. The function will try to determine what type of data it's 
@@ -34,7 +34,9 @@ def plot_slice(data, los_axis = 0, slice_num = 0, logscale = False, **kwargs):
         * slice_num = 0 (integer): the point along los_axis where the slice
             will be taken.
         * logscale = False (bool): whether to plot the logarithm of the data
-            
+        * boxsize = None (float): the box size in cMpc, used for the axis
+            extent. If None, set to conv.LB
+
     Kwargs:
         All kwargs are sent to matplotlib's imshow function. This can be used to,
         for instance, change the colormap.
@@ -62,7 +64,9 @@ def plot_slice(data, los_axis = 0, slice_num = 0, logscale = False, **kwargs):
         get_slice = lambda data, i : data[:,:,i]
     
     data_slice = get_slice(plot_data, slice_num)
-    ext = [0, conv.LB, 0, conv.LB]
+    if boxsize is None:
+        boxsize = conv.LB
+    ext = [0, boxsize, 0, boxsize]
     if (logscale):
         data_slice = np.log10(data_slice)
 

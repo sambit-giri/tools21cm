@@ -6,7 +6,7 @@ from . import const, conv
 import numpy as np
 import os, glob, time
 from .helper_functions import get_mesh_size, \
-    determine_redshift_from_filename, get_data_and_type, print_msg, find_idx
+    determine_redshift_from_filename, get_data_and_type, print_msg, find_idx, resolve_boxsize
 from .density_file import DensityFile
 from .vel_file import VelocityFile
 from . import cosmo as cm
@@ -297,25 +297,25 @@ def _get_output_z(file_redshifts, z_low, z_high, box_grid_n, box_length_mpc=None
     return output_z
 
 
-def redshifts_at_equal_comoving_distance(z_low, z_high, box_grid_n=256, box_length_mpc=None):
-    ''' 
-    Make a frequency axis vector with equal spacing in co-moving LOS coordinates. 
+def redshifts_at_equal_comoving_distance(z_low, z_high, box_grid_n=256, box_length_mpc=None, boxsize=None):
+    '''
+    Make a frequency axis vector with equal spacing in co-moving LOS coordinates.
     The comoving distance between each frequency will be the same as the cell
     size of the box.
-    
+
     Parameters:
         z_low (float): The lower redshift
-        z_high (float): The upper redhisft 
+        z_high (float): The upper redhisft
         box_grid_n = 256 (int): the number of slices in an input box
         box_length_mpc (float): the size of the box in cMpc. If None,
-        set to conv.LB
-             
+        set to conv.LB. Deprecated, use boxsize instead.
+        boxsize (float): the size of the box in cMpc. If None, set to conv.LB.
+
     Returns:
         numpy array containing the redshifts
-        
+
     '''
-    if box_length_mpc is None:
-        box_length_mpc = conv.LB
+    box_length_mpc = resolve_boxsize(boxsize, box_length_mpc, 'box_length_mpc', conv.LB)
     assert(z_high > z_low)
 
     z = z_low
@@ -357,35 +357,35 @@ def redshifts_at_equal_frequncy_width(z_low, z_high, dnu):
 
 def get_lightcone_subvolume(lightcone, redshifts, central_z, \
                             depth_mhz=None, depth_mpc=None, odd_num_cells=True, \
-                            subtract_mean=True, fov_Mpc=None, verbose=True):
+                            subtract_mean=True, fov_Mpc=None, boxsize=None, verbose=True):
     '''
     Extract a subvolume from a lightcone, at a given central redshift,
     and with a given depth. The depth can be specified in Mpc or MHz.
     You must give exactly one of these parameters.
-    
+
     Parameters:
         ligthcone (numpy array): the lightcone
         redshifts (numpy array): the redshifts along the LOS
         central_z (float): the central redshift of the subvolume
         depth_mhz (float): the depth of the subvolume in MHz
         depth_mpc (float): the depth of the subvolume in Mpc
-        odd_num_cells (bool): if true, the depth of the box will always 
-                be an odd number of cells. This avoids problems with 
+        odd_num_cells (bool): if true, the depth of the box will always
+                be an odd number of cells. This avoids problems with
                 power spectrum calculations.
         subtract_mean (bool): if true, subtract the mean of the signal (Default: True)
-        fov_Mpc (float): the FoV size in Mpc
-        verbose (bool) : turning the verbosity. 
-        
+        fov_Mpc (float): the FoV size in Mpc. Equivalent to boxsize.
+        boxsize (float): the FoV size in Mpc. Equivalent to fov_Mpc.
+        verbose (bool) : turning the verbosity.
+
     Returns:
         Tuple with (subvolume, dims, sub_redshifts) where dims is a tuple
         with the dimensions of the subvolume in Mpc
     '''
-    
+
     assert len(np.nonzero([depth_mhz, depth_mpc])) == 1
-    
-    if fov_Mpc is None:
-        fov_Mpc = conv.LB
-        
+
+    fov_Mpc = resolve_boxsize(boxsize, fov_Mpc, 'fov_Mpc', conv.LB, warn=False)
+
     central_nu = cm.z_to_nu(central_z)
     if depth_mpc != None: #Depth is given in Mpc
         central_dist = cm.nu_to_cdist(central_nu)

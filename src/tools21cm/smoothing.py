@@ -13,7 +13,7 @@ from scipy.fftpack import fft, ifft, fftn, ifftn
 from numpy.fft import rfftn, irfftn
 from math import ceil, floor
 from numpy import array, asarray, roll
-from .helper_functions import find_idx
+from .helper_functions import find_idx, resolve_boxsize
 from .fft_functions import fftconvolve
 from tqdm import tqdm
 import astropy.units as u
@@ -330,24 +330,26 @@ def interpolate2d(input_array, x, y, order=0):
         
         return new_array
 
-def smooth_lightcone(lightcone, z_array, box_size_mpc=False, max_baseline=2., ratio=1., verbose=True):
+def smooth_lightcone(lightcone, z_array, box_size_mpc=False, boxsize=None, max_baseline=2., ratio=1., verbose=True):
         """
         This smooths in both angular and frequency direction assuming both to be smoothed by same scale.
 
         Parameters:
                 lightcone (numpy array): The lightcone that is to be smoothed.
                 z_array (float)        : The lowest value of the redshift in the lightcone or the whole redshift array.
-                box_size_mpc (float)   : The box size in Mpc. Default value is determined from 
-                                           the box size set for the simulation (set_sim_constants)
-                max_baseline (float)   : The maximun baseline of the telescope in km. Default value 
+                box_size_mpc (float)   : The box size in Mpc. Default value is determined from
+                                           the box size set for the simulation (set_sim_constants).
+                                           Deprecated, use boxsize instead.
+                boxsize (float)        : The box size in Mpc.
+                max_baseline (float)   : The maximun baseline of the telescope in km. Default value
                                            is set as 2 km (SKA core).
-                ratio (int)            : It is the ratio of smoothing scale in frequency direction and 
+                ratio (int)            : It is the ratio of smoothing scale in frequency direction and
                                            the angular direction (Default value: 1).
 
         Returns:
-                (Smoothed_lightcone, redshifts) 
+                (Smoothed_lightcone, redshifts)
         """
-        if (not box_size_mpc): box_size_mpc=conv.LB
+        box_size_mpc = resolve_boxsize(boxsize, box_size_mpc, 'box_size_mpc', conv.LB)
         if(z_array.shape[0] == lightcone.shape[2]):
                 input_redshifts = z_array.copy()
         else:
@@ -374,26 +376,27 @@ def smooth_lightcone(lightcone, z_array, box_size_mpc=False, max_baseline=2., ra
         else:
                return output_lightcone, input_redshifts
 
-def smooth_coeval(cube, z, box_size_mpc=False, max_baseline=2., ratio=1., nu_axis=2, verbose=True):
+def smooth_coeval(cube, z, box_size_mpc=False, boxsize=None, max_baseline=2., ratio=1., nu_axis=2, verbose=True):
         """
         This smooths the coeval cube by Gaussian in angular direction and by tophat along the third axis.
 
         Parameters:
                 coeval_cube (numpy array): The data cube that is to be smoothed.
                 z (float)                : The redshift of the coeval cube.
-                box_size_mpc (float)     : The box size in Mpc. Default value is determined from 
-                                             the box size set for the simulation (set_sim_constants)
-                max_baseline (float)     : The maximun baseline of the telescope in km. Default value 
+                box_size_mpc (float)     : The box size in Mpc. Default value is determined from
+                                             the box size set for the simulation (set_sim_constants).
+                                             Deprecated, use boxsize instead.
+                boxsize (float)          : The box size in Mpc.
+                max_baseline (float)     : The maximun baseline of the telescope in km. Default value
                                              is set as 2 km (SKA core).
-                ratio (int)              : It is the ratio of smoothing scale in frequency direction and 
+                ratio (int)              : It is the ratio of smoothing scale in frequency direction and
                                              the angular direction (Default value: 1).
                 nu_axis (int)            : Frequency axis
 
         Returns:
                 Smoothed_coeval_cube
         """
-        if (not box_size_mpc): 
-               box_size_mpc=conv.LB  
+        box_size_mpc = resolve_boxsize(boxsize, box_size_mpc, 'box_size_mpc', conv.LB)
         if isinstance(max_baseline,u.Quantity):
                max_baseline = max_baseline.to('km').value  
         output_dtheta  = (1+z)*21e-5/max_baseline
@@ -503,9 +506,8 @@ def smooth_lightcone_uv_threshold(lightcone, uv_box, threshold=0.0):
 
         return np.real(np.fft.ifft2(lightcone, axes = (0, 1)))
 
-def remove_baselines_from_uvmap(uv_map, z, max_baseline=2, box_size_mpc=False):
-        if (not box_size_mpc): 
-                box_size_mpc=conv.LB 
+def remove_baselines_from_uvmap(uv_map, z, max_baseline=2, box_size_mpc=False, boxsize=None):
+        box_size_mpc = resolve_boxsize(boxsize, box_size_mpc, 'box_size_mpc', conv.LB)
         if isinstance(max_baseline,u.Quantity):
                 max_baseline = max_baseline.to('km').value
         output_dtheta = (1+z)*21e-5/max_baseline
@@ -525,13 +527,12 @@ def remove_baselines_from_uvmap(uv_map, z, max_baseline=2, box_size_mpc=False):
         filt[0,0] = 0
         return filt*uv_map
 
-def convolve_uvmap(array, z=None, uv_map=None, max_baseline=None, box_size_mpc=False, 
+def convolve_uvmap(array, z=None, uv_map=None, max_baseline=None, box_size_mpc=False, boxsize=None,
         filename=None, total_int_time=6.0, int_time=10.0, declination=-30.0, verbose=True):
-        if (not box_size_mpc): 
-                box_size_mpc=conv.LB  
+        box_size_mpc = resolve_boxsize(boxsize, box_size_mpc, 'box_size_mpc', conv.LB)
         if isinstance(max_baseline,u.Quantity):
                max_baseline = max_baseline.to('km').value
-        if uv_map is None: 
+        if uv_map is None:
                 uv_map, N_ant  = get_uv_map(array.shape[0],
                                                 z,
                                                 filename=filename,
@@ -541,7 +542,7 @@ def convolve_uvmap(array, z=None, uv_map=None, max_baseline=None, box_size_mpc=F
                                                 declination=declination,
                                                 verbose=verbose,
                                         )
-        if max_baseline is not None: uv_map = remove_baselines_from_uvmap(uv_map, z, max_baseline=max_baseline, box_size_mpc=box_size_mpc)
+        if max_baseline is not None: uv_map = remove_baselines_from_uvmap(uv_map, z, max_baseline=max_baseline, boxsize=box_size_mpc)
         img_arr  = np.fft.fft2(array)
         kernel2d = uv_map #np.ones_like(uv_map); kernel2d[uv_map==0] = 0
         img_arr *= kernel2d/kernel2d.max()
@@ -550,7 +551,7 @@ def convolve_uvmap(array, z=None, uv_map=None, max_baseline=None, box_size_mpc=F
 
 
 
-def convolve_uvmap_coeval(cube, z, box_size_mpc=False, max_baseline=2., ratio=1., nu_axis=2, verbose=True,
+def convolve_uvmap_coeval(cube, z, box_size_mpc=False, boxsize=None, max_baseline=2., ratio=1., nu_axis=2, verbose=True,
                 filename=None, total_int_time=6.0, int_time=10.0, declination=-30.0, uv_map=None):
         """
         This smooths the coeval cube by Gaussian in angular direction and by tophat along the third axis.
@@ -558,22 +559,23 @@ def convolve_uvmap_coeval(cube, z, box_size_mpc=False, max_baseline=2., ratio=1.
         Parameters:
                 coeval_cube (numpy array): The data cube that is to be smoothed.
                 z (float)                : The redshift of the coeval cube.
-                box_size_mpc (float)     : The box size in Mpc. Default value is determined from 
-                                                the box size set for the simulation (set_sim_constants)
-                max_baseline (float)     : The maximun baseline of the telescope in km. Default value 
+                box_size_mpc (float)     : The box size in Mpc. Default value is determined from
+                                                the box size set for the simulation (set_sim_constants).
+                                                Deprecated, use boxsize instead.
+                boxsize (float)          : The box size in Mpc.
+                max_baseline (float)     : The maximun baseline of the telescope in km. Default value
                                                 is set as 2 km (SKA core).
-                ratio (int)              : It is the ratio of smoothing scale in frequency direction and 
+                ratio (int)              : It is the ratio of smoothing scale in frequency direction and
                                                 the angular direction (Default value: 1).
                 nu_axis (int)            : Frequency axis
 
         Returns:
                 Smoothed_coeval_cube
         """
-        if (not box_size_mpc): 
-               box_size_mpc=conv.LB  
+        box_size_mpc = resolve_boxsize(boxsize, box_size_mpc, 'box_size_mpc', conv.LB)
         if isinstance(max_baseline,u.Quantity):
                max_baseline = max_baseline.to('km').value
-        if uv_map is None: 
+        if uv_map is None:
                 uv_map, N_ant  = get_uv_map(array.shape[0],
                                                 z,
                                                 filename=filename,
@@ -583,14 +585,14 @@ def convolve_uvmap_coeval(cube, z, box_size_mpc=False, max_baseline=2., ratio=1.
                                                 declination=declination,
                                                 verbose=verbose,
                                         )
-        if max_baseline is not None: 
-               uv_map = remove_baselines_from_uvmap(uv_map, z, max_baseline=max_baseline, box_size_mpc=box_size_mpc)
+        if max_baseline is not None:
+               uv_map = remove_baselines_from_uvmap(uv_map, z, max_baseline=max_baseline, boxsize=box_size_mpc)
 
         output_dtheta  = (1+z)*21e-5/max_baseline
         output_ang_res = output_dtheta*cm.z_to_cdist(z) * cube.shape[0]/box_size_mpc
         output_cube = smooth_coeval_tophat(cube, output_ang_res*ratio, nu_axis=nu_axis, verbose=verbose)
         if nu_axis not in [2,-1]: output_cube = np.swapaxes(output_cube,nu_axis,2)
-        output_cube = np.array([convolve_uvmap(output_cube[:,:,i], uv_map=uv_map, verbose=verbose, box_size_mpc=box_size_mpc) for i in tqdm(range(output_cube.shape[2]),disable=not verbose)])
+        output_cube = np.array([convolve_uvmap(output_cube[:,:,i], uv_map=uv_map, verbose=verbose, boxsize=box_size_mpc) for i in tqdm(range(output_cube.shape[2]),disable=not verbose)])
         if nu_axis not in [2,-1]: output_cube = np.swapaxes(output_cube,nu_axis,2)
         return output_cube
 
