@@ -36,6 +36,7 @@ from .halo_list import *
 from .statistics import *
 from .power_spectrum import *
 from .phase_spectrum import *
+from .phase_statistics import *
 from .tau import *
 from .lightcone import *
 from .pv_mpm import *

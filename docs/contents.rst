@@ -45,6 +45,11 @@ N-Body Tools
 .. automodule:: tools21cm.nbody_file
     :members:
 
+Phase statistics
+----------------
+.. automodule:: tools21cm.phase_statistics
+    :members:
+
 Point statistics
 ----------------
 .. automodule:: tools21cm.statistics

@@ -2,6 +2,11 @@
 Changelog
 =========
 
+Unreleased (phases branch)
+--------------------------
+* ``phase_statistics`` module: the phase gradient spectrum ``phase_gradient_spectrum``, a two-point Fourier-space probe of the normalised squeezed bispectrum, with ``squeezed_bispectrum_normalized``, the Gaussian noise floor, the bispectrum prediction and von Mises helpers for the phase gradient distribution.
+* Fix: ``radial_average`` cast the shell average to float, dropping the imaginary part of complex input. Complex input now gives a complex average.
+
 v2.4
 ----
 * ``DistributionDiagnostic`` class family for comparing and diagnosing probability distributions.

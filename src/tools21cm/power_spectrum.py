@@ -304,7 +304,7 @@ def radial_average(input_array, box_dims, kbins=10, binning='log', kmax=None,
                 k_mid_s = np.linspace(kv.min(), kmax_s, n_bins)
                 bw = float(np.ptp(k_mid_s)) / max(n_bins - 1, 1)
                 pw = input_array.flatten()[valid]
-                ps_out  = np.empty(n_bins)
+                ps_out  = np.empty(n_bins, dtype=complex if np.iscomplexobj(pw) else float)
                 nm_out  = np.empty(n_bins)
                 for i, kc in enumerate(k_mid_s):
                         w = np.exp(-(kv - kc)**2 / (2.0 * bw**2))
@@ -326,7 +326,9 @@ def radial_average(input_array, box_dims, kbins=10, binning='log', kmax=None,
 
         dk = (kbins_edges[1:] - kbins_edges[:-1]) / 2.
         outdata = np.histogram(k.flatten(), bins=kbins_edges,
-                               weights=input_array.flatten())[0].astype(float)
+                               weights=input_array.flatten())[0]
+        # keep complex input complex: casting to float drops the imaginary part
+        outdata = outdata.astype(complex if np.iscomplexobj(input_array) else float)
         n_modes = np.histogram(k.flatten(), bins=kbins_edges)[0].astype(float)
         outdata /= n_modes
 
