@@ -6,6 +6,10 @@ Unreleased (phases branch)
 --------------------------
 * ``phase_statistics`` module: the phase gradient spectrum ``phase_gradient_spectrum``, a two-point Fourier-space probe of the normalised squeezed bispectrum, with ``squeezed_bispectrum_normalized``, the Gaussian noise floor, the bispectrum prediction and von Mises helpers for the phase gradient distribution.
 * Fix: ``radial_average`` cast the shell average to float, dropping the imaginary part of complex input. Complex input now gives a complex average.
+* Phase statistics are averaged over long-wavelength modes: ``dk_squared_max`` (default 9, i.e. the 61 long modes with ``|dk| <= 3 x 2 pi / L``), ``exclude_axes`` and ``dk_vectors``, with ``long_mode_vectors`` and ``phase_gradient_n_indep``. ``dk_squared_max=None`` restores the previous axis increments. A warning is issued for k-bins where the long modes are not much shorter than k.
+* Faster ``phase_gradient_spectrum`` and ``squeezed_bispectrum_normalized``: the bin means for all long modes come from FFT cross-correlations, the bin geometry is cached and the FFTs use ``scipy.fft`` with a ``workers`` option.
+* ``backend='jax'`` and ``backend='torch'`` for both functions (differentiable, GPU capable).
+* A field that vanishes everywhere now gives a phase gradient spectrum of NaN.
 
 v2.4
 ----

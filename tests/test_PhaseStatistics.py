@@ -1,4 +1,5 @@
 import numpy as np
+import pytest
 import tools21cm as t2c
 
 box_dims = 300.
@@ -36,7 +37,7 @@ def test_phase_gradient_spectrum_gaussian_noise_floor():
     R = []
     for seed in range(10):
         rr, kk, nm = t2c.phase_gradient_spectrum(_gaussian_field(seed), kbins=kbins, box_dims=box_dims,
-                                                 binning='linear', return_n_modes=True)
+                                                 binning='linear', return_n_modes=True, dk_squared_max=1)
         R.append(rr)
     ratio = np.mean(R, axis=0) / t2c.phase_gradient_noise_floor(nm)
     assert np.all(np.abs(ratio - 1) < 0.15)
@@ -51,8 +52,9 @@ def test_phase_gradient_spectrum_lognormal_matches_bispectrum():
     for seed in range(10):
         field = _lognormal_field(seed)
         rr, kk, nm = t2c.phase_gradient_spectrum(field, kbins=kbins, box_dims=box_dims,
-                                                 binning='linear', return_n_modes=True)
-        p3, _ = t2c.squeezed_bispectrum_normalized(field, kbins=kbins, box_dims=box_dims, binning='linear')
+                                                 binning='linear', return_n_modes=True, dk_squared_max=1)
+        p3, _ = t2c.squeezed_bispectrum_normalized(field, kbins=kbins, box_dims=box_dims, binning='linear',
+                                                   dk_squared_max=1)
         R.append(rr); P3.append(p3)
     R, pred = np.mean(R, axis=0), t2c.phase_gradient_spectrum_from_bispectrum(np.mean(P3, axis=0), nm)
     assert np.all(R > t2c.phase_gradient_noise_floor(nm))
@@ -62,8 +64,10 @@ def test_phase_gradient_spectrum_lognormal_matches_bispectrum():
 def test_phase_gradient_spectrum_axes():
     '''A single axis and the average over all axes give values of the same size.'''
     field = _lognormal_field(0)
-    rx, _ = t2c.phase_gradient_spectrum(field, kbins=kbins, box_dims=box_dims, binning='linear', axis='x')
-    rxyz, _ = t2c.phase_gradient_spectrum(field, kbins=kbins, box_dims=box_dims, binning='linear', axis='xyz')
+    rx, _ = t2c.phase_gradient_spectrum(field, kbins=kbins, box_dims=box_dims, binning='linear', axis='x',
+                                        dk_squared_max=None)
+    rxyz, _ = t2c.phase_gradient_spectrum(field, kbins=kbins, box_dims=box_dims, binning='linear', axis='xyz',
+                                          dk_squared_max=None)
     assert rx.shape == rxyz.shape
     assert np.all(rxyz > 0)
 
@@ -79,3 +83,76 @@ def test_phase_gradients_per_bin_and_von_mises():
     x = np.linspace(-np.pi, np.pi, 2000, endpoint=False)
     kappa = t2c.resultant_length_to_kappa(0.3)
     assert abs(np.sum(t2c.von_mises_pdf(x, kappa=kappa)) * (x[1] - x[0]) - 1) < 1e-6
+
+
+@pytest.mark.filterwarnings('ignore:The longest long mode')
+def test_long_mode_methods_agree():
+    '''
+    The cross-correlation ('fft') and mode-by-mode ('gather'/'roll') bin means give the same
+    R and p3 for many long modes, with the periodic wrap of np.roll.
+    '''
+    field = _lognormal_field(5)
+    vecs = t2c.long_mode_vectors(9)
+    kw = dict(kbins=kbins, box_dims=box_dims, binning='linear', dk_vectors=vecs)
+    R_fft, _ = t2c.phase_gradient_spectrum(field, method='fft', **kw)
+    R_gather, _ = t2c.phase_gradient_spectrum(field, method='gather', **kw)
+    assert np.allclose(R_fft, R_gather, rtol=1e-10, atol=0)
+    p3_fft, _ = t2c.squeezed_bispectrum_normalized(field, method='fft', average=False, squared=True, **kw)
+    p3_roll, _ = t2c.squeezed_bispectrum_normalized(field, method='roll', average=False, squared=True, **kw)
+    assert np.allclose(p3_fft, p3_roll, rtol=1e-8, atol=1e-14)
+
+
+@pytest.mark.filterwarnings('ignore:The longest long mode')
+def test_phase_gradient_spectrum_zero_field_is_nan():
+    '''A field that vanishes everywhere has no phases.'''
+    R, _ = t2c.phase_gradient_spectrum(np.zeros((32, 32, 32)), kbins=4, box_dims=100., binning='linear')
+    assert np.all(np.isnan(R))
+
+
+def test_phase_statistics_jax_backend():
+    '''The jax backend reproduces the numpy result (float64) and can be differentiated.'''
+    import pytest
+    jax = pytest.importorskip('jax')
+    jax.config.update('jax_enable_x64', True)
+    import jax.numpy as jnp
+    field = _lognormal_field(6)
+    kw = dict(kbins=kbins, box_dims=box_dims, binning='linear', dk_vectors=t2c.long_mode_vectors(2))
+    R_np, _ = t2c.phase_gradient_spectrum(field, **kw)
+    R_jx, _ = t2c.phase_gradient_spectrum(jnp.asarray(field), backend='jax', **kw)
+    assert np.allclose(np.asarray(R_jx), R_np, rtol=1e-10)
+    p3_np, _ = t2c.squeezed_bispectrum_normalized(field, **kw)
+    p3_jx, _ = t2c.squeezed_bispectrum_normalized(jnp.asarray(field), backend='jax', **kw)
+    assert np.allclose(np.asarray(p3_jx), p3_np, rtol=1e-8)
+    grad = jax.grad(lambda x: jnp.sum(t2c.phase_gradient_spectrum(x, backend='jax', **kw)[0]))(jnp.asarray(field))
+    assert np.all(np.isfinite(np.asarray(grad)))
+
+
+def test_phase_statistics_torch_backend():
+    '''The torch backend reproduces the numpy result (float64) and supports autograd.'''
+    import pytest
+    torch = pytest.importorskip('torch')
+    field = _lognormal_field(7)
+    kw = dict(kbins=kbins, box_dims=box_dims, binning='linear', dk_vectors=t2c.long_mode_vectors(2))
+    R_np, _ = t2c.phase_gradient_spectrum(field, **kw)
+    x = torch.tensor(field, dtype=torch.float64, requires_grad=True)
+    R_t, _ = t2c.phase_gradient_spectrum(x, backend='torch', **kw)
+    assert np.allclose(R_t.detach().numpy(), R_np, rtol=1e-10)
+    R_t.sum().backward()
+    assert torch.all(torch.isfinite(x.grad))
+    p3_np, _ = t2c.squeezed_bispectrum_normalized(field, **kw)
+    p3_t, _ = t2c.squeezed_bispectrum_normalized(torch.tensor(field), backend='torch', **kw)
+    assert np.allclose(p3_t.numpy(), p3_np, rtol=1e-8)
+
+
+def test_warning_when_long_modes_are_not_squeezed():
+    '''A warning is issued only for k-bins where |dk|_max > SQUEEZED_WARN_RATIO x k.'''
+    import warnings
+    field = _gaussian_field(8)
+    with warnings.catch_warnings():
+        warnings.simplefilter('error')
+        t2c.phase_gradient_spectrum(field, kbins=kbins, box_dims=box_dims, binning='linear', dk_squared_max=1)
+    with pytest.warns(UserWarning, match='not squeezed'):
+        t2c.phase_gradient_spectrum(field, kbins=kbins, box_dims=box_dims, binning='linear', dk_squared_max=25)
+    with pytest.warns(UserWarning, match='not squeezed'):
+        t2c.squeezed_bispectrum_normalized(field, kbins=kbins, box_dims=box_dims, binning='linear',
+                                           dk_squared_max=25)
